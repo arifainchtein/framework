@@ -1,0 +1,10 @@
+/CommunicationException.class
+/InvalidDeneStructureRequestException.class
+/InvalidDenomeException.class
+/InvalidMutation.class
+/MicrocontrollerCommunicationException.class
+/MissingDenomeException.class
+/PersistenceException.class
+/SerialPortCommunicationException.class
+/ServletProcessingException.class
+/TeleonomeException.class
