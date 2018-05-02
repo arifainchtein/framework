@@ -202,7 +202,7 @@ public class PulseThread extends Thread{
 				//FileUtils.deleteQuietly(new File("EndPulse.info"));
 				//FileUtils.writeByteArrayToFile(new File("StartPulse.info"), (""+System.currentTimeMillis()).getBytes());
 
-				logger.debug("aMappedBusThread=" + anHypothalamus.aMappedBusThread);
+				logger.debug("11111aMappedBusThread=" + anHypothalamus.aMappedBusThread);
 				if(anHypothalamus.aMappedBusThread!=null){
 
 					anHypothalamus.aMappedBusThread.setKeepRunning(false);
@@ -221,6 +221,7 @@ public class PulseThread extends Thread{
 				//
 				// check if there is a mother, if there is, let it know that we are starting a pulse
 				//
+				logger.debug("motherMicroController=" + anHypothalamus.motherMicroController);
 				if(anHypothalamus.motherMicroController!=null) {
 					output = anHypothalamus.motherMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
 					input = anHypothalamus.motherMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
@@ -246,6 +247,8 @@ public class PulseThread extends Thread{
 				}
 				//
 				// check to see if we are schedule to prune the mnemosyne
+				logger.debug("performTimePrunningAnalysis=" + anHypothalamus.performTimePrunningAnalysis);
+				
 				if(anHypothalamus.performTimePrunningAnalysis) {
 					anHypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_PULSE_STATUS_INFO, "Performing Mnemosyne Prunning" );
 					
@@ -657,8 +660,7 @@ public class PulseThread extends Thread{
 				if(anHypothalamus.motherMicroController!=null) {
 					try {
 						
-						motherInputStream = anHypothalamus.motherMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
-					
+						
 						motherOutputStream = anHypothalamus.motherMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
 						logger.info("telling mama pulse is done");
 						Calendar cal = Calendar.getInstance();//TimeZone.getTimeZone("GMT+10:00"));
@@ -676,6 +678,7 @@ public class PulseThread extends Thread{
 						//logger.info("received inputLine=" + inputLine);
 						String inputLine="";
 						do {
+							motherInputStream = anHypothalamus.motherMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
 							inputLine = motherInputStream.readLine();
 							logger.info("received inputLine=" + inputLine);
 							Thread.sleep(500);

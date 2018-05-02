@@ -141,12 +141,12 @@ public class PLSeriesMicroController extends MicroController {
 			@Override
 			public BufferedReader getReader() throws IOException {
 				logger.info(" When asking the reader.getCurrentCommand()=" + aPlSeriesWriter.getCurrentCommand());
-				if(aPlSeriesWriter.getCurrentCommand().startsWith("PulseFinished")) {
+				if(aPlSeriesWriter.getCurrentCommand().startsWith("AsyncData")) {
 					if(enableAsyncUpdate) {
 						aPLSeriesReader.setAsyncMode(true);
 					}
 				}
-				aPLSeriesReader.setCurrentCommand("PulseFinished");
+				//aPLSeriesReader.setCurrentCommand("PulseFinished");
 //				if(!aPlSeriesWriter.getCurrentCommand().equals("GetSensorData")) {
 //					aPLSeriesReader.setCurrentCommand(aPlSeriesWriter.getCurrentCommand());
 //				}

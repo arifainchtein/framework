@@ -401,12 +401,12 @@ public abstract class Hypothalamus {
 	    message.setRetained(true);
 	    
 	    try {
-			//logger.debug("about to Update the Heart, topic: " + topic  + " HEART_QUALITY_OF_SERVICE=" + TeleonomeConstants.HEART_QUALITY_OF_SERVICE + " message size=" +messageBytes.length + " anMqttClient.isConnected()=" + anMqttClient.isConnected());
+			logger.debug("about to Update the Heart, topic: " + topic  + " HEART_QUALITY_OF_SERVICE=" + TeleonomeConstants.HEART_QUALITY_OF_SERVICE + " message size=" +messageBytes.length + " anMqttClient.isConnected()=" + anMqttClient.isConnected());
 
 			do {
 				if(!anMqttClient.isConnected()) {
 					
-					logger.warn("Reconnecting to heart");
+					logger.warn("Reconnecting to heart, currentAttempt=" + currentAttempt);
 					anMqttClient.reconnect();
 					try {
 						currentAttempt++;
@@ -416,11 +416,12 @@ public abstract class Hypothalamus {
 						e.printStackTrace();
 					}
 				}	
-			}while(currentAttempt<numberOfReconnectAttempt);
+			}while(!anMqttClient.isConnected() && (currentAttempt<numberOfReconnectAttempt) );
 			
 			
 			
 			if(anMqttClient.isConnected()) {
+				logger.warn("heart is connected about to publish to topic " + topic);
 				anMqttClient.publish(topic, message);
 			}else {
 				logger.warn("Unable to publish to the heart");

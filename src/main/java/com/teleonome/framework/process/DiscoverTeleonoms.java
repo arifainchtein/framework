@@ -146,8 +146,7 @@ public class DiscoverTeleonoms extends Thread {
 	        @Override
 	        public void serviceAdded(ServiceEvent event) {
 	        	sampleListenerLogger.debug("Service added   : " + event.getName() + "." + event.getType());
-	        	System.out.println("***********  Service added   : " + event.getName() + "." + event.getType());
-	            bonjourService.requestServiceInfo(event.getType(), event.getName());
+	        	 bonjourService.requestServiceInfo(event.getType(), event.getName());
 	            
 	        }
 
@@ -158,7 +157,6 @@ public class DiscoverTeleonoms extends Thread {
 
 	        @Override
 	        public void serviceResolved(ServiceEvent ev) {
-	        	System.out.println("*********** Service resolved: " + ev.getInfo().getQualifiedName() + " port:" + ev.getInfo().getPort());
 	        	sampleListenerLogger.debug("Service resolved: " + ev.getInfo().getQualifiedName() + " port:" + ev.getInfo().getPort());
 	        	        
 	        }
