@@ -587,7 +587,7 @@ public class PulseThread extends Thread{
 				//
 				// store and publish the pulse
 				//
-				anHypothalamus.publisher.sendMore ("Status");
+				anHypothalamus.exoZeroPublisher.sendMore ("Status");
 				logger.debug("published  sendmore to zeromq, about to generate pulse");
 
 				JSONObject jsonMessage = this.aDenomeManager.generatePulse();
@@ -606,7 +606,7 @@ public class PulseThread extends Thread{
 				//
 				// notify both buses
 				
-				anHypothalamus.publisher.send(pulse); 
+				anHypothalamus.exoZeroPublisher.send(pulse); 
 				logger.debug("published  pulse to zeromq");
 				byte[] pulseBytes = StringCompressor.compress(pulse);
 				logger.warn("published  pulse to zeromq, byte size=" + pulseBytes.length);

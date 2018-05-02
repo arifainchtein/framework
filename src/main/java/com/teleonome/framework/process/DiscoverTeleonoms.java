@@ -31,6 +31,8 @@ public class DiscoverTeleonoms extends Thread {
 	//String bonjourServiceType = "_workstation._tcp.local.";
 	String bonjourServiceType = "_teleonome._tcp.local.";
 	Logger logger=null;
+	static Logger sampleListenerLogger= Logger.getLogger(SampleListener.class);
+	
 	
 	public DiscoverTeleonoms() {
 		logger = Logger.getLogger(getClass());
@@ -64,6 +66,13 @@ public class DiscoverTeleonoms extends Thread {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace(); 
+			}
+			try {
+				logger.debug("Before waiting 5");
+				Thread.sleep(5000);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 			bonjourService.addServiceListener(bonjourServiceType, new SampleListener());
 			ServiceInfo[] serviceInfos = bonjourService.list(bonjourServiceType);
@@ -136,21 +145,21 @@ public class DiscoverTeleonoms extends Thread {
 	 static class SampleListener implements ServiceListener {
 	        @Override
 	        public void serviceAdded(ServiceEvent event) {
-	         //  System.out.println("Service added   : " + event.getName() + "." + event.getType());
+	        	sampleListenerLogger.debug("Service added   : " + event.getName() + "." + event.getType());
+	        	System.out.println("***********  Service added   : " + event.getName() + "." + event.getType());
 	            bonjourService.requestServiceInfo(event.getType(), event.getName());
 	            
 	        }
 
 	        @Override
 	        public void serviceRemoved(ServiceEvent event) {
-	          //  System.out.println("Service removed : " + event.getName() + "." + event.getType());
+	        	sampleListenerLogger.debug("Service removed : " + event.getName() + "." + event.getType());
 	        }
 
 	        @Override
 	        public void serviceResolved(ServiceEvent ev) {
-	        	// System.out.println("Service resolved: "
-	        	//           + ev.getInfo().getQualifiedName()
-	        	 //       + " port:" + ev.getInfo().getPort());
+	        	System.out.println("*********** Service resolved: " + ev.getInfo().getQualifiedName() + " port:" + ev.getInfo().getPort());
+	        	sampleListenerLogger.debug("Service resolved: " + ev.getInfo().getQualifiedName() + " port:" + ev.getInfo().getPort());
 	        	        
 	        }
 	    }

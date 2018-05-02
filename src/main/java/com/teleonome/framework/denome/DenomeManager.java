@@ -1282,7 +1282,7 @@ public class DenomeManager {
 		// creating many subscriber threads, to see the effect
 		// i am going to always empty and see what happens with the
 		//return teleonomeToReconnect;
-		return new Vector();
+		return teleonomeToReconnect;//new Vector();
 	}
 	/**
 	 * this method is called when the application first start, to mark

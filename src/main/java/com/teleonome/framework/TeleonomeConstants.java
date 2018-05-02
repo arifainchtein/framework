@@ -5,6 +5,12 @@ public class TeleonomeConstants {
 	public static final String ADA_INTERNAL_HOST_IPADDRESS="172.16.1.1";
 	
 	//
+	// the ports for the exoZeroNetwork
+	//
+	public static final int EXOZERO_PULSE_PORT=5563;
+	public static final int EXOZERO_MNEMOSYNE_MANAGER_PORT=5564;
+	
+	//
 	// the Computer Model values  (Internal:Descriptive:Computer Info:Computer Model
 	//
 	public static final String  COMPUTER_MODEL_PI_A ="Raspberry Pi Model A";

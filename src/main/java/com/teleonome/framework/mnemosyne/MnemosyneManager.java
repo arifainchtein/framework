@@ -2,6 +2,8 @@ package com.teleonome.framework.mnemosyne;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -44,6 +46,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.zeromq.ZMQ;
+import org.zeromq.ZMQ.Context;
 import org.zeromq.ZMQ.Socket;
 
 import com.teleonome.framework.TeleonomeConstants;
@@ -67,13 +71,12 @@ public class MnemosyneManager {
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.US);
 	SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss",Locale.US);
 	
-	Socket publisher=null;
+	Socket exoZeroPublisher=null;
 	MqttClient anMqttClient=null;
-	public MnemosyneManager(DenomeManager d,Socket p, MqttClient m){
+	public MnemosyneManager(DenomeManager d, MqttClient m){
 		logger = Logger.getLogger(getClass());
 		logger.info("Initiating MnemosyneManager Manager");
 		aDenomeManager = d;
-		publisher=p;
 		anMqttClient=m;
 		aDBManager = PostgresqlPersistenceManager.instance();
 	}
@@ -86,10 +89,10 @@ public class MnemosyneManager {
 	 * @return
 	 * @throws MissingDenomeException
 	 */
-	public static MnemosyneManager instance(DenomeManager d,Socket p, MqttClient m) throws MissingDenomeException {
+	public static MnemosyneManager instance(DenomeManager d, MqttClient m) throws MissingDenomeException {
 
 		if(aMnemosyneManager==null){
-			aMnemosyneManager = new MnemosyneManager(d,p,m);
+			aMnemosyneManager = new MnemosyneManager(d,m);
 			aMnemosyneManager.init();
 		}
 		return aMnemosyneManager;
@@ -1015,8 +1018,35 @@ public class MnemosyneManager {
 				for(int i=0;i<batchOfPulses.length();i++) {
 					pulseJSONObject = batchOfPulses.getJSONObject(i);
 					pulse = pulseJSONObject.toString();
-					publisher.sendMore("Remember_" + aDenomeManager.getDenomeName());
-					publisher.send(pulse);
+					//
+					// Publish the pulse to the ExoZero Network
+					//
+					Context exozeroContext = ZMQ.context(1);
+					Socket exoZeroPublisher = exozeroContext.socket(ZMQ.PUB);
+					exoZeroPublisher.setHWM(2);
+					String ipToBindToZeroMQ="";
+					try {
+						ipToBindToZeroMQ = Utils.getIpAddressForNetworkMode().getHostAddress();
+					} catch (SocketException | UnknownHostException e2) {
+						// TODO Auto-generated catch block
+						logger.warn(Utils.getStringException(e2));
+						
+					}
+					logger.info("binding zeromq to " + ipToBindToZeroMQ);
+					exoZeroPublisher.bind("tcp://" + ipToBindToZeroMQ + ":" + TeleonomeConstants.EXOZERO_MNEMOSYNE_MANAGER_PORT);
+					
+					exoZeroPublisher.sendMore("Remember_" + aDenomeManager.getDenomeName());
+					exoZeroPublisher.send(pulse); 
+					exoZeroPublisher.close();
+					exozeroContext.close();
+					    
+					logger.debug("published  pulse to zeromq");
+					
+					//
+					// End of Publish the pulse to the ExoZero Network
+					//
+					
+				
 					pulseTimestampMillis = pulseJSONObject.getLong(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS);
 					pulseTimestamp = pulseJSONObject.getString(TeleonomeConstants.PULSE_TIMESTAMP);
 					if(i==0) {
@@ -1176,8 +1206,39 @@ public class MnemosyneManager {
 				for(int i=0;i<batchOfPulses.length();i++) {
 					pulseJSONObject = batchOfPulses.getJSONObject(i);
 					pulse = pulseJSONObject.toString();
-					publisher.sendMore("Remember_" + teleonomeName);
-					publisher.send(pulse);
+					
+					
+					
+					//
+					// Publish the pulse to the ExoZero Network
+					//
+					Context exozeroContext = ZMQ.context(1);
+					Socket exoZeroPublisher = exozeroContext.socket(ZMQ.PUB);
+					exoZeroPublisher.setHWM(2);
+					String ipToBindToZeroMQ="";
+					try {
+						ipToBindToZeroMQ = Utils.getIpAddressForNetworkMode().getHostAddress();
+					} catch (SocketException | UnknownHostException e2) {
+						// TODO Auto-generated catch block
+						logger.warn(Utils.getStringException(e2));
+						
+					}
+					logger.info("binding zeromq to " + ipToBindToZeroMQ);
+					exoZeroPublisher.bind("tcp://" + ipToBindToZeroMQ + ":5563");
+					
+					exoZeroPublisher.sendMore("Remember_" + teleonomeName);
+					exoZeroPublisher.send(pulse); 
+					exoZeroPublisher.close();
+					exozeroContext.close();
+					    
+					logger.debug("published  pulse to zeromq");
+					
+					//
+					// End of Publish the pulse to the ExoZero Network
+					//
+					
+					
+					
 					pulseTimestampMillis = pulseJSONObject.getLong(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS);
 					if(i==0) {
 						firstPulseInBatchMilliseconds=	pulseTimestampMillis;

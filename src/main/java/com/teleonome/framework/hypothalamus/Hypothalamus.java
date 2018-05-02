@@ -86,7 +86,7 @@ public abstract class Hypothalamus {
 	
 	
 	MnemosyneManager aMnemosyneManager=null;
-	Socket publisher=null;
+	Socket exoZeroPublisher=null;
 	
 	int currentPulseInMilliSeconds=0;
 	int basePulseInMilliSeconds=60;
@@ -95,7 +95,7 @@ public abstract class Hypothalamus {
 
 	public Socket subscriber;
 
-	public Context context=null;
+	public Context exoZeroContext=null;
 	public DiscoverTeleonoms aDiscoverTeleonoms=null;
 	public Hashtable subscriberList = new Hashtable();
 	protected String processName;
@@ -133,9 +133,9 @@ public abstract class Hypothalamus {
 
 		
 		try {
-			context = ZMQ.context(1);
-			publisher = context.socket(ZMQ.PUB);
-			publisher.setHWM(2);
+			exoZeroContext = ZMQ.context(1);
+			exoZeroPublisher = exoZeroContext.socket(ZMQ.PUB);
+			exoZeroPublisher.setHWM(2);
 			String ipToBindToZeroMQ="";
 			try {
 				ipToBindToZeroMQ = Utils.getIpAddressForNetworkMode().getHostAddress();
@@ -145,7 +145,7 @@ public abstract class Hypothalamus {
 				
 			}
 			logger.info("binding zeromq to " + ipToBindToZeroMQ);
-			publisher.bind("tcp://" + ipToBindToZeroMQ + ":5563");
+			exoZeroPublisher.bind("tcp://" + ipToBindToZeroMQ + ":5563");
 
 		
 			
@@ -154,7 +154,7 @@ public abstract class Hypothalamus {
             
 			aDBManager = PostgresqlPersistenceManager.instance();
 			aDenomeManager = DenomeManager.instance();
-			aMnemosyneManager = MnemosyneManager.instance(aDenomeManager, publisher, anMqttClient);
+			aMnemosyneManager = MnemosyneManager.instance(aDenomeManager, anMqttClient);
 			try {
 				localIpAddress = Utils.getIpAddress();
 				hostName = InetAddress.getLocalHost().getCanonicalHostName();
