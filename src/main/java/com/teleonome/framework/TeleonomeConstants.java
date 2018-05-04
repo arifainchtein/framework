@@ -787,6 +787,8 @@ public class TeleonomeConstants {
 	public static String SPERM_PURPOSE_DESCRIPTION="Description";
 	public static String SPERM_HOMEOBOX_INDEX="Homeobox Index";
 	public static String SPERM_DENE_TYPE_DENEWORD_CARRIER="DeneWord Carrier";
+	public static String SPERM_DENE_TYPE_DENEWORD_REMOVER="DeneWord Remover";
+	
 	public static String SPERM_DENE_TYPE_HOMEOBOX_METADATA="HomeoBox Metadata";
 	public static String SPERM_DATE_FORMAT="ddMMyyyy_HHmm";
 	

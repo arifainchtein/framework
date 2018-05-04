@@ -237,9 +237,18 @@ public class PulseThread extends Thread{
 					output.write(commandToSend,0,commandToSend.length());
 					output.flush();
 					logger.info("waiting for mama to respond2");
-					
-					String inputLine = input.readLine();
-					logger.info("received 2 inputLine=" + inputLine);
+					boolean waitingForMama=true;
+					while(waitingForMama) {
+						try {
+							String inputLine = input.readLine();
+							logger.info("received 2 inputLine=" + inputLine);
+							waitingForMama=false;
+						}catch(IOException e) {
+							logger.warn(Utils.getStringException(e));
+							Thread.sleep(2000);
+						}
+						
+					}
 					
 					
 					input.close();

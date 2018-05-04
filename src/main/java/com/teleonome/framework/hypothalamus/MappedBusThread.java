@@ -108,7 +108,7 @@ class MappedBusThread extends Thread{
 				for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
 					microControllerPointer = (String)en.nextElement();
 					aMicroController = (MicroController)hypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
-					logger.info("AsyncCycle is processing " + aMicroController.getName());
+					logger.debug("AsyncCycle is processing " + aMicroController.getName());
 					if(aMicroController.isEnableAsyncUpdate()) {
 						try {
 							output = aMicroController.getWriter();

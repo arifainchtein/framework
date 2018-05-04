@@ -1064,6 +1064,72 @@ public class DenomeUtils {
 
 	}
 	
+	public static boolean removeDeneWordFromDeneByIdentity(JSONObject pulseJSONObject, Identity targetDeneWordIdentity) throws InvalidDenomeException {
+		return removeDeneWordFromDeneByIdentity(pulseJSONObject,  targetDeneWordIdentity.getNucleusName(), targetDeneWordIdentity.getDenechainName(), targetDeneWordIdentity.getDeneName(), targetDeneWordIdentity.getDeneWordName());
+	}
+	
+	public static boolean removeDeneWordFromDeneByIdentity(JSONObject pulseJSONObject, String nucleusName,  String deneChainName, String deneName, String deneWordName) throws InvalidDenomeException {
+		// TODO Auto-generated method stub
+		int toReturn =0;
+		try {
+
+
+			//
+			// now parse them
+			JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
+			JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
+			String name;
+			JSONObject aJSONObject, selectedNucleus = null,purposeNucleus = null;
+
+			for(int i=0;i<nucleiArray.length();i++){
+				aJSONObject = (JSONObject) nucleiArray.get(i);
+				name = aJSONObject.getString("Name");
+
+				if(name.equals(nucleusName)){
+					selectedNucleus= aJSONObject;
+				}
+			}
+			//System.out.println("removing dene, from denechain, selectedNucleus=" + selectedNucleus);
+			JSONArray deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
+			JSONObject aDeneJSONObject, deneChain;
+			JSONArray denesJSONArray;
+			String valueType, valueInString;
+			Object object;
+			boolean keepGoing=true;
+			for(int i=0;i<deneChainsArray.length();i++){
+				aJSONObject = (JSONObject) deneChainsArray.get(i);
+				//System.out.println("removing dene, from denechain, aJSONObject=" + aJSONObject);
+				if(aJSONObject.has("Name") && aJSONObject.getString("Name").equals(deneChainName)){
+					deneChain = aJSONObject;
+					denesJSONArray = deneChain.getJSONArray("Denes");
+					done:
+					for(int j=0;j<denesJSONArray.length();j++){
+						aDeneJSONObject = denesJSONArray.getJSONObject(j);
+						if(aDeneJSONObject.getString("Name").equals(deneName)){
+							JSONArray deneWordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
+							for(int k=0;k<deneWordsJSONArray.length();k++){
+								JSONObject deneWord = (JSONObject) deneWordsJSONArray.get(k);
+								if(deneWord.getString("Name").equals(deneWordName)){
+									deneWordsJSONArray.remove(k);
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			// TODO Auto-generated catch block
+			Hashtable info = new Hashtable();
+
+			String m = "The denome is not formated Correctly. Error:" + e.getMessage() +" Stacktrace:" + ExceptionUtils.getStackTrace(e);
+			info.put("message", m);
+			throw new InvalidDenomeException(info);
+		}
+		return false;
+	}
+	
 	
 	
 	public static void addDeneToDeneChainByIdentity(JSONObject pulseJSONObject, JSONObject dene, Identity targetDeneChainidentity) throws InvalidDenomeException {
@@ -1401,6 +1467,75 @@ public class DenomeUtils {
 		return deneWordsRemoved;
 	}
 
+	public static boolean containsMutation(JSONObject pulseJSONObject, String mutationName){
+		JSONObject mutationsObject = pulseJSONObject.getJSONObject("Denome");
+		JSONArray mutationsArray = mutationsObject.getJSONArray("Mutations");
+		String name;
+		for(int i=0;i<mutationsArray.length();i++){
+			name =  mutationsArray.getJSONObject(i).getString("Name");
+			if(name.equals(mutationName)){
+				return true;
+			}
+		}
+		return false;
+	}
+	public static boolean containsDenomicElementByIdentity(JSONObject pulseJSONObject, Identity identity){
+
+		String nucleusName=identity.getNucleusName();
+		String deneChainName = identity.getDenechainName();
+		String deneName = identity.getDeneName();
+		String deneWordName = identity.getDeneWordName();
+		JSONObject aJSONObject, aDeneJSONObject, aDeneWordJSONObject, selectedNucleus = null;
+		JSONArray denesJSONArray, deneWordsJSONArray;
+		String valueType, valueInString, name;
+		Object object;
+		
+		JSONArray deneChainsArray=null;
+		try {
+			JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
+			JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
+			for(int i=0;i<nucleiArray.length();i++){
+				aJSONObject = (JSONObject) nucleiArray.get(i);
+				name = aJSONObject.getString("Name");
+				//System.out.println("nuclei name=" + name);
+				if(name.equals(nucleusName)){
+					selectedNucleus= aJSONObject;
+				}
+			}
+			if(selectedNucleus==null)return false;
+
+			deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
+			
+			for(int i=0;i<deneChainsArray.length();i++){
+				aJSONObject = (JSONObject) deneChainsArray.get(i);
+				if(aJSONObject.getString("Name").equals(deneChainName)){
+					if(deneName.equals(""))return true;
+
+					denesJSONArray = aJSONObject.getJSONArray("Denes");
+					for(int j=0;j<denesJSONArray.length();j++){
+						aDeneJSONObject = (JSONObject) denesJSONArray.get(j);
+
+						if(aDeneJSONObject.getString("Name").equals(deneName)){
+							if(deneWordName.equals(""))return true;
+
+							deneWordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
+							for(int k=0;k<deneWordsJSONArray.length();k++){
+								aDeneWordJSONObject = (JSONObject) deneWordsJSONArray.get(k);
+								if(aDeneWordJSONObject.get("Name").equals(deneWordName)){
+									return true;
+								}
+
+							}
+						}
+					}
+				}
+			}
+		}catch(JSONException e){
+
+		}
+		return false;
+	}
+	
 	public static JSONObject getDenomicElementByIdentity(JSONObject pulseJSONObject, Identity identity){
 
 		String nucleusName=identity.getNucleusName();
