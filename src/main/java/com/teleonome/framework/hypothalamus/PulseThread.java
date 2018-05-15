@@ -240,11 +240,15 @@ public class PulseThread extends Thread{
 					boolean waitingForMama=true;
 					while(waitingForMama) {
 						try {
-							String inputLine = input.readLine();
-							logger.info("received 2 inputLine=" + inputLine);
-							waitingForMama=false;
+							if(input.ready()) {
+								String inputLine = input.readLine();
+								logger.info("received 2 inputLine=" + inputLine);
+								waitingForMama=false;
+							}
+							
 						}catch(IOException e) {
 							logger.warn(Utils.getStringException(e));
+							logger.info("After erro talking to mama wait 2 sec and try again");
 							Thread.sleep(2000);
 						}
 						

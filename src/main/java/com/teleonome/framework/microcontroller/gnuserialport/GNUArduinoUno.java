@@ -120,19 +120,20 @@ public class GNUArduinoUno extends MicroController implements SerialPortEventLis
 			JSONObject commParamsDene = aDenomeManager.getDeneByIdentity(new Identity(pointerToCommParamsDene));
 			DATA_RATE = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(commParamsDene, "Serial Data Rate", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).intValue();
 			logger.debug("using datarate=" + DATA_RATE);
-			
+			int counter=0;
 			boolean openAndTested=false;
 			do {
+				logger.debug("about to open port 2" );
 				serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
 				//serialPort.disableReceiveTimeout();
-				serialPort.enableReceiveTimeout(5000);
-				//serialPort.enableReceiveThreshold(1);
+				serialPort.enableReceiveTimeout(30000);
+				serialPort.enableReceiveThreshold(0);
 				serialPort.setSerialPortParams(DATA_RATE,
 						SerialPort.DATABITS_8,
 						SerialPort.STOPBITS_1,
 						SerialPort.PARITY_NONE);
-				serialPort.setRTS(false);
-				serialPort.setDTR(true);
+				//serialPort.setRTS(false);
+				//serialPort.setDTR(true);
 
 				// open the streams
 
@@ -167,7 +168,7 @@ public class GNUArduinoUno extends MicroController implements SerialPortEventLis
 					String actuatorCommand="Ping";
 					output.write(actuatorCommand,0,actuatorCommand.length());
 					//serialPortOutputStream.write( actuatorCommand.getBytes() );
-					Thread.sleep(1000);
+					//Thread.sleep(1000);
 					output.flush();
 					logger.info("waiting for mother to answer" );
 					
@@ -179,9 +180,10 @@ public class GNUArduinoUno extends MicroController implements SerialPortEventLis
 					logger.warn(Utils.getStringException(e));
 				}
 				if(!openAndTested) {
-					logger.warn("Ping Failed,closing serial port, retrying in 2 secs" );
+					logger.warn("Ping Failed,closing serial port, retrying in 10 secs, counter="+counter );
+					counter++;
 					serialPort.close();
-					Thread.sleep(2000);
+					Thread.sleep(10000);
 				}
 			}while(!openAndTested);
 			

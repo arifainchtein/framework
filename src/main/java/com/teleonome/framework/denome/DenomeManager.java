@@ -145,9 +145,11 @@ public class DenomeManager {
 	private Vector analyticonsDataSourcesLate = new Vector();
 	String teleonomeName="";
 	private static final JexlEngine jexl = new JexlEngine(null, new NoStringCoercionArithmetic(), null, null);
-
-
-
+	
+	//
+	// a hashmap that contains as key the name of the foreign teleonome and as value an ArrayList with the identity pointers of all data items needed from that teleonome/
+	HashMap externalDataLocationHashMap = new HashMap();
+	
 	static {
 		jexl.setCache(512);
 		jexl.setLenient(false);
@@ -221,7 +223,7 @@ public class DenomeManager {
 		loadDenome(selectedDenomeFileName);
 	}
 
-	String denomeFileInString = null;
+	
 
 	public void writeDenomeToDisk(){
 		//
@@ -253,12 +255,12 @@ public class DenomeManager {
 		// read the denome from the hard disk
 		//  if its not found, then read it from the db
 		//
-
+		String stringFormDenome="";
 		try {
 			File selectedFile = new File(fn);
 			logger.debug("reading denome from " +selectedDenomeFileName);
 
-			denomeFileInString = FileUtils.readFileToString(selectedFile);
+			stringFormDenome = FileUtils.readFileToString(selectedFile);
 
 
 		} catch (IOException e) {
@@ -266,7 +268,7 @@ public class DenomeManager {
 			logger.warn(Utils.getStringException(e));
 		}
 
-		if(denomeFileInString.equals("")){
+		if(stringFormDenome.equals("")){
 			Hashtable info = new Hashtable();
 			info.put("message", "The denome file was not found in " + Utils.getLocalDirectory());
 			throw new MissingDenomeException(info);
@@ -291,10 +293,13 @@ public class DenomeManager {
 			// end of variable initialization
 			//
 
-			denomeJSONObject = new JSONObject(denomeFileInString);
+			denomeJSONObject = new JSONObject(stringFormDenome);
 			JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
 			denomeName = denomeObject.getString("Name");
-
+			//
+			// make sure it is garbage cllected
+			//
+			stringFormDenome=null;
 
 
 			//
@@ -900,7 +905,9 @@ public class DenomeManager {
 			String dataLocation, sourceTeleonomeName;
 			externalDataNameDeneWords = new Hashtable();
 			String deneType;
-
+			externalDataLocationHashMap = new HashMap();
+			Identity dataLocationIdentity=null;
+			ArrayList externalDataLocations=null;
 			for(int i=0;i<purposeNucleusDeneChains.length();i++){
 				aDeneChainJSONObject = (JSONObject) purposeNucleusDeneChains.get(i);
 
@@ -917,11 +924,23 @@ public class DenomeManager {
 							sourceTeleonomeName = externalDataDeneJSONObject.getString("Name");
 							externalDataDeneWordsJSONArray  = externalDataDeneJSONObject.getJSONArray("DeneWords");
 							externalDataNameDeneWords.put(sourceTeleonomeName, externalDataDeneWordsJSONArray);
-
-							//for(int k=0;k<externalDataDeneWordsJSONArray.length();k++){
-							//	externalDeneWordJSONObject = (JSONObject) externalDataDeneWordsJSONArray.get(k);
-							//	dataLocation = (String) externalDeneWordJSONObject.getString("Data Location");
-							//}
+							for(int k=0;k<externalDataDeneWordsJSONArray.length();k++){
+								externalDeneWordJSONObject = (JSONObject) externalDataDeneWordsJSONArray.get(k);
+								logger.debug("line 929, externalDeneWordJSONObject=" + externalDeneWordJSONObject.getString("Name") );
+								if(externalDeneWordJSONObject.has("Data Location")) {
+									dataLocation = (String) externalDeneWordJSONObject.getString("Data Location");
+									 dataLocationIdentity = new Identity(dataLocation);
+									 logger.debug("line 933, for external teleonome =" + dataLocationIdentity.getTeleonomeName() + " adding "+ dataLocation );
+										
+									externalDataLocations = (ArrayList) externalDataLocationHashMap.get(dataLocationIdentity.getTeleonomeName());
+									if(externalDataLocations==null)externalDataLocations = new ArrayList();
+									if(!externalDataLocations.contains(dataLocation))externalDataLocations.add(dataLocation);
+									externalDataLocationHashMap.put(dataLocationIdentity.getTeleonomeName(), externalDataLocations);
+								}
+								
+								
+							}
+							
 						}
 					}
 				}
@@ -1014,7 +1033,53 @@ public class DenomeManager {
 
 	public void updateExternalData(String teleonomeName, JSONObject jsonMessage){
 		logger.debug("received updated from "+teleonomeName+ " with size "+jsonMessage.toString().length() + " and lastExternalPulse=" + lastExternalPulse.size());
-		lastExternalPulse.put(teleonomeName,jsonMessage );
+		//
+		// now instead of storing the entire pulse
+		// extract the data that is required for the External Data
+		// and store that
+		ArrayList externalDataLocations = (ArrayList) externalDataLocationHashMap.get(teleonomeName);
+		String externalDataPointer;
+		Identity externalDataIdentity;
+		Object value;
+		JSONObject externalDataLastPulseInfoJSONObject = new JSONObject();
+		
+		long lastPulseExternalTimeInMillis = jsonMessage.getLong(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS);
+		externalDataLastPulseInfoJSONObject.put(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, lastPulseExternalTimeInMillis);
+		
+		String lastPulseExternalTime = jsonMessage.getString(TeleonomeConstants.PULSE_TIMESTAMP);
+		externalDataLastPulseInfoJSONObject.put(TeleonomeConstants.PULSE_TIMESTAMP, lastPulseExternalTime);
+		
+		Identity externalDataCurrentPulseIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,"Vital",TeleonomeConstants.DENEWORD_TYPE_CURRENT_PULSE_FREQUENCY );
+		Identity numberOfPulseForStaleIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_DESCRIPTIVE,TeleonomeConstants.DENE_VITAL,TeleonomeConstants.DENEWORD_TYPE_NUMBER_PULSES_BEFORE_LATE );
+		try{
+		    int externalCurrentPulse = (Integer)DenomeUtils.getDeneWordByIdentity(jsonMessage, externalDataCurrentPulseIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		    externalDataLastPulseInfoJSONObject.put(externalDataCurrentPulseIdentity.toString(), externalCurrentPulse);
+			
+		    int numberOfPulseForStale = (Integer)DenomeUtils.getDeneWordByIdentity(jsonMessage, numberOfPulseForStaleIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		    externalDataLastPulseInfoJSONObject.put(numberOfPulseForStaleIdentity.toString(), numberOfPulseForStale);
+			
+		}catch(InvalidDenomeException e){
+			logger.warn(Utils.getStringException(e));
+		}
+		if(externalDataLocations!=null) {
+			for(int i=0;i<externalDataLocations.size();i++) {
+				externalDataPointer = (String) externalDataLocations.get(i);
+				externalDataIdentity = new Identity(externalDataPointer);
+				try {
+					value = DenomeUtils.getDeneWordByIdentity(jsonMessage, externalDataIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					externalDataLastPulseInfoJSONObject.put(externalDataPointer, value);
+				} catch (InvalidDenomeException e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
+				}
+
+			}
+		}
+		
+		lastExternalPulse.put(teleonomeName,externalDataLastPulseInfoJSONObject );
+		
+		
+		//lastExternalPulse.put(teleonomeName,jsonMessage );
 
 	}
 
@@ -1025,9 +1090,252 @@ public class DenomeManager {
 
 	/**
 	 * This method is called during the pulse creation to populate all the external variables 
+	 * it is the new way, where lasrtExtenalData does not contain the complete pulse,
+	 * but just a simple json object with the necesary data
 	 * 
 	 */
 	public Vector processExternalData(){
+		//
+		// get the address of the deneword where this data is going to
+		String reportingAddress, deneWordName;
+		Vector teleonomeToReconnect = new Vector();
+		try {
+			
+			JSONObject currentlyCreatingPulseDenome = currentlyCreatingPulseJSONObject.getJSONObject("Denome");
+			String teleonomeName = currentlyCreatingPulseDenome.getString("Name");
+			JSONArray currentlyCreatingPulseNuclei = currentlyCreatingPulseDenome.getJSONArray("Nuclei");
+			JSONArray deneWords;
+
+			JSONObject jsonObject, jsonObjectChain, jsonObjectDene, jsonObjectDeneWord;
+			JSONArray chains, denes;
+			String externalDataDeneName;
+			JSONObject lastPulseExternalTeleonomeJSONObject;
+			String externalSourceOfData;
+
+			JSONObject pathologyDeneChain = null, pathologyDeneDeneWord;
+			JSONArray pathologyDenes=null, pathologyDeneDeneWords;
+			JSONObject pathologyDene;
+			String pathologyLocation = "";
+			try {
+				pathologyDeneChain = getDeneChainByName(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_PATHOLOGY);
+				pathologyDenes = pathologyDeneChain.getJSONArray("Denes");
+
+			} catch (JSONException e2) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e2));
+
+			}
+
+			long lastPulseExternalTimeInMillis,difference;
+			String lastPulseExternalTime;
+			Identity externalDataCurrentPulseIdentity,numberOfPulseForStaleIdentity;
+			int secondsToStale=180;
+			//String valueType;
+
+			for(int i=0;i<currentlyCreatingPulseNuclei.length();i++){
+				jsonObject = currentlyCreatingPulseNuclei.getJSONObject(i);
+				if(jsonObject.getString("Name").equals(TeleonomeConstants.NUCLEI_PURPOSE)){
+					chains = jsonObject.getJSONArray("DeneChains");
+					for(int j=0;j<chains.length();j++){
+						jsonObjectChain = chains.getJSONObject(j);
+
+						if(jsonObjectChain.toString().length()>10 && jsonObjectChain.getString("Name").equals(TeleonomeConstants.DENECHAIN_EXTERNAL_DATA)){
+							denes = jsonObjectChain.getJSONArray("Denes");
+
+							for(int k=0;k<denes.length();k++){
+								jsonObjectDene = denes.getJSONObject(k);
+								externalDataDeneName = jsonObjectDene.getString("Name");
+								//
+								// the externalDataDeneName is the name of the External Teleonome
+								// lastPulseExternalTeleonomeJSONObject contains the last pulse
+								// of that teleonome
+								//
+								logger.debug("line 824 denomemanamger, looking for  " + externalDataDeneName + " and lastExternalPulse size=" + lastExternalPulse.size() + " and lastExternalPulse.get[" + lastExternalPulse.containsKey(externalDataDeneName));
+								lastPulseExternalTeleonomeJSONObject = (JSONObject)lastExternalPulse.get(externalDataDeneName );
+								//
+								// there could be the situation where lastPulseExternalTeleonomeJSONObject==null
+								// this is because there is no data yet from that teleonome
+								//  only proceed if you have data
+								//
+								// the other problem is when there is external data but the data is stale
+								// and therefore should not be used, both of these cases will end up in the
+								// pathology report of the denome
+								//
+								logger.debug("line 1031 denomemanamger, lastPulseExternalTeleonomeJSONObject is not equal to null  " + (lastPulseExternalTeleonomeJSONObject!=null) );
+
+								if(lastPulseExternalTeleonomeJSONObject!=null){
+									//
+									// check if the data is stale
+										logger.debug("line 1111   " + (lastPulseExternalTeleonomeJSONObject.toString(4)) );
+
+									lastPulseExternalTimeInMillis = lastPulseExternalTeleonomeJSONObject.getLong(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS);
+									lastPulseExternalTime = lastPulseExternalTeleonomeJSONObject.getString(TeleonomeConstants.PULSE_TIMESTAMP);
+									long now= System.currentTimeMillis();
+									difference = now-lastPulseExternalTimeInMillis;
+									logger.debug("difference="+ difference + " now=" + now + " lastPulseExternalTimeInMillis=" + lastPulseExternalTimeInMillis + " secondsToStale=" + secondsToStale);
+
+									externalDataCurrentPulseIdentity = new Identity(externalDataDeneName,TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,"Vital",TeleonomeConstants.DENEWORD_TYPE_CURRENT_PULSE_FREQUENCY );
+									secondsToStale=180;
+									numberOfPulseForStaleIdentity = new Identity(externalDataDeneName,TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_DESCRIPTIVE,TeleonomeConstants.DENE_VITAL,TeleonomeConstants.DENEWORD_TYPE_NUMBER_PULSES_BEFORE_LATE );
+
+									try{
+										int externalCurrentPulse = (Integer)lastPulseExternalTeleonomeJSONObject.getInt( externalDataCurrentPulseIdentity.toString());
+										int numberOfPulseForStale = (Integer)lastPulseExternalTeleonomeJSONObject.getInt( numberOfPulseForStaleIdentity.toString());
+										
+										secondsToStale = externalCurrentPulse * numberOfPulseForStale;
+										logger.debug("externalCurrentPulse="+ externalCurrentPulse + " numberOfPulseForStale=" + numberOfPulseForStale + " secondsToStale=" + secondsToStale);
+
+									}catch(NullPointerException e){
+										logger.warn(Utils.getStringException(e));
+
+									}
+									deneWords = jsonObjectDene.getJSONArray("DeneWords");
+									boolean dataIsStale=false;
+
+
+									if(difference>secondsToStale){
+										dataIsStale=true;
+										jsonObjectDeneWord = (JSONObject) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(jsonObjectDene, TeleonomeConstants.EXTERNAL_DATA_STATUS, TeleonomeConstants.COMPLETE);
+										jsonObjectDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, TeleonomeConstants.EXTERNAL_DATA_STATUS_STALE);
+										logger.debug("data is stale");
+										//
+										// now create the pathology dene
+										//
+										pathologyDene = new JSONObject();
+										pathologyDenes.put(pathologyDene);
+
+										pathologyDene.put("Name", TeleonomeConstants.PATHOLOGY_DENE_EXTERNAL_DATA);
+										pathologyDeneDeneWords = new JSONArray();
+
+										pathologyDene.put("DeneWords", pathologyDeneDeneWords);
+										//
+										// create the Cause deneword
+										//
+										pathologyDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_CAUSE, TeleonomeConstants.PATHOLOGY_DATA_STALE ,null,"String",true);
+										pathologyDeneDeneWords.put(pathologyDeneDeneWord);
+										//
+										// create the location deneword
+										pathologyLocation = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_EXTERNAL_DATA,externalDataDeneName  ).toString();
+										//
+										// exterbDataDeneName contains the name of the teleonome that needs to reconnect
+										// add it to the return variable
+										if(!teleonomeToReconnect.contains(externalDataDeneName)){
+											logger.debug(externalDataDeneName + " is stale, adding to recoonectList");
+
+											teleonomeToReconnect.addElement(externalDataDeneName);
+										}
+
+										pathologyDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_LOCATION, pathologyLocation ,null,TeleonomeConstants.DATATYPE_DENE_POINTER,true);
+										pathologyDeneDeneWords.put(pathologyDeneDeneWord);
+
+
+										pathologyDeneDeneWord = Utils.createDeneWordJSONObject("Last Pulse Timestamp in Millis", ""+lastPulseExternalTimeInMillis ,null,"long",true);
+										pathologyDeneDeneWords.put(pathologyDeneDeneWord);
+
+
+										pathologyDeneDeneWord = Utils.createDeneWordJSONObject("Last Pulse Timestamp", lastPulseExternalTime ,null,"String",true);
+										pathologyDeneDeneWords.put(pathologyDeneDeneWord);
+
+
+
+									}else{
+										jsonObjectDeneWord = (JSONObject) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(jsonObjectDene, TeleonomeConstants.EXTERNAL_DATA_STATUS, TeleonomeConstants.COMPLETE);
+										jsonObjectDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, TeleonomeConstants.EXTERNAL_DATA_STATUS_OK);
+										//
+										// first put all the values from the last pulse of this external teleonome
+										//
+										logger.debug("line 1154 deneWords.length()=" + deneWords.toString(4));
+
+										for(int l=0;l<deneWords.length();l++){
+											jsonObjectDeneWord = deneWords.getJSONObject(l);
+											//
+											// jsonObjectDeneWord is the deneword so first
+											// get the data location to know the source of data
+											// strip the first character which is a @
+											// check that it has a data location because
+											// there are denewords in the external data dene
+											// that do not have a datalocation, for example
+											// the deneword called ExternalDataStatus which stores
+											// whether the data is stale or not
+											//
+											if(jsonObjectDeneWord.has("Data Location")){
+												externalSourceOfData = jsonObjectDeneWord.getString("Data Location");
+												//
+												// now get the value from 
+												logger.debug("line 1267 dataIsStale=" + dataIsStale + " externalSourceOfData=" + externalSourceOfData);
+												
+												Object externalData =  lastPulseExternalTeleonomeJSONObject.get(externalSourceOfData);
+												logger.debug("line 1270 externalData=" + externalData);
+												
+												if(externalData!=null)jsonObjectDeneWord.put("Value", externalData);	
+											}
+
+										}
+									}
+								}else{
+									logger.debug("no data from " + externalDataDeneName + " setting all dene to stale");
+
+
+									jsonObjectDeneWord = (JSONObject) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(jsonObjectDene, TeleonomeConstants.EXTERNAL_DATA_STATUS, TeleonomeConstants.COMPLETE);
+									jsonObjectDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, TeleonomeConstants.EXTERNAL_DATA_STATUS_STALE);
+
+									logger.debug("line 1248 disallowexternal data jsonObjectDene  " + jsonObjectDene.getString("Name") + " is stale");
+
+
+
+									// add to the pathology denechain
+									//
+									// now create the pathology dene
+									//
+									pathologyDene = new JSONObject();
+									pathologyDenes.put(pathologyDene);
+
+									pathologyDene.put("Name", TeleonomeConstants.PATHOLOGY_DENE_EXTERNAL_DATA);
+									pathologyDeneDeneWords = new JSONArray();
+
+									pathologyDene.put("DeneWords", pathologyDeneDeneWords);
+									//
+									// create the Cause deneword
+									//
+									pathologyDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_CAUSE, TeleonomeConstants.PATHOLOGY_DATA_NOT_AVAILABLE ,null,"String",true);
+									pathologyDeneDeneWords.put(pathologyDeneDeneWord);
+									//
+									if(!teleonomeToReconnect.contains(externalDataDeneName)){
+										logger.debug(externalDataDeneName + " is stale, adding to recoonectList");
+										teleonomeToReconnect.addElement(externalDataDeneName);
+									}
+
+									// create the location deneword
+									pathologyLocation = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_EXTERNAL_DATA,externalDataDeneName  ).toString();
+									pathologyDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_LOCATION, pathologyLocation ,null,TeleonomeConstants.DATATYPE_DENE_POINTER,true);
+									pathologyDeneDeneWords.put(pathologyDeneDeneWord);
+
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}
+		//
+		// there is a problem because iam reconneting all the time
+		// creating many subscriber threads, to see the effect
+		// i am going to always empty and see what happens with the
+		//return teleonomeToReconnect;
+		return teleonomeToReconnect;//new Vector();
+	}
+	
+	/**
+	 * This method is the original method which assumed that the complete
+	 *  pulse of the other teleonomes is stred in lastExternalPulse
+	 *  this method is now replaced with the one above
+	 *  where lstExternlaData only has a simple json object with the values for the necesary info called during the pulse creation to populate all the external variables 
+	 * 
+	 */
+	public Vector processExternalDataFullPulse(){
 		//
 		// get the address of the deneword where this data is going to
 		String reportingAddress, deneWordName;
@@ -1124,7 +1432,7 @@ public class DenomeManager {
 
 									try{
 										int externalCurrentPulse = (Integer)DenomeUtils.getDeneWordByIdentity(lastPulseExternalTeleonomeJSONObject, externalDataCurrentPulseIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-										int numberOfPulseForStale = (Integer)DenomeUtils.getDeneWordByIdentity(currentlyCreatingPulseJSONObject, numberOfPulseForStaleIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+										int numberOfPulseForStale = (Integer)DenomeUtils.getDeneWordByIdentity(lastPulseExternalTeleonomeJSONObject, numberOfPulseForStaleIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 										secondsToStale = externalCurrentPulse * numberOfPulseForStale;
 										logger.debug("externalCurrentPulse="+ externalCurrentPulse + " numberOfPulseForStale=" + numberOfPulseForStale + " secondsToStale=" + secondsToStale);
@@ -1301,8 +1609,7 @@ public class DenomeManager {
 			File selectedFile = new File(Utils.getLocalDirectory() + "Teleonome.denome");
 			logger.debug("reading denome from " +selectedDenomeFileName);
 			String initialIdentityState="";
-			String fileInString = FileUtils.readFileToString(selectedFile);
-			JSONObject denomeJSONObject = new JSONObject(denomeFileInString);
+			JSONObject denomeJSONObject = new JSONObject(FileUtils.readFileToString(selectedFile));
 
 			JSONObject denome = denomeJSONObject.getJSONObject("Denome");	
 			JSONArray currentlyCreatingPulseNuclei = denome.getJSONArray("Nuclei");
@@ -4116,8 +4423,7 @@ public class DenomeManager {
 		logger.debug("readAndModifyDeneWordByIdentity, reading denome from " +selectedDenomeFileName);
 		String initialIdentityState="";
 		try {
-			String fileInString = FileUtils.readFileToString(selectedFile);
-			JSONObject denomeJSONObject = new JSONObject(denomeFileInString);
+			JSONObject denomeJSONObject = new JSONObject(FileUtils.readFileToString(selectedFile));
 			String nucleusName = deneChainIdentity.getNucleusName();
 			String deneChainName = deneChainIdentity.getDenechainName();
 			logger.debug("nucleusName=" + nucleusName + " deneChainName=" + deneChainName);
@@ -4144,8 +4450,7 @@ public class DenomeManager {
 		String initialIdentityState="";
 		boolean toReturn=false;
 		try {
-			String fileInString = FileUtils.readFileToString(selectedFile);
-			JSONObject localDenomeJSONObject = new JSONObject(denomeFileInString);
+			JSONObject localDenomeJSONObject = new JSONObject(FileUtils.readFileToString(selectedFile));
 			logger.debug("targetDeneWordIdentity=" + targetDeneWordIdentity.toString());
 
 			JSONObject deneWord = (JSONObject) DenomeUtils.getDeneWordByIdentity(localDenomeJSONObject, targetDeneWordIdentity, TeleonomeConstants.COMPLETE);

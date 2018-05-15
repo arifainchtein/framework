@@ -421,7 +421,7 @@ public abstract class Hypothalamus {
 			
 			
 			if(anMqttClient.isConnected()) {
-				logger.warn("heart is connected about to publish to topic " + topic);
+				logger.debug("heart is connected about to publish to topic " + topic);
 				anMqttClient.publish(topic, message);
 			}else {
 				logger.warn("Unable to publish to the heart");
