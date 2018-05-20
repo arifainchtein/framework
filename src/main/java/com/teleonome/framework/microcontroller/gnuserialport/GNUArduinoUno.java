@@ -122,24 +122,26 @@ public class GNUArduinoUno extends MicroController implements SerialPortEventLis
 			logger.debug("using datarate=" + DATA_RATE);
 			int counter=0;
 			boolean openAndTested=false;
-			do {
-				logger.debug("about to open port 2" );
-				serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
-				//serialPort.disableReceiveTimeout();
-				serialPort.enableReceiveTimeout(30000);
-				serialPort.enableReceiveThreshold(0);
-				serialPort.setSerialPortParams(DATA_RATE,
-						SerialPort.DATABITS_8,
-						SerialPort.STOPBITS_1,
-						SerialPort.PARITY_NONE);
-				//serialPort.setRTS(false);
-				//serialPort.setDTR(true);
-				serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN |  SerialPort.FLOWCONTROL_RTSCTS_OUT);
-				serialPort.setDTR(true);
-				// open the streams
+			logger.debug("about to open port 2" );
+			serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
+			//serialPort.disableReceiveTimeout();
+			serialPort.enableReceiveTimeout(30000);
+			serialPort.enableReceiveThreshold(0);
+			serialPort.setSerialPortParams(DATA_RATE,
+					SerialPort.DATABITS_8,
+					SerialPort.STOPBITS_1,
+					SerialPort.PARITY_NONE);
+			//serialPort.setRTS(false);
+			//serialPort.setDTR(true);
+			serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN |  SerialPort.FLOWCONTROL_RTSCTS_OUT);
+			serialPort.setDTR(true);
+			// open the streams
 
-				serialPort.addEventListener(this);
-				serialPort.notifyOnDataAvailable(true);
+			serialPort.addEventListener(this);
+			serialPort.notifyOnDataAvailable(true);
+			
+			do {
+				
 
 				///serialPort..write().write(InetAddress.getLocalHost().toString().t());
 				serialPortInputStream = serialPort.getInputStream();
