@@ -168,7 +168,7 @@ public class GNUArduinoUno extends MicroController implements SerialPortEventLis
 					String actuatorCommand="Ping";
 					output.write(actuatorCommand,0,actuatorCommand.length());
 					//serialPortOutputStream.write( actuatorCommand.getBytes() );
-					//Thread.sleep(1000);
+					Thread.sleep(1000);
 					output.flush();
 					logger.info("waiting for mother to answer" );
 					
