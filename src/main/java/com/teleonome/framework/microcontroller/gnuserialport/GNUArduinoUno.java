@@ -122,8 +122,12 @@ public class GNUArduinoUno extends MicroController implements SerialPortEventLis
 			logger.debug("using datarate=" + DATA_RATE);
 			int counter=0;
 			boolean openAndTested=false;
-			logger.debug("about to open port 2" );
+			logger.debug("about to open port , sleeping 10 sec first" );
+			
+			Thread.sleep(10000);
 			serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
+			logger.debug("opened port , sleeping another 10 sec " );
+			Thread.sleep(10000);
 			//serialPort.disableReceiveTimeout();
 			serialPort.enableReceiveTimeout(30000);
 			serialPort.enableReceiveThreshold(0);
@@ -183,9 +187,9 @@ public class GNUArduinoUno extends MicroController implements SerialPortEventLis
 					logger.warn(Utils.getStringException(e));
 				}
 				if(!openAndTested) {
-					logger.warn("Ping Failed,closing serial port, retrying in 10 secs, counter="+counter );
+					logger.warn("Ping Failed, retrying in 10 secs, counter="+counter );
 					counter++;
-					serialPort.close();
+					//serialPort.close();
 					Thread.sleep(10000);
 				}
 			}while(!openAndTested);
