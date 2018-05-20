@@ -134,7 +134,8 @@ public class GNUArduinoUno extends MicroController implements SerialPortEventLis
 						SerialPort.PARITY_NONE);
 				//serialPort.setRTS(false);
 				//serialPort.setDTR(true);
-
+				serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN |  SerialPort.FLOWCONTROL_RTSCTS_OUT);
+				serialPort.setDTR(true);
 				// open the streams
 
 				serialPort.addEventListener(this);
