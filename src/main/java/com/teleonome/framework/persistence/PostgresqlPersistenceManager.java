@@ -32,8 +32,7 @@ import com.teleonome.framework.utils.Utils;
 public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 	private static PostgresqlPersistenceManager aPostgresqlPersistenceManager;
-	//private final String DATABASE_URL = "postgres://postgres:sazirac@localhost:5432/teleonome";
-	private final String DATABASE_URL = "postgres://localhost:5432/teleonome";
+	private final String DATABASE_URL = "postgres://postgres:sazirac@localhost:5432/teleonome";
 	private TeleonomeConnectionPool connectionPool;
 	private Logger logger;
 
