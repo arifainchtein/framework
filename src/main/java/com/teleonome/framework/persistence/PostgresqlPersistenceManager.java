@@ -34,7 +34,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	private static PostgresqlPersistenceManager aPostgresqlPersistenceManager;
 	private final String DATABASE_URL = "postgres://postgres:sazirac@localhost:5432/teleonome";
 	private TeleonomeConnectionPool connectionPool;
-	private Logger logger;
+	private Logger logger;  
 
 	private PostgresqlPersistenceManager(){
 		logger = Logger.getLogger(getClass());
