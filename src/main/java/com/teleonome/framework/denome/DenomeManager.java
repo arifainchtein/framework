@@ -7645,7 +7645,7 @@ public class DenomeManager {
 			logger.warn(Utils.getStringException(e));
 		}
 	}
-
+	
 	public Object updateDeneWordCurrentPulse(String pointerToDeneWord, Object valueToUpdate) throws InvalidDenomeException{
 		String[] tokens = pointerToDeneWord.substring(1,pointerToDeneWord.length()).split(":");
 

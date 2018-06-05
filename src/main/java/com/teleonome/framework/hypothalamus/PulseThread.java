@@ -563,7 +563,21 @@ public class PulseThread extends Thread{
 							
 							Object result = mnemomsyneMethod.invoke(anHypothalamus.aMnemosyneManager,parameters);
 							logger.debug ("mnemomsyneMethod.invoke result=" + result);
-
+							//
+							// now check to see if this mnemsocyon is recurrent or onetime.  if its one time then set Active to false
+							//
+							// the default is to be recurrent, so a mnemosycon that does not have the "DeneWord Type": "Mnemosycon Remember Recurrence",
+							// then is recurrent
+							Object recurrentDeneWordObject =  aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							if(recurrentDeneWordObject!=null) {
+								JSONObject recurrentDeneWordJSONObject = (JSONObject)recurrentDeneWordObject;
+								String recurrentValue = recurrentDeneWordJSONObject.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+								if(recurrentValue.equals(TeleonomeConstants.MNEMOSYNE_RECURRENCE_ONE_TIME)) {
+									Identity id = new Identity(aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_MNEMOSYCONS, mnemosyconDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE), TeleonomeConstants.DENEWORD_ACTIVE);
+									aDenomeManager.updateDeneWordCurrentPulse(id.toString(), false);
+								}
+								
+							}
 						} catch (JSONException e) {
 							logger.warn(Utils.getStringException(e));
 						} catch (InvalidDenomeException e) {

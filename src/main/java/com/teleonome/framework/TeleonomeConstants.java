@@ -503,7 +503,7 @@ public class TeleonomeConstants {
 	public static String DENEWORD_DENEWORD_TYPE_ATTRIBUTE = "DeneWord Type";
 	
 	
-	public static String DENE_DENE_NAMEE_ATTRIBUTE = "Name";
+	public static String DENE_DENE_NAME_ATTRIBUTE = "Name";
 	public static String DENE_DENE_TYPE_ATTRIBUTE = "Dene Type";
 	public static String DENE_TYPE_EXTERNAL_DATA_SOURCE = "External Data Source";
 	//
@@ -563,7 +563,8 @@ public class TeleonomeConstants {
 	public static String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL="Mnemosyne Processing Interval";
 	public static String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL_START="Mnemosyne Processing Interval Start";
 	public static String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL_END="Mnemosyne Processing Interval End";
-	
+	public static String MNEMOSYNE_RECURRENCE_ONE_TIME="One Time";
+	public static String MNEMOSYNE_RECURRENCE_RECURRENT="Recurrent";
 	public static String SORTING_ORDER_DESCENDING="Descending";
 	public static String SORTING_ORDER_ASCENDING="Ascending";
 	public static String SORTING_PARAMETER="Sorting Parameter";
@@ -804,7 +805,13 @@ public class TeleonomeConstants {
 	
 	public static String SPERM_HOX_DENE_POINTER="Hox Dene Pointer";
 	public static String SPERM_VALIDATED="Sperm Validated";
-
+	//
+	// Variables for Sertoli
+	//
+	public static String HOMEOBOX_DEFINITION_TYPE="Homeobox Definition Type";
+	public static String HOMEOBOX_DEFINITION_SENSOR="Sensor";
+	public static String HUMAN_INTERFACE_PANEL = "Human Interface Panel";
+	public static String IN_PANEL_POSITION=  "In Panel Position";
 	//
 	// the denetypes to make the human interface
 	//

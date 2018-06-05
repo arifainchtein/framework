@@ -135,7 +135,7 @@ public abstract class Hypothalamus {
 		try {
 			exoZeroContext = ZMQ.context(1);
 			exoZeroPublisher = exoZeroContext.socket(ZMQ.PUB);
-			exoZeroPublisher.setHWM(2);
+			exoZeroPublisher.setHWM(1);
 			String ipToBindToZeroMQ="";
 			try {
 				ipToBindToZeroMQ = Utils.getIpAddressForNetworkMode().getHostAddress();
@@ -146,8 +146,7 @@ public abstract class Hypothalamus {
 			}
 			logger.info("binding zeromq to " + ipToBindToZeroMQ);
 			exoZeroPublisher.bind("tcp://" + ipToBindToZeroMQ + ":5563");
-
-		
+			
 			
 			
            connectToHeart();
