@@ -125,6 +125,9 @@ public class TeleonomeConstants {
 	
 	public static final String DENE_TYPE_HUMAN_INTERFACE_STATE_VARIABLES= "Human Interface State Variables";
 	public static final String DENE_TYPE_ACTUATOR_ACTION_PROCESSING="Actuator Action Processing";
+	public static final String DENE_TYPE_ACTUATOR_DENE_PROCESSING="Actuator Action Processing";
+	public static final String DENE_TYPE_ACTUATOR_DENE_OPERATION_EVALUATION_PROCESSING="Actuator Action Dene Operation Evaluation Processing";
+	
 	
 	public static final String DENE_TYPE_COMPONENT= "Component";
 	public static final String DENE_TYPE_COMPONENT_TYPE= "Component Type";
