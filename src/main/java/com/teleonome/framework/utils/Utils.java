@@ -571,6 +571,14 @@ public class Utils {
 		return exceptionAsString;
 	}
 
+	public static String getElapsedSecondsToHoursMinutesSecondsString(int elapsedTime) {       
+		String format = String.format("%%0%dd", 2);  
+		String seconds = String.format(format, elapsedTime % 60);  
+		String minutes = String.format(format, (elapsedTime % 3600) / 60);  
+		String hours = String.format(format, elapsedTime / 3600);  
+		String time =  hours + ":" + minutes + ":" + seconds;  
+		return time;  
+	} 
 
 	public static String getElapsedTimeHoursMinutesSecondsString(long e) {       
 		String format = String.format("%%0%dd", 2);  

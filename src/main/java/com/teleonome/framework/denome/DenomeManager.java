@@ -3321,7 +3321,66 @@ public class DenomeManager {
 				// 
 				JSONObject selectedDene=null; 
 				String operation = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_OPERATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				if(operation.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION)){
+				if(operation.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION)){
+
+					logger.debug("line 2765 mnemosyneDene=" + mnemosyneDene.toString(4));
+					//
+					// the process to follow is:
+					// 1)Get the function used to transform
+					// 2)Get the source of the data, this would be a number
+					// 3)get the Target Deneword which is where the result of the operation is stored, this is adeneword
+					// 4)transform the source data and store it in the target
+					// 5) Update Time fields
+
+					//
+					// 1)Function
+					//
+					String function = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Function", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("transofrm function=" + function );
+
+					
+
+					//
+					//2) get the data source
+					//
+					String dataSourceIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_TYPE_TRANSFORMATION_DATA_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("line 2751 targetDeneWordIdentityPointer=" + dataSourceIdentityPointer);
+					Identity aggregateValueDeneWordIdentity = new Identity(dataSourceIdentityPointer);
+					Object aggregateValueObject = this.getDeneWordAttributeByIdentity(aggregateValueDeneWordIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("line 2778 aggregateValueObject=" + aggregateValueObject + " class=" + aggregateValueObject.getClass().toString());
+
+					
+
+					//
+					// 3)target 
+					//
+					String targetDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("line 2751 targetDeneWordIdentityPointer=" + targetDeneWordIdentityPointer);
+					Identity targetDeneWordIdentity = new Identity(targetDeneWordIdentityPointer);
+					JSONObject targetDeneWord = (JSONObject) getDeneWordAttributeByIdentity(targetDeneWordIdentity,  TeleonomeConstants.COMPLETE);
+					//
+					// now use the identity of the deneword to get the dene, we need this because we need to update the 
+					// timestamp
+					Identity targetDeneIdentity  = new Identity(targetDeneWordIdentity.getTeleonomeName(),targetDeneWordIdentity.getNucleusName(), targetDeneWordIdentity.getDenechainName(), targetDeneWordIdentity.getDeneName());
+					JSONObject targetDene = getDeneByIdentity(targetDeneIdentity);
+					//
+					// 4)Transform the value
+					//
+					if(function.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION_FUNCTION_ELAPSED_TIME)) {
+						int value = ((Integer)aggregateValueObject).intValue();				
+						String resultingValue = Utils.getElapsedSecondsToHoursMinutesSecondsString(value);
+						logger.debug("line 3372 value=" + value + " resultingValue=" + resultingValue );
+						targetDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, resultingValue);
+					}
+					//
+					//
+					//5) Update times values
+					//
+					logger.debug("line 3380 About to set the time for the dene in the update,"+  formatedCurrentTime);
+					targetDene.put("Timestamp", formatedCurrentTime);
+					targetDene.put("Timestamp Milliseconds", currentTimeMillis);
+
+				}else if(operation.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION)){
 
 					logger.debug("line 2765 mnemosyneDene=" + mnemosyneDene.toString(4));
 					//
@@ -6335,7 +6394,7 @@ public class DenomeManager {
 					destinationJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, result); 
 					
 					
-					actuatorActionEvaluationLogicProcessingDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_ACTION_PROCESSING_RESULT, result,null,"boolean",true);
+					actuatorActionEvaluationLogicProcessingDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_ACTION_PROCESSING_RESULT, result,null,"double",true);
 					actuatorActionEvaluationLogicProcessingDeneDeneWords.put(actuatorActionEvaluationLogicProcessingDeneDeneWord);
 
 					

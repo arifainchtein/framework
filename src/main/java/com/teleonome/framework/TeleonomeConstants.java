@@ -212,6 +212,7 @@ public class TeleonomeConstants {
 	//
 	// the command embedded as values
 	//
+	public static final String COMMANDS_ELAPSED_TIME_STRING = "$ElapsedTimeString";
 	public static final String COMMANDS_PUBLISH_TELEONOME_PULSE="$Teleonome_Pulse";
 	public static final String COMMANDS_CURRENT_HOUR = "$Current_Hour";
 	public static final String COMMANDS_CURRENT_DATE = "$Current_Date";
@@ -626,6 +627,11 @@ public class TeleonomeConstants {
 	public static String MNEMOSYNE_DENEWORD_TARGET_POSITION="Target Position";
 	
 	public static String MNEMOSYNE_CREATE_DENEWORD_ADD_TO_DENE_OPERATION="Create DeneWord Add To Dene";
+	public static String MNEMOSYNE_DENEWORD_TYPE_TRANSFORMATION_DATA_SOURCE="Transformation Data Source";
+
+	public static String MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION="DeneWord Transformation";
+	public static String MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION_FUNCTION="DeneWord Transformation Function";
+	public static String MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION_FUNCTION_ELAPSED_TIME="Transformation Function Seconds To Elapsed Time";
 	
 	public static String MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION="DeneWord Aggregation";
 	public static String MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION_AGGREGATE_TO="Aggregate To";
