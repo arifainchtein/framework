@@ -3367,7 +3367,7 @@ public class DenomeManager {
 					// 4)Transform the value
 					//
 					if(function.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION_FUNCTION_ELAPSED_TIME)) {
-						int value = ((Integer)aggregateValueObject).intValue();				
+						int value = ((Double)aggregateValueObject).intValue();				
 						String resultingValue = Utils.getElapsedSecondsToHoursMinutesSecondsString(value);
 						logger.debug("line 3372 value=" + value + " resultingValue=" + resultingValue );
 						targetDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, resultingValue);
