@@ -418,9 +418,9 @@ public class Utils {
 	
 	
 	public static ArrayList executeCommand(String command) throws IOException, InterruptedException{
-		//System.out.println("about to create process for the command:" + command);
+		System.out.println("about to create process for the command:" + command);
 		Process process = Runtime.getRuntime().exec(new String[]{"sh","-c",command});
-		//System.out.println("created process for the command:" + command);
+		System.out.println("created process for the command:" + command);
 		
 		ArrayList toReturn = new ArrayList();
 		
@@ -429,20 +429,21 @@ public class Utils {
 		//Process process =pb.start();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 		String line = null;
-		//System.out.println("executeCommand reader created:" + command);
+		System.out.println("executeCommand reader created:" + command);
 		
 		
 		while ( (line = reader.readLine()) != null) {
-			//System.out.println("adding line:" + line);
+			System.out.println("adding line:" + line);
 			toReturn.add(line);
 		}
 		reader.close();
 		if(!process.waitFor(500, TimeUnit.MILLISECONDS)) {
 		    //timeout - kill the process.
-			//System.out.println("executeCommand The command:" + command + " was killed after 500 milliseconds");
+			System.out.println("executeCommand The command:" + command + " was killed after 500 milliseconds");
+			toReturn.add("executeCommand The command:" + command + " was killed after 500 milliseconds");
 		    process.destroy(); // consider using destroyForcibly instead
 		}
-		//System.out.println("executeCommand returning :" + toReturn);
+		System.out.println("executeCommand returning :" + toReturn);
 		
 		return toReturn;
 	}
