@@ -32,7 +32,8 @@ public class DenomeValidator {
 		
 		JSONObject nucleusJSONObject, deneChainJSONObject,deneJSONObject,resolvedDeneWordJSONObject, deneWordJSONObject, resolvedDeneJSONObject;
 		JSONArray deneChainsJSONArray, denesJSONArray, deneWordsJSONArray;
-		String name, valueType, denePointer, errorMessage;
+		String name, valueType, denePointer,errorMessage;
+		Object denePointerObject;
 		JSONArray errorReportJSONArray = new JSONArray();
 		JSONObject errorJSONObject;
 		for(int i=0;i<nucleiArray.length();i++){
@@ -102,12 +103,12 @@ public class DenomeValidator {
 											errorReportJSONArray.put(errorJSONObject);
 											continue;
 										}
-										denePointer = deneWordJSONObject.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-										if(denePointer.startsWith("$")){
+										denePointerObject = deneWordJSONObject.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+										if(denePointerObject instanceof String && ((String)denePointerObject).startsWith("$")){
 											
-										}else if(denePointer.startsWith("@")){
+										}else if(denePointerObject instanceof String && ((String)denePointerObject).startsWith("@")){
 											try {
-												Identity identity = new Identity(denePointer);
+												Identity identity = new Identity((String)denePointerObject);
 												if(identity.isDene()){
 													resolvedDeneJSONObject = aDenomeViewerManager.getDeneByIdentity(identity);
 													//System.out.println("line 160 denePointer=" + denePointer + "       DeneWord is null=" + (resolvedDeneJSONObject==null) );
@@ -118,7 +119,7 @@ public class DenomeValidator {
 																":" + deneChainJSONObject.getString("Name") + ":" + deneJSONObject.getString("Name") ;
 														
 														String errorTitle = "Unresolved Dene Pointer";
-														String currentValue =  denePointer;
+														String currentValue =  denePointerObject.toString();
 														
 														errorJSONObject = generateError( problemIdentity,  errorTitle,  currentValue);
 														errorReportJSONArray.put(errorJSONObject);
@@ -134,7 +135,7 @@ public class DenomeValidator {
 																":" + deneWordJSONObject.getString("Name");
 														
 														String errorTitle = "Unresolved DeneWord Pointer";
-														String currentValue =  denePointer;
+														String currentValue =  denePointerObject.toString();
 														
 														errorJSONObject = generateError( problemIdentity,  errorTitle,  currentValue);
 														errorReportJSONArray.put(errorJSONObject);
@@ -148,7 +149,7 @@ public class DenomeValidator {
 														":" + deneChainJSONObject.getString("Name") + ":" + deneJSONObject.getString("Name") +
 														":" + deneWordJSONObject.getString("Name") ;
 												
-												String errorTitle = "Null Pointer resolving a DeneWord pointer:" + denePointer;
+												String errorTitle = "Null Pointer resolving a DeneWord pointer:" + denePointerObject.toString();
 												String currentValue =  Utils.getStringException(e);
 												errorJSONObject = generateError( problemIdentity,  errorTitle,  currentValue);
 												errorReportJSONArray.put(errorJSONObject);
