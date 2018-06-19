@@ -265,7 +265,7 @@ public class TeleonomeConstants {
 	public static final String COMMAND_STOPPING_PULSE="StoppingPulse";
 	public static final String COMMAND_STATE_MUTATION_PAYLOAD_INJECTION = "State Mutation Payload Injection";
 	
-	public static String CAMERA_TIMESTAMP_FILENAME_FORMAT="dd-MM-yyyy_HHmm";
+	public static final String CAMERA_TIMESTAMP_FILENAME_FORMAT="dd-MM-yyyy_HHmm";
 	
 	//
 	// the mutation actions dene types
@@ -276,10 +276,10 @@ public class TeleonomeConstants {
 	public static final String MUTATION_COMMAND_DENEWORD_VALUE = "Mutation Value";
 	//
 	// the type of mutatins according to when they get executed
-	public static String MUTATION_EXECUTION_MODE_IMMEDIATE="Immediate";
-	public static String MUTATION_EXECUTION_MODE_NORMAL="Normal";
+	public static final String MUTATION_EXECUTION_MODE_IMMEDIATE="Immediate";
+	public static final String MUTATION_EXECUTION_MODE_NORMAL="Normal";
 	
-	public static String MUTATION_PROCESSING_LOGIC_DENE_CHAIN_NAME="Mutation Processing Logic";
+	public static final String MUTATION_PROCESSING_LOGIC_DENE_CHAIN_NAME="Mutation Processing Logic";
 	
 	
 	//
@@ -477,79 +477,79 @@ public class TeleonomeConstants {
 	// deneword.  used in searchs to specify what to return from a deneword
 	// search when COMPLETE is not used
 	//
-	public static String DENEWORD_VALUETYPE_ATTRIBUTE="Value Type";
-	public static String DENEWORD_COLOR_ATTRIBUTE="Color";
-	public static String DENEWORD_SERIESTYPE_ATTRIBUTE="Series Type";
+	public static final String DENEWORD_VALUETYPE_ATTRIBUTE="Value Type";
+	public static final String DENEWORD_COLOR_ATTRIBUTE="Color";
+	public static final String DENEWORD_SERIESTYPE_ATTRIBUTE="Series Type";
 	
-	public static String DENEWORD_VALUE_SET_ATTRIBUTE="Value Set";
+	public static final String DENEWORD_VALUE_SET_ATTRIBUTE="Value Set";
 	
-	public static String DENEWORD_DATA_SOURCE_ATTRIBUTE="Data Source";
-	public static String DENEWORD_DATA_LOCATION_ATTRIBUTE="Data Location";
+	public static final String DENEWORD_DATA_SOURCE_ATTRIBUTE="Data Source";
+	public static final String DENEWORD_DATA_LOCATION_ATTRIBUTE="Data Location";
 	
-	public static String DENEWORD_SENSORS_ACTIVE = "Sensors Active";
-	public static String DENEWORD_ACTUATORS_ACTIVE = "Actuators Active";
-	public static String DENEWORD_ANALYTICONS_ACTIVE = "Analyticons Active";
-	public static String DENEWORD_MNEMOSYCONS_ACTIVE = "Mnemosycons Active";
+	public static final String DENEWORD_SENSORS_ACTIVE = "Sensors Active";
+	public static final String DENEWORD_ACTUATORS_ACTIVE = "Actuators Active";
+	public static final String DENEWORD_ANALYTICONS_ACTIVE = "Analyticons Active";
+	public static final String DENEWORD_MNEMOSYCONS_ACTIVE = "Mnemosycons Active";
 	
 
-	public static String DENEWORD_DEFAULT_VALUE = "Default";
-	public static String DENEWORD_VALUE_ATTRIBUTE = "Value";
-	public static String DENEWORD_QUANTITY_ATTRIBUTE = "Quantity";
+	public static final String DENEWORD_DEFAULT_VALUE = "Default";
+	public static final String DENEWORD_VALUE_ATTRIBUTE = "Value";
+	public static final String DENEWORD_QUANTITY_ATTRIBUTE = "Quantity";
 	
-	public static String DENEWORD_TARGET_ATTRIBUTE = "Target";
-	public static String DENEWORD_TIMESTRING_VALUE = "Time String";
-	public static String DENEWORD_TIMESTRING_FORMAT_VALUE = "Time String Format";
+	public static final String DENEWORD_TARGET_ATTRIBUTE = "Target";
+	public static final String DENEWORD_TIMESTRING_VALUE = "Time String";
+	public static final String DENEWORD_TIMESTRING_FORMAT_VALUE = "Time String Format";
 	
-	public static String DENEWORD_UNIT_ATTRIBUTE = "Units";
-	public static String DENEWORD_NAME_ATTRIBUTE = "Name";
+	public static final String DENEWORD_UNIT_ATTRIBUTE = "Units";
+	public static final String DENEWORD_NAME_ATTRIBUTE = "Name";
 	
-	public static String DENEWORD_REQUIRED_ATTRIBUTE = "Required";
-	public static String DENEWORD_DENEWORD_TYPE_ATTRIBUTE = "DeneWord Type";
+	public static final String DENEWORD_REQUIRED_ATTRIBUTE = "Required";
+	public static final String DENEWORD_DENEWORD_TYPE_ATTRIBUTE = "DeneWord Type";
 	
 	
-	public static String DENE_DENE_NAME_ATTRIBUTE = "Name";
-	public static String DENE_DENE_TYPE_ATTRIBUTE = "Dene Type";
-	public static String DENE_TYPE_EXTERNAL_DATA_SOURCE = "External Data Source";
+	public static final String DENE_DENE_NAME_ATTRIBUTE = "Name";
+	public static final String DENE_DENE_TYPE_ATTRIBUTE = "Dene Type";
+	public static final String DENE_TYPE_EXTERNAL_DATA_SOURCE = "External Data Source";
 	//
 	// the pulse_status
 	//
-	public static String PULSE_STATUS_FINISHED = "FinishedPulse";
-	public static String PULSE_STATUS_STARTED="Started Pulse";
+	public static final String PULSE_STATUS_FINISHED = "FinishedPulse";
+	public static final String PULSE_STATUS_STARTED="Started Pulse";
 	
 	//
 	// commands known to the commandServer
 	//
-	public static String COMMAND_INITIATING_PULSE="Initiating Pulse";
-	public static String COMMAND_PULSE_COMPLETED="Pulse Completed";
+	public static final String COMMAND_INITIATING_PULSE="Initiating Pulse";
+	public static final String COMMAND_PULSE_COMPLETED="Pulse Completed";
 	public static int COMMAND_SERVER_PORT=7777;
-	public static String COMMAND_SERVER_IP_LOCALHOST="127.0.0.1";
-	public static String COMMAND_QUEUE_EMPTY="Command Queue Empty";
+	public static final String COMMAND_SERVER_IP_LOCALHOST="127.0.0.1";
+	public static final String COMMAND_QUEUE_EMPTY="Command Queue Empty";
 	//
 	// THE MAPPED BUS parameters
 	//
-	public static String MAPPED_BUS_FILE="PulseGenerator";
-	public static String MAPPED_BUS_FILE_PULSE_STATUS="PulseStatus";
+	public static final String MAPPED_BUS_FILE="PulseGenerator";
+	public static final String MAPPED_BUS_FILE_PULSE_STATUS="PulseStatus";
 	public static long MAPPED_BUS_FILE_PULSE_STATUS_SIZE=3000000L;
 	
-	public static String STARTING_PULSE_MAPPED_BUS_MESSAGE="Started Pulse";
-	public static String PULSE_FINISHED_MAPPED_BUS_MESSAGE="Pulse Finished";
-	public static String PULSE_SIZE_MESSAGE="Pulse Size";
-	public static String PULSE_TIMESTAMP="Pulse Timestamp";
-	public static String PULSE_TIMESTAMP_MILLISECONDS="Pulse Timestamp in Milliseconds";
+	public static final String STARTING_PULSE_MAPPED_BUS_MESSAGE="Started Pulse";
+	public static final String PULSE_FINISHED_MAPPED_BUS_MESSAGE="Pulse Finished";
+	public static final String PULSE_SIZE_MESSAGE="Pulse Size";
+	public static final String PULSE_TIMESTAMP="Pulse Timestamp";
+	public static final String PULSE_TIMESTAMP_MILLISECONDS="Pulse Timestamp in Milliseconds";
 	//
 	// The record size must be at least big enough to contain a pulse
 	//
 	public static int MAPPED_BUS_RECORD_SIZE=300000;
-	public static String DENEWORD_TYPE_MICROCONTROLLER_PROCESSING_CLASSNAME="Microcontroller Processing Class Name";
-	public static String COMMAND_REQUEST_NOT_EXECUTED="Not Executed";
-	public static String COMMAND_REQUEST_EXECUTED="Executed";
-	public static String COMMAND_REQUEST_SKIPPED_AT_INIT="Skipped at init";
+	public static final String DENEWORD_TYPE_MICROCONTROLLER_PROCESSING_CLASSNAME="Microcontroller Processing Class Name";
+	public static final String COMMAND_REQUEST_NOT_EXECUTED="Not Executed";
+	public static final String COMMAND_REQUEST_EXECUTED="Executed";
+	public static final String COMMAND_REQUEST_SKIPPED_AT_INIT="Skipped at init";
 	
 	//
 	// the index for the front end
 	//
-	public static String TODAY_INDEX="TodayIndex";
-	public static String LAST_24_HOURS_INDEX="Last24HoursIndex";
+	public static final String TODAY_INDEX="TodayIndex";
+	public static final String LAST_24_HOURS_INDEX="Last24HoursIndex";
 	
 	public static final String CODON="Codon";
 	public static final String TIMER_FINISHED = "TimerFinished";
@@ -558,25 +558,25 @@ public class TeleonomeConstants {
 	// the different types of processing to be done
 	// by the Mnemosyne
 	//
-	public static String DENE_TYPE_MNEMOSYNE_PROCESSING_INFO="Mnemosyne Processing Info";
+	public static final String DENE_TYPE_MNEMOSYNE_PROCESSING_INFO="Mnemosyne Processing Info";
 	public static final String MNEMOSYNE_DENE_WPS_CYCLE_PULSE_COUNT="WPS Cycle Pulse Count";
-	public static String DENEWORD_TYPE_MNEMOSYNE_ANALYSIS="Mnemosyne Analysis";
-	public static String DENE_TYPE_ANALYTYCON="Analyticon";
-	public static String DENEWORD_MNEMOSYNE_ANALYSIS_PROFILE="Mnemosyne Analysis Profile";
-	public static String DENEWORD_MNEMOSYNE_COUNTER="Counter";
-	public static String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL="Mnemosyne Processing Interval";
-	public static String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL_START="Mnemosyne Processing Interval Start";
-	public static String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL_END="Mnemosyne Processing Interval End";
-	public static String MNEMOSYNE_RECURRENCE_ONE_TIME="One Time";
-	public static String MNEMOSYNE_RECURRENCE_RECURRENT="Recurrent";
-	public static String SORTING_ORDER_DESCENDING="Descending";
-	public static String SORTING_ORDER_ASCENDING="Ascending";
-	public static String SORTING_PARAMETER="Sorting Parameter";
-	public static String SORTING_ORDER="Sorting Order";
+	public static final String DENEWORD_TYPE_MNEMOSYNE_ANALYSIS="Mnemosyne Analysis";
+	public static final String DENE_TYPE_ANALYTYCON="Analyticon";
+	public static final String DENEWORD_MNEMOSYNE_ANALYSIS_PROFILE="Mnemosyne Analysis Profile";
+	public static final String DENEWORD_MNEMOSYNE_COUNTER="Counter";
+	public static final String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL="Mnemosyne Processing Interval";
+	public static final String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL_START="Mnemosyne Processing Interval Start";
+	public static final String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL_END="Mnemosyne Processing Interval End";
+	public static final String MNEMOSYNE_RECURRENCE_ONE_TIME="One Time";
+	public static final String MNEMOSYNE_RECURRENCE_RECURRENT="Recurrent";
+	public static final String SORTING_ORDER_DESCENDING="Descending";
+	public static final String SORTING_ORDER_ASCENDING="Ascending";
+	public static final String SORTING_PARAMETER="Sorting Parameter";
+	public static final String SORTING_ORDER="Sorting Order";
 	
-	public static String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL_TYPE="Mnemosyne Processing Interval Type";
-	public static String MNEMOSYNE_PROCESSING_INTERVAL_TODAY="Today";
-	public static String MNEMOSYNE_PROCESSING_INTERVAL_TYPE_RANGE="Range";
+	public static final String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL_TYPE="Mnemosyne Processing Interval Type";
+	public static final String MNEMOSYNE_PROCESSING_INTERVAL_TODAY="Today";
+	public static final String MNEMOSYNE_PROCESSING_INTERVAL_TYPE_RANGE="Range";
 
 	//
 	// all the functions in the mnemosyne
@@ -586,365 +586,365 @@ public class TeleonomeConstants {
 	// deneWord.put("Value", TeleonomeConstants.MNEMOSYNE_PROCESSING_FUNCTION_RANGE_EVALUATION);
 	
 	//
-	public static String MNEMOSYNE_PROCESSING_FUNCTION_RANGE_EVALUATION="evaluateRange";
-	public static String MNEMOSYNE_PROCESSING_SAMPLE_FREQUENCY= "Mnemosyne Sample Frequency Seconds";
-	public static String MNEMOSYNE_PROCESSING_SAMPLE_TYPE="Mnemosyne Data Sample Type";
+	public static final String MNEMOSYNE_PROCESSING_FUNCTION_RANGE_EVALUATION="evaluateRange";
+	public static final String MNEMOSYNE_PROCESSING_SAMPLE_FREQUENCY= "Mnemosyne Sample Frequency Seconds";
+	public static final String MNEMOSYNE_PROCESSING_SAMPLE_TYPE="Mnemosyne Data Sample Type";
 	
-	public static String MNEMOSYNE_PROCESSING_NOW="Now";
-	public static String DENEWORD_TYPE_MNEMOSYNE_DATA_RANGE="Mnemosyne Data Range";
-	public static String MNEMOSYNE_GRAPH_DISPLAY_ALL_VALUES="All Values";
-	public static String MNEMOSYNE_ANALYSIS_MAXIMUM_MINIMUM="Maximum and Minimum";
-	public static String MNEMOSYNE_ANALYSIS_MAXIMUM="Maximum";
-	public static String MNEMOSYNE_ANALYSIS_MINIMUM="Minimum";
-	public static String MNEMOSYNE_ANALYSIS_AVERAGE="Average";
+	public static final String MNEMOSYNE_PROCESSING_NOW="Now";
+	public static final String DENEWORD_TYPE_MNEMOSYNE_DATA_RANGE="Mnemosyne Data Range";
+	public static final String MNEMOSYNE_GRAPH_DISPLAY_ALL_VALUES="All Values";
+	public static final String MNEMOSYNE_ANALYSIS_MAXIMUM_MINIMUM="Maximum and Minimum";
+	public static final String MNEMOSYNE_ANALYSIS_MAXIMUM="Maximum";
+	public static final String MNEMOSYNE_ANALYSIS_MINIMUM="Minimum";
+	public static final String MNEMOSYNE_ANALYSIS_AVERAGE="Average";
 	
-	public static String MNEMOSYNE_DENECHAIN_CURRENT_HOUR="Mnemosyne Current Hour";
-	public static String MNEMOSYNE_DENECHAIN_CURRENT_DAY="Mnemosyne Today";
-	public static String MNEMOSYNE_DENECHAIN_YESTERDAY="Mnemosyne Yesterday";
-	public static String MNEMOSYNE_DENECHAIN_PULSE_COUNT="Mnemosyne Pulse Count";
+	public static final String MNEMOSYNE_DENECHAIN_CURRENT_HOUR="Mnemosyne Current Hour";
+	public static final String MNEMOSYNE_DENECHAIN_CURRENT_DAY="Mnemosyne Today";
+	public static final String MNEMOSYNE_DENECHAIN_YESTERDAY="Mnemosyne Yesterday";
+	public static final String MNEMOSYNE_DENECHAIN_PULSE_COUNT="Mnemosyne Pulse Count";
 	
-	public static String MNEMOSYNE_DENECHAIN_CURRENT_WEEK="Mnemosyne Current Week";
-	public static String MNEMOSYNE_DENECHAIN_CURRENT_MONTH="Mnemosyne Current Month";
-	public static String MNEMOSYNE_DENECHAIN_CURRENT_QUARTER="Mnemosyne Current Quarter";
-	public static String MNEMOSYNE_DENECHAIN_CURRENT_SEMESTER="Mnemosyne Current Semester";
-	public static String MNEMOSYNE_DENECHAIN_CURRENT_YEAR="Mnemosyne Current Year";
-	public static String MNEMOSYNE_TIMESTAMP_FORMAT="dd/MM/yyyy HH:mm:ss";
-	public static String MNEMOSYNE_DATE_FORMAT="dd/MM/yyyy";
-	public static String MNEMOSYNE_TIME_FORMAT="HH:mm";
+	public static final String MNEMOSYNE_DENECHAIN_CURRENT_WEEK="Mnemosyne Current Week";
+	public static final String MNEMOSYNE_DENECHAIN_CURRENT_MONTH="Mnemosyne Current Month";
+	public static final String MNEMOSYNE_DENECHAIN_CURRENT_QUARTER="Mnemosyne Current Quarter";
+	public static final String MNEMOSYNE_DENECHAIN_CURRENT_SEMESTER="Mnemosyne Current Semester";
+	public static final String MNEMOSYNE_DENECHAIN_CURRENT_YEAR="Mnemosyne Current Year";
+	public static final String MNEMOSYNE_TIMESTAMP_FORMAT="dd/MM/yyyy HH:mm:ss";
+	public static final String MNEMOSYNE_DATE_FORMAT="dd/MM/yyyy";
+	public static final String MNEMOSYNE_TIME_FORMAT="HH:mm";
 	
-	public static String MNEMOSYNE_LIST_FILE_INFO_OPERATION="Mnemosyne List File Info Operation";
-	public static String MNEMOSYNE_CREATE_DENE_OPERATION="Mnemosyne Create Dene Operation";
-	public static String MNEMOSYNE_ADD_DENEWORD_TO_DENE_OPERATION="Mnemosyne Add DeneWord To Dene Operation";
-	public static String MNEMOSYNE_UPDATE_VALUE_OPERATION="Mnemosyne Update Value Operation";
+	public static final String MNEMOSYNE_LIST_FILE_INFO_OPERATION="Mnemosyne List File Info Operation";
+	public static final String MNEMOSYNE_CREATE_DENE_OPERATION="Mnemosyne Create Dene Operation";
+	public static final String MNEMOSYNE_ADD_DENEWORD_TO_DENE_OPERATION="Mnemosyne Add DeneWord To Dene Operation";
+	public static final String MNEMOSYNE_UPDATE_VALUE_OPERATION="Mnemosyne Update Value Operation";
 
-	public static String MNEMOSYNE_DENEWORD_OPERATION="Operation";
+	public static final String MNEMOSYNE_DENEWORD_OPERATION="Operation";
 	
-	public static String MNEMOSYNE_DENE_WORD_TYPE_TARGET="Mnemosyne Target";
-	public static String MNEMOSYNE_DENE_WORD_TYPE_COPY_DENEWORD="Copy DeneWord";
-	public static String MNEMOSYNE_DENE_WORD_TYPE_CREATE_DENEWORD_SOURCE="Create DeneWord Source";
-	public static String MNEMOSYNE_DENEWORD_FILE_LIST_PATH="File List Path";
-	public static String MNEMOSYNE_DENEWORD_NEW_DENE_NAME="New Dene Name";
-	public static String MNEMOSYNE_DENEWORD_TARGET_POSITION="Target Position";
+	public static final String MNEMOSYNE_DENE_WORD_TYPE_TARGET="Mnemosyne Target";
+	public static final String MNEMOSYNE_DENE_WORD_TYPE_COPY_DENEWORD="Copy DeneWord";
+	public static final String MNEMOSYNE_DENE_WORD_TYPE_CREATE_DENEWORD_SOURCE="Create DeneWord Source";
+	public static final String MNEMOSYNE_DENEWORD_FILE_LIST_PATH="File List Path";
+	public static final String MNEMOSYNE_DENEWORD_NEW_DENE_NAME="New Dene Name";
+	public static final String MNEMOSYNE_DENEWORD_TARGET_POSITION="Target Position";
 	
-	public static String MNEMOSYNE_CREATE_DENEWORD_ADD_TO_DENE_OPERATION="Create DeneWord Add To Dene";
-	public static String MNEMOSYNE_DENEWORD_TYPE_TRANSFORMATION_DATA_SOURCE="Transformation Data Source";
+	public static final String MNEMOSYNE_CREATE_DENEWORD_ADD_TO_DENE_OPERATION="Create DeneWord Add To Dene";
+	public static final String MNEMOSYNE_DENEWORD_TYPE_TRANSFORMATION_DATA_SOURCE="Transformation Data Source";
 
-	public static String MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION="DeneWord Transformation";
-	public static String MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION_FUNCTION="DeneWord Transformation Function";
-	public static String MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION_FUNCTION_ELAPSED_TIME="Transformation Function Seconds To Elapsed Time";
+	public static final String MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION="DeneWord Transformation";
+	public static final String MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION_FUNCTION="DeneWord Transformation Function";
+	public static final String MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION_FUNCTION_ELAPSED_TIME="Transformation Function Seconds To Elapsed Time";
 	
-	public static String MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION="DeneWord Aggregation";
-	public static String MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION_AGGREGATE_TO="Aggregate To";
-	public static String MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION_AGGREGATE_Value="Aggregate Value";
-	public static String MNEMOSYCON_MAXIMUM_PERCENTAGE="Maximum Percentage";
+	public static final String MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION="DeneWord Aggregation";
+	public static final String MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION_AGGREGATE_TO="Aggregate To";
+	public static final String MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION_AGGREGATE_Value="Aggregate Value";
+	public static final String MNEMOSYCON_MAXIMUM_PERCENTAGE="Maximum Percentage";
 
-	public static String DENECHAIN_MNEMOSYCON_LOGIC_PROCESSING="Mnemosycon Logic Processing";
-	public static String DENE_TYPE_MNEMOSYCON_PROCESSING="Mnemosycon Processing";
-	public static String DENEWORD_TYPE_MNEMOSYCON_RULES_LIST_POINTER="Mnemosycon Rules List Pointer";
-	public static String DENEWORD_TYPE_MNEMOSYCON_RULE_POINTER="Mnemosycon Rule Pointer";
-	public static String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_DATABASE_SIZE_TO_DISK_SIZE="Percentage Database To Disk";
-	public static String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_ORGANISMPULSE_SIZE_TO_DISK_SIZE="Percentage OrganismPulse To Disk";
-	public static String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_PULSE_SIZE_TO_DISK_SIZE="Percentage Pulse To Disk";
-	public static String MNEMOSYCON_PATHOLOGY_MNEMOSYNE_LOCATION="Mnemosycon Pathology Mnemosyne Location";
-	public static String MNEMOSYCON_RULE_SOURCE="Mnemosycon Rule Source";
-	public static String MNEMOSYCON_RULE_TIME_UNIT="Mnemosycon Rule Until Time Unit";
-	public static String MNEMOSYCON_RULE_TIME_UNIT_VALUE="Mnemosycon Rule Until Time Value";
-	public static String TIME_UNIT_DAY="Day";
-	public static String TIME_UNIT_WEEK="Week";
-	public static String TIME_UNIT_MONTH="Month";
-	public static String TIME_UNIT_YEAR="Year";
-	public static String PULSE_TABLE="Pulse";
-	public static String ORGANISMPULSE_TABLE="OrganismPulse";
-	public static String MNEMOSYCON_RULE_TEAM_PARAMETER="Team Parameter";
-	public static String MNEMOSYCON_TEAM_MEMBER="Mnemosycon Team Member";
-	public static String DENE_MNEMOSYCON_TEAM_DEFINITION="Mnemosycon Team Definition";
-	public static String MNEMOSYCON_RULE_TEAM_PARAMETER_TEAM="Team";
-	public static String MNEMOSYCON_RULE_TEAM_PARAMETER_NOT_TEAM="Not Team";
-	public static String MNEMOSYCON_RULE_TEAM_PARAMETER_ALL="All";
-	public static String DENE_TYPE_MNEMOSYCON_RULE_PROCESSING="Mnemosycon Rule Processing";
-	public static String MNEMOSYCON_RULE_EXECUTION_MILLIS="Mnemosycon Rule Execution Millis";
-	public static String PATHOLOGY_MNEMOSYCON_FAILED="Mnemosycon Failed";
-	public static String DENEWORD_TYPE_MNEMOSYCON_SUCCESS_TASKS_POINTER="Mnemosycon Success Tasks Pointer";
-	public static String DENEWORD_TYPE_MNEMOSYCON_FAILURE_TASKS_POINTER="Mnemosycon Failure Tasks Pointer";
+	public static final String DENECHAIN_MNEMOSYCON_LOGIC_PROCESSING="Mnemosycon Logic Processing";
+	public static final String DENE_TYPE_MNEMOSYCON_PROCESSING="Mnemosycon Processing";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_RULES_LIST_POINTER="Mnemosycon Rules List Pointer";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_RULE_POINTER="Mnemosycon Rule Pointer";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_DATABASE_SIZE_TO_DISK_SIZE="Percentage Database To Disk";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_ORGANISMPULSE_SIZE_TO_DISK_SIZE="Percentage OrganismPulse To Disk";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_PULSE_SIZE_TO_DISK_SIZE="Percentage Pulse To Disk";
+	public static final String MNEMOSYCON_PATHOLOGY_MNEMOSYNE_LOCATION="Mnemosycon Pathology Mnemosyne Location";
+	public static final String MNEMOSYCON_RULE_SOURCE="Mnemosycon Rule Source";
+	public static final String MNEMOSYCON_RULE_TIME_UNIT="Mnemosycon Rule Until Time Unit";
+	public static final String MNEMOSYCON_RULE_TIME_UNIT_VALUE="Mnemosycon Rule Until Time Value";
+	public static final String TIME_UNIT_DAY="Day";
+	public static final String TIME_UNIT_WEEK="Week";
+	public static final String TIME_UNIT_MONTH="Month";
+	public static final String TIME_UNIT_YEAR="Year";
+	public static final String PULSE_TABLE="Pulse";
+	public static final String ORGANISMPULSE_TABLE="OrganismPulse";
+	public static final String MNEMOSYCON_RULE_TEAM_PARAMETER="Team Parameter";
+	public static final String MNEMOSYCON_TEAM_MEMBER="Mnemosycon Team Member";
+	public static final String DENE_MNEMOSYCON_TEAM_DEFINITION="Mnemosycon Team Definition";
+	public static final String MNEMOSYCON_RULE_TEAM_PARAMETER_TEAM="Team";
+	public static final String MNEMOSYCON_RULE_TEAM_PARAMETER_NOT_TEAM="Not Team";
+	public static final String MNEMOSYCON_RULE_TEAM_PARAMETER_ALL="All";
+	public static final String DENE_TYPE_MNEMOSYCON_RULE_PROCESSING="Mnemosycon Rule Processing";
+	public static final String MNEMOSYCON_RULE_EXECUTION_MILLIS="Mnemosycon Rule Execution Millis";
+	public static final String PATHOLOGY_MNEMOSYCON_FAILED="Mnemosycon Failed";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_SUCCESS_TASKS_POINTER="Mnemosycon Success Tasks Pointer";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_FAILURE_TASKS_POINTER="Mnemosycon Failure Tasks Pointer";
 	
-	public static String MNEMOSYNE_HOURLY_MUTATION="Hourly";
-	public static String MNEMOSYNE_DAILY_MUTATION="Daily";
-	public static String MNEMOSYNE_WEEKLY_MUTATION="Weekly";
-	public static String MNEMOSYNE_MONTHLY_MUTATION="Monthly";
-	public static String MNEMOSYNE_YEARLY_MUTATION="Yearly";
-	public static String DENEWORD_HOUR_IN_DAY="Hour in Day";
-	public static String DENEWORD_DAY_IN_WEEK="Day in Week";
-	public static String DENEWORD_DAY_IN_MONTH="Day in Month";
-	public static String DENEWORD_MONTH_IN_YEAR="Month in Year";
-	public static String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH="Mnemosycon Forget Approach";
-	public static String DENEWORD_TYPE_MNEMOSYCON_EXPRESSION_VARIABLE_DEFINITION = "Mnemosycon Expression Variable Definition";
-	public static String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_FUNCTION="Mnemosyne Function";
+	public static final String MNEMOSYNE_HOURLY_MUTATION="Hourly";
+	public static final String MNEMOSYNE_DAILY_MUTATION="Daily";
+	public static final String MNEMOSYNE_WEEKLY_MUTATION="Weekly";
+	public static final String MNEMOSYNE_MONTHLY_MUTATION="Monthly";
+	public static final String MNEMOSYNE_YEARLY_MUTATION="Yearly";
+	public static final String DENEWORD_HOUR_IN_DAY="Hour in Day";
+	public static final String DENEWORD_DAY_IN_WEEK="Day in Week";
+	public static final String DENEWORD_DAY_IN_MONTH="Day in Month";
+	public static final String DENEWORD_MONTH_IN_YEAR="Month in Year";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH="Mnemosycon Forget Approach";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_EXPRESSION_VARIABLE_DEFINITION = "Mnemosycon Expression Variable Definition";
+	public static final String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_FUNCTION="Mnemosyne Function";
 	
-	public static String DENEWORD_TYPE_MNEMOSYNE_SAMPLE_FREQUENCY="Mnemosyne Sample Frequency Seconds";
-	public static String VISUALIZATION_OBJECT_TABLE="Table";
+	public static final String DENEWORD_TYPE_MNEMOSYNE_SAMPLE_FREQUENCY="Mnemosyne Sample Frequency Seconds";
+	public static final String VISUALIZATION_OBJECT_TABLE="Table";
 
-	public static String VISUALIZATION_OBJECT_LINE_GRAPH="Line Graph";
-	public static String DENE_TYPE_VISUALIZATION_STYLE="Visualization Definition";
-	public static String DENEWORD_TYPE_VISUALIZATION_OBJECT="Visualization Object";
-	public static String DENEWORD_TYPE_VISUALIZATION_PARAMETER="Visualization Parameter";
-	public static String DENEWORD_EXECUTION_POSITION="Execution Position";
-	public static String DENEWORD_PERSIST_ORGANISM_PULSE="Persist Organism Pulse";
-	public static String DENEWORD_PERSIST_PULSE="Persist Pulse";
+	public static final String VISUALIZATION_OBJECT_LINE_GRAPH="Line Graph";
+	public static final String DENE_TYPE_VISUALIZATION_STYLE="Visualization Definition";
+	public static final String DENEWORD_TYPE_VISUALIZATION_OBJECT="Visualization Object";
+	public static final String DENEWORD_TYPE_VISUALIZATION_PARAMETER="Visualization Parameter";
+	public static final String DENEWORD_EXECUTION_POSITION="Execution Position";
+	public static final String DENEWORD_PERSIST_ORGANISM_PULSE="Persist Organism Pulse";
+	public static final String DENEWORD_PERSIST_PULSE="Persist Pulse";
 	//
 	//
 	
-	public static String PATHOLOGY_CAUSE = "Cause";
-	public static String PATHOLOGY_LOCATION = "Location";
-	public static String PATHOLOGY_DENEWORD_TYPE= "Pathology Dene Word Type";
-	public static String PATHOLOGY_LOCATION_MICROCONTROLLER= "Microcontroller";
-	public static String PATHOLOGY_LOCATION_NETWORK= "Network";
-	public static String PATHOLOGY_LOCATION_MEDULA= "Medula";
-	public static String PATHOLOGY_PULSE_LATE= "Pulse Late";
-	public static String PATHOLOGY_HYPOTHALAMUS_DIED= "Hypothalamus died";
-	public static String PATHOLOGY_HEART_DIED= "Heart died";
-	public static String PATHOLOGY_HEART_PULSE_LATE= "Heart Pulse Late";
-	public static String PATHOLOGY_HEART_CRASHED_HPROF= "Heart Crashed hprof";
+	public static final String PATHOLOGY_CAUSE = "Cause";
+	public static final String PATHOLOGY_LOCATION = "Location";
+	public static final String PATHOLOGY_DENEWORD_TYPE= "Pathology Dene Word Type";
+	public static final String PATHOLOGY_LOCATION_MICROCONTROLLER= "Microcontroller";
+	public static final String PATHOLOGY_LOCATION_NETWORK= "Network";
+	public static final String PATHOLOGY_LOCATION_MEDULA= "Medula";
+	public static final String PATHOLOGY_PULSE_LATE= "Pulse Late";
+	public static final String PATHOLOGY_HYPOTHALAMUS_DIED= "Hypothalamus died";
+	public static final String PATHOLOGY_HEART_DIED= "Heart died";
+	public static final String PATHOLOGY_HEART_PULSE_LATE= "Heart Pulse Late";
+	public static final String PATHOLOGY_HEART_CRASHED_HPROF= "Heart Crashed hprof";
 	
-	public static String PATHOLOGY_CORRUPT_PULSE_FILE= "Corrupt Pulse File";
-	public static String PATHOLOGY_TOMCAT_PING_LATE= "Tomcat Ping Late";
-	public static String PATHOLOGY_DETAILS_LABEL= "Details";
+	public static final String PATHOLOGY_CORRUPT_PULSE_FILE= "Corrupt Pulse File";
+	public static final String PATHOLOGY_TOMCAT_PING_LATE= "Tomcat Ping Late";
+	public static final String PATHOLOGY_DETAILS_LABEL= "Details";
 	
-	public static String PATHOLOGY_MEDULA_FORCED_REBOOT="Medula Forced Reboot";
-	public static String MEDULA_PATHOLOGY_MNEMOSYNE_LOCATION="Medula Pathology Mnemosyne Location";
+	public static final String PATHOLOGY_MEDULA_FORCED_REBOOT="Medula Forced Reboot";
+	public static final String MEDULA_PATHOLOGY_MNEMOSYNE_LOCATION="Medula Pathology Mnemosyne Location";
 	
 	
 	
-	public static String PATHOLOGY_EVENT_TIMESTAMP = "Pathology Event Timestamp";
-	public static String PATHOLOGY_EVENT_MILLISECONDS =  "Pathology Event Milliseconds";
+	public static final String PATHOLOGY_EVENT_TIMESTAMP = "Pathology Event Timestamp";
+	public static final String PATHOLOGY_EVENT_MILLISECONDS =  "Pathology Event Milliseconds";
 	
 	
 	//
 	// Pathology fault deneword type
 	//
-	public static String PATHOLOGY_DATA_NOT_AVAILABLE = "Data Not Available";
-	public static String PATHOLOGY_DATA_OUT_OF_RANGE = "Data Out Of Range";
-	public static String PATHOLOGY_AVAILABLE_MEMORY_BELOW_THRESHOLD = "Available Memory Below Threshold";
-	public static String PATHOLOGY_DISK_SPACE_BELOW_THRESHOLD = "Disk Space Below Threshold";
-	public static String PATHOLOGY_PULSE_DURATION_ABOVE_THRESHOLD = "Pulse Generation Above Threshold";
-	public static String PATHOLOGY_ANALYTICON_SOURCES_LATE = "Analyticon Sources Late";
+	public static final String PATHOLOGY_DATA_NOT_AVAILABLE = "Data Not Available";
+	public static final String PATHOLOGY_DATA_OUT_OF_RANGE = "Data Out Of Range";
+	public static final String PATHOLOGY_AVAILABLE_MEMORY_BELOW_THRESHOLD = "Available Memory Below Threshold";
+	public static final String PATHOLOGY_DISK_SPACE_BELOW_THRESHOLD = "Disk Space Below Threshold";
+	public static final String PATHOLOGY_PULSE_DURATION_ABOVE_THRESHOLD = "Pulse Generation Above Threshold";
+	public static final String PATHOLOGY_ANALYTICON_SOURCES_LATE = "Analyticon Sources Late";
 	
 	
-	public static String PATHOLOGY_DATA_STALE="Data Stale";
-	public static String PATHOLOGY_INITIAL_STATE_NETWORK_UNAVAILABLE="Initial State Network Unavailable";
-	public static String PATHOLOGY_NETWORK_STATE_MISTMATCH="Network State Mismatch";
+	public static final String PATHOLOGY_DATA_STALE="Data Stale";
+	public static final String PATHOLOGY_INITIAL_STATE_NETWORK_UNAVAILABLE="Initial State Network Unavailable";
+	public static final String PATHOLOGY_NETWORK_STATE_MISTMATCH="Network State Mismatch";
 	
-	public static String PATHOLOGY_NETWORK_UNAVAILABLE="Network Unavailable";
-	public static String PATHOLOGY_DENE_EXTERNAL_DATA= "External Data Pathology";
-	public static String PATHOLOGY_DENE_SENSOR_OUT_OF_RANGE= "Sensor Out Of Range Pathology";
-	public static String PATHOLOGY_DENE_MICROCONTROLLER_FAULT= "Microcontroller Fault";
-	public static String PATHOLOGY_DENE_MICROCONTROLLER_COMMUNICATION= "Microcontroller Communication Pathology";
-	public static String PATHOLOGY_DENEWORD_OPERATING_SYSTEM_NETWORK_IDENTITY = "Operating System Network Identity";
-	public static String PATHOLOGY_DENEWORD_DENOME_NETWORK_IDENTITY = "Denome Network Identity";
+	public static final String PATHOLOGY_NETWORK_UNAVAILABLE="Network Unavailable";
+	public static final String PATHOLOGY_DENE_EXTERNAL_DATA= "External Data Pathology";
+	public static final String PATHOLOGY_DENE_SENSOR_OUT_OF_RANGE= "Sensor Out Of Range Pathology";
+	public static final String PATHOLOGY_DENE_MICROCONTROLLER_FAULT= "Microcontroller Fault";
+	public static final String PATHOLOGY_DENE_MICROCONTROLLER_COMMUNICATION= "Microcontroller Communication Pathology";
+	public static final String PATHOLOGY_DENEWORD_OPERATING_SYSTEM_NETWORK_IDENTITY = "Operating System Network Identity";
+	public static final String PATHOLOGY_DENEWORD_DENOME_NETWORK_IDENTITY = "Denome Network Identity";
 	
 	
-	public static String EXTERNAL_SOURCE_TELEONOME_NAME="External Source Teleonome Name";
-	public static String EXTERNAL_DATA_STATUS_STALE="danger";
-	public static String EXTERNAL_DATA_STATUS="ExternalDataStatus";
-	public static String EXTERNAL_DATA_STATUS_OK="success";
-	public static String DENE_SYSTEM_DATA="System Data";
-	public static String DENE_ALERT_MESSAGES="Alert Messages";
-	public static String DENE_MEMORY_STATUS="Memory Status";
-	public static String DENE_WIFI_INFO="Wifi Info";
+	public static final String EXTERNAL_SOURCE_TELEONOME_NAME="External Source Teleonome Name";
+	public static final String EXTERNAL_DATA_STATUS_STALE="danger";
+	public static final String EXTERNAL_DATA_STATUS="ExternalDataStatus";
+	public static final String EXTERNAL_DATA_STATUS_OK="success";
+	public static final String DENE_SYSTEM_DATA="System Data";
+	public static final String DENE_ALERT_MESSAGES="Alert Messages";
+	public static final String DENE_MEMORY_STATUS="Memory Status";
+	public static final String DENE_WIFI_INFO="Wifi Info";
 	
 	
 	//
 	// the values to use for the status message in case the application calling 
 	// the DenomeManager does not set one
 	//
-	public static String STATUS_MESSAGE_USE_CURRENT_PULSE_MILLIS="Status Message Use Current Pulse Millis";
-	public static String STATUS_MESSAGE_USE_CURRENT_PULSE_SECONDS="Status Message Use Current Pulse Seconds";
-	public static String STATUS_MESSAGE_USE_CURRENT_PULSE_MINUTES="Status Message Use Current Pulse Minutes";
-	public static String STATUS_MESSAGE_USE_CURRENT_AND_AVAILABLE_PULSE_SECONDS="Status Message Use Current and Available Pulse Seconds";
-	public static String STATUS_MESSAGE_USE_CURRENT_AVAILABLE_PULSE_NUMBER_ANALYTICONS="Status Message Use Current Available Pulse Number of Analyticons";
-	public static String STATUS_MESSAGE_EXTERNAL_DATA_STALE="External Data Stale";
+	public static final String STATUS_MESSAGE_USE_CURRENT_PULSE_MILLIS="Status Message Use Current Pulse Millis";
+	public static final String STATUS_MESSAGE_USE_CURRENT_PULSE_SECONDS="Status Message Use Current Pulse Seconds";
+	public static final String STATUS_MESSAGE_USE_CURRENT_PULSE_MINUTES="Status Message Use Current Pulse Minutes";
+	public static final String STATUS_MESSAGE_USE_CURRENT_AND_AVAILABLE_PULSE_SECONDS="Status Message Use Current and Available Pulse Seconds";
+	public static final String STATUS_MESSAGE_USE_CURRENT_AVAILABLE_PULSE_NUMBER_ANALYTICONS="Status Message Use Current Available Pulse Number of Analyticons";
+	public static final String STATUS_MESSAGE_EXTERNAL_DATA_STALE="External Data Stale";
 
 	//
 	// The Egg Denes that need to be removed during the fertilization
-	public static String EGG_VIRTUAL_MICROCONTROLLER="Simple Micro Controller";
-	public static String EGG_VIRTUAL_ACTUATOR="VirtualActuator";
+	public static final String EGG_VIRTUAL_MICROCONTROLLER="Simple Micro Controller";
+	public static final String EGG_VIRTUAL_ACTUATOR="VirtualActuator";
 	
 	//
 	// Sperm structure
 	//
-	public static String SPERM="Sperm";
-	public static String SPERM_PURPOSE="Purpose";
-	public static String SPERM_PURPOSE_TYPE="Purpose Type";
-	public static String SPERM_PURPOSE_TYPE_CREATE="Create";
-	public static String SPERM_PURPOSE_TYPE_MUTATE="Mutate";
+	public static final String SPERM="Sperm";
+	public static final String SPERM_PURPOSE="Purpose";
+	public static final String SPERM_PURPOSE_TYPE="Purpose Type";
+	public static final String SPERM_PURPOSE_TYPE_CREATE="Create";
+	public static final String SPERM_PURPOSE_TYPE_MUTATE="Mutate";
 	
-	public static String SPERM_HYPOTHALAMUS="Hypothalamus";
-	public static String SPERM_HYPOTHALAMUS_HOMEOBOXES="Homeoboxes";
-	public static String SPERM_HYPOTHALAMUS_ACTIONS="Actions";
-	public static String SPERM_HYPOTHALAMUS_MUTATIONS="Mutations";
+	public static final String SPERM_HYPOTHALAMUS="Hypothalamus";
+	public static final String SPERM_HYPOTHALAMUS_HOMEOBOXES="Homeoboxes";
+	public static final String SPERM_HYPOTHALAMUS_ACTIONS="Actions";
+	public static final String SPERM_HYPOTHALAMUS_MUTATIONS="Mutations";
 	
-	public static String SPERM_DENE_TYPE_CREATE_DENE_CHAIN="Create Dene Chain";
-	public static String SPERM_ACTION_DENWORD_UPDATE_VALUE_LIST="DeneWords Update List";
+	public static final String SPERM_DENE_TYPE_CREATE_DENE_CHAIN="Create Dene Chain";
+	public static final String SPERM_ACTION_DENWORD_UPDATE_VALUE_LIST="DeneWords Update List";
 
-	public static String SPERM_DENE_TYPE_UPDATE_DENEWORD_VALUE="Update DeneWord";
-	public static String SPERM_ACTION_DENEWORD_EXECUTION_POSITION="Execution Position";
-	public static String SPERM_ACTION_DENEWORD_EXECUTION_POINT="Execution Point";
-	public static String SPERM_ACTION_DENEWORD_EXECUTION_POINT_PRE_HOMEBOX="Pre Homebox Insertion";
-	public static String SPERM_ACTION_DENEWORD_EXECUTION_POINT_POST_HOMEBOX="Post Homebox Insertion";
-	public static String SPERM_ACTION_DENEWORD_DENECHAIN_NAME="DeneChain Name";
+	public static final String SPERM_DENE_TYPE_UPDATE_DENEWORD_VALUE="Update DeneWord";
+	public static final String SPERM_ACTION_DENEWORD_EXECUTION_POSITION="Execution Position";
+	public static final String SPERM_ACTION_DENEWORD_EXECUTION_POINT="Execution Point";
+	public static final String SPERM_ACTION_DENEWORD_EXECUTION_POINT_PRE_HOMEBOX="Pre Homebox Insertion";
+	public static final String SPERM_ACTION_DENEWORD_EXECUTION_POINT_POST_HOMEBOX="Post Homebox Insertion";
+	public static final String SPERM_ACTION_DENEWORD_DENECHAIN_NAME="DeneChain Name";
 	
-	public static String SPERM_MEDULA="Medula";
-	public static String SPERM_PURPOSE_NAME="Name";
-	public static String SPERM_PURPOSE_DESCRIPTION="Description";
-	public static String SPERM_HOMEOBOX_INDEX="Homeobox Index";
-	public static String SPERM_DENE_TYPE_DENEWORD_CARRIER="DeneWord Carrier";
-	public static String SPERM_DENE_TYPE_DENEWORD_REMOVER="DeneWord Remover";
+	public static final String SPERM_MEDULA="Medula";
+	public static final String SPERM_PURPOSE_NAME="Name";
+	public static final String SPERM_PURPOSE_DESCRIPTION="Description";
+	public static final String SPERM_HOMEOBOX_INDEX="Homeobox Index";
+	public static final String SPERM_DENE_TYPE_DENEWORD_CARRIER="DeneWord Carrier";
+	public static final String SPERM_DENE_TYPE_DENEWORD_REMOVER="DeneWord Remover";
 	
-	public static String SPERM_DENE_TYPE_HOMEOBOX_METADATA="HomeoBox Metadata";
-	public static String SPERM_DATE_FORMAT="ddMMyyyy_HHmm";
+	public static final String SPERM_DENE_TYPE_HOMEOBOX_METADATA="HomeoBox Metadata";
+	public static final String SPERM_DATE_FORMAT="ddMMyyyy_HHmm";
 	
-	public static String SPERM_HOMEOBOX_DENES="Denes";
-	public static String SPERM_ACTIONS_DENES="Denes";
+	public static final String SPERM_HOMEOBOX_DENES="Denes";
+	public static final String SPERM_ACTIONS_DENES="Denes";
 	
-	public static String DENEWORD_TYPE_HOX_DENE_POINTER="Hox Dene Pointer";
-	public static String DENEWORD_TYPE_SPERM_DENOME_OPERATION_POINTER="Sperm Operation Pointer";
+	public static final String DENEWORD_TYPE_HOX_DENE_POINTER="Hox Dene Pointer";
+	public static final String DENEWORD_TYPE_SPERM_DENOME_OPERATION_POINTER="Sperm Operation Pointer";
 	
 	
-	public static String SPERM_HOX_DENE_TARGET="Target";
-	public static String SPERM_ACTION_DENE_TARGET="Target";
+	public static final String SPERM_HOX_DENE_TARGET="Target";
+	public static final String SPERM_ACTION_DENE_TARGET="Target";
 	
-	public static String SPERM_HOX_DENE_POINTER="Hox Dene Pointer";
-	public static String SPERM_VALIDATED="Sperm Validated";
+	public static final String SPERM_HOX_DENE_POINTER="Hox Dene Pointer";
+	public static final String SPERM_VALIDATED="Sperm Validated";
 	//
 	// Variables for Sertoli
 	//
-	public static String HOMEOBOX_DEFINITION_TYPE="Homeobox Definition Type";
-	public static String HOMEOBOX_DEFINITION_SENSOR="Sensor";
-	public static String HUMAN_INTERFACE_PANEL = "Human Interface Panel";
-	public static String IN_PANEL_POSITION=  "In Panel Position";
+	public static final String HOMEOBOX_DEFINITION_TYPE="Homeobox Definition Type";
+	public static final String HOMEOBOX_DEFINITION_SENSOR="Sensor";
+	public static final String HUMAN_INTERFACE_PANEL = "Human Interface Panel";
+	public static final String IN_PANEL_POSITION=  "In Panel Position";
 	//
 	// the denetypes to make the human interface
 	//
-	public static String DENECHAIN_TYPE_HUMAN_INTERFACE_CONTROL_PARAMETERS="Human Interface Control Parameters";
-	public static String DENECHAIN_TYPE_HUMAN_INTERFACE_WEB_PAGE ="Human Interface Web Page";
-	public static String DENEWORD_TYPE_HUMAN_INTERFACE_WEB_PAGE_INCLUDE_IN_NAVIGATION ="Include in Navigation";
-	public static String DENEWORD_TYPE_HUMAN_INTERFACE_WEB_PAGE_PAGE_TITLE ="Page Title";
-	public static String DENEWORD_HUMAN_INTERFACE_WEB_PAGE_PAGE_POSITION ="Page Position";
-	public static String DENEWORD_TYPE_PANEL_DENECHAIN_POINTER="Panel DeneChain Pointer";
-	public static String DENEWORD_TYPE_PANEL_IN_PAGE_POSITION="Panel In Page Pointer";
-	public static String DENEWORD_TYPE_PANEL_IN_PANEL_POSITION="Panel In Panel Pointer";
-	public static String DENEWORD_TYPE_PANEL_VISUALIZATION_STYLE="Panel Visualization Style";
-	public static String DENEWORD_TYPE_PANEL_DATA_SOURCE_POINTER="Panel Data Source Pointer";
-	public static String DENEWORD_TYPE_DISPLAY_TABLE_DENEWORD_POINTER="Display Table DeneWord Pointer";
+	public static final String DENECHAIN_TYPE_HUMAN_INTERFACE_CONTROL_PARAMETERS="Human Interface Control Parameters";
+	public static final String DENECHAIN_TYPE_HUMAN_INTERFACE_WEB_PAGE ="Human Interface Web Page";
+	public static final String DENEWORD_TYPE_HUMAN_INTERFACE_WEB_PAGE_INCLUDE_IN_NAVIGATION ="Include in Navigation";
+	public static final String DENEWORD_TYPE_HUMAN_INTERFACE_WEB_PAGE_PAGE_TITLE ="Page Title";
+	public static final String DENEWORD_HUMAN_INTERFACE_WEB_PAGE_PAGE_POSITION ="Page Position";
+	public static final String DENEWORD_TYPE_PANEL_DENECHAIN_POINTER="Panel DeneChain Pointer";
+	public static final String DENEWORD_TYPE_PANEL_IN_PAGE_POSITION="Panel In Page Pointer";
+	public static final String DENEWORD_TYPE_PANEL_IN_PANEL_POSITION="Panel In Panel Position";
+	public static final String DENEWORD_TYPE_PANEL_VISUALIZATION_STYLE="Panel Visualization Style";
+	public static final String DENEWORD_TYPE_PANEL_DATA_SOURCE_POINTER="Panel Data Source Pointer";
+	public static final String DENEWORD_TYPE_DISPLAY_TABLE_DENEWORD_POINTER="Display Table DeneWord Pointer";
 	
-	public static String DENEWORD_TYPE_HUMAN_INTERFACE_WEB_PAGE_GLYPH_ICON="Lower Nav Glyphicon";
+	public static final String DENEWORD_TYPE_HUMAN_INTERFACE_WEB_PAGE_GLYPH_ICON="Lower Nav Glyphicon";
 	//
 	// the different styles to present data
 	//
-	public static String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_EXTERNAL_DATA="Single Value Panel External Data";
-	public static String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_COMPLETE_WIDTH_EXTERNAL_DATA="Single Value Panel Complete Width External Data";
-	public static String PANEL_VISUALIZATION_COMPLETE_DENE_STYLE_SINGLE_VALUE_PANEL_EXTERNAL_DATA="Complete Dene Single Value Panel External Data";
-	public static String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL="Single Value Panel";
-    public static String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_COMPLETE_WIDTH="Single Value Panel Complete Width";
-	public static String PANEL_VISUALIZATION_COMPLETE_DENE_STYLE_SINGLE_VALUE_PANEL="Complete Dene Single Value Panel";
-	public static String PANEL_VISUALIZATION_COMPLETE_DENE_CHAIN_STYLE_SINGLE_VALUE_PANEL="Complete Dene Chain Single Value Panel";
-	public static String PANEL_VISUALIZATION_WELL_SINGLE_VALUE_PANEL="Well Single Value";
-	public static String PANEL_TITLE="Panel Title";
+	public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_EXTERNAL_DATA="Single Value Panel External Data";
+	public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_COMPLETE_WIDTH_EXTERNAL_DATA="Single Value Panel Complete Width External Data";
+	public static final String PANEL_VISUALIZATION_COMPLETE_DENE_STYLE_SINGLE_VALUE_PANEL_EXTERNAL_DATA="Complete Dene Single Value Panel External Data";
+	public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL="Single Value Panel";
+    public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_COMPLETE_WIDTH="Single Value Panel Complete Width";
+	public static final String PANEL_VISUALIZATION_COMPLETE_DENE_STYLE_SINGLE_VALUE_PANEL="Complete Dene Single Value Panel";
+	public static final String PANEL_VISUALIZATION_COMPLETE_DENE_CHAIN_STYLE_SINGLE_VALUE_PANEL="Complete Dene Chain Single Value Panel";
+	public static final String PANEL_VISUALIZATION_WELL_SINGLE_VALUE_PANEL="Well Single Value";
+	public static final String PANEL_TITLE="Panel Title";
 	
-	public static String PANEL_VISUALIZATION_STYLE_DENEWORD_TABLE="DeneWord Table";
-	public static String PANEL_VISUALIZATION_STYLE_SHORT_TERM_WEATHER_FORECAST="Short Term Weather Forecast Panel";
-	public static String PANEL_VISUALIZATION_STYLE_DAILY_WEATHER_FORECAST="Daily Weather Forecast Panel";
-	public static String PANEL_VISUALIZATION_STYLE_MANUAL_ACTION_WITH_TIMER="Manual Action With Timer Panel";
-	public static String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_EXTERNAL_TIMESTAMP="Single Value Panel External Timestamp";
+	public static final String PANEL_VISUALIZATION_STYLE_DENEWORD_TABLE="DeneWord Table";
+	public static final String PANEL_VISUALIZATION_STYLE_SHORT_TERM_WEATHER_FORECAST="Short Term Weather Forecast Panel";
+	public static final String PANEL_VISUALIZATION_STYLE_DAILY_WEATHER_FORECAST="Daily Weather Forecast Panel";
+	public static final String PANEL_VISUALIZATION_STYLE_MANUAL_ACTION_WITH_TIMER="Manual Action With Timer Panel";
+	public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_EXTERNAL_TIMESTAMP="Single Value Panel External Timestamp";
 
 	
 	
 	
-	public static String PANEL_VISUALIZATION_STYLE_PATHOLOGY="Pathology Panel";
-	public static String PANEL_VISUALIZATION_STYLE_LINE_CHART="Line Chart Panel";
-	public static String PANEL_VISUALIZATION_STYLE_CSV_MULTI_LINE_CHART="CSV File MultiLine Chart Panel";
-	public static String PANEL_VISUALIZATION_STYLE_PI_CHART="Pie Chart Panel";
+	public static final String PANEL_VISUALIZATION_STYLE_PATHOLOGY="Pathology Panel";
+	public static final String PANEL_VISUALIZATION_STYLE_LINE_CHART="Line Chart Panel";
+	public static final String PANEL_VISUALIZATION_STYLE_CSV_MULTI_LINE_CHART="CSV File MultiLine Chart Panel";
+	public static final String PANEL_VISUALIZATION_STYLE_PI_CHART="Pie Chart Panel";
 
 	
-	public static String PANEL_VISUALIZATION_STYLE_BAR_CHART="Bar Chart Panel";
-	public static String PANEL_VISUALIZATION_ORGANISM_VIEW="Organism View Panel";
-	public static String PANEL_VISUALIZATION_STYLE_MNEMOSYNE_TABLE="Mnemosyne Table Panel";
-	public static String PANEL_VISUALIZATION_STYLE_IMAGE="Image Panel";
-	public static String PANEL_VISUALIZATION_STYLE_UPDATE_MULTIPLE_DENEWORDS_FORM="Update Multiple Denewords Form Panel";
-	public static String DENEWORD_TYPE_PANEL_DATA_DISPLAY_NAME="Panel Display Name";
-	public static String DENEWORD_RECORD_TIMESTAMP="Record Timestamp";
+	public static final String PANEL_VISUALIZATION_STYLE_BAR_CHART="Bar Chart Panel";
+	public static final String PANEL_VISUALIZATION_ORGANISM_VIEW="Organism View Panel";
+	public static final String PANEL_VISUALIZATION_STYLE_MNEMOSYNE_TABLE="Mnemosyne Table Panel";
+	public static final String PANEL_VISUALIZATION_STYLE_IMAGE="Image Panel";
+	public static final String PANEL_VISUALIZATION_STYLE_UPDATE_MULTIPLE_DENEWORDS_FORM="Update Multiple Denewords Form Panel";
+	public static final String DENEWORD_TYPE_PANEL_DATA_DISPLAY_NAME="Panel Display Name";
+	public static final String DENEWORD_RECORD_TIMESTAMP="Record Timestamp";
 	
-	public static String PANEL_VISUALIZATION_STYLE_ACTION_EVALUATION_REPORT="Action Evaluation Report";
-	public static String PANEL_VISUALIZATION_STYLE_NETWORK_MODE_SELECTOR="Network Mode Selector";
+	public static final String PANEL_VISUALIZATION_STYLE_ACTION_EVALUATION_REPORT="Action Evaluation Report";
+	public static final String PANEL_VISUALIZATION_STYLE_NETWORK_MODE_SELECTOR="Network Mode Selector";
 	
-	public static String DENE_TYPE_HUMAN_INTERFACE_PAGE="Human Interface Page";
-	public static String DENE_TYPE_HUMAN_INTERFACE_COMPONENT="Human Interface Component";
-	public static String DENEWORD_TYPE_HUMAN_INTERFACE_COMPONENT_PROPERTY="Human Interface Component Property";
-	public static String DENEWORD_TYPE_HUMAN_INTERFACE_COMPONENT_TEMPLATE="Human Interface Component Template";
-	public static String DENEWORD_TYPE_HUMAN_INTERFACE_COMPONENT_TEMPLATE_URL="Human Interface Component Template URL";
-	public static String DENEWORD_TYPE_HUMAN_INTERFACE_COMPONENT_STYLES="Human Interface Component Styles";
-	public static String DENEWORD_TYPE_EXTERNAL_DATA_SOURCE_DENE="External Data Source Dene";
-	public static String DENEWORD_TYPE_EXTERNAL_TIMESTAMP_DATA_SOURCE_DENE="External Timestamp Data Source Dene";
-	public static String DENEWORD_TYPE_HUMAN_INTERFACE_COMPONENT_STYLES_URL="Human Interface Component Styles URL";
-	public static String DENEWORD_TYPE_WEB_PAGE_VIEW_DEFINITION_POINTER="Web Page View Definition Pointer";
-	public static String DENEWORD_TYPE_COLUMN_DATA_SOURCE_POINTER="Column Data Source Pointer";
-	public static String DENEWORD_DISPLAY_TABLE_COLUMN_DEFINITION_POINTER="Display Table Column Definition Pointer";
-	public static String DENEWORD_TYPE_COLUMN_IN_TABLE_POSITION="Column In Table Position";
-	public static String DENEWORD_TYPE_COLUMN_HEADER="Column Header";
-	public static String DENEWORD_TYPE_COLUMN_TD_CLASS_INFO="TDClassInfo";
+	public static final String DENE_TYPE_HUMAN_INTERFACE_PAGE="Human Interface Page";
+	public static final String DENE_TYPE_HUMAN_INTERFACE_COMPONENT="Human Interface Component";
+	public static final String DENEWORD_TYPE_HUMAN_INTERFACE_COMPONENT_PROPERTY="Human Interface Component Property";
+	public static final String DENEWORD_TYPE_HUMAN_INTERFACE_COMPONENT_TEMPLATE="Human Interface Component Template";
+	public static final String DENEWORD_TYPE_HUMAN_INTERFACE_COMPONENT_TEMPLATE_URL="Human Interface Component Template URL";
+	public static final String DENEWORD_TYPE_HUMAN_INTERFACE_COMPONENT_STYLES="Human Interface Component Styles";
+	public static final String DENEWORD_TYPE_EXTERNAL_DATA_SOURCE_DENE="External Data Source Dene";
+	public static final String DENEWORD_TYPE_EXTERNAL_TIMESTAMP_DATA_SOURCE_DENE="External Timestamp Data Source Dene";
+	public static final String DENEWORD_TYPE_HUMAN_INTERFACE_COMPONENT_STYLES_URL="Human Interface Component Styles URL";
+	public static final String DENEWORD_TYPE_WEB_PAGE_VIEW_DEFINITION_POINTER="Web Page View Definition Pointer";
+	public static final String DENEWORD_TYPE_COLUMN_DATA_SOURCE_POINTER="Column Data Source Pointer";
+	public static final String DENEWORD_DISPLAY_TABLE_COLUMN_DEFINITION_POINTER="Display Table Column Definition Pointer";
+	public static final String DENEWORD_TYPE_COLUMN_IN_TABLE_POSITION="Column In Table Position";
+	public static final String DENEWORD_TYPE_COLUMN_HEADER="Column Header";
+	public static final String DENEWORD_TYPE_COLUMN_TD_CLASS_INFO="TDClassInfo";
 	//
 	// everything related to the mnemotycons
 	//
-	public static String DENECHAIN_MNEMOSYCONS="Mnemosycons";
-	public static String DENE_TYPE_MNEMOSYCON="Mnemosycon";
-	public static String DENE_TYPE_MNEMOSYCON_DATA_SOURCE="Mnemosycon Data Source";
-	public static String MNEMOSYCON_DATA_SOURCE_PULSE="Pulse Data Source";
-	public static String MNEMOSYCON_DATA_SOURCE_ORGANISM="Organism Data Source";
-	public static String DENEWORD_TYPE_MNEMOSYCON_PROFILE_POINTER="Mnemosycon Profile Pointer";
-	public static String MNEMOSYCON_MILLIS_STARTING_POINT="MillisStartingPoint";
-	public static String MNEMOSYCON_NEXT_BATCH_MILLIS_STARTING_POINT="NextBatchMillisStartingPoint";
-	public static String MNEMOSYCON_NUMBER_OF_PULSES_TO_RETRIEVE_PER_BATCH="Number Pulses Per Batch";
-	public static String MNEMOSYCON_ORGANISM_TELEONOME_TO_PUBLISH="Organism Teleonome To Publish";
-	public static String MNEMOSYCON_ORGANISM_TELEONOME_TO_PUBLISH_ALL_TELEONOME="All Teleonomes";
-	public static String MNEMOSYCON_FUNCTION="Mnemosycon Function";
-	public static String PATHOLOGY_SQL_EXCEPTION="SQL Exception";
-	public static String PATHOLOGY_JSON_EXCEPTION="JSON Exception";
-	public static String PATHOLOGY_DENE_MNEMSYCON_PROCESSING_ERROR="Mnemosycon Processing Error";
-	public static String PATHOLOGY_EXCEPTION_STACK_TRACE="Exception Stacktrace";
-	public static String DENECHAIN_MNEMOSYCON_PROCESSING="Mnemosycon Processing";
+	public static final String DENECHAIN_MNEMOSYCONS="Mnemosycons";
+	public static final String DENE_TYPE_MNEMOSYCON="Mnemosycon";
+	public static final String DENE_TYPE_MNEMOSYCON_DATA_SOURCE="Mnemosycon Data Source";
+	public static final String MNEMOSYCON_DATA_SOURCE_PULSE="Pulse Data Source";
+	public static final String MNEMOSYCON_DATA_SOURCE_ORGANISM="Organism Data Source";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_PROFILE_POINTER="Mnemosycon Profile Pointer";
+	public static final String MNEMOSYCON_MILLIS_STARTING_POINT="MillisStartingPoint";
+	public static final String MNEMOSYCON_NEXT_BATCH_MILLIS_STARTING_POINT="NextBatchMillisStartingPoint";
+	public static final String MNEMOSYCON_NUMBER_OF_PULSES_TO_RETRIEVE_PER_BATCH="Number Pulses Per Batch";
+	public static final String MNEMOSYCON_ORGANISM_TELEONOME_TO_PUBLISH="Organism Teleonome To Publish";
+	public static final String MNEMOSYCON_ORGANISM_TELEONOME_TO_PUBLISH_ALL_TELEONOME="All Teleonomes";
+	public static final String MNEMOSYCON_FUNCTION="Mnemosycon Function";
+	public static final String PATHOLOGY_SQL_EXCEPTION="SQL Exception";
+	public static final String PATHOLOGY_JSON_EXCEPTION="JSON Exception";
+	public static final String PATHOLOGY_DENE_MNEMSYCON_PROCESSING_ERROR="Mnemosycon Processing Error";
+	public static final String PATHOLOGY_EXCEPTION_STACK_TRACE="Exception Stacktrace";
+	public static final String DENECHAIN_MNEMOSYCON_PROCESSING="Mnemosycon Processing";
 	
 	public static final String DENE_TYPE_MNEMOSYCON_ACTION_PROCESSING="Mnemosycon Action Processing";
 	public static final String DENE_NAME_MNEMOSYCON_LEARN_MY_HISTORY="Learn My History";
-	public static String DENE_NAME_MNEMOSYCON_LEARN_OTHER_HISTORY="Learn Others History";
-	public static String DENE_NAME_MNEMOSYCON_LEARN_OTHER_HISTORY_TELEONOME="Learn Others History Teleonome";
-	public static String MNEMOSYCON_NUMBER_OF_SECONDS_TO_COMPLETE_CYCLE="Seconds To Complete Cycle";
-	public static String MNEMOSYCON_CYCLE_START_MILLISECONDS="Cycle Start Milliseconds";
-	public static String MNEMOSYCON_CYCLE_START_TIMESTAMP="Cycle Start Timestamp";
-	public static String MNEMOSYCON_MAXIMUM_NUMBER_OF_RECORDS_PER_BATCH="Maximum Number Records Per Batch";
-	public static String MNEMOSYCON_MINIMUM_NUMBER_OF_RECORDS_PER_BATCH="Minimum Number Records Per Batch";
-	public static String MNEMOSYCON_NUMBER_OF_PULSES_TO_RETRIEVE_PER_BATCH_NEEDED_FOR_TIME_RESTRICTION="Records Needed For Time Restriction";
+	public static final String DENE_NAME_MNEMOSYCON_LEARN_OTHER_HISTORY="Learn Others History";
+	public static final String DENE_NAME_MNEMOSYCON_LEARN_OTHER_HISTORY_TELEONOME="Learn Others History Teleonome";
+	public static final String MNEMOSYCON_NUMBER_OF_SECONDS_TO_COMPLETE_CYCLE="Seconds To Complete Cycle";
+	public static final String MNEMOSYCON_CYCLE_START_MILLISECONDS="Cycle Start Milliseconds";
+	public static final String MNEMOSYCON_CYCLE_START_TIMESTAMP="Cycle Start Timestamp";
+	public static final String MNEMOSYCON_MAXIMUM_NUMBER_OF_RECORDS_PER_BATCH="Maximum Number Records Per Batch";
+	public static final String MNEMOSYCON_MINIMUM_NUMBER_OF_RECORDS_PER_BATCH="Minimum Number Records Per Batch";
+	public static final String MNEMOSYCON_NUMBER_OF_PULSES_TO_RETRIEVE_PER_BATCH_NEEDED_FOR_TIME_RESTRICTION="Records Needed For Time Restriction";
 
 	//
 	// the topics for the heart
 	//'
 	public static int HEART_QUALITY_OF_SERVICE=1;
-	public static String HEART_TOPIC_STATUS="Status";
-	public static String HEART_TOPIC_PULSE_STATUS_INFO="PulseStatusInfo";
-	public static String HEART_TOPIC_PULSE_STATUS_INFO_SECUNDARY="PulseStatusInfoSecundary";
-	public static String HEART_TOPIC_UPDATE_FORM_STATUS="UpdateFormStatus";
-	public static String HEART_TOPIC_UPDATE_FORM_REQUEST="UpdateFormRequest";
-	public static String HEART_TOPIC_ASYNC_CYCLE_UPDATE="AsyncCycleUpdate";
+	public static final String HEART_TOPIC_STATUS="Status";
+	public static final String HEART_TOPIC_PULSE_STATUS_INFO="PulseStatusInfo";
+	public static final String HEART_TOPIC_PULSE_STATUS_INFO_SECUNDARY="PulseStatusInfoSecundary";
+	public static final String HEART_TOPIC_UPDATE_FORM_STATUS="UpdateFormStatus";
+	public static final String HEART_TOPIC_UPDATE_FORM_REQUEST="UpdateFormRequest";
+	public static final String HEART_TOPIC_ASYNC_CYCLE_UPDATE="AsyncCycleUpdate";
 
-	public static String HEART_TOPIC_BLINK="Blink";
-	public static String HEART_TOPIC_ADA_STATUS="AdaStatus";
-	public static String HEART_TOPIC_ORGANISM_STATUS="OrganismStatus";
-	public static String HEART_TOPIC_ORGANISM_UPDATE="OrganismUpdate";
-	public static String HEART_TOPIC_AVAILABLE_SSIDS="Available SSID";
-	public static String HEART_TOPIC_EXECUTE_MANUAL_ACTION="Manual Action";
-	public static String HEART_TOPIC_RESIGNAL="Resignal";
+	public static final String HEART_TOPIC_BLINK="Blink";
+	public static final String HEART_TOPIC_ADA_STATUS="AdaStatus";
+	public static final String HEART_TOPIC_ORGANISM_STATUS="OrganismStatus";
+	public static final String HEART_TOPIC_ORGANISM_UPDATE="OrganismUpdate";
+	public static final String HEART_TOPIC_AVAILABLE_SSIDS="Available SSID";
+	public static final String HEART_TOPIC_EXECUTE_MANUAL_ACTION="Manual Action";
+	public static final String HEART_TOPIC_RESIGNAL="Resignal";
 	
-	public static String PROCESS_HYPOTHALAMUS="Hypothalamus";
-	public static String PROCESS_HEART="Heart";
-	public static String PROCESS_WEB_SERVER="Web Server";
+	public static final String PROCESS_HYPOTHALAMUS="Hypothalamus";
+	public static final String PROCESS_HEART="Heart";
+	public static final String PROCESS_WEB_SERVER="Web Server";
 
 	
 
