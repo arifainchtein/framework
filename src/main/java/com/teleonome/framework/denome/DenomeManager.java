@@ -5356,7 +5356,12 @@ public class DenomeManager {
 						rangeMaximum = Double.parseDouble((String)this.getDeneWordAttributeByIdentity(new Identity(rangeMaximumRawValue.toString()), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
 						logger.debug("rangemaximum is a pointer and the rendered value is " + rangeMaximum);
 					}else{
-						rangeMaximum = (Double) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MAXIMUM);
+						try{
+							rangeMaximum = (Double) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MAXIMUM);
+						}catch(java.lang.ClassCastException e) {
+							logger.debug("class cast exception to double,inputLine=" + inputLine);
+							rangeMaximum = ((Integer) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MAXIMUM)).doubleValue();
+						}
 					}
 
 					Object rangeMinimumRawValue  = extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MINIMUM);
