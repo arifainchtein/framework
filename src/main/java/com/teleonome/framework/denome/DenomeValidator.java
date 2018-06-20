@@ -104,6 +104,7 @@ public class DenomeValidator {
 											continue;
 										}
 										denePointerObject = deneWordJSONObject.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+										
 										if(denePointerObject instanceof String && ((String)denePointerObject).startsWith("$")){
 											
 										}else if(denePointerObject instanceof String && ((String)denePointerObject).startsWith("@")){

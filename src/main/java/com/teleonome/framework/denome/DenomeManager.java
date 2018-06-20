@@ -5353,18 +5353,18 @@ public class DenomeManager {
 					// and the maximum value for the temperature of the pump is given by another dene
 					Object rangeMaximumRawValue  = extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MAXIMUM);
 					if(rangeMaximumRawValue instanceof String && rangeMaximumRawValue.toString().startsWith("@")){
-						rangeMaximum = Integer.parseInt((String)this.getDeneWordAttributeByIdentity(new Identity(rangeMaximumRawValue.toString()), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+						rangeMaximum = Double.parseDouble((String)this.getDeneWordAttributeByIdentity(new Identity(rangeMaximumRawValue.toString()), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
 						logger.debug("rangemaximum is a pointer and the rendered value is " + rangeMaximum);
 					}else{
-						rangeMaximum = (Integer) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MAXIMUM);
+						rangeMaximum = (Double) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MAXIMUM);
 					}
 
 					Object rangeMinimumRawValue  = extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MINIMUM);
 					if(rangeMinimumRawValue instanceof String && rangeMinimumRawValue.toString().startsWith("@")){
-						rangeMinimum = Integer.parseInt((String)this.getDeneWordAttributeByIdentity(new Identity(rangeMinimumRawValue.toString()), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+						rangeMinimum = Double.parseDouble((String)this.getDeneWordAttributeByIdentity(new Identity(rangeMinimumRawValue.toString()), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
 
 					}else{
-						rangeMinimum = (Integer) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MINIMUM);
+						rangeMinimum = (Double) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MINIMUM);
 					}
 				}catch(NullPointerException e){
 					//
