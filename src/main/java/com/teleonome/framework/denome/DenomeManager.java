@@ -5369,7 +5369,12 @@ public class DenomeManager {
 						rangeMinimum = Double.parseDouble((String)this.getDeneWordAttributeByIdentity(new Identity(rangeMinimumRawValue.toString()), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
 
 					}else{
-						rangeMinimum = (Double) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MINIMUM);
+						try{
+							rangeMinimum = (Double) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MINIMUM);
+						}catch(java.lang.ClassCastException e) {
+							logger.debug("class cast exception to double,inputLine=" + inputLine);
+							rangeMinimum = ((Integer) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MINIMUM)).doubleValue();
+						}
 					}
 				}catch(NullPointerException e){
 					//
