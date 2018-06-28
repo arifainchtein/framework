@@ -83,25 +83,6 @@ public class PLSeriesReader extends BufferedReader {
 		
 		logger.debug("plseries invoking readline " );
 		logger.debug("Ra-" + "about to read data");
-		//int loopback  = aPlasmatronicPLA.loopback();
-		//logger.debug("Ra- loopback" + loopback);
-//		try {
-//			Thread.sleep(PAUSE_BETWEEN_DATA);
-//		} catch (InterruptedException e3) {
-//			// TODO Auto-generated catch block
-//			logger.info(Utils.getStringException(e3));
-//		}
-		
-		logger.debug("Ra-" + "about to read voltage");
-		double batteryVoltage  = getCurrentVoltage();
-		logger.debug("Ra- batteryVoltage" + batteryVoltage);
-		try {
-			Thread.sleep(PAUSE_BETWEEN_DATA);
-		} catch (InterruptedException e3) {
-			// TODO Auto-generated catch block
-			logger.info(Utils.getStringException(e3));
-		}
-		
 		
 		logger.debug("Ra-" + "about to read currentCharge, PAUSE_BETWEEN_DATA=" + PAUSE_BETWEEN_DATA);
 		double currentCharge  = getCurrentCharge();
@@ -115,7 +96,7 @@ public class PLSeriesReader extends BufferedReader {
 		
 		
 		
-		
+		logger.debug("Ra- about to read currentLoad" );
 		double currentLoad = getCurrentLoad();
 		logger.debug("Ra- currentLoad" + currentLoad);
 		try {
@@ -134,6 +115,19 @@ public class PLSeriesReader extends BufferedReader {
 			// TODO Auto-generated catch block
 			logger.info(Utils.getStringException(e3));
 		}
+		
+		logger.debug("Ra-" + "about to read voltage");
+		double batteryVoltage  = getCurrentVoltage();
+		logger.debug("Ra- batteryVoltage" + batteryVoltage);
+		try {
+			Thread.sleep(PAUSE_BETWEEN_DATA);
+		} catch (InterruptedException e3) {
+			// TODO Auto-generated catch block
+			logger.info(Utils.getStringException(e3));
+		}
+		
+		
+		
 //		
 //		double maxBatVoltageToday = getMaxBatVoltageToday();
 //		logger.debug("Ra- maxBatVoltageToday" + maxBatVoltageToday);
