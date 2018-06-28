@@ -196,7 +196,7 @@ public class PLSeriesReader extends BufferedReader {
 		double currentStateOfCharge = getCurrentStateOfCharge();
 		double totalLoadAmpHoursForToday = 100;//getTotalLoadAmpHoursForToday();
 		String prefix="";
-		
+		logger.info("about to return ");
 		if(currentCommand.equals("AsyncData"))prefix =  "AsyncCycleUpdate#";
 		dataLine =prefix + batteryVoltage+ "#"+ currentCharge + "#"+ currentLoad+ "#" + currentStateOfCharge + "#"+ batteryState + "#"+ totalLoadAmpHoursForToday+ "#"+ totalChargeAmpHoursForToday + "#"+ minBatVoltageToday +"#" + maxBatVoltageToday;
 		
