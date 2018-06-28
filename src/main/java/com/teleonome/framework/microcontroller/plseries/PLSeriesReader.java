@@ -45,7 +45,7 @@ public class PLSeriesReader extends BufferedReader {
 	// pl60=0.4
 	private double chargeCurrentFactor=1;
 	private String dataLine="";
-	private int PAUSE_BETWEEN_DATA=2500;
+	private int PAUSE_BETWEEN_DATA=3500;
 	private String currentCommand="";
 	private boolean asyncMode=false;
 	private boolean readerReady=true;
