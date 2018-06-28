@@ -45,7 +45,7 @@ public class PLSeriesReader extends BufferedReader {
 	// pl60=0.4
 	private double chargeCurrentFactor=1;
 	private String dataLine="";
-	private int PAUSE_BETWEEN_DATA=3500;
+	private int PAUSE_BETWEEN_DATA=4500;
 	private String currentCommand="";
 	private boolean asyncMode=false;
 	private boolean readerReady=true;
@@ -103,7 +103,7 @@ public class PLSeriesReader extends BufferedReader {
 		}
 		
 		
-		logger.debug("Ra-" + "about to read currentCharge");
+		logger.debug("Ra-" + "about to read currentCharge, PAUSE_BETWEEN_DATA=" + PAUSE_BETWEEN_DATA);
 		double currentCharge  = getCurrentCharge();
 		logger.debug("Ra- currentCharge" + currentCharge);
 		try {
