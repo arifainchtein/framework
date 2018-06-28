@@ -452,19 +452,19 @@ public class PLSeriesReader extends BufferedReader {
 			
 			
 			byte[] buffer = new byte[1024];
-			////logger.debug("point 3c");
+			logger.debug("point 3c");
 			serialPortInputStream.read(buffer);
 			int responseCode = convertByteToInt(buffer);
-        //	//logger.debug("getCurrentCharge responseCode:" + responseCode);
+        logger.debug("getCurrentCharge responseCode:" + responseCode);
 			double chargeCurrent=0;
         	if(responseCode==200){
         		serialPortInputStream.read(buffer);
             	double chargeCurrentUnprocessed = convertByteToDouble(buffer);
             	chargeCurrent = round(chargeCurrentUnprocessed*chargeCurrentFactor,2);
-     			////logger.debug("getCurrentCharge charge buffer+" + buffer + " chargeCurrentUnprocessed=" + chargeCurrentUnprocessed +" current= " + chargeCurrent);
+     			logger.debug("getCurrentCharge charge buffer+" + buffer + " chargeCurrentUnprocessed=" + chargeCurrentUnprocessed +" current= " + chargeCurrent);
  			}else{
  				logger.debug("PLA-"+"getCurrentCharge, returning 0 because response code was " + responseCode);
- 				//logger.debug("getCurrentCharge, returning 0 because response code was " + responseCode);	
+ 				logger.debug("getCurrentCharge, returning 0 because response code was " + responseCode);	
  			}
         	
         	return chargeCurrent;
