@@ -32,7 +32,7 @@ public class NetworkUtilities {
 			supplicantFileContents.append("psk=\"" + password + "\"" + newLine);
 		}
 		supplicantFileContents.append("}" + newLine);		
-		////logger.debug("writing supplicant:" +supplicantFileContents.toString() );
+		////System.out.println("writing supplicant:" +supplicantFileContents.toString() );
 		FileUtils.writeStringToFile(new File("/etc/wpa_supplicant/wpa_supplicant.network"), supplicantFileContents.toString());
 	}
 	
@@ -45,10 +45,10 @@ public class NetworkUtilities {
 		ArrayList macAddress = new ArrayList();
 		for(int i=0;i<initialData.size();i++){
 			line = (String) initialData.get(i);
-			//sud hostapd_cli all_sta//logger.debug("pint 1 line=" + line );	
+			//sud hostapd_cli all_sta//System.out.println("pint 1 line=" + line );	
 			if(line.startsWith("dot11RSNAStatsSTAAddress")){
 				tokens = line.split("=");
-				////logger.debug("pint 1a tokens[1].trim()=" + tokens[1].trim() );	
+				////System.out.println("pint 1a tokens[1].trim()=" + tokens[1].trim() );	
 				
 				macAddress.add(tokens[1].trim());
 			}
@@ -63,15 +63,15 @@ public class NetworkUtilities {
 			//
 			// get the name
 			//
-			////logger.debug("pint 2 line=" + line );	
+			////System.out.println("pint 2 line=" + line );	
 			
 			name = line.substring(0,line.indexOf("(")).trim();
 			ipaddress = line.substring(line.indexOf("(")+1, line.indexOf(")")).trim();
 			macAdd = line.substring(line.indexOf(" at ")+3, line.indexOf(" [")).trim();
-			////logger.debug("pint 2 name=" + name + " ipaddress=" + ipaddress + " macAdd=" + macAdd);	
+			////System.out.println("pint 2 name=" + name + " ipaddress=" + ipaddress + " macAdd=" + macAdd);	
 			
 			if(macAddress.contains(macAdd)){
-			//	//logger.debug("pint 2a name=" + name + " ipaddress=" + ipaddress );	
+			//	//System.out.println("pint 2a name=" + name + " ipaddress=" + ipaddress );	
 				
 				toReturn.put(name, ipaddress);
 			}
@@ -97,12 +97,12 @@ public class NetworkUtilities {
 	public static JSONArray getSSID(boolean debug){
 		ArrayList result=new ArrayList();;
 		try {
-			//if(debug)//logger.debug("in getSSID, About to execute command");
+			//if(debug)//System.out.println("in getSSID, About to execute command");
 			result = Utils.executeCommand( "sudo  iw dev wlan0 scan ap-force");
-			//if(debug)//logger.debug("in getSSID, executed command, size="+ result.size());
+			//if(debug)//System.out.println("in getSSID, executed command, size="+ result.size());
 		} catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
-			//logger.debug(Utils.getStringException(e));
+			//System.out.println(Utils.getStringException(e));
 		}
 		boolean foundTSF=false;
 		boolean foundSSID=false;
