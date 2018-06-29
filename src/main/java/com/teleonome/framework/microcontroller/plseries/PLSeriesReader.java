@@ -87,6 +87,17 @@ public class PLSeriesReader extends BufferedReader {
 		logger.debug("plseries invoking readline " );
 		logger.debug("Ra-" + "about to read data");
 		
+		logger.debug("Ra-" + "about to read voltage");
+		double batteryVoltage  = getCurrentVoltage();
+		logger.debug("Ra- batteryVoltage" + batteryVoltage);
+		try {
+			Thread.sleep(PAUSE_BETWEEN_DATA);
+		} catch (InterruptedException e3) {
+			// TODO Auto-generated catch block
+			logger.info(Utils.getStringException(e3));
+		}
+		
+		
 		logger.debug("Ra-" + "about to read currentCharge, PAUSE_BETWEEN_DATA=" + PAUSE_BETWEEN_DATA);
 		double currentCharge  = getCurrentCharge();
 		logger.debug("Ra- currentCharge" + currentCharge);
@@ -102,15 +113,7 @@ public class PLSeriesReader extends BufferedReader {
 		
 		
 		
-		logger.debug("Ra-" + "about to read voltage");
-		double batteryVoltage  = getCurrentVoltage();
-		logger.debug("Ra- batteryVoltage" + batteryVoltage);
-		try {
-			Thread.sleep(PAUSE_BETWEEN_DATA);
-		} catch (InterruptedException e3) {
-			// TODO Auto-generated catch block
-			logger.info(Utils.getStringException(e3));
-		}
+		
 		
 		String batteryState = getBatteryState();
 		logger.debug("Ra-" + "battery state=" +  batteryState);
@@ -209,22 +212,7 @@ public class PLSeriesReader extends BufferedReader {
 	public double getCurrentVoltage() {
 		try {
 			logger.debug("about to getCurrentVoltage data, serialPortInputStream=" + serialPortInputStream);
-			//
-			// loopback
-			/*
-			serialPortOutputStream.write( 187 );
-			serialPortOutputStream.write( 0 );
-			serialPortOutputStream.write( 0 );
-			serialPortOutputStream.write( 68 );
-			*/
-			// voltage for one plc
-			//
-			/*
-			serialPortOutputStream.write( 20 );
-			serialPortOutputStream.write( 50 );
-			serialPortOutputStream.write( 0 );
-			serialPortOutputStream.write( 235 );
-			*/
+			
 			//
 			// for pla
 			//
@@ -244,22 +232,17 @@ public class PLSeriesReader extends BufferedReader {
 			
 		    logger.debug("about to read data after sending");
 			
-			byte[] buffer = new byte[2];
+			byte[] buffer = new byte[4];
 			logger.debug("point 3c");
 		//	serialPortInputStream.read(buffer);
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			logger.debug("readCount=" + readCount);
 			
 			String hex = DatatypeConverter.printHexBinary(buffer);
-			logger.debug("voltage hex=" + hex);
+			logger.debug("voltage  4byte hex=" + hex);
 			
 			
-			int high = buffer[1] >= 0 ? buffer[1] : 256 + buffer[1];
-			int low = buffer[0] >= 0 ? buffer[0] : 256 + buffer[0];
-
-			int res = low | (high << 8);
 			
-			logger.debug("getCurrentCharge res res res :" + res);
 			
 			int responseCode = convertByteToInt(buffer);
 			logger.debug("getCurrentVoltage responseCode:" + responseCode);
@@ -271,13 +254,6 @@ public class PLSeriesReader extends BufferedReader {
     			
 	        	String hex2 = DatatypeConverter.printHexBinary(buf2);
 				logger.debug("hex2=" + hex2);
-				
-	        	int high2 = buf2[1] >= 0 ? buf2[1] : 256 + buf2[1];
-				int low2 = buf2[0] >= 0 ? buf2[0] : 256 + buf2[0];
-
-				int res2 = low | (high << 8);
-				
-				logger.debug("getCurrentCharge res res res2 :" + res2);
 				
         		logger.debug("getCurrentVoltage after 200 with buf2, readCount=" + readCount);
     		
