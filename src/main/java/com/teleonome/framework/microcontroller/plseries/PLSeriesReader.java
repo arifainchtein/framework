@@ -233,6 +233,12 @@ public class PLSeriesReader extends BufferedReader {
 			serialPortOutputStream.write( 4 );
 			
 			serialPortOutputStream.flush();
+			try {
+				Thread.sleep(70);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		    logger.debug("about to read data after sending");
 			
@@ -241,17 +247,19 @@ public class PLSeriesReader extends BufferedReader {
 		//	serialPortInputStream.read(buffer);
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			logger.debug("readCount=" + readCount);
-		
-			int responseCode = convertByteToInt(buffer);
+			byte[] buf2 = new byte[1];
+			buf2[0]=buffer[0];
+			int responseCode = convertByteToInt(buf2);
 			logger.debug("getCurrentVoltage responseCode:" + responseCode);
         	double voltage=0;
         	if(responseCode==200){
 	        	//serialPortInputStream.read(buffer);
-	        	readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
-    			logger.debug("getCurrentVoltage after 200 readCount=" + readCount);
-    		
+	        	//readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
     			
-	        	int voltageUnprocessed = convertByteToInt(buffer);
+        		logger.debug("getCurrentVoltage after 200 with buf1");
+    		
+        		buf2[0]=buffer[1];
+	        	int voltageUnprocessed = convertByteToInt(buf2);
 	        	voltage = round(0.1*voltageUnprocessed*voltageSystemCorrectorFactor,2);
  			}else{
  				logger.debug("PLA-"+"getCurrentVoltage, returning 0 because response code was " + responseCode);
@@ -480,7 +488,12 @@ public class PLSeriesReader extends BufferedReader {
 			serialPortOutputStream.write( 4);
 			
 			serialPortOutputStream.flush();
-			
+			try {
+				Thread.sleep(70);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 			byte[] buffer = new byte[2];
 			logger.debug("point 3c");
