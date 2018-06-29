@@ -32,6 +32,7 @@ public class PLSeriesReader extends BufferedReader {
 	public final static String ABSORTION = "Absortion";
 	public final static String EQUALIZE= "Equalize";
 	public final static String FLOAT = "Float";
+	int SERIAL_PORT_READ_TIMEOUT=3000;
 	
 	DecimalFormat decimalFormat = new DecimalFormat("###.##");
 	
@@ -235,10 +236,10 @@ public class PLSeriesReader extends BufferedReader {
 			
 		    logger.debug("about to read data after sending");
 			
-			byte[] buffer = new byte[1024];
+			byte[] buffer = new byte[2];
 			logger.debug("point 3c");
 		//	serialPortInputStream.read(buffer);
-			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			logger.debug("readCount=" + readCount);
 		
 			int responseCode = convertByteToInt(buffer);
@@ -246,7 +247,7 @@ public class PLSeriesReader extends BufferedReader {
         	double voltage=0;
         	if(responseCode==200){
 	        	//serialPortInputStream.read(buffer);
-	        	readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+	        	readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
     			logger.debug("getCurrentVoltage after 200 readCount=" + readCount);
     		
     			
@@ -290,7 +291,7 @@ public class PLSeriesReader extends BufferedReader {
 			byte[] buffer = new byte[2];
 			logger.debug("line 284");
 		//	serialPortInputStream.read(buffer);
-			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			logger.debug("readCount=" + readCount);
 		
 			int responseCode = convertByteToInt(buffer);
@@ -301,7 +302,7 @@ public class PLSeriesReader extends BufferedReader {
         	if(responseCode==200){
         	//	serialPortInputStream.read(buffer);
         		
-        		 readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+        		 readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
     			logger.debug("battery state, after 200 readCount=" + readCount);
     		
     			
@@ -363,10 +364,10 @@ public class PLSeriesReader extends BufferedReader {
 			serialPortOutputStream.flush();
 			
 			
-			byte[] buffer = new byte[1024];
+			byte[] buffer = new byte[2];
 			////logger.debug("point 3c");
 			//serialPortInputStream.read(buffer);
-			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			
 			int responseCode = convertByteToInt(buffer);
         	logger.debug("PLA-"+"getCurrentStateOfCharge responseCode:" + responseCode);
@@ -375,7 +376,7 @@ public class PLSeriesReader extends BufferedReader {
         	if(responseCode==200){
         		//serialPortInputStream.read(buffer);
             	
-        		readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+        		readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
     			logger.debug("getCurrentStateOfCharge after 200 readCount=" + readCount);
     		
     			
@@ -419,12 +420,12 @@ public class PLSeriesReader extends BufferedReader {
 			serialPortOutputStream.flush();
 			
 			
-			byte[] buffer = new byte[1024];
-			logger.debug("about to read new wy");
+			byte[] buffer = new byte[2];
+			logger.debug("about to read new wy with byte[2]");
 			//serialPortInputStream.read(buffer);
 			
 			
-			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			logger.debug("readCount=" + readCount);
 		
 			
@@ -438,7 +439,7 @@ public class PLSeriesReader extends BufferedReader {
 			
         	if(responseCode==200){
         		//serialPortInputStream.read(buffer);
-        		readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+        		readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
     			logger.debug("getCurrentLOad after 200 readCount=" + readCount);
     		
     			
@@ -481,11 +482,11 @@ public class PLSeriesReader extends BufferedReader {
 			serialPortOutputStream.flush();
 			
 			
-			byte[] buffer = new byte[1024];
+			byte[] buffer = new byte[2];
 			logger.debug("point 3c");
 			//serialPortInputStream.read(buffer);
 			//logger.debug("readCount simpe read=" + buffer.length);
-			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			logger.debug("readCount=" + readCount);
 		
 			
@@ -494,7 +495,7 @@ public class PLSeriesReader extends BufferedReader {
 			double chargeCurrent=0;
         	if(responseCode==200){
         		// serialPortInputStream.read(buffer);
-        		 readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+        		 readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
     			logger.debug("getCurrentCharge after 200 readCount=" + readCount);
     		
     			
@@ -543,7 +544,7 @@ public class PLSeriesReader extends BufferedReader {
 			serialPortOutputStream.flush();
 			
 			
-			byte[] buffer = new byte[1024];
+			byte[] buffer = new byte[2];
 			////logger.debug("point 3c");
 			serialPortInputStream.read(buffer);
 			int responseCode = convertByteToInt(buffer);
@@ -563,7 +564,7 @@ public class PLSeriesReader extends BufferedReader {
 			serialPortOutputStream.flush();
 			
 			
-			buffer = new byte[1024];
+			buffer = new byte[2];
 			////logger.debug("point 3c");
 			serialPortInputStream.read(buffer);
 			responseCode = convertByteToInt(buffer);
@@ -620,7 +621,7 @@ public class PLSeriesReader extends BufferedReader {
 					serialPortOutputStream.flush();
 					
 					
-					byte[] buffer = new byte[1024];
+					byte[] buffer = new byte[2];
 					////logger.debug("point 3c");
 					serialPortInputStream.read(buffer);
 					int responseCode = convertByteToInt(buffer);
@@ -640,7 +641,7 @@ public class PLSeriesReader extends BufferedReader {
 					serialPortOutputStream.flush();
 					
 					
-					buffer = new byte[1024];
+					buffer = new byte[2];
 					////logger.debug("point 3c");
 					serialPortInputStream.read(buffer);
 					responseCode = convertByteToInt(buffer);
@@ -690,7 +691,7 @@ public class PLSeriesReader extends BufferedReader {
 					serialPortOutputStream.flush();
 					
 					
-					byte[] buffer = new byte[1024];
+					byte[] buffer = new byte[2];
 					//logger.debug("point 3c maximum voltage");
 					serialPortInputStream.read(buffer);
 					int responseCode = convertByteToInt(buffer);
@@ -739,7 +740,7 @@ public class PLSeriesReader extends BufferedReader {
 				serialPortOutputStream.flush();
 				
 				
-				byte[] buffer = new byte[1024];
+				byte[] buffer = new byte[2];
 				//logger.debug("point 3c min voltage");
 				serialPortInputStream.read(buffer);
 				int responseCode = convertByteToInt(buffer);
