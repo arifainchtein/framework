@@ -526,6 +526,10 @@ public class PLSeriesReader extends BufferedReader {
 				
 				logger.debug("getCurrentCharge res res res :" + res);
 				
+				logger.debug("about to loop over first");
+				for (int i = 0; i < buffer.length; ++i)
+			         logger.debug((char)buffer[i]);
+				
 				
 				int responseCode = convertByteToInt(buffer);
 				logger.debug("getCurrentCharge responseCode one byte buffer:" + responseCode);
