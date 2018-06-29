@@ -217,10 +217,10 @@ public class PLSeriesReader extends BufferedReader {
 			// for pla
 			//
 			
+			serialPortOutputStream.write( 4);
 			serialPortOutputStream.write( 20 );
 			serialPortOutputStream.write( 206 );
 			serialPortOutputStream.write( 0 );
-			serialPortOutputStream.write( 4);
 			serialPortOutputStream.write( 230 );
 			
 			serialPortOutputStream.flush();
@@ -274,8 +274,9 @@ public class PLSeriesReader extends BufferedReader {
 			serialPortOutputStream.write( 20 );
 			serialPortOutputStream.write( 50 );
 			serialPortOutputStream.write( 0 );
-			serialPortOutputStream.write( 4 );
 			serialPortOutputStream.write( 74 );
+			serialPortOutputStream.write( 4 );
+			
 			
 			serialPortOutputStream.flush();
 			try {
