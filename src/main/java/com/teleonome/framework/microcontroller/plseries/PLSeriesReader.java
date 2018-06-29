@@ -495,7 +495,7 @@ public class PLSeriesReader extends BufferedReader {
 				e.printStackTrace();
 			}
 			
-			byte[] buffer = new byte[2];
+			byte[] buffer = new byte[1];
 			logger.debug("point 3c");
 			//serialPortInputStream.read(buffer);
 			//logger.debug("readCount simpe read=" + buffer.length);
@@ -503,19 +503,18 @@ public class PLSeriesReader extends BufferedReader {
 			logger.debug("readCount=" + readCount);
 			double chargeCurrent=0;
 			if(readCount>0) {
-				byte[] buf2 = new byte[1];
-				buf2[0]=buffer[0];
-				int i=buffer[0];
-				logger.debug("getCurrentCharge i [0] =" + i);
-				int responseCode = convertByteToInt(buf2);
-				logger.debug("getCurrentCharge responseCode single buffer:" + responseCode);
+				
+			
+				int responseCode = convertByteToInt(buffer);
+				logger.debug("getCurrentCharge responseCode one byte buffer:" + responseCode);
 				
 				if(responseCode==200){
 					// serialPortInputStream.read(buffer);
-					// readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+					byte[] buf2 = new byte[1];
+					 readCount = readInputStreamWithTimeout(serialPortInputStream, buf2, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 					//logger.debug("getCurrentCharge after 200 readCount=" + readCount);
 
-					buf2[0]=buffer[1];
+					
 					double chargeCurrentUnprocessed = convertByteToDouble(buf2);
 					chargeCurrent = round(chargeCurrentUnprocessed*chargeCurrentFactor,2);
 					logger.debug("getCurrentCharge charge buffer+" + buffer + " chargeCurrentUnprocessed=" + chargeCurrentUnprocessed +" current= " + chargeCurrent);
