@@ -242,23 +242,23 @@ public class PLSeriesReader extends BufferedReader {
 			
 		    logger.debug("about to read data after sending");
 			
-			byte[] buffer = new byte[2];
+			byte[] buffer = new byte[1];
 			logger.debug("point 3c");
 		//	serialPortInputStream.read(buffer);
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			logger.debug("readCount=" + readCount);
-			byte[] buf2 = new byte[1];
-			buf2[0]=buffer[0];
-			int responseCode = convertByteToInt(buf2);
+			
+			int responseCode = convertByteToInt(buffer);
 			logger.debug("getCurrentVoltage responseCode:" + responseCode);
         	double voltage=0;
         	if(responseCode==200){
 	        	//serialPortInputStream.read(buffer);
-	        	//readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+        		byte[] buf2 = new byte[1];
+	        	readCount = readInputStreamWithTimeout(serialPortInputStream, buf2, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
     			
-        		logger.debug("getCurrentVoltage after 200 with buf1");
+        		logger.debug("getCurrentVoltage after 200 with buf2");
     		
-        		buf2[0]=buffer[1];
+        		
 	        	int voltageUnprocessed = convertByteToInt(buf2);
 	        	voltage = round(0.1*voltageUnprocessed*voltageSystemCorrectorFactor,2);
  			}else{
