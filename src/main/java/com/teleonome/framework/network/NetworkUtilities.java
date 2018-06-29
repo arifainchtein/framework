@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,7 +15,7 @@ import com.teleonome.framework.utils.Utils;
 
 public class NetworkUtilities {
 
-	 
+	 private static Logger logger = Logger.getLogger(com.teleonome.framework.network.NetworkUtilities.class);
 	
 	public static void createNetworkSupplicant(String ssid, String password) throws IOException{
 		
@@ -31,7 +32,7 @@ public class NetworkUtilities {
 			supplicantFileContents.append("psk=\"" + password + "\"" + newLine);
 		}
 		supplicantFileContents.append("}" + newLine);		
-		////System.out.println("writing supplicant:" +supplicantFileContents.toString() );
+		////logger.debug("writing supplicant:" +supplicantFileContents.toString() );
 		FileUtils.writeStringToFile(new File("/etc/wpa_supplicant/wpa_supplicant.network"), supplicantFileContents.toString());
 	}
 	
@@ -44,10 +45,10 @@ public class NetworkUtilities {
 		ArrayList macAddress = new ArrayList();
 		for(int i=0;i<initialData.size();i++){
 			line = (String) initialData.get(i);
-			//sud hostapd_cli all_sta//System.out.println("pint 1 line=" + line );	
+			//sud hostapd_cli all_sta//logger.debug("pint 1 line=" + line );	
 			if(line.startsWith("dot11RSNAStatsSTAAddress")){
 				tokens = line.split("=");
-				////System.out.println("pint 1a tokens[1].trim()=" + tokens[1].trim() );	
+				////logger.debug("pint 1a tokens[1].trim()=" + tokens[1].trim() );	
 				
 				macAddress.add(tokens[1].trim());
 			}
@@ -62,15 +63,15 @@ public class NetworkUtilities {
 			//
 			// get the name
 			//
-			////System.out.println("pint 2 line=" + line );	
+			////logger.debug("pint 2 line=" + line );	
 			
 			name = line.substring(0,line.indexOf("(")).trim();
 			ipaddress = line.substring(line.indexOf("(")+1, line.indexOf(")")).trim();
 			macAdd = line.substring(line.indexOf(" at ")+3, line.indexOf(" [")).trim();
-			////System.out.println("pint 2 name=" + name + " ipaddress=" + ipaddress + " macAdd=" + macAdd);	
+			////logger.debug("pint 2 name=" + name + " ipaddress=" + ipaddress + " macAdd=" + macAdd);	
 			
 			if(macAddress.contains(macAdd)){
-			//	//System.out.println("pint 2a name=" + name + " ipaddress=" + ipaddress );	
+			//	//logger.debug("pint 2a name=" + name + " ipaddress=" + ipaddress );	
 				
 				toReturn.put(name, ipaddress);
 			}
@@ -96,12 +97,12 @@ public class NetworkUtilities {
 	public static JSONArray getSSID(boolean debug){
 		ArrayList result=new ArrayList();;
 		try {
-			//if(debug)//System.out.println("in getSSID, About to execute command");
+			//if(debug)//logger.debug("in getSSID, About to execute command");
 			result = Utils.executeCommand( "sudo  iw dev wlan0 scan ap-force");
-			//if(debug)//System.out.println("in getSSID, executed command, size="+ result.size());
+			//if(debug)//logger.debug("in getSSID, executed command, size="+ result.size());
 		} catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
-			//System.out.println(Utils.getStringException(e));
+			//logger.debug(Utils.getStringException(e));
 		}
 		boolean foundTSF=false;
 		boolean foundSSID=false;
@@ -113,7 +114,7 @@ public class NetworkUtilities {
 		for(int j=0;j<result.size();j++){
 			line = (String) result.get(j);
 			if(debug) {
-				System.out.println("line=" + line);
+				logger.debug("line=" + line);
 			}
 			if(line.contains("TSF:")){
 				foundTSF=true;
@@ -149,7 +150,7 @@ public class NetworkUtilities {
 				}
 			}
 			if(debug) {
-				System.out.println("ssidInfo=" + ssidInfo.toString(4));
+				logger.debug("ssidInfo=" + ssidInfo.toString(4));
 			}
 		}
 		return units;
@@ -170,7 +171,7 @@ public class NetworkUtilities {
 			if(routeInfo.size()>0){
 				String line =((String) routeInfo.get(0)).trim();
 				String gatewayAddress = line.substring(12).split(" ")[0].trim();
-				////System.out.println("isNetworkStatusOk, gatewayAddress=" + gatewayAddress);
+				////logger.debug("isNetworkStatusOk, gatewayAddress=" + gatewayAddress);
 				ArrayList pingInfo = Utils.executeCommand("ping " + gatewayAddress + " -c 3");
 				//
 				// the result will be 4 lines as follows if it can not find the gateway:
@@ -193,7 +194,7 @@ public class NetworkUtilities {
 				//
 				for(int i=1;i<pingInfo.size();i++){
 					line = (String) pingInfo.get(i);
-					////System.out.println("isNetworkStatusOk, line=" + line);
+					////logger.debug("isNetworkStatusOk, line=" + line);
 					
 					if(line.contains("Destination Host Unreachable")){
 						networkStatusOk=false;

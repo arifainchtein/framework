@@ -295,7 +295,12 @@ public class PLSeriesReader extends BufferedReader {
         	
         	String status="";
         	if(responseCode==200){
-        		serialPortInputStream.read(buffer);
+        	//	serialPortInputStream.read(buffer);
+        		
+        		 readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+    			logger.debug("battery state, after 200 readCount=" + readCount);
+    		
+    			
             	byte returnData = buffer[1];
             	int result = buffer[0] & 3;
             	logger.debug("PLA-"+"getBatteryState= " +result);
