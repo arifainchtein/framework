@@ -248,6 +248,12 @@ public class PLSeriesReader extends BufferedReader {
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			logger.debug("readCount=" + readCount);
 			
+			int high = buffer[1] >= 0 ? buffer[1] : 256 + buffer[1];
+			int low = buffer[0] >= 0 ? buffer[0] : 256 + buffer[0];
+
+			int res = low | (high << 8);
+			
+			logger.debug("getCurrentCharge res res res :" + res);
 			
 			int responseCode = convertByteToInt(buffer);
 			logger.debug("getCurrentVoltage responseCode:" + responseCode);
@@ -257,6 +263,13 @@ public class PLSeriesReader extends BufferedReader {
         		byte[] buf2 = new byte[2];
 	        	readCount = readInputStreamWithTimeout(serialPortInputStream, buf2, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
     			
+	        	int high2 = buf2[1] >= 0 ? buf2[1] : 256 + buf2[1];
+				int low2 = buf2[0] >= 0 ? buf2[0] : 256 + buf2[0];
+
+				int res2 = low | (high << 8);
+				
+				logger.debug("getCurrentCharge res res res2 :" + res2);
+				
         		logger.debug("getCurrentVoltage after 200 with buf2, readCount=" + readCount);
     		
         		
