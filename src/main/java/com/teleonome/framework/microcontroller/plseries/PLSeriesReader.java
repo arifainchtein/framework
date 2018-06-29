@@ -250,6 +250,10 @@ public class PLSeriesReader extends BufferedReader {
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			logger.debug("readCount=" + readCount);
 			
+			String hex = DatatypeConverter.printHexBinary(buffer);
+			logger.debug("voltage hex=" + hex);
+			
+			
 			int high = buffer[1] >= 0 ? buffer[1] : 256 + buffer[1];
 			int low = buffer[0] >= 0 ? buffer[0] : 256 + buffer[0];
 
@@ -265,6 +269,9 @@ public class PLSeriesReader extends BufferedReader {
         		byte[] buf2 = new byte[2];
 	        	readCount = readInputStreamWithTimeout(serialPortInputStream, buf2, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
     			
+	        	String hex2 = DatatypeConverter.printHexBinary(buf2);
+				logger.debug("hex2=" + hex2);
+				
 	        	int high2 = buf2[1] >= 0 ? buf2[1] : 256 + buf2[1];
 				int low2 = buf2[0] >= 0 ? buf2[0] : 256 + buf2[0];
 
