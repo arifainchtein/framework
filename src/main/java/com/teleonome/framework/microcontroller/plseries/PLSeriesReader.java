@@ -448,11 +448,12 @@ public class PLSeriesReader extends BufferedReader {
 			
         	if(responseCode==200){
         		//serialPortInputStream.read(buffer);
-        		readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+        		byte[] buf2 = new byte[2];
+        		readCount = readInputStreamWithTimeout(serialPortInputStream, buf2, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
     			logger.debug("getCurrentLOad after 200 readCount=" + readCount);
     		
     			
-            	double loadCurrentUnprocessed = convertByteToDouble(buffer);
+            	double loadCurrentUnprocessed = convertByteToDouble(buf2);
             	loadCurrent = round(loadCurrentUnprocessed*chargeCurrentFactor,2);
      			logger.debug("PLA-"+"getCurrentLoad charge buffer+" + buffer + " chargeCurrentUnprocessed=" + loadCurrentUnprocessed +" current= " + loadCurrent);
     			//logger.debug("getCurrentLoad charge buffer+" + buffer + " chargeCurrentUnprocessed=" + loadCurrentUnprocessed +" current= " + loadCurrent);
