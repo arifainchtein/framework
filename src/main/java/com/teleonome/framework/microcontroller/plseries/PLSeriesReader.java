@@ -540,6 +540,10 @@ public class PLSeriesReader extends BufferedReader {
 						int low2 = buffer[0] >= 0 ? buf2[0] : 256 + buf2[0];
 
 						int res2= low2 | (high2 << 8);
+						logger.debug("about to loop over");
+						for (int i = 0; i < buf2.length; ++i)
+					         logger.debug((char)buf2[i]);
+						
 						
 						logger.debug("getCurrentCharge res res res22 :" + res2);
 						
