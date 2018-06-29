@@ -126,8 +126,8 @@ public class PLSeriesReader extends BufferedReader {
 		
 		
 		
-		logger.debug("Ra-" + "about to read currentCharge, PAUSE_BETWEEN_DATA=" + PAUSE_BETWEEN_DATA);
-		double currentCharge  = getCurrentCharge();
+		logger.debug("Ra-" + "about to read newcurrentCharge, PAUSE_BETWEEN_DATA=" + PAUSE_BETWEEN_DATA);
+		double currentCharge  = getNewCurrentCharge();
 		logger.debug("Ra- currentCharge" + currentCharge);
 		try {
 			Thread.sleep(PAUSE_BETWEEN_DATA);
@@ -196,7 +196,7 @@ public class PLSeriesReader extends BufferedReader {
 		double maxBatVoltageToday = 55;//getMaxBatVoltageToday();
 		double minBatVoltageToday  = 46;//getMinBatVoltageToday();
 		double totalChargeAmpHoursForToday = 10;//getTotalChargeAmpHoursForToday();
-		double currentStateOfCharge = getCurrentStateOfCharge();
+		double currentStateOfCharge = getNewCurrentStateOfCharge();
 		double totalLoadAmpHoursForToday = 100;//getTotalLoadAmpHoursForToday();
 		String prefix="";
 		logger.info("about to return ");
@@ -208,6 +208,99 @@ public class PLSeriesReader extends BufferedReader {
 		return dataLine;
 	}
 	
+	public double getCurrentCharge() {
+		// TODO Auto-generated method stub
+		
+		try {
+		//	//logger.debug("about to getCurrentCharge");
+			
+			//
+			// for pla
+			//
+			
+			serialPortOutputStream.write( 20 );
+			serialPortOutputStream.write( 205 );
+			serialPortOutputStream.write( 0 );
+			serialPortOutputStream.write( 229 );
+			serialPortOutputStream.write( 4);
+			
+			serialPortOutputStream.flush();
+			try {
+				Thread.sleep(170);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			byte[] buffer = new byte[2];
+			logger.debug("point 3 normal read");
+			//serialPortInputStream.read(buffer);
+			//logger.debug("readCount simpe read=" + buffer.length);
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+			//logger.debug("readCount=" + readCount);
+			double chargeCurrent=0;
+			if(readCount>0) {
+				
+				int high = buffer[1] >= 0 ? buffer[1] : 256 + buffer[1];
+				int low = buffer[0] >= 0 ? buffer[0] : 256 + buffer[0];
+
+				int res = low | (high << 8);
+				
+				logger.debug("getCurrentCharge res res res :" + res);
+				
+				
+				String hex = DatatypeConverter.printHexBinary(buffer);
+				logger.debug("hex=" + hex);
+				
+				
+				int responseCode = convertByteToInt(buffer);
+				logger.debug("getCurrentCharge responseCode one byte buffer:" + responseCode);
+				
+				if(responseCode==200){
+					// serialPortInputStream.read(buffer);
+					byte[] buf2 = new byte[2];
+					 readCount = readInputStreamWithTimeout(serialPortInputStream, buf2, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+					//logger.debug("getCurrentCharge after 200 readCount=" + readCount);
+
+					 String hex2 = DatatypeConverter.printHexBinary(buf2);
+						logger.debug("he2x=" + hex2);
+						
+						
+					 int high2 = buf2[1] >= 0 ? buf2[1] : 256 + buf2[1];
+						int low2 = buffer[0] >= 0 ? buf2[0] : 256 + buf2[0];
+
+						int res2= low2 | (high2 << 8);
+						logger.debug("about to loop over");
+						for (int i = 0; i < buf2.length; ++i)
+					         logger.debug((char)buf2[i]);
+						
+						
+						logger.debug("getCurrentCharge res res res22 :" + res2);
+						
+					double chargeCurrentUnprocessed = convertByteToDouble(buf2);
+					chargeCurrent = round(chargeCurrentUnprocessed*chargeCurrentFactor,2);
+					logger.debug("getCurrentCharge charge buffer+" + buffer + " chargeCurrentUnprocessed=" + chargeCurrentUnprocessed +" current= " + chargeCurrent);
+				}else{
+					logger.debug("PLA-"+"getCurrentCharge, returning 0 because response code was " + responseCode);
+					logger.debug("getCurrentCharge, returning 0 because response code was " + responseCode);	
+				}
+
+
+
+			}
+        	return chargeCurrent;
+		} catch( IOException e ) {
+			e.printStackTrace();
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			logger.debug("PLA-"+sw.toString());
+			//logger.debug(sw.toString());
+		}
+		
+		return -1;
+	}
+	
 	public double getNewCurrentLoad() {
 		// TODO Auto-generated method stub
 		try {
@@ -217,12 +310,12 @@ public class PLSeriesReader extends BufferedReader {
 			// for pla
 			//
 			
-			serialPortOutputStream.write( 4);
+			
 			serialPortOutputStream.write( 20 );
 			serialPortOutputStream.write( 206 );
 			serialPortOutputStream.write( 0 );
 			serialPortOutputStream.write( 230 );
-			
+			serialPortOutputStream.write( 4);
 			serialPortOutputStream.flush();
 			
 			
@@ -310,6 +403,59 @@ public class PLSeriesReader extends BufferedReader {
 			
         	 logger.debug("rutrn voltageg=" + voltage);
 			return voltage;
+		} catch( IOException e ) {
+			e.printStackTrace();
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			logger.debug("PLA-"+sw.toString());
+			//logger.debug(sw.toString());
+		}
+		return -1;
+	}
+	
+	public double getNewCurrentStateOfCharge(){
+		try {
+			////logger.debug("about to getCurrentLoad");
+			
+			//
+			// for pla
+			//
+			
+			serialPortOutputStream.write( 20 );
+			serialPortOutputStream.write( 181 );
+			serialPortOutputStream.write( 0 );
+			serialPortOutputStream.write( 205 );
+			serialPortOutputStream.write( 4);
+			
+			serialPortOutputStream.flush();
+			
+			
+			byte[] buffer = new byte[2];
+			////logger.debug("point 3c");
+			//serialPortInputStream.read(buffer);
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+			
+			double loadCurrent=0;
+			String hex = DatatypeConverter.printHexBinary(buffer);
+			logger.debug("loadCurrent  2byte hex=" + hex);
+			
+
+			String firstByte=hex.substring(0, 2);
+			String secondByte=hex.substring(2, 4);
+			
+			
+			if(firstByte.equals("C8")) {
+				int loadCurrentUnprocessed = Integer.parseInt(secondByte.trim(), 16 );
+				logger.debug("getNewCurrentStateOfCharge unprocessed, loadCurrentUnprocessed=" + loadCurrentUnprocessed);
+				loadCurrent = round(loadCurrentUnprocessed,2);
+			}
+			
+			
+			
+			
+        	////logger.debug("getCurrentCharge charge buffer+" + buffer + " chargeCurrentUnprocessed=" + loadCurrentUnprocessed +" current= " + loadCurrent);
+			return loadCurrent;
 		} catch( IOException e ) {
 			e.printStackTrace();
 			StringWriter sw = new StringWriter();
@@ -466,6 +612,7 @@ public class PLSeriesReader extends BufferedReader {
 		return "";
 	}
 	
+	
 	public double getCurrentStateOfCharge(){
 		try {
 			////logger.debug("about to getCurrentLoad");
@@ -590,7 +737,7 @@ public class PLSeriesReader extends BufferedReader {
 	
 	
 	
-	public double getCurrentCharge() {
+	public double getNewCurrentCharge() {
 		// TODO Auto-generated method stub
 		
 		try {
@@ -616,60 +763,25 @@ public class PLSeriesReader extends BufferedReader {
 			
 			byte[] buffer = new byte[2];
 			logger.debug("point 3 normal read");
-			//serialPortInputStream.read(buffer);
-			//logger.debug("readCount simpe read=" + buffer.length);
+			
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
-			//logger.debug("readCount=" + readCount);
+			logger.debug("readCount=" + readCount);
+		
+
+			String hex = DatatypeConverter.printHexBinary(buffer);
+			logger.debug("load  2byte hex=" + hex);
+			
+
+			String firstByte=hex.substring(0, 2);
+			String secondByte=hex.substring(2, 4);
+			
 			double chargeCurrent=0;
-			if(readCount>0) {
-				
-				int high = buffer[1] >= 0 ? buffer[1] : 256 + buffer[1];
-				int low = buffer[0] >= 0 ? buffer[0] : 256 + buffer[0];
-
-				int res = low | (high << 8);
-				
-				logger.debug("getCurrentCharge res res res :" + res);
-				
-				
-				String hex = DatatypeConverter.printHexBinary(buffer);
-				logger.debug("hex=" + hex);
-				
-				
-				int responseCode = convertByteToInt(buffer);
-				logger.debug("getCurrentCharge responseCode one byte buffer:" + responseCode);
-				
-				if(responseCode==200){
-					// serialPortInputStream.read(buffer);
-					byte[] buf2 = new byte[2];
-					 readCount = readInputStreamWithTimeout(serialPortInputStream, buf2, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
-					//logger.debug("getCurrentCharge after 200 readCount=" + readCount);
-
-					 String hex2 = DatatypeConverter.printHexBinary(buf2);
-						logger.debug("he2x=" + hex2);
-						
-						
-					 int high2 = buf2[1] >= 0 ? buf2[1] : 256 + buf2[1];
-						int low2 = buffer[0] >= 0 ? buf2[0] : 256 + buf2[0];
-
-						int res2= low2 | (high2 << 8);
-						logger.debug("about to loop over");
-						for (int i = 0; i < buf2.length; ++i)
-					         logger.debug((char)buf2[i]);
-						
-						
-						logger.debug("getCurrentCharge res res res22 :" + res2);
-						
-					double chargeCurrentUnprocessed = convertByteToDouble(buf2);
-					chargeCurrent = round(chargeCurrentUnprocessed*chargeCurrentFactor,2);
-					logger.debug("getCurrentCharge charge buffer+" + buffer + " chargeCurrentUnprocessed=" + chargeCurrentUnprocessed +" current= " + chargeCurrent);
-				}else{
-					logger.debug("PLA-"+"getCurrentCharge, returning 0 because response code was " + responseCode);
-					logger.debug("getCurrentCharge, returning 0 because response code was " + responseCode);	
-				}
-
-
-
+			if(firstByte.equals("C8")) {
+				int chargeCurrentUnprocessed = Integer.parseInt(secondByte.trim(), 16 );
+				logger.debug("chargeCurrentUnprocessed=" + chargeCurrentUnprocessed);
+				chargeCurrent = round(chargeCurrentUnprocessed*chargeCurrentFactor,2);
 			}
+			
         	return chargeCurrent;
 		} catch( IOException e ) {
 			e.printStackTrace();
