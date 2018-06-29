@@ -232,7 +232,7 @@ public class PLSeriesReader extends BufferedReader {
 			
 		    logger.debug("about to read data after sending");
 			
-			byte[] buffer = new byte[4];
+			byte[] buffer = new byte[2];
 			logger.debug("point 3c");
 		//	serialPortInputStream.read(buffer);
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
@@ -435,6 +435,10 @@ public class PLSeriesReader extends BufferedReader {
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			logger.debug("readCount=" + readCount);
 		
+
+			String hex = DatatypeConverter.printHexBinary(buffer);
+			logger.debug("load  2byte hex=" + hex);
+			
 			
 			
 			int responseCode = convertByteToInt(buffer);
