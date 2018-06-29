@@ -499,11 +499,11 @@ public class PLSeriesReader extends BufferedReader {
 			}
 			
 			byte[] buffer = new byte[1];
-			logger.debug("point 3c");
-			//serialPortInputStream.read(buffer);
+			logger.debug("point 3 normal read");
+			serialPortInputStream.read(buffer);
 			//logger.debug("readCount simpe read=" + buffer.length);
-			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
-			logger.debug("readCount=" + readCount);
+			int readCount = 1;//readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+			//logger.debug("readCount=" + readCount);
 			double chargeCurrent=0;
 			if(readCount>0) {
 				int intV = buffer[0];
