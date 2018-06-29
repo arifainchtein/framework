@@ -58,16 +58,226 @@ public class MethodTester {
 			String arg="MyLegoDoor";
 			String s= String.format("%040x", new BigInteger(1, arg.getBytes("UTF-8")));
 			System.out.println(s);
-			listIP();
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			recognizeImages();
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
+	public void recognizeImages() {
+		try {
+			String path="/Users/arifainchtein/Data/Teleonome/Ra/ocr/";
+			String formatedCurrentTime="29-06-2018_1339";
+			String currentImageFileName="Selectronic_"+formatedCurrentTime + ".png";
+			String currentStateOfChargeImageFileName="Selectronic_StateOfCharge_"+formatedCurrentTime + ".png";
+			String currentBatteryVoltageImageFileName="Selectronic_Battery_Voltage_"+formatedCurrentTime + ".png";
+			String currentACLoadImageFileName="Selectronic_AC_Load_"+formatedCurrentTime + ".png";
+			String currentACLoadTodayImageFileName="Selectronic_AC_Load_Today_"+formatedCurrentTime + ".png";
+			String currentBatteryPowerImageFileName="Selectronic_Battery_Power_"+formatedCurrentTime + ".png";
+			String currentSolarChargeImageFileName="Selectronic_Solar_Charge_"+formatedCurrentTime + ".png";
+			String currentBatteryNetImageFileName="Selectronic_Battery_Net_Today_"+formatedCurrentTime + ".png";
+			String currentGeneratorStatusImageFileName="Selectronic_Generator_Status_"+formatedCurrentTime + ".png";
+			String currentGeneratorStartedImageFileName="Selectronic_Generator_Started_"+formatedCurrentTime + ".png";
+			
+			
+			//
+			// code to extract and recognized the Battery Net Today
+			//
+			String batteryNetTodayImageName =  path + currentBatteryNetImageFileName;
+			//
+			// now process the image, first convert it to bw
+			String command = "convert "+batteryNetTodayImageName+" -type bilevel SelectronicBatteryNetToday.png";
+			ArrayList results = Utils.executeCommand(command);
+			//
+			// now recognized it
+			command = "tesseract SelectronicBatteryNetToday.png ./SelectronicBatteryNetToday";
+			results = Utils.executeCommand(command);
+			// Now read the recognized file
+			String recognizedText = FileUtils.readFileToString(new File("SelectronicBatteryNetToday.txt"));
+			logger.debug("SelectronicBatteryNetToday text=" + recognizedText);
+			//
+			// the recognized text is of the form -19.5 kwh
+			//
+			double recognisedBatteryNetToday = Double.parseDouble(recognizedText.substring(0, 3))/10;
+			logger.debug("recgnized SelectronicBatteryNetToday=" + recognisedBatteryNetToday);
+			
+			
+			//
+			// code to extract and recognized the Battery Net Today
+			//
+			String solarChargeImageFileName =  path + currentSolarChargeImageFileName;
+			//
+			// now process the image, first convert it to bw
+			 command = "convert "+solarChargeImageFileName+" -type bilevel SelectronicSolarCharge.png";
+			 results = Utils.executeCommand(command);
+			//
+			// now recognized it
+			command = "tesseract SelectronicSolarCharge.png ./SelectronicSolarCharge";
+			results = Utils.executeCommand(command);
+			// Now read the recognized file
+			 recognizedText = FileUtils.readFileToString(new File("SelectronicSolarCharge.txt"));
+			logger.debug("SelectronicSolarCharge text=" + recognizedText);
+			//
+			// the recognized text is of the form -19.5 kwh
+			//
+			double recognisedSolarCharge = Double.parseDouble(recognizedText.substring(0, 3))/10;
+			logger.debug("recgnized recognisedSolarCharge=" + recognisedSolarCharge);
+			
+			
+			//
+			// code to extract and recognized the Battery Power
+			//
+			String batteryPowerImageFileName =  path + currentBatteryPowerImageFileName;
+			//
+			// now process the image, first convert it to bw
+			 command = "convert "+batteryPowerImageFileName+" -type bilevel SelectronicBatteryPower.png";
+			 results = Utils.executeCommand(command);
+			//
+			// now recognized it
+			command = "tesseract SelectronicBatteryPower.png ./SelectronicBatteryPower";
+			results = Utils.executeCommand(command);
+			// Now read the recognized file
+			 recognizedText = FileUtils.readFileToString(new File("SelectronicBatteryPower.txt"));
+			logger.debug("SelectronicBatteryPower text=" + recognizedText);
+			//
+			// the recognized text is of the form -19.5 kwh
+			//
+			double recognisedBatteryPower = Double.parseDouble(recognizedText.substring(0, 3))/10;
+			logger.debug("recgnized recognisedBatteryPower=" + recognisedBatteryPower);
+		
+			
+			//
+			// code to extract and recognized the state of charge
+			//
+			String stateOfChargeImageName = path + currentStateOfChargeImageFileName;
+			//
+			// now process the image, first convert it to bw
+			 command = "convert "+stateOfChargeImageName+" -type bilevel SelectronicStateOfCharge.png";
+			 results = Utils.executeCommand(command);
+			//
+			// now recognized it
+			command = "tesseract SelectronicStateOfCharge.png ./SelectronicStateOfCharge";
+			results = Utils.executeCommand(command);
+			// Now read the recognized file
+			 recognizedText = FileUtils.readFileToString(new File("SelectronicStateOfCharge.txt"));
+			logger.debug("recgnized text=" + recognizedText);
+			//
+			// the recognized text is of the form 524v
+			//
+			double recognisedStateOfCharge = Double.parseDouble(recognizedText.substring(0, 3))/10;
+			logger.debug("recognisedStateOfCharge text=" + recognisedStateOfCharge);
+			
+			
+			
+			//
+			// code to extract and recognized the battery voltage
+			//
+			String batteryVoltageImageName = path + currentBatteryPowerImageFileName;
+			//
+			// now process the image, first convert it to bw
+			 command = "convert "+batteryVoltageImageName+" -type bilevel SelectronicBatteryVoltage.png";
+			 results = Utils.executeCommand(command);
+			//
+			// now recognized it
+			command = "tesseract SelectronicBatteryVoltage.png ./SelectronicBatteryVoltage";
+			results = Utils.executeCommand(command);
+			// Now read the recognized file
+			 recognizedText = FileUtils.readFileToString(new File("SelectronicBatteryVoltage.txt"));
+			logger.debug("recgnized text=" + recognizedText);
+			//
+			// the recognized text is of the form 524v
+			//
+			double recognisedBatteryVoltage = Double.parseDouble(recognizedText.substring(0, 3))/10;
+			logger.debug("recognisedBatteryVoltage=" + recognisedBatteryVoltage);
+			
+			//
+			// code to extract and recognized the ACLoadImageFileName
+			//
+			String acLoadImageFileName = path + currentACLoadImageFileName;
+			//
+			// now process the image, first convert it to bw
+			 command = "convert "+acLoadImageFileName+" -type bilevel SelectronicACLoad.png";
+			 results = Utils.executeCommand(command);
+			//
+			// now recognized it
+			command = "tesseract SelectronicACLoad.png ./SelectronicACLoad";
+			results = Utils.executeCommand(command);
+			// Now read the recognized file
+			 recognizedText = FileUtils.readFileToString(new File("SelectronicACLoad.txt"));
+			logger.debug("recgnized text=" + recognizedText);
+			//
+			// the recognized text is of the form 524v
+			//
+			double recognisedACLoad = Double.parseDouble(recognizedText.substring(0, 3))/10;
+			logger.debug("recognisedACLoad=" + recognisedACLoad);
+			
+
+
+			//
+			// code to extract and recognized the ACLoadTodayImageFileName
+			//
+			String acLoadTodayImageFileName = path + currentACLoadTodayImageFileName;
+			//
+			// now process the image, first convert it to bw
+			 command = "convert "+acLoadTodayImageFileName+" -type bilevel SelectronicACLoadToday.png";
+			 results = Utils.executeCommand(command);
+			//
+			// now recognized it
+			command = "tesseract SelectronicACLoadToday.png ./SelectronicACLoadToday";
+			results = Utils.executeCommand(command);
+			// Now read the recognized file
+			 recognizedText = FileUtils.readFileToString(new File("SelectronicACLoadToday.txt"));
+			logger.debug("recgnized text=" + recognizedText);
+			//
+			// the recognized text is of the form 524v
+			//
+			double recognisedACLoadToday = Double.parseDouble(recognizedText.substring(0, 3))/10;
+			logger.debug("recognisedACLoadToday=" + recognisedACLoadToday);
+			
+			
+			
+			
+			
+			//
+			// code to extract and recognized the Generator Status
+			//
+			String generatorStatusImageFileName = path + currentGeneratorStatusImageFileName;
+			//
+			// now process the image, first convert it to bw
+			 command = "convert "+generatorStatusImageFileName+" -type bilevel SelectronicGeneratorStatus.png";
+			 results = Utils.executeCommand(command);
+			//
+			// now recognized it
+			command = "tesseract SelectronicGeneratorStatus.png ./SelectronicGeneratorStatus";
+			results = Utils.executeCommand(command);
+			// Now read the recognized file
+			String recognisedGeneratorStatus = FileUtils.readFileToString(new File("SelectronicGeneratorStatus.txt"));
+			logger.debug("recgnized recognisedGeneratorStatus=" + recognisedGeneratorStatus);
+			
+			//
+			// code to extract and recognized the Generator Started
+			//
+			String generatorStartedImageFileName = path + currentGeneratorStartedImageFileName;
+			//
+			// now process the image, first convert it to bw
+			 command = "convert "+generatorStartedImageFileName+" -type bilevel SelectronicGeneratorStarted.png";
+			 results = Utils.executeCommand(command);
+			//
+			// now recognized it
+			command = "tesseract SelectronicGeneratorStarted.png ./SelectronicGeneratorStarted";
+			results = Utils.executeCommand(command);
+			// Now read the recognized file
+			String recognisedGeneratorStarted = FileUtils.readFileToString(new File("SelectronicGeneratorStarted.txt"));
+			logger.debug("recgnized recognisedGeneratorStarted=" + recognisedGeneratorStarted);
+		}catch(IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 	public void listIP() throws SocketException {
 			NetworkInterface networkInterface;
 			InetAddress inetAddr, potential=null;
