@@ -514,7 +514,7 @@ public class PLSeriesReader extends BufferedReader {
 				
 				if(responseCode==200){
 					// serialPortInputStream.read(buffer);
-					byte[] buf2 = new byte[1];
+					byte[] buf2 = new byte[2];
 					 readCount = readInputStreamWithTimeout(serialPortInputStream, buf2, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 					//logger.debug("getCurrentCharge after 200 readCount=" + readCount);
 
