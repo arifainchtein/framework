@@ -15,6 +15,8 @@ import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.util.Enumeration;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 
@@ -484,7 +486,10 @@ public class PLSeriesReader extends BufferedReader {
 			//logger.debug(sw.toString());
 		}
 		
-		return -1;	}
+		return -1;	
+		}
+	
+	
 	
 	public double getCurrentCharge() {
 		// TODO Auto-generated method stub
@@ -526,9 +531,9 @@ public class PLSeriesReader extends BufferedReader {
 				
 				logger.debug("getCurrentCharge res res res :" + res);
 				
-				logger.debug("about to loop over first");
-				for (int i = 0; i < buffer.length; ++i)
-			         logger.debug((char)buffer[i]);
+				
+				String hex = DatatypeConverter.printHexBinary(buffer);
+				logger.debug("hex=" + hex);
 				
 				
 				int responseCode = convertByteToInt(buffer);
@@ -540,6 +545,10 @@ public class PLSeriesReader extends BufferedReader {
 					 readCount = readInputStreamWithTimeout(serialPortInputStream, buf2, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 					//logger.debug("getCurrentCharge after 200 readCount=" + readCount);
 
+					 String hex2 = DatatypeConverter.printHexBinary(buf2);
+						logger.debug("he2x=" + hex2);
+						
+						
 					 int high2 = buf2[1] >= 0 ? buf2[1] : 256 + buf2[1];
 						int low2 = buffer[0] >= 0 ? buf2[0] : 256 + buf2[0];
 
