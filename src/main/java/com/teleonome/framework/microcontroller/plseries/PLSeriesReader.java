@@ -96,16 +96,6 @@ public class PLSeriesReader extends BufferedReader {
 		
 		
 		
-		logger.debug("Ra- about to read currentLoad" );
-		double currentLoad = getCurrentLoad();
-		logger.debug("Ra- currentLoad" + currentLoad);
-		try {
-			Thread.sleep(PAUSE_BETWEEN_DATA);
-		} catch (InterruptedException e3) {
-			// TODO Auto-generated catch block
-			logger.info(Utils.getStringException(e3));
-		}
-		
 		
 		
 		
@@ -127,6 +117,19 @@ public class PLSeriesReader extends BufferedReader {
 			// TODO Auto-generated catch block
 			logger.info(Utils.getStringException(e3));
 		}
+		
+		
+		logger.debug("Ra- about to read currentLoad" );
+		double currentLoad = getCurrentLoad();
+		logger.debug("Ra- currentLoad" + currentLoad);
+		try {
+			Thread.sleep(PAUSE_BETWEEN_DATA);
+		} catch (InterruptedException e3) {
+			// TODO Auto-generated catch block
+			logger.info(Utils.getStringException(e3));
+		}
+		
+		
 		
 //		
 //		double maxBatVoltageToday = getMaxBatVoltageToday();
@@ -278,10 +281,10 @@ public class PLSeriesReader extends BufferedReader {
 			
 			
 			byte[] buffer = new byte[2];
-			////logger.debug("point 3c");
+			logger.debug("line 284");
 			serialPortInputStream.read(buffer);
 			int responseCode = convertByteToInt(buffer);
-        	//logger.debug("getState responseCode:" + responseCode);
+        	logger.debug("getState responseCode:" + responseCode);
         	
         	
         	String status="";
