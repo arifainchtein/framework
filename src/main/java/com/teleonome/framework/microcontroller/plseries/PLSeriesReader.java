@@ -88,7 +88,7 @@ public class PLSeriesReader extends BufferedReader {
 		logger.debug("Ra-" + "about to read data");
 		
 		logger.debug("Ra-" + "about to read voltage");
-		double batteryVoltage  = getCurrentVoltage();
+		double batteryVoltage  = getNewCurrentVoltage();
 		logger.debug("Ra- batteryVoltage" + batteryVoltage);
 		try {
 			Thread.sleep(PAUSE_BETWEEN_DATA);
@@ -98,16 +98,15 @@ public class PLSeriesReader extends BufferedReader {
 		}
 		
 		
-		logger.debug("Ra-" + "about to read currentCharge, PAUSE_BETWEEN_DATA=" + PAUSE_BETWEEN_DATA);
-		double currentCharge  = getCurrentCharge();
-		logger.debug("Ra- currentCharge" + currentCharge);
+		logger.debug("Ra- about to read currentLoad" );
+		double currentLoad = getNewCurrentLoad();
+		logger.debug("Ra- currentLoad" + currentLoad);
 		try {
 			Thread.sleep(PAUSE_BETWEEN_DATA);
 		} catch (InterruptedException e3) {
 			// TODO Auto-generated catch block
 			logger.info(Utils.getStringException(e3));
 		}
-		
 		
 		
 		
@@ -125,16 +124,17 @@ public class PLSeriesReader extends BufferedReader {
 		}
 		
 		
-		logger.debug("Ra- about to read currentLoad" );
-		double currentLoad = getCurrentLoad();
-		logger.debug("Ra- currentLoad" + currentLoad);
+		
+		
+		logger.debug("Ra-" + "about to read currentCharge, PAUSE_BETWEEN_DATA=" + PAUSE_BETWEEN_DATA);
+		double currentCharge  = getCurrentCharge();
+		logger.debug("Ra- currentCharge" + currentCharge);
 		try {
 			Thread.sleep(PAUSE_BETWEEN_DATA);
 		} catch (InterruptedException e3) {
 			// TODO Auto-generated catch block
 			logger.info(Utils.getStringException(e3));
 		}
-		
 		
 		
 //		
@@ -208,6 +208,117 @@ public class PLSeriesReader extends BufferedReader {
 		return dataLine;
 	}
 	
+	public double getNewCurrentLoad() {
+		// TODO Auto-generated method stub
+		try {
+			////logger.debug("about to getCurrentLoad");
+			
+			//
+			// for pla
+			//
+			
+			serialPortOutputStream.write( 20 );
+			serialPortOutputStream.write( 206 );
+			serialPortOutputStream.write( 0 );
+			serialPortOutputStream.write( 230 );
+			serialPortOutputStream.write( 4);
+			
+			serialPortOutputStream.flush();
+			
+			
+			byte[] buffer = new byte[2];
+			logger.debug("about to read new wy with byte[2]");
+			//serialPortInputStream.read(buffer);
+			
+			
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+			logger.debug("readCount=" + readCount);
+		
+
+			String hex = DatatypeConverter.printHexBinary(buffer);
+			logger.debug("load  2byte hex=" + hex);
+			
+
+			String firstByte=hex.substring(0, 2);
+			String secondByte=hex.substring(2, 4);
+			
+			double loadCurrent=0;
+			if(firstByte.equals("C8")) {
+				int loadCurrentUnprocessed = Integer.parseInt(secondByte.trim(), 16 );
+				logger.debug("volatge unprocessed, loadCurrentUnprocessed=" + loadCurrentUnprocessed);
+				loadCurrent = round(loadCurrentUnprocessed*chargeCurrentFactor,2);
+			}
+			
+			
+        	
+        	return loadCurrent;
+		} catch( IOException e ) {
+			e.printStackTrace();
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			logger.debug("PLA-"+sw.toString());
+			//logger.debug(sw.toString());
+		}
+		
+		return -1;	
+		}
+	
+	public double getNewCurrentVoltage() {
+		try {
+			logger.debug("about to getNewCurrentVoltage data, serialPortInputStream=" + serialPortInputStream);
+			
+			//
+			// for pla
+			//
+			serialPortOutputStream.write( 20 );
+			serialPortOutputStream.write( 50 );
+			serialPortOutputStream.write( 0 );
+			serialPortOutputStream.write( 74 );
+			serialPortOutputStream.write( 4 );
+			
+			serialPortOutputStream.flush();
+			try {
+				Thread.sleep(70);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		    logger.debug("about to read data after sending");
+			
+			byte[] buffer = new byte[2];
+			logger.debug("point 3c");
+		//	serialPortInputStream.read(buffer);
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+			logger.debug("readCount=" + readCount);
+			
+			String hex = DatatypeConverter.printHexBinary(buffer);
+			logger.debug("voltage  4byte hex=" + hex);
+			String firstByte=hex.substring(0, 2);
+			String secondByte=hex.substring(2, 4);
+			
+			double voltage=0;
+			if(firstByte.equals("C8")) {
+				int voltageUnprocessed = Integer.parseInt(secondByte.trim(), 16 );
+				logger.debug("volatge unprocessed, voltageUnprocessed=" + voltageUnprocessed);
+	        	voltage = round(0.1*voltageUnprocessed*voltageSystemCorrectorFactor,2);
+			}
+			
+			
+			
+        	 logger.debug("rutrn voltageg=" + voltage);
+			return voltage;
+		} catch( IOException e ) {
+			e.printStackTrace();
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			logger.debug("PLA-"+sw.toString());
+			//logger.debug(sw.toString());
+		}
+		return -1;
+	}
 	
 	public double getCurrentVoltage() {
 		try {
