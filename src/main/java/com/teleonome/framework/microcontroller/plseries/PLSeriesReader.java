@@ -503,7 +503,8 @@ public class PLSeriesReader extends BufferedReader {
 			logger.debug("readCount=" + readCount);
 			double chargeCurrent=0;
 			if(readCount>0) {
-				
+				int intV = buffer[0];
+				logger.debug("buffer[0]=" + buffer[0] + " int=" + intV);
 			
 				int responseCode = convertByteToInt(buffer);
 				logger.debug("getCurrentCharge responseCode one byte buffer:" + responseCode);
