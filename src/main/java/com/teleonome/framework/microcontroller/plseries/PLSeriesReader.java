@@ -237,7 +237,10 @@ public class PLSeriesReader extends BufferedReader {
 			
 			byte[] buffer = new byte[1024];
 			logger.debug("point 3c");
-			serialPortInputStream.read(buffer);
+		//	serialPortInputStream.read(buffer);
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+			logger.debug("readCount=" + readCount);
+		
 			int responseCode = convertByteToInt(buffer);
 			logger.debug("getCurrentVoltage responseCode:" + responseCode);
         	double voltage=0;
@@ -282,7 +285,10 @@ public class PLSeriesReader extends BufferedReader {
 			
 			byte[] buffer = new byte[2];
 			logger.debug("line 284");
-			serialPortInputStream.read(buffer);
+		//	serialPortInputStream.read(buffer);
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+			logger.debug("readCount=" + readCount);
+		
 			int responseCode = convertByteToInt(buffer);
         	logger.debug("getState responseCode:" + responseCode);
         	
@@ -350,7 +356,9 @@ public class PLSeriesReader extends BufferedReader {
 			
 			byte[] buffer = new byte[1024];
 			////logger.debug("point 3c");
-			serialPortInputStream.read(buffer);
+			//serialPortInputStream.read(buffer);
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+			
 			int responseCode = convertByteToInt(buffer);
         	logger.debug("PLA-"+"getCurrentStateOfCharge responseCode:" + responseCode);
         	
@@ -457,7 +465,11 @@ public class PLSeriesReader extends BufferedReader {
 			
 			byte[] buffer = new byte[1024];
 			logger.debug("point 3c");
-			serialPortInputStream.read(buffer);
+			//serialPortInputStream.read(buffer);
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+			logger.debug("readCount=" + readCount);
+		
+			
 			int responseCode = convertByteToInt(buffer);
         logger.debug("getCurrentCharge responseCode:" + responseCode);
 			double chargeCurrent=0;
