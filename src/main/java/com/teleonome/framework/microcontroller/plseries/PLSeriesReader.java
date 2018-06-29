@@ -245,7 +245,11 @@ public class PLSeriesReader extends BufferedReader {
 			logger.debug("getCurrentVoltage responseCode:" + responseCode);
         	double voltage=0;
         	if(responseCode==200){
-	        	serialPortInputStream.read(buffer);
+	        	//serialPortInputStream.read(buffer);
+	        	readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+    			logger.debug("getCurrentVoltage after 200 readCount=" + readCount);
+    		
+    			
 	        	int voltageUnprocessed = convertByteToInt(buffer);
 	        	voltage = round(0.1*voltageUnprocessed*voltageSystemCorrectorFactor,2);
  			}else{
@@ -369,8 +373,13 @@ public class PLSeriesReader extends BufferedReader {
         	
 			double loadCurrent=0;
         	if(responseCode==200){
-        		serialPortInputStream.read(buffer);
-            	double loadCurrentUnprocessed = convertByteToDouble(buffer);
+        		//serialPortInputStream.read(buffer);
+            	
+        		readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+    			logger.debug("getCurrentStateOfCharge after 200 readCount=" + readCount);
+    		
+    			
+        		double loadCurrentUnprocessed = convertByteToDouble(buffer);
             	logger.debug("PLA-"+"getCurrentStateOfCharge loadCurrentUnprocessed:" + loadCurrentUnprocessed);
             	loadCurrent = round(loadCurrentUnprocessed*chargeCurrentFactor,2);
  			}else{
@@ -428,7 +437,11 @@ public class PLSeriesReader extends BufferedReader {
 			logger.debug("PLA-"+"getCurrentLoad responseCode=" + responseCode);
 			
         	if(responseCode==200){
-        		serialPortInputStream.read(buffer);
+        		//serialPortInputStream.read(buffer);
+        		readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+    			logger.debug("getCurrentLOad after 200 readCount=" + readCount);
+    		
+    			
             	double loadCurrentUnprocessed = convertByteToDouble(buffer);
             	loadCurrent = round(loadCurrentUnprocessed*chargeCurrentFactor,2);
      			logger.debug("PLA-"+"getCurrentLoad charge buffer+" + buffer + " chargeCurrentUnprocessed=" + loadCurrentUnprocessed +" current= " + loadCurrent);
@@ -480,7 +493,11 @@ public class PLSeriesReader extends BufferedReader {
         logger.debug("getCurrentCharge responseCode:" + responseCode);
 			double chargeCurrent=0;
         	if(responseCode==200){
-        		serialPortInputStream.read(buffer);
+        		// serialPortInputStream.read(buffer);
+        		 readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, 6000);  // 6 second timeout
+    			logger.debug("getCurrentCharge after 200 readCount=" + readCount);
+    		
+    			
             	double chargeCurrentUnprocessed = convertByteToDouble(buffer);
             	chargeCurrent = round(chargeCurrentUnprocessed*chargeCurrentFactor,2);
      			logger.debug("getCurrentCharge charge buffer+" + buffer + " chargeCurrentUnprocessed=" + chargeCurrentUnprocessed +" current= " + chargeCurrent);
@@ -554,8 +571,9 @@ public class PLSeriesReader extends BufferedReader {
         	
 			double chargeLoadAmperHours=0;
         	if(responseCode==200){
-        		serialPortInputStream.read(buffer);
-            	double chargeLoadUnprocessedHighByte = convertByteToDouble(buffer);
+        		//serialPortInputStream.read(buffer);
+            	
+        		double chargeLoadUnprocessedHighByte = convertByteToDouble(buffer);
             	
             	//logger.debug("load low byte:" + chargeLoadUnprocessed + " load high byte:" +  chargeLoadUnprocessedHighByte);
             	double totalEnergy = chargeLoadUnprocessed + chargeLoadUnprocessedHighByte*256;

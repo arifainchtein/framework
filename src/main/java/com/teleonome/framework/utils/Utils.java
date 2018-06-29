@@ -224,7 +224,7 @@ public class Utils {
 			}
 		} catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
-			//System.out.println(Utils.getStringException(e));
+			//logger.debug(Utils.getStringException(e));
 		}
 		return modelName;
 	}
@@ -336,7 +336,7 @@ public class Utils {
 			
 			for(int i=0;i<result.size();i++){
 				line  = (String) result.get(i);
-				////System.out.println("line:" + line);
+				////logger.debug("line:" + line);
 				//
 				tokens = line.split(":");
 				if(tokens.length > 1){
@@ -379,7 +379,7 @@ public class Utils {
 			String line;
 			for(int i=0;i<result.size();i++){
 				line  = (String) result.get(i);
-				////System.out.println("line:" + line);
+				////logger.debug("line:" + line);
 				//
 				tokens = line.split(":");
 				if(tokens.length > 1){
@@ -418,32 +418,32 @@ public class Utils {
 	
 	
 	public static ArrayList executeCommand(String command) throws IOException, InterruptedException{
-		System.out.println("about to create process for the command:" + command);
+		logger.debug("about to create process for the command:" + command);
 		Process process = Runtime.getRuntime().exec(new String[]{"sh","-c",command});
-		System.out.println("created process for the command:" + command);
+		logger.debug("created process for the command:" + command);
 		
 		ArrayList toReturn = new ArrayList();
 		
-		//System.out.println("executeCommand about to start reader");
+		//logger.debug("executeCommand about to start reader");
 		
 		//Process process =pb.start();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 		String line = null;
-		System.out.println("executeCommand reader created:" + command);
+		logger.debug("executeCommand reader created:" + command);
 		
 		
 		while ( (line = reader.readLine()) != null) {
-			System.out.println("adding line:" + line);
+			logger.debug("adding line:" + line);
 			toReturn.add(line);
 		}
 		reader.close();
 		if(!process.waitFor(500, TimeUnit.MILLISECONDS)) {
 		    //timeout - kill the process.
-			System.out.println("executeCommand The command:" + command + " was killed after 500 milliseconds");
+			logger.debug("executeCommand The command:" + command + " was killed after 500 milliseconds");
 			toReturn.add("executeCommand The command:" + command + " was killed after 500 milliseconds");
 		    process.destroy(); // consider using destroyForcibly instead
 		}
-		System.out.println("executeCommand returning :" + toReturn);
+		logger.debug("executeCommand returning :" + toReturn);
 		
 		return toReturn;
 	}
@@ -473,7 +473,7 @@ public class Utils {
 				e.printStackTrace();
 			}
 			String fileName =  getLocalDirectory() + "ssids";
-			//System.out.println("saving ssids file to " + fileName);
+			//logger.debug("saving ssids file to " + fileName);
 			//Runtime.getRuntime().exec("wpa_cli scan_results >" + fileName);
 			
 			ArrayList v=null;
@@ -486,7 +486,7 @@ public class Utils {
 			}
 			
 			
-			//System.out.println("saved ssid info to " + fileName);
+			//logger.debug("saved ssid info to " + fileName);
 			File file = new File(fileName);
 			//while(!file.isFile()){
 				//System.out.print(".");
@@ -806,7 +806,7 @@ public class Utils {
             String fileName = zipEntry.getName();
             File newFile = new File(path + fileName);
             desFileName = path +"/"+ fileName;
-            System.out.println("unzipping " + desFileName);
+            logger.debug("unzipping " + desFileName);
             FileOutputStream fos = new FileOutputStream(desFileName);
             int len;
             while ((len = zis.read(buffer)) > 0) {
