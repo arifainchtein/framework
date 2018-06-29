@@ -504,6 +504,8 @@ public class PLSeriesReader extends BufferedReader {
 		
 			byte[] buf2 = new byte[1];
 			buf2[0]=buffer[0];
+			int i=buffer[0];
+			logger.debug("getCurrentCharge i [0] =" + i);
 			int responseCode = convertByteToInt(buf2);
         logger.debug("getCurrentCharge responseCode single buffer:" + responseCode);
 			double chargeCurrent=0;
