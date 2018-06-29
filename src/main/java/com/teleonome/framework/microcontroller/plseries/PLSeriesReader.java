@@ -502,17 +502,18 @@ public class PLSeriesReader extends BufferedReader {
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			logger.debug("readCount=" + readCount);
 		
-			
-			int responseCode = convertByteToInt(buffer);
-        logger.debug("getCurrentCharge responseCode:" + responseCode);
+			byte[] buf2 = new byte[1];
+			buf2[0]=buffer[0];
+			int responseCode = convertByteToInt(buf2);
+        logger.debug("getCurrentCharge responseCode single buffer:" + responseCode);
 			double chargeCurrent=0;
         	if(responseCode==200){
         		// serialPortInputStream.read(buffer);
-        		 readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
-    			logger.debug("getCurrentCharge after 200 readCount=" + readCount);
+        		// readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+    			//logger.debug("getCurrentCharge after 200 readCount=" + readCount);
     		
-    			
-            	double chargeCurrentUnprocessed = convertByteToDouble(buffer);
+        		buf2[0]=buffer[1];
+            	double chargeCurrentUnprocessed = convertByteToDouble(buf2);
             	chargeCurrent = round(chargeCurrentUnprocessed*chargeCurrentFactor,2);
      			logger.debug("getCurrentCharge charge buffer+" + buffer + " chargeCurrentUnprocessed=" + chargeCurrentUnprocessed +" current= " + chargeCurrent);
  			}else{
