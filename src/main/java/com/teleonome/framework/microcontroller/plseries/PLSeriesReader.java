@@ -498,7 +498,7 @@ public class PLSeriesReader extends BufferedReader {
 				e.printStackTrace();
 			}
 			
-			byte[] buffer = new byte[1];
+			byte[] buffer = new byte[2];
 			logger.debug("point 3 normal read");
 			serialPortInputStream.read(buffer);
 			//logger.debug("readCount simpe read=" + buffer.length);
