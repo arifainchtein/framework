@@ -304,7 +304,7 @@ public class PLSeriesReader extends BufferedReader {
 			serialPortOutputStream.flush();
 			
 			try {
-				Thread.sleep(70);
+				Thread.sleep(170);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
