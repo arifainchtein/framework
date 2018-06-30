@@ -48,7 +48,7 @@ public class PLSeriesReader extends BufferedReader {
 	// pl60=0.4
 	private double chargeCurrentFactor=1;
 	private String dataLine="";
-	private int PAUSE_BETWEEN_DATA=1000;
+	private int PAUSE_BETWEEN_DATA=500;
 	private String currentCommand="";
 	private boolean asyncMode=false;
 	private boolean readerReady=true;
@@ -102,17 +102,8 @@ public class PLSeriesReader extends BufferedReader {
 			// TODO Auto-generated catch block
 			logger.info(Utils.getStringException(e3));
 		}
-		
-		
-	
-		
-		
-		
-		
-		
-		
-		
-		String batteryState = getBatteryState();
+			
+		String batteryState = getNewBatteryState();
 		logger.debug("Ra-" + "battery state=" +  batteryState);
 		try {
 			Thread.sleep(PAUSE_BETWEEN_DATA);
@@ -120,9 +111,6 @@ public class PLSeriesReader extends BufferedReader {
 			// TODO Auto-generated catch block
 			logger.info(Utils.getStringException(e3));
 		}
-		
-		
-		
 		
 		logger.debug("Ra-" + "about to read newcurrentCharge, PAUSE_BETWEEN_DATA=" + PAUSE_BETWEEN_DATA);
 		double currentCharge  = getNewCurrentCharge();
@@ -297,6 +285,85 @@ public class PLSeriesReader extends BufferedReader {
 		}
 		
 		return -1;
+	}
+	
+	public String getNewBatteryState(){
+		try {
+			logger.debug("about to getBatteryState");
+			
+			//
+			// for pla
+			//
+			
+			serialPortOutputStream.write( 20 );
+			serialPortOutputStream.write( 101 );
+			serialPortOutputStream.write( 0 );
+			serialPortOutputStream.write( 125 );
+			serialPortOutputStream.write( 4);
+			
+			serialPortOutputStream.flush();
+			
+			try {
+				Thread.sleep(70);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			byte[] buffer = new byte[2];
+			logger.debug("getNewBatteryState about to read");
+			
+			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+			logger.debug("readCount=" + readCount);
+		
+
+			String hex = DatatypeConverter.printHexBinary(buffer);
+			logger.debug("getNewBatteryState  2byte hex=" + hex);
+			
+		
+        	
+
+			String firstByte=hex.substring(0, 2);
+			String secondByte=hex.substring(2, 4);
+			String status="NA";
+			double chargeCurrent=0;
+			if(firstByte.equals("C8")) {
+				byte returnData = buffer[1];
+            	int result = buffer[0] & 3;
+            	logger.debug("PLA-"+"getBatteryState= " +result);
+            	
+            	//logger.debug("buffer[0]=" + buffer[0]  + " getState " + result);
+            	
+            	switch(result){
+            		case 0:
+            			status=BOOST;
+            			break;
+            		case 1:
+            			status=EQUALIZE;
+            			break;
+            		case 2:
+            			status=ABSORTION;
+            			break;
+            		case 3:
+            			status=FLOAT;
+            			break;
+            			
+            	}
+			}
+        	
+        	
+        	logger.debug("PLA-"+"getBatteryState returning = " +status);
+        	
+        	return status;
+		} catch( IOException e ) {
+			e.printStackTrace();
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			logger.debug("PLA-"+sw.toString());
+			//logger.debug(sw.toString());
+		}
+		return "";
 	}
 	
 	public double getNewCurrentLoad() {
