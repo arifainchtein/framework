@@ -83,6 +83,15 @@ public class PLSeriesReader extends BufferedReader {
 			return "Ok-PulseFinished";
 		}
 		
+		logger.debug("Ra- about to read currentLoad" );
+		double currentLoad = getNewCurrentLoad();
+		logger.debug("Ra- currentLoad" + currentLoad);
+		try {
+			Thread.sleep(PAUSE_BETWEEN_DATA);
+		} catch (InterruptedException e3) {
+			// TODO Auto-generated catch block
+			logger.info(Utils.getStringException(e3));
+		}
 		
 		logger.debug("Ra-" + "about to read voltage");
 		double batteryVoltage  = getNewCurrentVoltage();
@@ -95,15 +104,7 @@ public class PLSeriesReader extends BufferedReader {
 		}
 		
 		
-		logger.debug("Ra- about to read currentLoad" );
-		double currentLoad = getNewCurrentLoad();
-		logger.debug("Ra- currentLoad" + currentLoad);
-		try {
-			Thread.sleep(PAUSE_BETWEEN_DATA);
-		} catch (InterruptedException e3) {
-			// TODO Auto-generated catch block
-			logger.info(Utils.getStringException(e3));
-		}
+	
 		
 		
 		
@@ -315,6 +316,12 @@ public class PLSeriesReader extends BufferedReader {
 			serialPortOutputStream.write( 4);
 			serialPortOutputStream.flush();
 			
+			try {
+				Thread.sleep(70);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 			byte[] buffer = new byte[2];
 			logger.debug("about to read new wy with byte[2]");
@@ -335,7 +342,7 @@ public class PLSeriesReader extends BufferedReader {
 			double loadCurrent=0;
 			if(firstByte.equals("C8")) {
 				int loadCurrentUnprocessed = Integer.parseInt(secondByte.trim(), 16 );
-				logger.debug("volatge unprocessed, loadCurrentUnprocessed=" + loadCurrentUnprocessed);
+				logger.debug(" loadCurrentUnprocessed=" + loadCurrentUnprocessed);
 				loadCurrent = round(loadCurrentUnprocessed*chargeCurrentFactor,2);
 			}
 			
@@ -353,6 +360,9 @@ public class PLSeriesReader extends BufferedReader {
 		
 		return -1;	
 		}
+	
+	
+	
 	
 	public double getNewCurrentVoltage() {
 		try {
@@ -752,21 +762,21 @@ public class PLSeriesReader extends BufferedReader {
 			
 			serialPortOutputStream.flush();
 			try {
-				Thread.sleep(170);
+				Thread.sleep(70);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 			byte[] buffer = new byte[2];
-			logger.debug("point 3 normal read");
+			logger.debug("getNewCurrentCharge about to read");
 			
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			logger.debug("readCount=" + readCount);
 		
 
 			String hex = DatatypeConverter.printHexBinary(buffer);
-			logger.debug("load  2byte hex=" + hex);
+			logger.debug("getNewCurrentCharge  2byte hex=" + hex);
 			
 
 			String firstByte=hex.substring(0, 2);
@@ -775,7 +785,7 @@ public class PLSeriesReader extends BufferedReader {
 			double chargeCurrent=0;
 			if(firstByte.equals("C8")) {
 				int chargeCurrentUnprocessed = Integer.parseInt(secondByte.trim(), 16 );
-				logger.debug("chargeCurrentUnprocessed=" + chargeCurrentUnprocessed);
+				logger.debug("getNewCurrentCharge chargeCurrentUnprocessed=" + chargeCurrentUnprocessed);
 				chargeCurrent = round(chargeCurrentUnprocessed*chargeCurrentFactor,2);
 			}
 			
