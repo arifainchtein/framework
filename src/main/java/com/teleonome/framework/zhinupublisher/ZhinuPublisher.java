@@ -24,7 +24,7 @@ public class ZhinuPublisher implements MqttCallback{
 	static final Boolean subscriber = false;
 	static final Boolean publisher = true;
 	public ZhinuPublisher() {
-	
+		logger = Logger.getLogger(getClass());
 	}
 	/**
 	 * 
