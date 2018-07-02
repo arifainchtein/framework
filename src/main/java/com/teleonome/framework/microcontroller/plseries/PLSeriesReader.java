@@ -35,6 +35,7 @@ public class PLSeriesReader extends BufferedReader {
 	public final static String EQUALIZE= "Equalize";
 	public final static String FLOAT = "Float";
 	int SERIAL_PORT_READ_TIMEOUT=3000;
+	int NUMBER_OF_RETRIES=3;
 	
 	DecimalFormat decimalFormat = new DecimalFormat("###.##");
 	
@@ -83,21 +84,57 @@ public class PLSeriesReader extends BufferedReader {
 			return "Ok-PulseFinished";
 		}
 		
-		logger.debug("Ra- about to read currentLoad" );
-		double currentLoad = getNewCurrentLoad();
-		logger.debug("Ra- currentLoad" + currentLoad);
-		try {
-			Thread.sleep(PAUSE_BETWEEN_DATA);
-		} catch (InterruptedException e3) {
-			// TODO Auto-generated catch block
-			logger.info(Utils.getStringException(e3));
+		int currentRetries=0;
+		double currentLoad=0;
+		boolean keepGoing=true;
+		while(keepGoing) {
+			logger.debug("Ra- about to read currentLoad, currentRetries=" + currentRetries );
+			 currentLoad = getNewCurrentLoad();
+			logger.debug("Ra- currentLoad" + currentLoad);
+			if(currentLoad!=-99) {
+				keepGoing=false;
+			}else {
+				//
+				// bad data try again
+				currentRetries++;
+				if(currentRetries<NUMBER_OF_RETRIES) {
+					keepGoing=true;
+				}else {
+					keepGoing=false;
+					currentLoad=-1;
+				}
+			}
+			try {
+				Thread.sleep(PAUSE_BETWEEN_DATA);
+			} catch (InterruptedException e3) {
+				// TODO Auto-generated catch block
+				logger.info(Utils.getStringException(e3));
+			}
+			
 		}
+			
 		
+		 currentRetries=0;
+		 keepGoing=true;
 		double batteryVoltage=0;
-		while(batteryVoltage==0) {
-			logger.debug("Ra-" + "about to read voltage");
+		while(keepGoing) {
+			logger.debug("Ra-" + "about to read voltage, currentRetries=" + currentRetries);
 			batteryVoltage  = getNewCurrentVoltage();
 			logger.debug("Ra- batteryVoltage" + batteryVoltage);
+			
+			if(batteryVoltage!=-99) {
+				keepGoing=false;
+			}else {
+				//
+				// bad data try again
+				currentRetries++;
+				if(currentRetries<NUMBER_OF_RETRIES) {
+					keepGoing=true;
+				}else {
+					keepGoing=false;
+					batteryVoltage=-1;
+				}
+			}
 			try {
 				Thread.sleep(PAUSE_BETWEEN_DATA);
 			} catch (InterruptedException e3) {
@@ -107,23 +144,64 @@ public class PLSeriesReader extends BufferedReader {
 		}
 		
 			
-		String batteryState = getNewBatteryState();
-		logger.debug("Ra-" + "battery state=" +  batteryState);
-		try {
-			Thread.sleep(PAUSE_BETWEEN_DATA);
-		} catch (InterruptedException e3) {
-			// TODO Auto-generated catch block
-			logger.info(Utils.getStringException(e3));
+		
+		 currentRetries=0;
+		 keepGoing=true;
+		 String batteryState = "NA";
+		while(keepGoing) {
+			 batteryState = getNewBatteryState();
+			logger.debug("Ra-" + "battery state=" +  batteryState);
+			
+			if(!batteryState.equals("NA")) {
+				keepGoing=false;
+			}else {
+				//
+				// bad data try again
+				currentRetries++;
+				if(currentRetries<NUMBER_OF_RETRIES) {
+					keepGoing=true;
+				}else {
+					keepGoing=false;
+					batteryState="NA";
+				}
+			}
+			try {
+				Thread.sleep(PAUSE_BETWEEN_DATA);
+			} catch (InterruptedException e3) {
+				// TODO Auto-generated catch block
+				logger.info(Utils.getStringException(e3));
+			}
 		}
 		
-		logger.debug("Ra-" + "about to read newcurrentCharge, PAUSE_BETWEEN_DATA=" + PAUSE_BETWEEN_DATA);
-		double currentCharge  = getNewCurrentCharge();
-		logger.debug("Ra- currentCharge" + currentCharge);
-		try {
-			Thread.sleep(PAUSE_BETWEEN_DATA);
-		} catch (InterruptedException e3) {
-			// TODO Auto-generated catch block
-			logger.info(Utils.getStringException(e3));
+		
+	
+		 currentRetries=0;
+		 keepGoing=true;
+		 double currentCharge=0;
+		while(keepGoing) {
+			logger.debug("Ra-" + "about to read newcurrentCharge, currentRetries=" + currentRetries);
+			 currentCharge  = getNewCurrentCharge();
+			logger.debug("Ra- currentCharge" + currentCharge);
+
+			if(currentCharge!=-99) {
+				keepGoing=false;
+			}else {
+				//
+				// bad data try again
+				currentRetries++;
+				if(currentRetries<NUMBER_OF_RETRIES) {
+					keepGoing=true;
+				}else {
+					keepGoing=false;
+					currentCharge=-1;
+				}
+			}
+			try {
+				Thread.sleep(PAUSE_BETWEEN_DATA);
+			} catch (InterruptedException e3) {
+				// TODO Auto-generated catch block
+				logger.info(Utils.getStringException(e3));
+			}
 		}
 		
 		
@@ -353,6 +431,8 @@ public class PLSeriesReader extends BufferedReader {
             			break;
             			
             	}
+			}else {
+				status="NA";
 			}
         	
         	
@@ -410,7 +490,7 @@ public class PLSeriesReader extends BufferedReader {
 			String firstByte=hex.substring(0, 2);
 			String secondByte=hex.substring(2, 4);
 			
-			double loadCurrent=0;
+			double loadCurrent=-99;
 			if(firstByte.equals("C8")) {
 				int loadCurrentUnprocessed = Integer.parseInt(secondByte.trim(), 16 );
 				logger.debug(" loadCurrentUnprocessed=" + loadCurrentUnprocessed);
@@ -470,7 +550,7 @@ public class PLSeriesReader extends BufferedReader {
 			String firstByte=hex.substring(0, 2);
 			String secondByte=hex.substring(2, 4);
 			
-			double voltage=0;
+			double voltage=-99;
 			if(firstByte.equals("C8")) {
 				int voltageUnprocessed = Integer.parseInt(secondByte.trim(), 16 );
 				logger.debug("volatge unprocessed, voltageUnprocessed=" + voltageUnprocessed);
@@ -514,9 +594,9 @@ public class PLSeriesReader extends BufferedReader {
 			//serialPortInputStream.read(buffer);
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
 			
-			double loadCurrent=0;
+			double newCurrentStateOfCharge=-99;
 			String hex = DatatypeConverter.printHexBinary(buffer);
-			logger.debug("loadCurrent  2byte hex=" + hex);
+			logger.debug("currentStateOfCharge  2byte hex=" + hex);
 			
 
 			String firstByte=hex.substring(0, 2);
@@ -524,16 +604,16 @@ public class PLSeriesReader extends BufferedReader {
 			
 			
 			if(firstByte.equals("C8")) {
-				int loadCurrentUnprocessed = Integer.parseInt(secondByte.trim(), 16 );
-				logger.debug("getNewCurrentStateOfCharge unprocessed, loadCurrentUnprocessed=" + loadCurrentUnprocessed);
-				loadCurrent = round(loadCurrentUnprocessed,2);
+				 newCurrentStateOfCharge = Integer.parseInt(secondByte.trim(), 16 );
+				logger.debug("getNewCurrentStateOfCharge unprocessed, newCurrentStateOfCharge=" + newCurrentStateOfCharge);
+				newCurrentStateOfCharge = round(newCurrentStateOfCharge,2);
 			}
 			
 			
 			
 			
         	////logger.debug("getCurrentCharge charge buffer+" + buffer + " chargeCurrentUnprocessed=" + loadCurrentUnprocessed +" current= " + loadCurrent);
-			return loadCurrent;
+			return newCurrentStateOfCharge;
 		} catch( IOException e ) {
 			e.printStackTrace();
 			StringWriter sw = new StringWriter();
@@ -853,7 +933,7 @@ public class PLSeriesReader extends BufferedReader {
 			String firstByte=hex.substring(0, 2);
 			String secondByte=hex.substring(2, 4);
 			
-			double chargeCurrent=0;
+			double chargeCurrent=-99;
 			if(firstByte.equals("C8")) {
 				int chargeCurrentUnprocessed = Integer.parseInt(secondByte.trim(), 16 );
 				logger.debug("getNewCurrentCharge chargeCurrentUnprocessed=" + chargeCurrentUnprocessed);
