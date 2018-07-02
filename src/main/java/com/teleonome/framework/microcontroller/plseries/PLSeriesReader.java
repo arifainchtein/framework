@@ -93,15 +93,19 @@ public class PLSeriesReader extends BufferedReader {
 			logger.info(Utils.getStringException(e3));
 		}
 		
-		logger.debug("Ra-" + "about to read voltage");
-		double batteryVoltage  = getNewCurrentVoltage();
-		logger.debug("Ra- batteryVoltage" + batteryVoltage);
-		try {
-			Thread.sleep(PAUSE_BETWEEN_DATA);
-		} catch (InterruptedException e3) {
-			// TODO Auto-generated catch block
-			logger.info(Utils.getStringException(e3));
+		double batteryVoltage=0;
+		while(batteryVoltage==0) {
+			logger.debug("Ra-" + "about to read voltage");
+			batteryVoltage  = getNewCurrentVoltage();
+			logger.debug("Ra- batteryVoltage" + batteryVoltage);
+			try {
+				Thread.sleep(PAUSE_BETWEEN_DATA);
+			} catch (InterruptedException e3) {
+				// TODO Auto-generated catch block
+				logger.info(Utils.getStringException(e3));
+			}
 		}
+		
 			
 		String batteryState = getNewBatteryState();
 		logger.debug("Ra-" + "battery state=" +  batteryState);
