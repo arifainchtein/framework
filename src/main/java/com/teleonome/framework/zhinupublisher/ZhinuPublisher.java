@@ -10,6 +10,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 
+import com.teleonome.framework.utils.Utils;
+
 public class ZhinuPublisher implements MqttCallback{
 
 	static final String BROKER_URL = "tcp://chilhuacle.info:1883";
@@ -32,16 +34,16 @@ public class ZhinuPublisher implements MqttCallback{
 	 */
 	@Override
 	public void connectionLost(Throwable t) {
-		System.out.println("Connection lost!");
+		logger.debug("Connection lost!");
 		// code to reconnect to the broker would go here if desired
 	}
 
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
-		System.out.println("-------------------------------------------------");
-		System.out.println("| Topic:" + topic);
-		System.out.println("| Message: " + new String(message.getPayload()));
-		System.out.println("-------------------------------------------------");
+		logger.debug("-------------------------------------------------");
+		logger.debug("| Topic:" + topic);
+		logger.debug("| Message: " + new String(message.getPayload()));
+		logger.debug("-------------------------------------------------");
 		
 	}
 	@Override
@@ -67,11 +69,11 @@ public class ZhinuPublisher implements MqttCallback{
 			myClient.setCallback(this);
 			myClient.connect(connOpt);
 		} catch (MqttException e) {
-			e.printStackTrace();
-			System.exit(-1);
+			logger.warn(Utils.getStringException(e));
+			//System.exit(-1);
 		}
 		
-		System.out.println("Connected to " + BROKER_URL);
+		logger.debug("Connected to " + BROKER_URL);
 
 		// setup topic
 		// topics on m2m.io are in the form <domain>/<stuff>/<thing>
@@ -83,7 +85,7 @@ public class ZhinuPublisher implements MqttCallback{
 				int subQoS = 0;
 				myClient.subscribe(topicName, subQoS);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.warn(Utils.getStringException(e));
 			}
 		}
 
@@ -96,7 +98,7 @@ public class ZhinuPublisher implements MqttCallback{
 		    	message.setRetained(false);
 
 		    	// Publish the message
-		    	System.out.println("Publishing to topic \"" + topic + "\" qos " + pubQoS);
+		    	logger.debug("Publishing to topic \"" + topic + "\" qos " + pubQoS);
 		    	MqttDeliveryToken token = null;
 		    	try {
 		    		// publish message to broker
@@ -105,7 +107,7 @@ public class ZhinuPublisher implements MqttCallback{
 					token.waitForCompletion();
 					Thread.sleep(100);
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.warn(Utils.getStringException(e));
 				}
 			}			
 		
@@ -117,7 +119,7 @@ public class ZhinuPublisher implements MqttCallback{
 			}
 			myClient.disconnect();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.warn(Utils.getStringException(e));
 		}
 	}
 	
