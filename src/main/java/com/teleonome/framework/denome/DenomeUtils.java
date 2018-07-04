@@ -327,7 +327,7 @@ public class DenomeUtils {
 				    //Logger.getLogger(JavaApplication256.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			try {
-				is.close();
+				if(is!=null)is.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
