@@ -29,6 +29,7 @@ import com.teleonome.framework.exception.InvalidMutation;
 import com.teleonome.framework.utils.Utils;
 public class DenomeUtils {
 
+	private static Logger logger = Logger.getLogger(com.teleonome.framework.denome.DenomeUtils.class);
 	/**
 	 * this methods returns the memory status dene
 	 * which contains the first 5 lines of the top command
@@ -211,10 +212,10 @@ public class DenomeUtils {
 			    //Logger.getLogger(JavaApplication256.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		try {
-			is.close();
+			if(is!=null)is.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn(Utils.getStringException(e));
 		}
 		
 		return memoryStatusDene;
