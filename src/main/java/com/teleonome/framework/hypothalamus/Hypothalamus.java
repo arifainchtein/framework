@@ -83,7 +83,7 @@ public abstract class Hypothalamus {
 	 * end f variables configure via gui
 	 */
 	DecimalFormat decimalFormat = new DecimalFormat("###.##");
-	
+	String ipToBindToZeroMQ="";
 	
 	MnemosyneManager aMnemosyneManager=null;
 	Socket exoZeroPublisher=null;
@@ -134,19 +134,7 @@ public abstract class Hypothalamus {
 		
 		try {
 			exoZeroContext = ZMQ.context(1);
-			exoZeroPublisher = exoZeroContext.socket(ZMQ.PUB);
-			exoZeroPublisher.setHWM(1);
-			String ipToBindToZeroMQ="";
-			try {
-				ipToBindToZeroMQ = Utils.getIpAddressForNetworkMode().getHostAddress();
-			} catch (SocketException | UnknownHostException e2) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e2));
-				
-			}
-			logger.info("binding zeromq to " + ipToBindToZeroMQ);
-			exoZeroPublisher.bind("tcp://" + ipToBindToZeroMQ + ":5563");
-			
+			startExoZeroPublisher();
 			
 			
            connectToHeart();
@@ -326,6 +314,29 @@ public abstract class Hypothalamus {
 		}
 	}
 	
+	protected void stopExoZeroPublisher() {
+		boolean unbindedOk = exoZeroPublisher.unbind("tcp://" + ipToBindToZeroMQ + ":5563");
+		logger.debug("unbinding exozero publisher returns " + unbindedOk);
+	}
+	
+	protected void startExoZeroPublisher() {
+		// TODO Auto-generated method stub
+		
+		exoZeroPublisher = exoZeroContext.socket(ZMQ.PUB);
+		exoZeroPublisher.setHWM(1);
+		
+		try {
+			ipToBindToZeroMQ = Utils.getIpAddressForNetworkMode().getHostAddress();
+		} catch (SocketException | UnknownHostException e2) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e2));
+			
+		}
+		logger.info("binding zeromq to " + ipToBindToZeroMQ);
+		exoZeroPublisher.bind("tcp://" + ipToBindToZeroMQ + ":5563");
+		
+	}
+
 	public DenomeManager getDenomeManager() {
 		return aDenomeManager;
 	}

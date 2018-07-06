@@ -247,6 +247,7 @@ public class DenomeManager {
 		return denomeName;
 	}
 
+	
 
 
 	private void loadDenome(String fn) throws MissingDenomeException{

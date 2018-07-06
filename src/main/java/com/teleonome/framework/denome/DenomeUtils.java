@@ -608,6 +608,97 @@ public class DenomeUtils {
 		return itIs;
 	}
 	/**
+	 * This method is used by the subscriber thread, to detect if there is a problem with
+	 * the exozero network, ie if there is another teleonome waiting for data from this 
+	 * teleonome.
+	 * if it returns true then the exozero publisher needs to be restarted
+	 * @param publisherTeleonomeName - the name of the publisher teleonome
+	 * @param dependentTeleonomePulse - the data of the teleonome dependind of the publisherteleonome data
+	 * @return
+	 */
+	public static boolean isSomebodyWaitingForMe(String publisherTeleonomeName, JSONObject dependentTeleonomePulse){
+		//
+		// get the address of the deneword where this data is going to
+		String reportingAddress, deneWordName;
+		Vector teleonomeToReconnect = new Vector();
+		boolean somebodyIsWating=false;
+		try {
+			
+			JSONObject dependentPulseDenome = dependentTeleonomePulse.getJSONObject("Denome");
+			String dependentTeleonomeName = dependentPulseDenome.getString("Name");
+			JSONArray dependentPulseNuclei = dependentPulseDenome.getJSONArray("Nuclei");
+			JSONArray deneWords;
+
+			JSONObject jsonObject, jsonObjectChain, jsonObjectDene, jsonObjectDeneWord;
+			JSONArray chains, denes;
+			String externalDataDeneName;
+			JSONObject lastPulseExternalTeleonomeJSONObject;
+			String externalSourceOfData;
+
+			
+			long lastPulseExternalTimeInMillis,difference;
+			String lastPulseExternalTime;
+			Identity externalDataCurrentPulseIdentity,numberOfPulseForStaleIdentity;
+			int secondsToStale=180;
+			//String valueType;
+
+			for(int i=0;i<dependentPulseNuclei.length();i++){
+				jsonObject = dependentPulseNuclei.getJSONObject(i);
+				if(jsonObject.getString("Name").equals(TeleonomeConstants.NUCLEI_PURPOSE)){
+					chains = jsonObject.getJSONArray("DeneChains");
+					for(int j=0;j<chains.length();j++){
+						jsonObjectChain = chains.getJSONObject(j);
+
+						if(jsonObjectChain.toString().length()>10 && jsonObjectChain.getString("Name").equals(TeleonomeConstants.DENECHAIN_EXTERNAL_DATA)){
+							denes = jsonObjectChain.getJSONArray("Denes");
+
+							for(int k=0;k<denes.length();k++){
+								jsonObjectDene = denes.getJSONObject(k);
+								externalDataDeneName = jsonObjectDene.getString("Name");
+								//
+								// the externalDataDeneName is the name of the External Teleonome
+								// lastPulseExternalTeleonomeJSONObject contains the last pulse
+								// of that teleonome
+								//
+								logger.debug("line 662 Denomemutils, looking for  " + externalDataDeneName);
+								if(publisherTeleonomeName.equals(externalDataDeneName)) {
+							
+									String externalDeneStatus=TeleonomeConstants.EXTERNAL_DATA_STATUS_STALE;
+									Identity denewordStatusIdentity = new Identity(dependentTeleonomeName,TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_EXTERNAL_DATA,publisherTeleonomeName, TeleonomeConstants.EXTERNAL_DATA_STATUS);
+									try {
+										externalDeneStatus = (String) getDeneWordByIdentity(dependentTeleonomePulse, denewordStatusIdentity,  TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+									} catch (InvalidDenomeException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									logger.debug("externalDeneStatus after getting data by pointer " + externalDeneStatus);
+									if(externalDeneStatus.equals(TeleonomeConstants.EXTERNAL_DATA_STATUS_STALE)) {
+										somebodyIsWating=true;
+									}
+									
+								}
+							
+								
+							}
+						}
+					}
+				}
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}
+		
+		return somebodyIsWating;
+	}
+	
+	
+	private String getDeneWordAttributeByIdentity(Identity denewordStatusIdentity, String denewordValueAttribute) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
 	 * you pass a dene as a first parameter and the value of the dene attribute "Dene Type" as a second parameter
 	 * and the third parameter is what part of th the DeneWord you want and in the third parameter
 	 * you say what you want back. If you want the whole deneword you pass TeleonomeConstants.COMPLETE, otherwise
