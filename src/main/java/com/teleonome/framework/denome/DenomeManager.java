@@ -5446,18 +5446,21 @@ public class DenomeManager {
 												}
 
 											}else{
-												logger.debug("storing into value=" + inputLine);
+												logger.debug("valueType=" + valueType + " the value as line =" + inputLine);
 												//
 												// now check to see what type of value it is
 												//
 												if(valueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
 													int v = Integer.parseInt(inputLine);
+													logger.debug("storing into value inte ger =" + v);
 													jsonObjectDeneWord.put("Value", v);
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
 													double v = Double.parseDouble(inputLine);
+													logger.debug("storing into value double=" + v);
 													jsonObjectDeneWord.put("Value", v);
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_LONG)) {
 													long v = Long.parseLong(inputLine);
+													logger.debug("storing into value long=" + v);
 													jsonObjectDeneWord.put("Value", v);
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_STRING)) {
 													jsonObjectDeneWord.put("Value", inputLine);
