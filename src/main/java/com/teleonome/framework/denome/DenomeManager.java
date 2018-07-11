@@ -5342,7 +5342,7 @@ public class DenomeManager {
 			try{
 				Double parseValue = Double.parseDouble(inputLine.trim());
 			}catch(NumberFormatException e){
-				logger.debug(inputLine + " is not numeric");
+				logger.info(inputLine + " is not numeric");
 				ignoreMaximumMinimum=true;
 			}
 			if(!ignoreMaximumMinimum){
@@ -5355,12 +5355,12 @@ public class DenomeManager {
 					Object rangeMaximumRawValue  = extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MAXIMUM);
 					if(rangeMaximumRawValue instanceof String && rangeMaximumRawValue.toString().startsWith("@")){
 						rangeMaximum = Double.parseDouble((String)this.getDeneWordAttributeByIdentity(new Identity(rangeMaximumRawValue.toString()), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
-						logger.debug("rangemaximum is a pointer and the rendered value is " + rangeMaximum);
+						logger.info("rangemaximum is a pointer and the rendered value is " + rangeMaximum);
 					}else{
 						try{
 							rangeMaximum = (Double) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MAXIMUM);
 						}catch(java.lang.ClassCastException e) {
-							logger.debug("class cast exception to double,inputLine=" + inputLine);
+							logger.info("class cast exception to double,inputLine=" + inputLine);
 							rangeMaximum = ((Integer) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MAXIMUM)).doubleValue();
 						}
 					}
@@ -5373,7 +5373,7 @@ public class DenomeManager {
 						try{
 							rangeMinimum = (Double) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MINIMUM);
 						}catch(java.lang.ClassCastException e) {
-							logger.debug("class cast exception to double,inputLine=" + inputLine);
+							logger.info("class cast exception to double,inputLine=" + inputLine);
 							rangeMinimum = ((Integer) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.SENSOR_VALUE_RANGE_MINIMUM)).doubleValue();
 						}
 					}
@@ -5397,7 +5397,7 @@ public class DenomeManager {
 			String deneName = tokens[3];
 			String deneWordLabel = tokens[4];
 
-			logger.debug("line 2704 denomemanager, " + reportingAddress + " sourceDeneName=" + sourceDeneName + " unit=" + unit);
+			logger.info("line 2704 denomemanager, " + reportingAddress + " sourceDeneName=" + sourceDeneName + " unit=" + unit);
 			JSONObject currentlyCreatingPulseDenome = currentlyCreatingPulseJSONObject.getJSONObject("Denome");
 
 			JSONArray currentlyCreatingPulseNuclei = currentlyCreatingPulseDenome.getJSONArray("Nuclei");
@@ -5420,7 +5420,7 @@ public class DenomeManager {
 									deneWords = jsonObjectDene.getJSONArray("DeneWords");
 									for(int l=0;l<deneWords.length();l++){
 										jsonObjectDeneWord = deneWords.getJSONObject(l);
-										logger.debug("jsonObjectDeneWord, " + jsonObjectDeneWord.getString("Name") +  " deneWordLabel=" + deneWordLabel);
+										//logger.info("jsonObjectDeneWord, " + jsonObjectDeneWord.getString("Name") +  " deneWordLabel=" + deneWordLabel);
 										if(jsonObjectDeneWord.getString("Name").equals(deneWordLabel)){
 											//
 											// store the value in the deneword
@@ -5433,11 +5433,11 @@ public class DenomeManager {
 
 												timeStringFormat = (String) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.DENEWORD_TIMESTRING_FORMAT_VALUE);
 												SimpleDateFormat sd = new SimpleDateFormat(timeStringFormat);
-												logger.debug("timeStringFormat, " + timeStringFormat);
+												logger.info("timeStringFormat, " + timeStringFormat);
 
 												try {
 													Date d = sd.parse(inputLine);
-													logger.debug("d.getTime(), " + d.getTime());
+													logger.info("d.getTime(), " + d.getTime());
 													jsonObjectDeneWord.put("Value", d.getTime());
 												} catch (ParseException e) {
 													// TODO Auto-generated catch block
@@ -5446,21 +5446,21 @@ public class DenomeManager {
 												}
 
 											}else{
-												logger.debug("valueType=" + valueType + " the value as line =" + inputLine);
+												logger.info("line 5449 valueType=" + valueType + " the value as line =" + inputLine);
 												//
 												// now check to see what type of value it is
 												//
 												if(valueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
 													int v = Integer.parseInt(inputLine);
-													logger.debug("storing into value inte ger =" + v);
+													logger.info("storing into value inte ger =" + v);
 													jsonObjectDeneWord.put("Value", v);
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
 													double v = Double.parseDouble(inputLine);
-													logger.debug("storing into value double=" + v);
+													logger.info("storing into value double=" + v);
 													jsonObjectDeneWord.put("Value", v);
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_LONG)) {
 													long v = Long.parseLong(inputLine);
-													logger.debug("storing into value long=" + v);
+													logger.info("storing into value long=" + v);
 													jsonObjectDeneWord.put("Value", v);
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_STRING)) {
 													jsonObjectDeneWord.put("Value", inputLine);
