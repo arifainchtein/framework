@@ -58,6 +58,7 @@ public class DenomeValidator {
 				
 				//System.out.println("looking at denechain " + deneChainJSONObject.getString("Name"));
 				denesJSONArray = deneChainJSONObject.getJSONArray("Denes");
+				logger.debug("denesJSONArray=" + denesJSONArray.toString(4));
 				for(int k=0;k<denesJSONArray.length();k++){
 					deneJSONObject = denesJSONArray.getJSONObject(k);
 					if(!deneJSONObject.has("Name")){
