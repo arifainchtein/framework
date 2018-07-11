@@ -1063,15 +1063,18 @@ public class DenomeViewManager {
 					denesJSONArray = aJSONObject.getJSONArray("Denes");
 					for(int j=0;j<denesJSONArray.length();j++){
 						aDeneJSONObject = (JSONObject) denesJSONArray.get(j);
-
-						if(aDeneJSONObject.getString("Name").equals(deneName)){
-							deneWordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
-							for(int k=0;k<deneWordsJSONArray.length();k++){
-								aDeneWordJSONObject = (JSONObject) deneWordsJSONArray.get(k);
-								if(aDeneWordJSONObject.getString("Name").equals(deneWordName)){
-									return aDeneWordJSONObject;
+						if(aDeneJSONObject!=null) {
+							if(aDeneJSONObject.getString("Name").equals(deneName)){
+								deneWordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
+								for(int k=0;k<deneWordsJSONArray.length();k++){
+									aDeneWordJSONObject = (JSONObject) deneWordsJSONArray.get(k);
+									if(aDeneWordJSONObject.getString("Name").equals(deneWordName)){
+										return aDeneWordJSONObject;
+									}
 								}
 							}
+						}else {
+							return null;
 						}
 					}
 
