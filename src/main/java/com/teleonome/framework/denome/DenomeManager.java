@@ -6370,6 +6370,7 @@ public class DenomeManager {
  
 					variableValue=null;
 
+					logger.info("actionVariableValueJSONObject=" + actionVariableValueJSONObject.toString(4));
 					logger.info("Evaluate Deneword operation,variableName=" + variableName);
 					logger.info("Evaluate Deneword operation,variableRawValue=" + variableRawValue);
 					logger.info("Evaluate Deneword operation,variableValueType=" + variableValueType);
