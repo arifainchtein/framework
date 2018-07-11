@@ -6240,7 +6240,7 @@ public class DenomeManager {
 	public boolean evaluateSwitchDeneWordOperation(String deneWordOperationPointer){
 		boolean toReturn=false;
 		
-		finish this
+		//finish this
 		
 		return toReturn;
 	}
