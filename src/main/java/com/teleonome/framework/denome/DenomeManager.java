@@ -6367,7 +6367,7 @@ public class DenomeManager {
 					variableName = actionVariableValueJSONObject.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
 					variableValueType = actionVariableValueJSONObject.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
 					variableRawValue= actionVariableValueJSONObject.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
+ 
 					variableValue=null;
 
 					logger.debug("Evaluate Deneword operation,variableName=" + variableName);
