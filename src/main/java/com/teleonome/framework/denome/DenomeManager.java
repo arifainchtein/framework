@@ -6198,13 +6198,63 @@ public class DenomeManager {
 	//	}
 
 	/**
-	 * /**
-	 *  this method evaluates a deneword operation, this means that the actuator commmand code
+	 * 
+	 *  this method is called by the Pulse Thread when an  action 
+	 *  has a pointer instead of an actual code
+	 *  This method loads the dene and gets its DeneType
+	 *  it then invoques the appropiate method that executes the function
+	 *  Note that in compatibility with previous version of the Denome
+	 *  
 	 *  of this action is not sent to the microcontroller but instead an operation is performed
 	 *  
 	 * @param deneWordOperationPointer - the pointer where the operation information is located
 	 */
 	public boolean evaluateDeneWordOperation(String deneWordOperationPointer){
+		
+		boolean toReturn=false;
+		
+		try {
+			JSONObject evaluationDeneJSONObject = getDeneByIdentity( new Identity(deneWordOperationPointer));
+			if(evaluationDeneJSONObject.has(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE)) {
+				String deneType = evaluationDeneJSONObject.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
+				if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_EVALUATION)) {
+					return evaluateExpressionDeneWordOperation( deneWordOperationPointer);
+				}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_SWITCH)) {
+					return evaluateSwitchDeneWordOperation(deneWordOperationPointer);
+				}else if(deneType.equals("Action")) {
+					//
+					// this is a hack until i update all my existing denomes
+					return evaluateExpressionDeneWordOperation( deneWordOperationPointer);
+				}
+			}
+		} catch (InvalidDenomeException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}
+		
+		
+		return toReturn;
+	}
+	
+	
+	public boolean evaluateSwitchDeneWordOperation(String deneWordOperationPointer){
+		boolean toReturn=false;
+		
+		finish this
+		
+		return toReturn;
+	}
+	
+	
+	
+	/**
+	 * 
+	 *  this method evaluates a deneword operation, this means that the actuator commmand code
+	 *  of this action is not sent to the microcontroller but instead an operation is performed
+	 *  
+	 * @param deneWordOperationPointer - the pointer where the operation information is located
+	 */
+	public boolean evaluateExpressionDeneWordOperation(String deneWordOperationPointer){
 		boolean toReturn=false;
 		try {
 			logger.debug("Evaluate Deneword operation,deneWordOperationPointer=" + deneWordOperationPointer);

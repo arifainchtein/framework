@@ -52,6 +52,12 @@ public class TeleonomeConstants {
 	
 	
 	//
+	// the different kinds of deneword operations
+	//
+	public static final String DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_EVALUATION = "Expression Evaluation";
+	public static final String DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_SWITCH = "Expression Switch";
+	
+	//
 	// the types of microcontrolers
 	//
 	public static final String DENEWORD_TYPE_MICROCONTROLLER_TYPE="MicroController Type";

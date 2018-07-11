@@ -1,5 +1,6 @@
 package com.teleonome.framework.denome;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,6 +12,7 @@ import com.teleonome.framework.utils.Utils;
 
 public class DenomeValidator {
 
+	private static Logger logger = Logger.getLogger(com.teleonome.framework.denome.DenomeValidator.class);
 	private static DenomeViewManager aDenomeViewerManager = new com.teleonome.framework.denome.DenomeViewManager();
 	
 	public DenomeValidator() {
@@ -126,6 +128,7 @@ public class DenomeValidator {
 														errorReportJSONArray.put(errorJSONObject);
 													}
 												}else if(identity.isDeneWord()){
+													logger.debug("about to get " + identity);
 													resolvedDeneWordJSONObject = aDenomeViewerManager.getDeneWordByIdentity(identity);
 													//System.out.println("line 77 denePointer=" + denePointer + "       DeneWord is null=" + (resolvedDeneWordJSONObject==null) );
 													
