@@ -54,7 +54,7 @@ public class DenomeValidator {
 					errorReportJSONArray.put(errorJSONObject);
 					continue;
 				}
-				
+				 
 				
 				//System.out.println("looking at denechain " + deneChainJSONObject.getString("Name"));
 				denesJSONArray = deneChainJSONObject.getJSONArray("Denes");
