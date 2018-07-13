@@ -137,8 +137,8 @@ class MappedBusThread extends Thread{
 										&& !inputLine.startsWith("Command") 
 										&& !inputLine.startsWith("Fault")
 										&& !inputLine.startsWith("AsyncCycleUpdate")
-										&& !inputLine.startsWith("Shutdown")
-										&& !inputLine.startsWith("Reboot")
+										&& !inputLine.startsWith(TeleonomeConstants.COMMAND_SHUTDOWN)
+										&& !inputLine.startsWith(TeleonomeConstants.COMMAND_REBOOT)
 										);
 
 								input.close();
@@ -146,23 +146,23 @@ class MappedBusThread extends Thread{
 
 								//if(!inputLine.equals("")){
 								if(inputLine.equals(TeleonomeConstants.COMMAND_REBOOT)){
-									//								if(waitingForConfirmReboot){
-									//									output = aMicroController.getWriter();
-									//									output.write(TeleonomeConstants.COMMAND_REBOOTING);
-									//									output.flush();
-									//									logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
-									//									Runtime.getRuntime().exec("sudo reboot");
-									//
-									//									waitingForConfirmReboot=false;
-									//								}else{
-									logger.debug("not waitingForConfirmReboot =" + inputLine);
-
-									output = aMicroController.getWriter();
-									output.write(TeleonomeConstants.COMMAND_CONFIRM_REBOOT);
-									output.flush();
-									waitingForConfirmReboot=true;
-									waitingForConfirmShutdown=false;
-									waitingForConfirmKillPulse=false;
+									//if(waitingForConfirmReboot){
+										output = aMicroController.getWriter();
+										output.write(TeleonomeConstants.COMMAND_REBOOTING);
+										output.flush();
+										logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
+										Runtime.getRuntime().exec("sudo reboot");
+	
+										waitingForConfirmReboot=false;
+									//}else{
+//									logger.debug("not waitingForConfirmReboot =" + inputLine);
+//
+//									output = aMicroController.getWriter();
+//									output.write(TeleonomeConstants.COMMAND_CONFIRM_REBOOT);
+//									output.flush();
+//									waitingForConfirmReboot=true;
+//									waitingForConfirmShutdown=false;
+//									waitingForConfirmKillPulse=false;
 									//								}
 								}else if(inputLine.equals(TeleonomeConstants.COMMAND_SHUTDOWN)){
 									//								if(waitingForConfirmShutdown){
