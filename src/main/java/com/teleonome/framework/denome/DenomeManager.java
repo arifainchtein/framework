@@ -3472,20 +3472,20 @@ public class DenomeManager {
 				//
 				JSONObject newValueJSONObject=new JSONObject();
 				newValueJSONObject.put(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, getcurrentlyCreatingPulseTimestampMillis());
-				if(dataSourceValueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
-					double dataSourceValue = (double) this.getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + dataSourceValue);
-					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);				
-				}else if(dataSourceValueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
-					int dataSourceValue = (int) this.getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + dataSourceValue);
-			
-					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);
-				}else if(dataSourceValueType.equals(TeleonomeConstants.DATATYPE_LONG)) {
-					long dataSourceValue = (long) this.getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + dataSourceValue);
-					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,dataSourceValue);
+				Object o = this.getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				logger.debug("dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + o);
+				if(o instanceof Integer) {
+					int dataSourceValue = (int)o;
+					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
+				}else if (o instanceof Double) {
+					double dataSourceValue = (double) o;
+					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
+				}else if (o instanceof Long) {
+					long dataSourceValue = (long) o;
+					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
 				}
+				
+				
 				logger.debug("newValueJSONObject=" + newValueJSONObject.toString(4));
 
 				int counterLimit = (int) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_COUNTER_LIMIT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
