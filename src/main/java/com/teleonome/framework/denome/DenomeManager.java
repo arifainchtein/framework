@@ -3473,7 +3473,7 @@ public class DenomeManager {
 				JSONObject newValueJSONObject=new JSONObject();
 				newValueJSONObject.put(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, getcurrentlyCreatingPulseTimestampMillis());
 				Object o = this.getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				logger.debug("dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + o);
+				logger.debug("line 3476 dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + o);
 				if(o instanceof Integer) {
 					int dataSourceValue = (int)o;
 					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
