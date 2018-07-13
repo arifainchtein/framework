@@ -53,6 +53,7 @@ public class GNUArduinoUno extends MicroController implements SerialPortEventLis
 	public GNUArduinoUno(DenomeManager d, String n){
 		super(d,n);
 		logger = Logger.getLogger(getClass());
+		setEnableAsyncUpdate(true);
 	}
 	
 	
