@@ -137,6 +137,8 @@ class MappedBusThread extends Thread{
 										&& !inputLine.startsWith("Command") 
 										&& !inputLine.startsWith("Fault")
 										&& !inputLine.startsWith("AsyncCycleUpdate")
+										&& !inputLine.startsWith("Shutdown")
+										&& !inputLine.startsWith("Reboot")
 										);
 
 								input.close();
