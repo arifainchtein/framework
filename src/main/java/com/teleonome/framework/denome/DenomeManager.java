@@ -3467,19 +3467,24 @@ public class DenomeManager {
 
 				String dataSourceValueType = (String) getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
 
-				String dataSourceValue = (String) this.getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				logger.debug("line 2595dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + dataSourceValue);
 				//
 				// the new object that willgo into the timeseries
 				//
 				JSONObject newValueJSONObject=new JSONObject();
 				newValueJSONObject.put(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, getcurrentlyCreatingPulseTimestampMillis());
 				if(dataSourceValueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
-					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, Double.parseDouble(dataSourceValue));				
+					double dataSourceValue = (double) this.getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + dataSourceValue);
+					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);				
 				}else if(dataSourceValueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
-					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, Integer.parseInt(dataSourceValue));
+					int dataSourceValue = (int) this.getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + dataSourceValue);
+			
+					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);
 				}else if(dataSourceValueType.equals(TeleonomeConstants.DATATYPE_LONG)) {
-					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, Long.parseLong(dataSourceValue));
+					long dataSourceValue = (long) this.getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + dataSourceValue);
+					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,dataSourceValue);
 				}
 				logger.debug("newValueJSONObject=" + newValueJSONObject.toString(4));
 
