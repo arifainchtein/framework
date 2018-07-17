@@ -916,7 +916,7 @@ public class DenomeManager {
 						rememberedWordsMnemosyconJSONObject = mnemosyconDenesJSONArray.getJSONObject(i);
 						active = (boolean) this.getDeneWordAttributeByDeneWordNameFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						if(active) {
-							rememberedDeneWordsJSONArray = (JSONArray) this.getDeneWordAttributeByDeneWordTypeFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENEWORD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							rememberedDeneWordsJSONArray = getAllDeneWordAttributeByDeneWordTypeFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENEWORD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							logger.info("rememberedDeneWordsJSONArray= " + rememberedDeneWordsJSONArray);
 							
 							//
@@ -5848,7 +5848,8 @@ public class DenomeManager {
 
 	}
 
-
+	
+	
 	public Object getDeneWordAttributeByDeneWordTypeFromDene(JSONObject deneJSONObject , String type, String whatToBring) throws JSONException{
 		JSONArray deneWords = deneJSONObject.getJSONArray("DeneWords");
 		for(int i=0;i<deneWords.length();i++){
