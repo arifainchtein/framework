@@ -925,13 +925,16 @@ public class DenomeManager {
 							// "@Tlaloc:Purpose:Sensor Data:Solar Radiation:Solar Radiation Data","@Tlaloc:Purpose:Sensor Data:Ambient Temperature:Ambient Temperature Data"
 							//
 							// get the name of the teleonome and use to get the vector of all the other remembered words, and stored the identity in the vector
-							for(int j=0;j<mnemosyconDenesJSONArray.length();j++) {
+							for(int j=0;j<rememberedDeneWordsJSONArray.length();j++) {
 								try {
 									rememberedDeneWordPointer= rememberedDeneWordsJSONArray.getString(j);
+									
 									rememberedDeneWordIdentity = new Identity(rememberedDeneWordPointer);
 									rememberedDeneWordTeleonomeName = rememberedDeneWordIdentity.getTeleonomeName();
 									
 									rememberedDeneWordValue = (String) this.getDeneWordAttributeByIdentity(rememberedDeneWordIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+									logger.info("rememberedDeneWordTeleonomeName=" + rememberedDeneWordTeleonomeName + " rememberedDeneWordPointer= " + rememberedDeneWordPointer);
+									
 									teleonomeRememeberedWordsArrayList = deneWordsToRememberByTeleonome.get(teleonomeName);
 									if(teleonomeRememeberedWordsArrayList==null)teleonomeRememeberedWordsArrayList = new ArrayList();
 									teleonomeRememeberedWordsArrayList.add(rememberedDeneWordValue);
