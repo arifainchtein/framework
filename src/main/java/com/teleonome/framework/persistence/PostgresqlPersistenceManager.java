@@ -1782,11 +1782,25 @@ public JSONArray vacuum() {
 				preparedStatement.setTimestamp(1, dateTimeValue, calendarTimeZone);
 				preparedStatement.setString(2, teleonomeName);
 				preparedStatement.setString(3, identityString);
+				double d = 0;
 				if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
-					double d = (double)value;
+					
+					if(value instanceof String) {
+						 d = Double.parseDouble((String)value);
+					}else {
+						 d = (double)value;
+					}
+					
 					preparedStatement.setDouble(4, d);
 				}else if(valueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
-					double d = ((Integer)value).doubleValue();
+					
+					if(value instanceof String) {
+						 d = Integer.getInteger((String)value).doubleValue();
+					}else {
+						d = ((Integer)value).doubleValue();
+					}
+					
+					
 					preparedStatement.setDouble(4, d);
 				}
 				int result = preparedStatement.executeUpdate();
