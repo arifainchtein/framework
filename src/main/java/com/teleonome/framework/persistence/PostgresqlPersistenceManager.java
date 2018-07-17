@@ -1774,7 +1774,7 @@ public JSONArray vacuum() {
 				//statement = connection.createStatement();
 				java.sql.Timestamp dateTimeValue = new java.sql.Timestamp(pulseTimeMillis);
 				
-				sql = "insert into RememberedDeneWords (pulseTimeMillis, teleonomeName,identityString,value) values(?,?,?,?)";
+				sql = "insert into RememberedDeneWords (time, teleonomeName,identityString,value) values(?,?,?,?)";
 				logger.debug("storePurposeChainInfo=" + sql);
 				Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
 				
