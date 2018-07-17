@@ -1787,6 +1787,11 @@ public JSONArray vacuum() {
 					
 					if(value instanceof String) {
 						 d = Double.parseDouble((String)value);
+					}else if(value instanceof Integer) {
+						//
+						// if the value is rendered as 0 and the value type is double
+						// it gets interpreted as an integer, 
+						 d = Integer.getInteger((String)value).doubleValue();
 					}else {
 						 d = (double)value;
 					}
