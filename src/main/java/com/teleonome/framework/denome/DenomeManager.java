@@ -933,11 +933,11 @@ public class DenomeManager {
 								
 								logger.info("rememberedDeneWordTeleonomeName=" + rememberedDeneWordTeleonomeName + " rememberedDeneWordPointer= " + rememberedDeneWordPointer);
 								
-								teleonomeRememeberedWordsArrayList = deneWordsToRememberByTeleonome.get(teleonomeName);
+								teleonomeRememeberedWordsArrayList = deneWordsToRememberByTeleonome.get(rememberedDeneWordTeleonomeName);
 								if(teleonomeRememeberedWordsArrayList==null)teleonomeRememeberedWordsArrayList = new ArrayList();
 								teleonomeRememeberedWordsArrayList.add(rememberedDeneWordPointer);
 								logger.info("adding to remembered denewords= " + rememberedDeneWordPointer);
-								deneWordsToRememberByTeleonome.put(teleonomeName, teleonomeRememeberedWordsArrayList);
+								deneWordsToRememberByTeleonome.put(rememberedDeneWordTeleonomeName, teleonomeRememeberedWordsArrayList);
 								
 							}
 						}
