@@ -1791,7 +1791,7 @@ public JSONArray vacuum() {
 						//
 						// if the value is rendered as 0 and the value type is double
 						// it gets interpreted as an integer, 
-						 d = Integer.getInteger((String)value).doubleValue();
+						 d = ((Integer)value).doubleValue();
 					}else {
 						 d = (double)value;
 					}
