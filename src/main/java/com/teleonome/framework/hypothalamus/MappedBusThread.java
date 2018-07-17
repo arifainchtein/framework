@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
 
@@ -39,7 +40,7 @@ class MappedBusThread extends Thread{
 		BufferedReader input=null;
 		BufferedWriter output=null;
 		Logger logger=null;
-		
+		JSONObject lastPulseJSONObject;
 		public MappedBusThread(Hypothalamus h){
 			hypothalamus = h;
 			keepRunning=true;
@@ -81,8 +82,9 @@ class MappedBusThread extends Thread{
 			JSONObject dataPayloadJSONObject = null;
 			
 			while(keepRunning){
+				
+				
 				command=null;
-
 				//
 				// get the command from the database
 				//
@@ -100,9 +102,10 @@ class MappedBusThread extends Thread{
 							logger.warn(Utils.getStringException(e));
 						}
 					}
-					
-					
 				}
+				
+				
+				
 				String asyncData="AsyncData";
 				logger.debug("line 105 microControllerPointerMicroControllerIndex=" + hypothalamus.microControllerPointerMicroControllerIndex);
 				for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){

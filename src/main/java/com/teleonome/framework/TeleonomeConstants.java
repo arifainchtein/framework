@@ -686,6 +686,10 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_MNEMOSYCON_EXPRESSION_VARIABLE_DEFINITION = "Mnemosycon Expression Variable Definition";
 	public static final String DENEWORD_TYPE_MNEMOSYNE_PROCESSING_FUNCTION="Mnemosyne Function";
 	
+	public static final String DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENEWORD="Remembered DeneWord";
+	public static final String DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER="DeneWords To Remember";
+	
+	
 	public static final String DENEWORD_TYPE_MNEMOSYNE_SAMPLE_FREQUENCY="Mnemosyne Sample Frequency Seconds";
 	public static final String VISUALIZATION_OBJECT_TABLE="Table";
 

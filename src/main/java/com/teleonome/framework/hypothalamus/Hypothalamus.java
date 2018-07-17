@@ -85,7 +85,7 @@ public abstract class Hypothalamus {
 	DecimalFormat decimalFormat = new DecimalFormat("###.##");
 	String ipToBindToZeroMQ="";
 	
-	MnemosyneManager aMnemosyneManager=null;
+	public MnemosyneManager aMnemosyneManager=null;
 	Socket exoZeroPublisher=null;
 	
 	int currentPulseInMilliSeconds=0;

@@ -123,8 +123,10 @@ public class DenomeManager {
 	Hashtable<String,ArrayList> actuatorDeneNameActuatorActionEvaluationPositionActionIndex = new Hashtable();
 	Hashtable<String,ArrayList> actuatorDeneNameActuatorActionEvaluationPositionActionForInitialIndex = new Hashtable();
 
-
 	Hashtable<String,JSONArray> externalDataNameDeneWords = new Hashtable();
+	
+	Hashtable<String,ArrayList> deneWordsToRememberByTeleonome = new Hashtable();
+	
 	JSONArray microProcessorsDenesJSONArray=null;
 
 	/**
@@ -875,7 +877,7 @@ public class DenomeManager {
 			// begin processing analyticons
 			//
 			//
-			// Cant assume that all teleonomes will have actuators
+			// Cant assume that all teleonomes will have analyticons
 			//
 			if(deneChainNameDeneChainIndex.containsKey(TeleonomeConstants.DENECHAIN_ANALYTICONS)) {
 				JSONObject anAnalyticonsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_ANALYTICONS);
@@ -887,12 +889,66 @@ public class DenomeManager {
 			//logger.debug("line 858 deneChainNameDeneChainIndex=" + deneChainNameDeneChainIndex);
 			//
 			// end of processing analyticons
+			//
+			// process the mnemosycons
+			// cant assumew all teleonome have mnemosycons
+			//
 			if(deneChainNameDeneChainIndex.containsKey(TeleonomeConstants.DENECHAIN_MNEMOSYCONS)) {
 
+				// first get all the denes of type DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER 
+				//
+				// Hashtable<String,ArrayList> deneWordsToRememberByTeleonome
+				
+				deneWordsToRememberByTeleonome = new Hashtable();
+				
+				JSONObject rememberedWordsMnemosyconJSONObject;
+				boolean active=false;
+				JSONArray rememberedDeneWordsJSONArray;
+				String rememberedDeneWordTeleonomeName,rememberedDeneWordPointer, rememberedDeneWordValue;
+				Identity rememberedDeneWordIdentity;
+				ArrayList teleonomeRememeberedWordsArrayList;
+				
 				JSONObject anMnemosyconsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_MNEMOSYCONS);
 				//logger.debug("in denomemagager anAnalyticonsDeneChainJSONObject= " + anAnalyticonsDeneChainJSONObject);
 				if(anMnemosyconsDeneChainJSONObject!=null){
-					mnemosyconDenesJSONArray = DenomeUtils.getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON);
+					mnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON);
+					for(int i=0;i<mnemosyconDenesJSONArray.length();i++) {
+						rememberedWordsMnemosyconJSONObject = mnemosyconDenesJSONArray.getJSONObject(i);
+						active = (boolean) this.getDeneWordAttributeByDeneWordNameFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						if(active) {
+							rememberedDeneWordsJSONArray = (JSONArray) this.getDeneWordAttributeByDeneWordTypeFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENEWORD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							//
+							// this array will contain elements that are actually pointers, 
+							//
+							// "@Tlaloc:Purpose:Sensor Data:Solar Radiation:Solar Radiation Data","@Tlaloc:Purpose:Sensor Data:Ambient Temperature:Ambient Temperature Data"
+							//
+							// get the name of the teleonome and use to get the vector of all the other remembered words, and stored the identity in the vector
+							for(int j=0;j<mnemosyconDenesJSONArray.length();j++) {
+								try {
+									rememberedDeneWordPointer= rememberedDeneWordsJSONArray.getString(j);
+									rememberedDeneWordIdentity = new Identity(rememberedDeneWordPointer);
+									rememberedDeneWordTeleonomeName = rememberedDeneWordIdentity.getTeleonomeName();
+									
+									rememberedDeneWordValue = (String) this.getDeneWordAttributeByIdentity(rememberedDeneWordIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+									teleonomeRememeberedWordsArrayList = deneWordsToRememberByTeleonome.get(teleonomeName);
+									if(teleonomeRememeberedWordsArrayList==null)teleonomeRememeberedWordsArrayList = new ArrayList();
+									teleonomeRememeberedWordsArrayList.add(rememberedDeneWordValue);
+									deneWordsToRememberByTeleonome.put(teleonomeName, teleonomeRememeberedWordsArrayList);
+									
+								} catch (InvalidDenomeException e) {
+									// TODO Auto-generated catch block
+									logger.warn(Utils.getStringException(e));
+								}
+								
+							}
+						}
+
+					}
+					//
+					// now check if its active
+					
+					
+					//now loop over all them extracting the denewords of type
 				}
 
 			}
@@ -1084,6 +1140,28 @@ public class DenomeManager {
 
 	}
 
+	public TimeZone getTeleonomeTimeZone() {
+		String timeZoneId = "UTC";
+		int basePulseFrequency=60;
+		String currentIdentityMode="";
+		JSONObject internalDescriptiveDeneChain = getDeneChainByName(denomeJSONObject,TeleonomeConstants.NUCLEI_INTERNAL,  TeleonomeConstants.DENECHAIN_DESCRIPTIVE);
+		JSONObject internalVitalDene = DenomeUtils.getDeneByName(internalDescriptiveDeneChain, "Vital");
+		timeZoneId = (String) getDeneWordAttributeByDeneWordNameFromDene(internalVitalDene, "Timezone", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		//// System.out.println("AsyncServlet, timeZoneId=" + timeZoneId);
+		TimeZone currentTimeZone = null;
+		if(timeZoneId!=null && !timeZoneId.equals("")){
+			currentTimeZone = TimeZone.getTimeZone(timeZoneId);
+		}else{
+			currentTimeZone = TimeZone.getDefault();
+		}
+		return currentTimeZone;
+	}
+	//  deneWordsToRememberByTeleonome
+	
+	public Hashtable<String,ArrayList> getDeneWordsToRememberByTeleonome() {
+		return deneWordsToRememberByTeleonome;
+	}
+	
 
 	public Hashtable<String,JSONArray> getExternalDataNameDeneWords(){
 		return externalDataNameDeneWords;
@@ -2213,6 +2291,8 @@ public class DenomeManager {
 	}
 
 
+	
+	
 	public JSONArray getDenesByDeneType(JSONObject aDeneChainJSONObject,String deneType) throws JSONException{
 		JSONArray denes = aDeneChainJSONObject.getJSONArray("Denes");
 		JSONArray toReturn = new JSONArray();
@@ -2223,6 +2303,7 @@ public class DenomeManager {
 		}
 		return toReturn;
 	}
+	
 	/**
 	 * returns all the denes that have the same identity.  In the mnemosyne, you can have multiple
 	 * denes with the same identity where

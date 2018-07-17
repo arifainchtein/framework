@@ -3,11 +3,13 @@ package com.teleonome.framework.persistence;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -15,6 +17,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -1759,6 +1762,51 @@ public JSONArray vacuum() {
 		public static String getUniqueIndex(){
 			java.rmi.dgc.VMID v = new java.rmi.dgc.VMID();
 			return v.toString();
+		}
+
+		public boolean unwrap(TimeZone timeZone, String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value) {
+			String sql="";
+			Connection connection = null;
+			PreparedStatement preparedStatement = null;
+			boolean toReturn=false;
+			try {
+				connection = connectionPool.getConnection();
+				//statement = connection.createStatement();
+				java.sql.Timestamp dateTimeValue = new java.sql.Timestamp(pulseTimeMillis);
+				
+				sql = "insert into RememberedDeneWords (pulseTimeMillis, teleonomeName, ,identityString,value) values(?,?,?,?)";
+				logger.debug("storePurposeChainInfo=" + sql);
+				Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
+				
+				preparedStatement = connection.prepareStatement(sql);
+				preparedStatement.setTimestamp(1, dateTimeValue, calendarTimeZone);
+				preparedStatement.setString(2, teleonomeName);
+				preparedStatement.setString(3, identityString);
+				if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
+					double d = (double)value;
+					preparedStatement.setDouble(4, d);
+				}else if(valueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
+					double d = ((Integer)value).doubleValue();
+					preparedStatement.setDouble(4, d);
+				}
+				int result = preparedStatement.executeUpdate();
+				preparedStatement.close();
+				connectionPool.closeConnection(connection);
+				toReturn= true;
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				System.out.println("bad sql=" + sql);
+				logger.warn(Utils.getStringException(e));
+			}finally{
+				try {
+					if(preparedStatement!=null)preparedStatement.close();
+					if(connection!=null)connectionPool.closeConnection(connection);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			}
+			return toReturn;
 		}
 
 //		public ArrayList getHistoricalDeneWordValueByIdentity(Identity identity) {

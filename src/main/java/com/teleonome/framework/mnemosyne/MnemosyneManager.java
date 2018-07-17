@@ -495,6 +495,9 @@ public class MnemosyneManager {
 	
 	
 	
+	public boolean unwrap(TimeZone timeZone, String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value) {
+		return aDBManager.unwrap(timeZone ,teleonomeName,  pulseTimeMillis,  identityString,  valueType,  value);
+	}
 	
 	public void performTimePrunningAnalysis(){
 		logger.info("entering time prunning analysis");
