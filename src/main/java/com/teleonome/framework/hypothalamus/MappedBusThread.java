@@ -442,7 +442,7 @@ class MappedBusThread extends Thread{
 
 
 							}else {
-								logger.info("Closing input because is not ready");
+								logger.debug("Closing input because is not ready");
 								if(input!=null)input.close();
 								if(output!=null)output.close();
 							}
