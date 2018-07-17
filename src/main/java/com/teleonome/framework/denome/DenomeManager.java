@@ -909,7 +909,7 @@ public class DenomeManager {
 				ArrayList teleonomeRememeberedWordsArrayList;
 				
 				JSONObject anMnemosyconsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_MNEMOSYCONS);
-				logger.debug("in denomemagager anMnemosyconsDeneChainJSONObject= " + anMnemosyconsDeneChainJSONObject);
+				logger.info("in denomemagager anMnemosyconsDeneChainJSONObject= " + anMnemosyconsDeneChainJSONObject);
 				if(anMnemosyconsDeneChainJSONObject!=null){
 					mnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON);
 					for(int i=0;i<mnemosyconDenesJSONArray.length();i++) {
@@ -917,7 +917,7 @@ public class DenomeManager {
 						active = (boolean) this.getDeneWordAttributeByDeneWordNameFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						if(active) {
 							rememberedDeneWordsJSONArray = (JSONArray) this.getDeneWordAttributeByDeneWordTypeFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENEWORD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-							logger.debug("rememberedDeneWordsJSONArray= " + rememberedDeneWordsJSONArray);
+							logger.info("rememberedDeneWordsJSONArray= " + rememberedDeneWordsJSONArray);
 							
 							//
 							// this array will contain elements that are actually pointers, 
@@ -935,7 +935,7 @@ public class DenomeManager {
 									teleonomeRememeberedWordsArrayList = deneWordsToRememberByTeleonome.get(teleonomeName);
 									if(teleonomeRememeberedWordsArrayList==null)teleonomeRememeberedWordsArrayList = new ArrayList();
 									teleonomeRememeberedWordsArrayList.add(rememberedDeneWordValue);
-									logger.debug("adding to remembered denewords= " + rememberedDeneWordValue);
+									logger.info("adding to remembered denewords= " + rememberedDeneWordValue);
 									deneWordsToRememberByTeleonome.put(teleonomeName, teleonomeRememeberedWordsArrayList);
 									
 								} catch (InvalidDenomeException e) {
