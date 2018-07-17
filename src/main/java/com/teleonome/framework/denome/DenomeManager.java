@@ -904,7 +904,7 @@ public class DenomeManager {
 				JSONObject rememberedWordsMnemosyconJSONObject;
 				boolean active=false;
 				JSONArray rememberedDeneWordsJSONArray;
-				String rememberedDeneWordTeleonomeName,rememberedDeneWordPointer, rememberedDeneWordValue;
+				String rememberedDeneWordTeleonomeName,rememberedDeneWordPointer;
 				Identity rememberedDeneWordIdentity;
 				ArrayList teleonomeRememeberedWordsArrayList;
 				
@@ -926,25 +926,18 @@ public class DenomeManager {
 							//
 							// get the name of the teleonome and use to get the vector of all the other remembered words, and stored the identity in the vector
 							for(int j=0;j<rememberedDeneWordsJSONArray.length();j++) {
-								try {
-									rememberedDeneWordPointer= rememberedDeneWordsJSONArray.getString(j);
-									
-									rememberedDeneWordIdentity = new Identity(rememberedDeneWordPointer);
-									rememberedDeneWordTeleonomeName = rememberedDeneWordIdentity.getTeleonomeName();
-									
-									rememberedDeneWordValue = (String) this.getDeneWordAttributeByIdentity(rememberedDeneWordIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-									logger.info("rememberedDeneWordTeleonomeName=" + rememberedDeneWordTeleonomeName + " rememberedDeneWordPointer= " + rememberedDeneWordPointer);
-									
-									teleonomeRememeberedWordsArrayList = deneWordsToRememberByTeleonome.get(teleonomeName);
-									if(teleonomeRememeberedWordsArrayList==null)teleonomeRememeberedWordsArrayList = new ArrayList();
-									teleonomeRememeberedWordsArrayList.add(rememberedDeneWordValue);
-									logger.info("adding to remembered denewords= " + rememberedDeneWordValue);
-									deneWordsToRememberByTeleonome.put(teleonomeName, teleonomeRememeberedWordsArrayList);
-									
-								} catch (InvalidDenomeException e) {
-									// TODO Auto-generated catch block
-									logger.warn(Utils.getStringException(e));
-								}
+								rememberedDeneWordPointer= rememberedDeneWordsJSONArray.getString(j);
+								
+								rememberedDeneWordIdentity = new Identity(rememberedDeneWordPointer);
+								rememberedDeneWordTeleonomeName = rememberedDeneWordIdentity.getTeleonomeName();
+								
+								logger.info("rememberedDeneWordTeleonomeName=" + rememberedDeneWordTeleonomeName + " rememberedDeneWordPointer= " + rememberedDeneWordPointer);
+								
+								teleonomeRememeberedWordsArrayList = deneWordsToRememberByTeleonome.get(teleonomeName);
+								if(teleonomeRememeberedWordsArrayList==null)teleonomeRememeberedWordsArrayList = new ArrayList();
+								teleonomeRememeberedWordsArrayList.add(rememberedDeneWordPointer);
+								logger.info("adding to remembered denewords= " + rememberedDeneWordPointer);
+								deneWordsToRememberByTeleonome.put(teleonomeName, teleonomeRememeberedWordsArrayList);
 								
 							}
 						}
