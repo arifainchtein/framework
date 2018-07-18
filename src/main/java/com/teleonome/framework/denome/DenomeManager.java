@@ -5406,6 +5406,31 @@ public class DenomeManager {
 		return null;
 	}
 
+	/**
+	 * This method will loop over all the denewords of the dene passed as the first parameter
+	 * and extract the value of the dene word whose name is passed as the second parameter
+	 * Note that this method can not be used with Dene Pointers.  If a deneWordLabel
+	 *  is requested that is of type Dene Pointer an exception will be throwb
+	 * @param dene
+	 * @param deneWordName
+	 * @return
+	 * @throws JSONException 
+	 */
+	public Object extractDeneWordValueTypeFromDene(JSONObject aDeneJSONObject, String deneWordLabel) throws JSONException{
+		JSONObject aDeneWordJSONObject;
+		JSONArray deneWordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
+		Object object;
+		//String valueType;
+		for(int k=0;k<deneWordsJSONArray.length();k++){
+			aDeneWordJSONObject = (JSONObject) deneWordsJSONArray.get(k);
+			object = aDeneWordJSONObject.get("Value Type");
+
+			if(aDeneWordJSONObject.getString("Name").equals(deneWordLabel)){
+				return object;
+			}
+		}
+		return null;
+	}
 
 	public void addSensorValueRenderedDeneWordToPulse(JSONObject currentlyProcessingSensorValueDene, String inputLine){
 
@@ -5419,7 +5444,7 @@ public class DenomeManager {
 			reportingAddress = (String) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,"Reporting Address");
 			unit = (String) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE);
 
-			valueType = (String) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+			valueType = (String) extractDeneWordValueTypeFromDene(currentlyProcessingSensorValueDene,"Reporting Address");
 
 			//
 			// rangeMaximum and rangeMinimum can be null, if the data been sent from the sensor is of type ON/OFF or some

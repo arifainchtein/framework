@@ -316,7 +316,7 @@ public abstract class Hypothalamus {
 	
 	protected void stopExoZeroPublisher() {
 		boolean unbindedOk = exoZeroPublisher.unbind("tcp://" + ipToBindToZeroMQ + ":5563");
-		logger.debug("unbinding exozero publisher returns " + unbindedOk);
+		logger.info("unbinding exozero publisher returns " + unbindedOk);
 	}
 	
 	protected void startExoZeroPublisher() {
