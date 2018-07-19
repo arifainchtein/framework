@@ -612,6 +612,8 @@ public class DenomeUtils {
 	 * the exozero network, ie if there is another teleonome waiting for data from this 
 	 * teleonome.
 	 * if it returns true then the exozero publisher needs to be restarted
+	 * There are two places to check, the external data and all the mnemosycons of type DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER
+	 * 
 	 * @param publisherTeleonomeName - the name of the publisher teleonome
 	 * @param dependentTeleonomePulse - the data of the teleonome dependind of the publisherteleonome data
 	 * @return
@@ -684,6 +686,10 @@ public class DenomeUtils {
 					}
 				}
 			}
+			//
+			// now check the mnemosycons of denetype DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER
+			//
+			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
