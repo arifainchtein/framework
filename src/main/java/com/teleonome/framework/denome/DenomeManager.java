@@ -1015,6 +1015,57 @@ public class DenomeManager {
 			throw new MissingDenomeException(info);
 		}
 	}
+	
+	/**
+	 *  this method will return a list of all the teleonomes that are needed in the  external data
+	 *  denechain and it is used in SubscriberThreads
+	 * @return
+	 */
+
+	public Vector getStaleExternalTeleonomeNames(){
+		Vector toReturn = new Vector();
+
+		try {
+			JSONArray deneChains = purposeNucleus.getJSONArray("DeneChains");
+			JSONObject deneChain, dene;
+			JSONArray denes;
+			JSONArray v = new JSONArray();
+			String externalPath;
+			Identity identity;
+			String teleonomeName, deneType;
+			for(int i=0;i<deneChains.length();i++){
+				deneChain = deneChains.getJSONObject(i);
+				if(!deneChain.has("Name")) {
+					System.out.println("dene chain has no nmae=" + purposeNucleus.toString(4));
+				}
+				if(deneChain.getString("Name").equals(TeleonomeConstants.DENECHAIN_EXTERNAL_DATA)){
+
+					denes = deneChain.getJSONArray("Denes");
+					for(int j=0;j<denes.length();j++){
+						dene = denes.getJSONObject(j);
+						deneType = dene.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
+						if(deneType.equals(TeleonomeConstants.DENE_TYPE_EXTERNAL_DATA_SOURCE)){	
+							v = DenomeUtils.getAllDeneWordsFromDeneByDeneWordType(dene , TeleonomeConstants.DENEWORD_DATA_LOCATION_ATTRIBUTE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							for(int k=0;k<v.length();k++){
+								externalPath = ((String)v.get(k)).substring(1);
+								identity = new Identity(externalPath);
+								teleonomeName = identity.getTeleonomeName();
+								if(!toReturn.contains(teleonomeName)){
+									toReturn.addElement(teleonomeName);
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}
+		return toReturn;
+	}
+
+	
 
 	/**
 	 *  this method will return a list of all the teleonomes that are needed in the  external data
@@ -1228,7 +1279,7 @@ public class DenomeManager {
 								// lastPulseExternalTeleonomeJSONObject contains the last pulse
 								// of that teleonome
 								//
-								logger.debug("line 824 denomemanamger, looking for  " + externalDataDeneName + " and lastExternalPulse size=" + lastExternalPulse.size() + " and lastExternalPulse.get[" + lastExternalPulse.containsKey(externalDataDeneName));
+								logger.info("line 824 denomemanamger, looking for  " + externalDataDeneName + " and lastExternalPulse size=" + lastExternalPulse.size() + " and lastExternalPulse.get[" + lastExternalPulse.containsKey(externalDataDeneName));
 								lastPulseExternalTeleonomeJSONObject = (JSONObject)lastExternalPulse.get(externalDataDeneName );
 								//
 								// there could be the situation where lastPulseExternalTeleonomeJSONObject==null
@@ -1239,18 +1290,18 @@ public class DenomeManager {
 								// and therefore should not be used, both of these cases will end up in the
 								// pathology report of the denome
 								//
-								logger.debug("line 1031 denomemanamger, lastPulseExternalTeleonomeJSONObject is not equal to null  " + (lastPulseExternalTeleonomeJSONObject!=null) );
+								logger.info("line 1031 denomemanamger, lastPulseExternalTeleonomeJSONObject is not equal to null  " + (lastPulseExternalTeleonomeJSONObject!=null) );
 
 								if(lastPulseExternalTeleonomeJSONObject!=null){
 									//
 									// check if the data is stale
-										logger.debug("line 1111   " + (lastPulseExternalTeleonomeJSONObject.toString(4)) );
+										logger.info("line 1111   " + (lastPulseExternalTeleonomeJSONObject.toString(4)) );
 
 									lastPulseExternalTimeInMillis = lastPulseExternalTeleonomeJSONObject.getLong(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS);
 									lastPulseExternalTime = lastPulseExternalTeleonomeJSONObject.getString(TeleonomeConstants.PULSE_TIMESTAMP);
 									long now= System.currentTimeMillis();
 									difference = now-lastPulseExternalTimeInMillis;
-									logger.debug("difference="+ difference + " now=" + now + " lastPulseExternalTimeInMillis=" + lastPulseExternalTimeInMillis + " secondsToStale=" + secondsToStale);
+									logger.info("difference="+ difference + " now=" + now + " lastPulseExternalTimeInMillis=" + lastPulseExternalTimeInMillis + " secondsToStale=" + secondsToStale);
 
 									externalDataCurrentPulseIdentity = new Identity(externalDataDeneName,TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,"Vital",TeleonomeConstants.DENEWORD_TYPE_CURRENT_PULSE_FREQUENCY );
 									secondsToStale=180;
@@ -1261,7 +1312,7 @@ public class DenomeManager {
 										int numberOfPulseForStale = (Integer)lastPulseExternalTeleonomeJSONObject.getInt( numberOfPulseForStaleIdentity.toString());
 										
 										secondsToStale = externalCurrentPulse * numberOfPulseForStale;
-										logger.debug("externalCurrentPulse="+ externalCurrentPulse + " numberOfPulseForStale=" + numberOfPulseForStale + " secondsToStale=" + secondsToStale);
+										logger.info("externalCurrentPulse="+ externalCurrentPulse + " numberOfPulseForStale=" + numberOfPulseForStale + " secondsToStale=" + secondsToStale);
 
 									}catch(NullPointerException e){
 										logger.warn(Utils.getStringException(e));
@@ -1275,7 +1326,7 @@ public class DenomeManager {
 										dataIsStale=true;
 										jsonObjectDeneWord = (JSONObject) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(jsonObjectDene, TeleonomeConstants.EXTERNAL_DATA_STATUS, TeleonomeConstants.COMPLETE);
 										jsonObjectDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, TeleonomeConstants.EXTERNAL_DATA_STATUS_STALE);
-										logger.debug("data is stale");
+										logger.info("data is stale");
 										//
 										// now create the pathology dene
 										//
@@ -1298,7 +1349,7 @@ public class DenomeManager {
 										// exterbDataDeneName contains the name of the teleonome that needs to reconnect
 										// add it to the return variable
 										if(!teleonomeToReconnect.contains(externalDataDeneName)){
-											logger.debug(externalDataDeneName + " is stale, adding to recoonectList");
+											logger.info(externalDataDeneName + " is stale, adding to recoonectList");
 
 											teleonomeToReconnect.addElement(externalDataDeneName);
 										}
@@ -1322,7 +1373,7 @@ public class DenomeManager {
 										//
 										// first put all the values from the last pulse of this external teleonome
 										//
-										logger.debug("line 1154 deneWords.length()=" + deneWords.toString(4));
+										logger.info("line 1154 deneWords.length()=" + deneWords.toString(4));
 
 										for(int l=0;l<deneWords.length();l++){
 											jsonObjectDeneWord = deneWords.getJSONObject(l);
@@ -1340,10 +1391,10 @@ public class DenomeManager {
 												externalSourceOfData = jsonObjectDeneWord.getString("Data Location");
 												//
 												// now get the value from 
-												logger.debug("line 1267 dataIsStale=" + dataIsStale + " externalSourceOfData=" + externalSourceOfData);
+												logger.info("line 1267 dataIsStale=" + dataIsStale + " externalSourceOfData=" + externalSourceOfData);
 												
 												Object externalData =  lastPulseExternalTeleonomeJSONObject.get(externalSourceOfData);
-												logger.debug("line 1270 externalData=" + externalData);
+												logger.info("line 1270 externalData=" + externalData);
 												
 												if(externalData!=null)jsonObjectDeneWord.put("Value", externalData);	
 											}
@@ -1351,13 +1402,13 @@ public class DenomeManager {
 										}
 									}
 								}else{
-									logger.debug("no data from " + externalDataDeneName + " setting all dene to stale");
+									logger.info("no data from " + externalDataDeneName + " setting all dene to stale");
 
 
 									jsonObjectDeneWord = (JSONObject) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(jsonObjectDene, TeleonomeConstants.EXTERNAL_DATA_STATUS, TeleonomeConstants.COMPLETE);
 									jsonObjectDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, TeleonomeConstants.EXTERNAL_DATA_STATUS_STALE);
 
-									logger.debug("line 1248 disallowexternal data jsonObjectDene  " + jsonObjectDene.getString("Name") + " is stale");
+									logger.info("line 1248 disallowexternal data jsonObjectDene  " + jsonObjectDene.getString("Name") + " is stale");
 
 
 
@@ -1379,7 +1430,7 @@ public class DenomeManager {
 									pathologyDeneDeneWords.put(pathologyDeneDeneWord);
 									//
 									if(!teleonomeToReconnect.contains(externalDataDeneName)){
-										logger.debug(externalDataDeneName + " is stale, adding to recoonectList");
+										logger.info(externalDataDeneName + " is stale, adding to recoonectList");
 										teleonomeToReconnect.addElement(externalDataDeneName);
 									}
 
