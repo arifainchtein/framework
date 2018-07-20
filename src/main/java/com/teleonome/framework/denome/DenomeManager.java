@@ -1137,8 +1137,16 @@ public class DenomeManager {
 	 * @param teleonomeName
 	 * @param jsonMessage
 	 */
-
-	public void updateExternalData(String teleonomeName, JSONObject jsonMessage){
+	public void updateExternalData(String teleonomeName, JSONObject externalDataLastPulseInfoJSONObject){
+		lastExternalPulse.put(teleonomeName,externalDataLastPulseInfoJSONObject );
+	}
+	
+	public ArrayList getExternalDataLocations(String teleonomeName) {
+		return (ArrayList) externalDataLocationHashMap.get(teleonomeName);
+	}
+	
+	/*
+	public void updateExternalDataOldWay(String teleonomeName, JSONObject jsonMessage){
 		logger.debug("received updated from "+teleonomeName+ " with size "+jsonMessage.toString().length() + " and lastExternalPulse=" + lastExternalPulse.size());
 		//
 		// now instead of storing the entire pulse
@@ -1189,7 +1197,8 @@ public class DenomeManager {
 		//lastExternalPulse.put(teleonomeName,jsonMessage );
 
 	}
-
+*/
+	
 	public TimeZone getTeleonomeTimeZone() {
 		String timeZoneId = "UTC";
 		int basePulseFrequency=60;
