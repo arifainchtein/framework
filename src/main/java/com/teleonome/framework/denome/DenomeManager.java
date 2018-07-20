@@ -5623,7 +5623,11 @@ public class DenomeManager {
 													long v = Long.parseLong(inputLine);
 													logger.info("storing into value long=" + v);
 													jsonObjectDeneWord.put("Value", v);
-												}else if(valueType.equals(TeleonomeConstants.DATATYPE_STRING)) {
+												}else if(valueType.equals(TeleonomeConstants.DATATYPE_STRING) || 
+														valueType.equals(TeleonomeConstants.DATATYPE_IMAGE_FILE) || 
+														valueType.equals(TeleonomeConstants.DATATYPE_AUDIO_FILE) || 
+														valueType.equals(TeleonomeConstants.DATATYPE_VIDEO_FILE) 
+														) {
 													jsonObjectDeneWord.put("Value", inputLine);
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER)) {
 													

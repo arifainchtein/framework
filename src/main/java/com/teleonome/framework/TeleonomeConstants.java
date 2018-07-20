@@ -91,6 +91,9 @@ public class TeleonomeConstants {
 	public static final String DATATYPE_DENE_POINTER = "Dene Pointer";
 	public static final String DATATYPE_TIMESTAMP = "Timestamp";
 	public static final String DATATYPE_JSONARRAY = "JSONArray";
+	public static final String DATATYPE_IMAGE_FILE = "Image File";
+	public static final String DATATYPE_AUDIO_FILE = "Audio File";
+	public static final String DATATYPE_VIDEO_FILE = "Video File";
 	
 	public static final String  DATATYPE_TIMESTAMP_MILLISECONDS = "Timestamp Milliseconds";
 
