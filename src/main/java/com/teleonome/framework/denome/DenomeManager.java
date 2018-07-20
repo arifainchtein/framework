@@ -5495,7 +5495,7 @@ public class DenomeManager {
 			reportingAddress = (String) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,"Reporting Address");
 			unit = (String) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE);
 
-			valueType = (String) extractDeneWordValueTypeFromDene(currentlyProcessingSensorValueDene,"Reporting Address");
+			valueType = (String) extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
 
 			//
 			// rangeMaximum and rangeMinimum can be null, if the data been sent from the sensor is of type ON/OFF or some
@@ -5624,6 +5624,9 @@ public class DenomeManager {
 													logger.info("storing into value long=" + v);
 													jsonObjectDeneWord.put("Value", v);
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_STRING)) {
+													jsonObjectDeneWord.put("Value", inputLine);
+												}else if(valueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER)) {
+													
 													jsonObjectDeneWord.put("Value", inputLine);
 												}
 												
