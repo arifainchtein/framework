@@ -1269,7 +1269,8 @@ public class DenomeManager {
 			Identity externalDataCurrentPulseIdentity,numberOfPulseForStaleIdentity;
 			int secondsToStale=180;
 			//String valueType;
-
+			int lastPulseCreationDurationMillis=0;
+			
 			for(int i=0;i<currentlyCreatingPulseNuclei.length();i++){
 				jsonObject = currentlyCreatingPulseNuclei.getJSONObject(i);
 				if(jsonObject.getString("Name").equals(TeleonomeConstants.NUCLEI_PURPOSE)){
@@ -1308,9 +1309,10 @@ public class DenomeManager {
 
 									lastPulseExternalTimeInMillis = lastPulseExternalTeleonomeJSONObject.getLong(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS);
 									lastPulseExternalTime = lastPulseExternalTeleonomeJSONObject.getString(TeleonomeConstants.PULSE_TIMESTAMP);
+									 lastPulseCreationDurationMillis = lastPulseExternalTeleonomeJSONObject.getInt(TeleonomeConstants.PULSE_CREATION_DURATION_MILLIS);
 									long now= System.currentTimeMillis();
 									difference = now-lastPulseExternalTimeInMillis;
-									logger.info("difference="+ difference + " now=" + now + " lastPulseExternalTimeInMillis=" + lastPulseExternalTimeInMillis + " secondsToStale=" + secondsToStale);
+									logger.info("difference="+ difference + " now=" + now + " lastPulseExternalTimeInMillis=" + lastPulseExternalTimeInMillis + " lastPulseCreationDurationMillis=" + lastPulseCreationDurationMillis + " secondsToStale=" + secondsToStale);
 
 									externalDataCurrentPulseIdentity = new Identity(externalDataDeneName,TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,"Vital",TeleonomeConstants.DENEWORD_TYPE_CURRENT_PULSE_FREQUENCY );
 									secondsToStale=180;
@@ -1320,7 +1322,7 @@ public class DenomeManager {
 										int externalCurrentPulse = (Integer)lastPulseExternalTeleonomeJSONObject.getInt( externalDataCurrentPulseIdentity.toString());
 										int numberOfPulseForStale = (Integer)lastPulseExternalTeleonomeJSONObject.getInt( numberOfPulseForStaleIdentity.toString());
 										
-										secondsToStale = externalCurrentPulse * numberOfPulseForStale;
+										secondsToStale = (externalCurrentPulse+lastPulseCreationDurationMillis) * numberOfPulseForStale;
 										logger.info("externalCurrentPulse="+ externalCurrentPulse + " numberOfPulseForStale=" + numberOfPulseForStale + " secondsToStale=" + secondsToStale);
 
 									}catch(NullPointerException e){
@@ -7798,7 +7800,7 @@ public class DenomeManager {
 			//
 			// Copy the currentpulse to be the previous pulse
 			//
-			currentlyCreatingPulseJSONObject.put("Pulse Creation Duration Millis", pulseDuration);
+			currentlyCreatingPulseJSONObject.put(TeleonomeConstants.PULSE_CREATION_DURATION_MILLIS, pulseDuration);
 
 			File currentPulseFile = new File(selectedDenomeFileName);
 			String previousPulseFileName = FilenameUtils.getBaseName(selectedDenomeFileName) + ".previous_pulse";

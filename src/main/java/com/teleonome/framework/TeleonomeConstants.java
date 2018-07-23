@@ -545,6 +545,8 @@ public class TeleonomeConstants {
 	public static final String PULSE_SIZE_MESSAGE="Pulse Size";
 	public static final String PULSE_TIMESTAMP="Pulse Timestamp";
 	public static final String PULSE_TIMESTAMP_MILLISECONDS="Pulse Timestamp in Milliseconds";
+	public static final String PULSE_CREATION_DURATION_MILLIS="Pulse Creation Duration Millis";
+
 	//
 	// The record size must be at least big enough to contain a pulse
 	//
@@ -939,7 +941,7 @@ public class TeleonomeConstants {
 	//
 	// the topics for the heart
 	//'
-	public static int HEART_QUALITY_OF_SERVICE=1;
+	public static int HEART_QUALITY_OF_SERVICE=1;	
 	public static final String HEART_TOPIC_STATUS="Status";
 	public static final String HEART_TOPIC_PULSE_STATUS_INFO="PulseStatusInfo";
 	public static final String HEART_TOPIC_PULSE_STATUS_INFO_SECUNDARY="PulseStatusInfoSecundary";
