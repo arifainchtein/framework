@@ -1792,7 +1792,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				time=rs.getTimestamp(1);
 				value = rs.getDouble(2);
 				j = new JSONObject();
-				j.put("Time", time);
+				j.put("Pulse Timestamp in Milliseconds", time.getTime());
 				j.put("Value", value);
 				toReturn.put(j);
 			}
