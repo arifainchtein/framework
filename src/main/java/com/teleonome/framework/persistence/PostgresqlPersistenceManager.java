@@ -1772,7 +1772,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		ResultSet rs=null;
 		JSONArray toReturn = new JSONArray();
 		try {
-			String command = "SELECT time, value from RememberedDeneWords where time>=? and time<=?";
+			String command = "SELECT time, value from RememberedDeneWords where time>=? and time<=? and  identityString=?";
 			
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
@@ -1782,6 +1782,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
 			preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
 			preparedStatement.setTimestamp(2, untilTimeValue, calendarTimeZone);
+			preparedStatement.setString(3, identityPointer);
 			
 			rs = preparedStatement.executeQuery();
 			Timestamp time=null;
