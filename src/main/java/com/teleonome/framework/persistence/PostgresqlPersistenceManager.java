@@ -1772,7 +1772,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		ResultSet rs=null;
 		JSONArray toReturn = new JSONArray();
 		try {
-			String command = "SELECT time, value from RememberedDeneWords where time>=? and time<=? and  identityString=?";
+			String command = "SELECT time, value from RememberedDeneWords where time>=? and time<=? and  identityString=? order by time asc";
 			
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
