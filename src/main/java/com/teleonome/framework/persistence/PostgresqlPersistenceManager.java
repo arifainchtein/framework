@@ -89,19 +89,19 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 	public double getTableSizeInMB(String tableName) {
 		String sql ="SELECT"+
-	    "total_size/1024000 AS total_size"+
-	    "FROM ("+
-	        "SELECT"+
-	            "table_name,"+
-	           " pg_table_size(table_name) AS table_size,"+
-	           " pg_indexes_size(table_name) AS indexes_size,"+
-	           " pg_total_relation_size(table_name) AS total_size"+
-	      "  FROM ("+
-	        "    SELECT table_name  AS table_name"+
-	        "    FROM information_schema.tables where table_name='"+ tableName +"'"+
-	       " ) AS all_tables"+
-	      "  ORDER BY total_size DESC"+
-	   " ) AS pretty_sizes";
+				"total_size/1024000 AS total_size"+
+				"FROM ("+
+				"SELECT"+
+				"table_name,"+
+				" pg_table_size(table_name) AS table_size,"+
+				" pg_indexes_size(table_name) AS indexes_size,"+
+				" pg_total_relation_size(table_name) AS total_size"+
+				"  FROM ("+
+				"    SELECT table_name  AS table_name"+
+				"    FROM information_schema.tables where table_name='"+ tableName +"'"+
+				" ) AS all_tables"+
+				"  ORDER BY total_size DESC"+
+				" ) AS pretty_sizes";
 		Connection connection=null;
 		Statement statement=null;
 		ResultSet rs=null;
@@ -110,7 +110,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
 
-		    rs = statement.executeQuery(sql);
+			rs = statement.executeQuery(sql);
 			String sizeString="";
 			while(rs.next()){
 				size=rs.getDouble(1);
@@ -118,7 +118,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
-		
+
 
 		}finally{
 
@@ -134,42 +134,42 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		}
 
 		return size;
-		
+
 
 	}
-	
-public JSONArray vacuum() {
-		
+
+	public JSONArray vacuum() {
+
 		Connection connection=null;
 		Statement st2=null;
 		ResultSet rs=null;
 		JSONArray toReturn = new JSONArray();
 		JSONObject warningJSONObject;
-		
+
 		try{
 			connection = getConnection();
-			
-			 st2 = connection.createStatement();
-			 st2.executeUpdate("VACUUM ANALYZE VERBOSE"); 
-			
-			 SQLWarning warning = st2.getWarnings();
-			  
-			 if (warning != null)
-			 {
-			      while (warning != null)
-			     {
-			    	  warningJSONObject = new JSONObject();
-			    	  warningJSONObject.put("Message", warning.getMessage());
-			    	  warningJSONObject.put("SQLState", warning.getSQLState());
-			    	  warningJSONObject.put("Error Code", warning.getErrorCode());
-			    	  toReturn.put(warningJSONObject);
-			         
-			         warning = warning.getNextWarning();
-			     }
-			 }
+
+			st2 = connection.createStatement();
+			st2.executeUpdate("VACUUM ANALYZE VERBOSE"); 
+
+			SQLWarning warning = st2.getWarnings();
+
+			if (warning != null)
+			{
+				while (warning != null)
+				{
+					warningJSONObject = new JSONObject();
+					warningJSONObject.put("Message", warning.getMessage());
+					warningJSONObject.put("SQLState", warning.getSQLState());
+					warningJSONObject.put("Error Code", warning.getErrorCode());
+					toReturn.put(warningJSONObject);
+
+					warning = warning.getNextWarning();
+				}
+			}
 		}
 		catch(SQLException e) {
-			
+
 		}finally {
 			if(st2!=null)
 				try {
@@ -182,9 +182,9 @@ public JSONArray vacuum() {
 		}
 		return toReturn;
 	}
-	
+
 	public int deleteByPeriodFromOrganismPulse( long millisToDeleteFrom, String teamInfo) {
-		
+
 		String command = "delete from organismpulse where pulsetimemillis < " +  millisToDeleteFrom;
 		if(!teamInfo.equals("")) {
 			command +=command + " " + teamInfo;
@@ -196,7 +196,7 @@ public JSONArray vacuum() {
 		String command = "delete from pulse where pulsetimemillis < " +  millisToDeleteFrom;
 		return deleteByPeriod( command);
 	}
-	
+
 	private int deleteByPeriod(String command) {
 		Connection connection=null;
 		Statement statement=null;
@@ -205,8 +205,8 @@ public JSONArray vacuum() {
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
-			
-			
+
+
 			rs = statement.executeQuery(command);
 			String sizeString="";
 			while(rs.next()){
@@ -235,7 +235,7 @@ public JSONArray vacuum() {
 
 		return numberDeleted;
 	}
-	
+
 	public double getDatabaseSizeInMB(){
 		Connection connection=null;
 		Statement statement=null;
@@ -330,7 +330,7 @@ public JSONArray vacuum() {
 		return size;
 
 	}
-	
+
 	public void closeConnection(Connection con){
 		try {
 			connectionPool.closeConnection(con);
@@ -340,8 +340,9 @@ public JSONArray vacuum() {
 
 		}
 	}
-	
-	
+
+
+
 	public JSONArray getDeneWordTimeSeriesByIdentity(Identity identity, long startTimeMillis, long endTimeMillis) {
 		String sql = "select pulsetimemillis,DeneWord -> 'Value' As CurrentPulse from pulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where pulsetimemillis>="+ startTimeMillis + " and pulsetimemillis<=" + endTimeMillis+" and Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' order by pulsetimemillis asc";
 		Connection connection = null;
@@ -1156,7 +1157,7 @@ public JSONArray vacuum() {
 
 		}
 		//System.out.println("erturnign from createcommand id=" + id + " command=" + command);
-		
+
 		return id;
 
 	}
@@ -1564,7 +1565,7 @@ public JSONArray vacuum() {
 				result = statement.executeUpdate(sql);
 				toReturn= true;
 			}
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.debug(Utils.getStringException(e));
@@ -1576,304 +1577,356 @@ public JSONArray vacuum() {
 				// TODO Auto-generated catch block
 				logger.debug(Utils.getStringException(e));
 			}
-			
+
 		} 
-			return toReturn;
+		return toReturn;
 	}
 
-		public static String getSimplePostgresDateString(Timestamp ts){
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTimeInMillis(ts.getTime());
-			String monthValue="";
-			String dateValue="";
-			String hourValue="";
-			String minuteValue="";
-			String secondValue="";
+	public static String getSimplePostgresDateString(Timestamp ts){
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(ts.getTime());
+		String monthValue="";
+		String dateValue="";
+		String hourValue="";
+		String minuteValue="";
+		String secondValue="";
 
-			if(calendar.get(Calendar.MONTH)>8)monthValue = "" + (calendar.get(Calendar.MONTH) +1);
-			else monthValue = "0" + (calendar.get(Calendar.MONTH) +1);
+		if(calendar.get(Calendar.MONTH)>8)monthValue = "" + (calendar.get(Calendar.MONTH) +1);
+		else monthValue = "0" + (calendar.get(Calendar.MONTH) +1);
 
-			if(calendar.get(Calendar.DATE)>9)dateValue = "" + (calendar.get(Calendar.DATE));
-			else dateValue = "0" + (calendar.get(Calendar.DATE));
+		if(calendar.get(Calendar.DATE)>9)dateValue = "" + (calendar.get(Calendar.DATE));
+		else dateValue = "0" + (calendar.get(Calendar.DATE));
 
-			String text = calendar.get(Calendar.YEAR ) + "-" + monthValue + "-" + dateValue  ;
-			return  text;
+		String text = calendar.get(Calendar.YEAR ) + "-" + monthValue + "-" + dateValue  ;
+		return  text;
 
-		}
+	}
 
-		public static String getPostgresDateString(Timestamp ts){
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTimeInMillis(ts.getTime());
-			String monthValue="";
-			String dateValue="";
-			String hourValue="";
-			String minuteValue="";
-			String secondValue="";
+	public static String getPostgresDateString(Timestamp ts){
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(ts.getTime());
+		String monthValue="";
+		String dateValue="";
+		String hourValue="";
+		String minuteValue="";
+		String secondValue="";
 
-			if(calendar.get(Calendar.MONTH)>8)monthValue = "" + (calendar.get(Calendar.MONTH) +1);
-			else monthValue = "0" + (calendar.get(Calendar.MONTH) +1);
+		if(calendar.get(Calendar.MONTH)>8)monthValue = "" + (calendar.get(Calendar.MONTH) +1);
+		else monthValue = "0" + (calendar.get(Calendar.MONTH) +1);
 
-			if(calendar.get(Calendar.DATE)>9)dateValue = "" + (calendar.get(Calendar.DATE));
-			else dateValue = "0" + (calendar.get(Calendar.DATE));
-
-
-			if(calendar.get(Calendar.HOUR_OF_DAY)>9)hourValue = "" + (calendar.get(Calendar.HOUR_OF_DAY));
-			else hourValue = "0" + (calendar.get(Calendar.HOUR_OF_DAY));
+		if(calendar.get(Calendar.DATE)>9)dateValue = "" + (calendar.get(Calendar.DATE));
+		else dateValue = "0" + (calendar.get(Calendar.DATE));
 
 
-			if(calendar.get(Calendar.MINUTE)>9)minuteValue = "" + (calendar.get(Calendar.MINUTE));
-			else minuteValue = "0" + (calendar.get(Calendar.MINUTE));
+		if(calendar.get(Calendar.HOUR_OF_DAY)>9)hourValue = "" + (calendar.get(Calendar.HOUR_OF_DAY));
+		else hourValue = "0" + (calendar.get(Calendar.HOUR_OF_DAY));
 
-			if(calendar.get(Calendar.SECOND)>9)secondValue = "" + (calendar.get(Calendar.SECOND));
-			else secondValue = "0" + (calendar.get(Calendar.SECOND));
 
-			String text = dateValue + monthValue + (calendar.get(Calendar.YEAR ))  + " " + hourValue +":"+   minuteValue +":"+ secondValue;
-			return  "to_timestamp('"+ text + "', 'DDMMYYYY HH24:MI:SS')";
+		if(calendar.get(Calendar.MINUTE)>9)minuteValue = "" + (calendar.get(Calendar.MINUTE));
+		else minuteValue = "0" + (calendar.get(Calendar.MINUTE));
 
-		}
+		if(calendar.get(Calendar.SECOND)>9)secondValue = "" + (calendar.get(Calendar.SECOND));
+		else secondValue = "0" + (calendar.get(Calendar.SECOND));
 
-		/**
-		 *  the purpose of this method is to take a pulse, extract the purpose chains
-		 *   and store them in a table that would make it easier to index
-		 * @param pulse
-		 */
-		public void storePurposeForIndexing(JSONObject pulse){
-			try {
-				long pulseTimestamp = pulse.getLong("Pulse Timestamp in Milliseconds");
-				JSONObject denomeJSONObject = pulse.getJSONObject("Denome");
-				String teleonomeName =  denomeJSONObject.getString("Name");
+		String text = dateValue + monthValue + (calendar.get(Calendar.YEAR ))  + " " + hourValue +":"+   minuteValue +":"+ secondValue;
+		return  "to_timestamp('"+ text + "', 'DDMMYYYY HH24:MI:SS')";
+
+	}
+
+	/**
+	 *  the purpose of this method is to take a pulse, extract the purpose chains
+	 *   and store them in a table that would make it easier to index
+	 * @param pulse
+	 */
+	public void storePurposeForIndexing(JSONObject pulse){
+		try {
+			long pulseTimestamp = pulse.getLong("Pulse Timestamp in Milliseconds");
+			JSONObject denomeJSONObject = pulse.getJSONObject("Denome");
+			String teleonomeName =  denomeJSONObject.getString("Name");
+			//
+			// now parse them
+			JSONArray nucleiArray = denomeJSONObject.getJSONArray("Nuclei");
+
+			JSONObject aJSONObject,purposeNucleus=null;
+			String name;
+			for(int i=0;i<nucleiArray.length();i++){
+				aJSONObject = (JSONObject) nucleiArray.get(i);
+				name = aJSONObject.getString("Name");
+				if(name.equals(TeleonomeConstants.NUCLEI_PURPOSE)){
+					purposeNucleus= aJSONObject;
+				}
+			}
+
+			if(purposeNucleus==null)return;
+
+			JSONArray deneChainsPurpose = purposeNucleus.getJSONArray("DeneChains");
+			JSONObject deneChain;
+			String identityString;
+			boolean result;
+			for(int i=0;i<deneChainsPurpose.length();i++){
+				deneChain = deneChainsPurpose.getJSONObject(i);
 				//
-				// now parse them
-				JSONArray nucleiArray = denomeJSONObject.getJSONArray("Nuclei");
-
-				JSONObject aJSONObject,purposeNucleus=null;
-				String name;
-				for(int i=0;i<nucleiArray.length();i++){
-					aJSONObject = (JSONObject) nucleiArray.get(i);
-					name = aJSONObject.getString("Name");
-					if(name.equals(TeleonomeConstants.NUCLEI_PURPOSE)){
-						purposeNucleus= aJSONObject;
-					}
+				// index everything except the processing logic
+				if(!deneChain.getString("Name").equals( TeleonomeConstants.DENECHAIN_ACTUATOR_LOGIC_PROCESSING)){
+					identityString = "@" + teleonomeName + ":" + TeleonomeConstants.NUCLEI_PURPOSE + ":" + deneChain.getString("Name");
+					result = storePurposeChainInfo(identityString, pulseTimestamp,deneChain);
+					//System.out.println("storing purpose chain index " + identityString + " pulseTimestamp: " + pulseTimestamp + " was " + result);
 				}
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}
 
-				if(purposeNucleus==null)return;
+	}
 
-				JSONArray deneChainsPurpose = purposeNucleus.getJSONArray("DeneChains");
-				JSONObject deneChain;
-				String identityString;
-				boolean result;
-				for(int i=0;i<deneChainsPurpose.length();i++){
-					deneChain = deneChainsPurpose.getJSONObject(i);
-					//
-					// index everything except the processing logic
-					if(!deneChain.getString("Name").equals( TeleonomeConstants.DENECHAIN_ACTUATOR_LOGIC_PROCESSING)){
-						identityString = "@" + teleonomeName + ":" + TeleonomeConstants.NUCLEI_PURPOSE + ":" + deneChain.getString("Name");
-						result = storePurposeChainInfo(identityString, pulseTimestamp,deneChain);
-						//System.out.println("storing purpose chain index " + identityString + " pulseTimestamp: " + pulseTimestamp + " was " + result);
-					}
-				}
-			} catch (JSONException e) {
+	public ArrayList<Map.Entry<JSONObject, Long>> getPurposeChainForIndexing(String identityString, long startPulseTimestampMillis, long endPulseTimestampMillis){
+		Connection connection = null;
+		Statement statement = null;
+		ArrayList arrayList = new ArrayList();
+		ResultSet rs=null;
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+
+			ArrayList<Map.Entry<JSONObject, Long>> sensorRequestQueuePositionDeneWordForInitialIndex = new ArrayList(); 
+
+			String sql = "select  pulseTimeMillis,data as text from PurposeChainInfo where identityString='"+ identityString +"' and pulseTimeMillis>="+startPulseTimestampMillis +" and pulseTimeMillis<=" + endPulseTimestampMillis +" order by pulseTimeMillis asc";
+			//System.out.println("getPurposeChainForIndexing:" + sql);
+			rs = statement.executeQuery(sql);
+			JSONObject data=null;
+			Long L;
+			while(rs.next()){
+				L = new Long(rs.getLong(1));
+				data = new JSONObject(rs.getString(2));
+
+				arrayList.add(new AbstractMap.SimpleEntry<JSONObject,Long>(data, L));
+				Collections.sort(arrayList, new Comparator<Map.Entry<?, Long>>(){
+					public int compare(Map.Entry<?, Long> o1, Map.Entry<?, Long> o2) {
+						return o1.getValue().compareTo(o2.getValue());
+					}});
+			}
+
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			try {
+				if(rs!=null)rs.close();
+				if(statement!=null)statement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
+				logger.debug(Utils.getStringException(e));
 			}
 
 		}
+		return arrayList;
+	}
 
-		public ArrayList<Map.Entry<JSONObject, Long>> getPurposeChainForIndexing(String identityString, long startPulseTimestampMillis, long endPulseTimestampMillis){
-			Connection connection = null;
-			Statement statement = null;
-			ArrayList arrayList = new ArrayList();
-			ResultSet rs=null;
+	private boolean storePurposeChainInfo(String identityString, long pulseTimestamp, JSONObject deneChain) {
+
+		String sql="";
+		Connection connection = null;
+		Statement statement = null;
+		boolean toReturn=false;
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			sql = "insert into PurposeChainInfo (identityString,pulseTimeMillis,data) values('"+ identityString + "'," + pulseTimestamp+ ",'" + deneChain.toString() +"')";
+			//System.out.println("storePurposeChainInfo=" + sql);
+			int result = statement.executeUpdate(sql);
+			statement.close();
+			connectionPool.closeConnection(connection);
+			toReturn= true;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			System.out.println("bad sql=" + sql);
+			logger.warn(Utils.getStringException(e));
+		}finally{
 			try {
-				connection = connectionPool.getConnection();
-				statement = connection.createStatement();
-
-				ArrayList<Map.Entry<JSONObject, Long>> sensorRequestQueuePositionDeneWordForInitialIndex = new ArrayList(); 
-
-				String sql = "select  pulseTimeMillis,data as text from PurposeChainInfo where identityString='"+ identityString +"' and pulseTimeMillis>="+startPulseTimestampMillis +" and pulseTimeMillis<=" + endPulseTimestampMillis +" order by pulseTimeMillis asc";
-				//System.out.println("getPurposeChainForIndexing:" + sql);
-				rs = statement.executeQuery(sql);
-				JSONObject data=null;
-				Long L;
-				while(rs.next()){
-					L = new Long(rs.getLong(1));
-					data = new JSONObject(rs.getString(2));
-
-					arrayList.add(new AbstractMap.SimpleEntry<JSONObject,Long>(data, L));
-					Collections.sort(arrayList, new Comparator<Map.Entry<?, Long>>(){
-						public int compare(Map.Entry<?, Long> o1, Map.Entry<?, Long> o2) {
-							return o1.getValue().compareTo(o2.getValue());
-						}});
-				}
-
-
+				if(statement!=null)statement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
-			}finally{
+				logger.debug(Utils.getStringException(e));
+			}
+
+		}
+		return toReturn;
+	}
+
+
+	public static String getUniqueIndex(){
+		java.rmi.dgc.VMID v = new java.rmi.dgc.VMID();
+		return v.toString();
+	}
+
+	public JSONArray getRemeberedDeneWord(TimeZone timeZone, String identityPointer,  long startTimeMillis, long  endTimeMillis){
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		try {
+			String command = "SELECT time, value from RememberedDeneWords where time>=? and time<=?";
+			
+			connection = connectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(command);
+			java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(startTimeMillis);
+			java.sql.Timestamp untilTimeValue = new java.sql.Timestamp(endTimeMillis);
+			
+			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
+			preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
+			preparedStatement.setTimestamp(2, untilTimeValue, calendarTimeZone);
+			
+			rs = preparedStatement.executeQuery();
+			Timestamp time=null;
+			JSONObject j;
+			double value;
+			while(rs.next()){
+				time=rs.getTimestamp(1);
+				value = rs.getDouble(2);
+				j = new JSONObject();
+				j.put("Time", time);
+				j.put("Value", value);
+				toReturn.put(j);
+			}
+
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
 				try {
 					if(rs!=null)rs.close();
-					if(statement!=null)statement.close();
-					if(connection!=null)connectionPool.closeConnection(connection);
+					preparedStatement.close();
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					logger.debug(Utils.getStringException(e));
 				}
-
-			}
-			return arrayList;
+			if(connection!=null)closeConnection(connection);
 		}
 
-		private boolean storePurposeChainInfo(String identityString, long pulseTimestamp, JSONObject deneChain) {
-
-			String sql="";
-			Connection connection = null;
-			Statement statement = null;
-			boolean toReturn=false;
-			try {
-				connection = connectionPool.getConnection();
-				statement = connection.createStatement();
-				sql = "insert into PurposeChainInfo (identityString,pulseTimeMillis,data) values('"+ identityString + "'," + pulseTimestamp+ ",'" + deneChain.toString() +"')";
-				//System.out.println("storePurposeChainInfo=" + sql);
-				int result = statement.executeUpdate(sql);
-				statement.close();
-				connectionPool.closeConnection(connection);
-				toReturn= true;
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				System.out.println("bad sql=" + sql);
-				logger.warn(Utils.getStringException(e));
-			}finally{
-				try {
-					if(statement!=null)statement.close();
-					if(connection!=null)connectionPool.closeConnection(connection);
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					logger.debug(Utils.getStringException(e));
-				}
-
-			}
-			return toReturn;
-		}
-
-
-		public static String getUniqueIndex(){
-			java.rmi.dgc.VMID v = new java.rmi.dgc.VMID();
-			return v.toString();
-		}
-
-		public boolean unwrap(TimeZone timeZone, String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value) {
-			String sql="";
-			Connection connection = null;
-			PreparedStatement preparedStatement = null;
-			boolean toReturn=false;
-			try {
-				connection = connectionPool.getConnection();
-				//statement = connection.createStatement();
-				java.sql.Timestamp dateTimeValue = new java.sql.Timestamp(pulseTimeMillis);
-				
-				sql = "insert into RememberedDeneWords (time, teleonomeName,identityString,value) values(?,?,?,?)";
-				logger.debug("storePurposeChainInfo=" + sql);
-				Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
-				
-				preparedStatement = connection.prepareStatement(sql);
-				preparedStatement.setTimestamp(1, dateTimeValue, calendarTimeZone);
-				preparedStatement.setString(2, teleonomeName);
-				preparedStatement.setString(3, identityString);
-				double d = 0;
-				if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
-					
-					if(value instanceof String) {
-						 d = Double.parseDouble((String)value);
-					}else if(value instanceof Integer) {
-						//
-						// if the value is rendered as 0 and the value type is double
-						// it gets interpreted as an integer, 
-						 d = ((Integer)value).doubleValue();
-					}else {
-						 d = (double)value;
-					}
-					
-					preparedStatement.setDouble(4, d);
-				}else if(valueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
-					
-					if(value instanceof String) {
-						 d = Integer.getInteger((String)value).doubleValue();
-					}else {
-						d = ((Integer)value).doubleValue();
-					}
-					
-					
-					preparedStatement.setDouble(4, d);
-				}
-				int result = preparedStatement.executeUpdate();
-				preparedStatement.close();
-				connectionPool.closeConnection(connection);
-				toReturn= true;
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				System.out.println("bad sql=" + sql);
-				logger.warn(Utils.getStringException(e));
-			}finally{
-				try {
-					if(preparedStatement!=null)preparedStatement.close();
-					if(connection!=null)connectionPool.closeConnection(connection);
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					logger.debug(Utils.getStringException(e));
-				}
-			}
-			return toReturn;
-		}
-
-//		public ArrayList getHistoricalDeneWordValueByIdentity(Identity identity) {
-//			String sql="select createdon, DeneWord -> 'Value' As CurrentPulse from pulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  " + 
-//					"jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, " + 
-//					"jsonb_array_elements(Dene->'DeneWords') as DeneWord where  Nucleus->>'Name'='"+identity.getNucleusName()+"' and DeneChain->>'Name'='"+identity.getDenechainName()+"' " + 
-//					"and Dene->>'Name'='"+identity.getDeneName()+"' and DeneWord->>'Name'='"+identity.getDeneWordName()+"' order by createdon;";
-//			
-//			Connection connection = null;
-//			Statement statement = null;
-//			ArrayList arrayList = new ArrayList();
-//			ResultSet rs=null;
-//			try {
-//				connection = connectionPool.getConnection();
-//				statement = connection.createStatement();
-//
-//				
-//				//System.out.println("getPurposeChainForIndexing:" + sql);
-//				rs = statement.executeQuery(sql);
-//				JSONObject data=null;
-//				Timestamp createdOnResult;
-//				while(rs.next()){
-//					createdOnResult = rs.getTimestamp(1);
-//					data = new JSONObject(rs.getString(2));
-//					arrayList.add(new AbstractMap.SimpleEntry<JSONObject,Long>(data, L));
-//					
-//				}
-//
-//
-//			} catch (SQLException e) {
-//				// TODO Auto-generated catch block
-//				logger.warn(Utils.getStringException(e));
-//			} catch (JSONException e) {
-//				// TODO Auto-generated catch block
-//				logger.warn(Utils.getStringException(e));
-//			}finally{
-//				try {
-//					if(rs!=null)rs.close();
-//					if(statement!=null)statement.close();
-//					if(connection!=null)connectionPool.closeConnection(connection);
-//				} catch (SQLException e) {
-//					// TODO Auto-generated catch block
-//					logger.debug(Utils.getStringException(e));
-//				}
-//
-//			}
-//			return arrayList;
-//		}
+		return toReturn;
 
 	}
+
+	public boolean unwrap(TimeZone timeZone, String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value) {
+		String sql="";
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		boolean toReturn=false;
+		try {
+			connection = connectionPool.getConnection();
+			//statement = connection.createStatement();
+			java.sql.Timestamp dateTimeValue = new java.sql.Timestamp(pulseTimeMillis);
+
+			sql = "insert into RememberedDeneWords (time, teleonomeName,identityString,value) values(?,?,?,?)";
+			logger.debug("storePurposeChainInfo=" + sql);
+			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
+
+			preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setTimestamp(1, dateTimeValue, calendarTimeZone);
+			preparedStatement.setString(2, teleonomeName);
+			preparedStatement.setString(3, identityString);
+			double d = 0;
+			if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
+
+				if(value instanceof String) {
+					d = Double.parseDouble((String)value);
+				}else if(value instanceof Integer) {
+					//
+					// if the value is rendered as 0 and the value type is double
+					// it gets interpreted as an integer, 
+					d = ((Integer)value).doubleValue();
+				}else {
+					d = (double)value;
+				}
+
+				preparedStatement.setDouble(4, d);
+			}else if(valueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
+
+				if(value instanceof String) {
+					d = Integer.getInteger((String)value).doubleValue();
+				}else {
+					d = ((Integer)value).doubleValue();
+				}
+
+
+				preparedStatement.setDouble(4, d);
+			}
+			int result = preparedStatement.executeUpdate();
+			preparedStatement.close();
+			connectionPool.closeConnection(connection);
+			toReturn= true;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			System.out.println("bad sql=" + sql);
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			try {
+				if(preparedStatement!=null)preparedStatement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+		}
+		return toReturn;
+	}
+
+	//		public ArrayList getHistoricalDeneWordValueByIdentity(Identity identity) {
+	//			String sql="select createdon, DeneWord -> 'Value' As CurrentPulse from pulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  " + 
+	//					"jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, " + 
+	//					"jsonb_array_elements(Dene->'DeneWords') as DeneWord where  Nucleus->>'Name'='"+identity.getNucleusName()+"' and DeneChain->>'Name'='"+identity.getDenechainName()+"' " + 
+	//					"and Dene->>'Name'='"+identity.getDeneName()+"' and DeneWord->>'Name'='"+identity.getDeneWordName()+"' order by createdon;";
+	//			
+	//			Connection connection = null;
+	//			Statement statement = null;
+	//			ArrayList arrayList = new ArrayList();
+	//			ResultSet rs=null;
+	//			try {
+	//				connection = connectionPool.getConnection();
+	//				statement = connection.createStatement();
+	//
+	//				
+	//				//System.out.println("getPurposeChainForIndexing:" + sql);
+	//				rs = statement.executeQuery(sql);
+	//				JSONObject data=null;
+	//				Timestamp createdOnResult;
+	//				while(rs.next()){
+	//					createdOnResult = rs.getTimestamp(1);
+	//					data = new JSONObject(rs.getString(2));
+	//					arrayList.add(new AbstractMap.SimpleEntry<JSONObject,Long>(data, L));
+	//					
+	//				}
+	//
+	//
+	//			} catch (SQLException e) {
+	//				// TODO Auto-generated catch block
+	//				logger.warn(Utils.getStringException(e));
+	//			} catch (JSONException e) {
+	//				// TODO Auto-generated catch block
+	//				logger.warn(Utils.getStringException(e));
+	//			}finally{
+	//				try {
+	//					if(rs!=null)rs.close();
+	//					if(statement!=null)statement.close();
+	//					if(connection!=null)connectionPool.closeConnection(connection);
+	//				} catch (SQLException e) {
+	//					// TODO Auto-generated catch block
+	//					logger.debug(Utils.getStringException(e));
+	//				}
+	//
+	//			}
+	//			return arrayList;
+	//		}
+
+}

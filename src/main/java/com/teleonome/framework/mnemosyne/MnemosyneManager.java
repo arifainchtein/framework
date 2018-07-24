@@ -489,10 +489,13 @@ public class MnemosyneManager {
 	}
 	
 	
-	public JSONArray remeberDeneWord(Identity identity, long startTimeMillis, long endTimeMillis) {
-		return aDBManager.getDeneWordTimeSeriesByIdentity( identity,  startTimeMillis,  endTimeMillis);
+	public JSONArray getRemeberedDeneWord(TimeZone timeZone, String identityString, long startTimeMillis, long endTimeMillis) {
+		return aDBManager.getRemeberedDeneWord( timeZone,identityString,  startTimeMillis,  endTimeMillis);
 	}
 	
+	public JSONArray getDeneWordFromPulseByRange(Identity identity, long startTimeMillis, long endTimeMillis) {
+		return aDBManager.getDeneWordTimeSeriesByIdentity( identity,  startTimeMillis,  endTimeMillis);
+	}
 	
 	
 	public boolean unwrap(TimeZone timeZone, String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value) {
