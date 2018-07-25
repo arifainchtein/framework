@@ -341,10 +341,54 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		}
 	}
 
+	public Object getOrganismDeneWordAttributeByIdentity(Identity identity, String attribute) {
+		String organismTeleonomeName = identity.getTeleonomeName();
+		String sql = "select DeneWord -> '"+ attribute+"' As Units from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where  Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' limit 1";
+		logger.debug("getOrganismDeneWordTimeSeriesByIdentity,sql=" + sql);
+		Connection connection = null;
+		Statement statement = null;
+		Object toReturn = "";
+		ResultSet rs=null;
+
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+
+			rs = statement.executeQuery(sql);
+			JSONObject data=null;
+			Long L;
+			while(rs.next()){
+				toReturn = rs.getObject(1);
+				
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		}finally{
+			if(connection!=null){
+				try {
+					if(rs!=null)rs.close();
+					if(statement!=null)statement.close();
+					if(connection!=null)connectionPool.closeConnection(connection);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+		}
+		return toReturn;
+	}
+	
 
 	public JSONArray getOrganismDeneWordTimeSeriesByIdentity(Identity identity, long startTimeMillis, long endTimeMillis) {
 		String organismTeleonomeName = identity.getTeleonomeName();
 		String sql = "select pulsetimemillis,DeneWord -> 'Value' As CurrentPulse from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where pulsetimemillis>="+ startTimeMillis + " and pulsetimemillis<=" + endTimeMillis+" and Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' order by pulsetimemillis asc";
+		logger.debug("getOrganismDeneWordTimeSeriesByIdentity,sql=" + sql);
 		Connection connection = null;
 		Statement statement = null;
 		JSONArray toReturn = new JSONArray();
