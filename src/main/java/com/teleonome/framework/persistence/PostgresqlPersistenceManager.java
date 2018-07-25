@@ -1852,7 +1852,120 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}
 
+	public JSONArray getTeleonomeNamesInOrganism() {
+		String command = "select distinct(teleonomeName) from organismpulse";
+		Connection connection=null;
+		Statement statement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(command);
+			Timestamp time=null;
+			String name;
+			while(rs.next()){
+				name=rs.getString(1);
+				toReturn.put(name);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			if(statement!=null)
+				try {
+					if(rs!=null)rs.close();
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+		return toReturn;
+	}
+	
+	public JSONArray getNucleiNamesForTeleonomeInOrganism(String teleonomeName) {
+		String command = "select NU from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei') as NU where teleonomeName='?'  limit 1";
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		try {
+			
+			connection = connectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(command);
+			preparedStatement.setString(1, teleonomeName);
+			rs = preparedStatement.executeQuery();
+			Timestamp time=null;
+			String name;
+			double value;
+			while(rs.next()){
+				name=rs.getString(1);
+				toReturn.put(name);
+			}
 
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+
+		return toReturn;
+	}
+	
+	public JSONArray getDeneChainNamesForTeleonomeInOrganism(String teleonomeName, String nucleusName) {
+		String command = "select DeneChain  -> 'Name' from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus, jsonb_array_elements(Nucleus->'DeneChains') As DeneChain where teleonomeName=? and Nucleus->>'Name'=? and createdon in (select createdon from pulse order by createdon desc limit 1)";
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		try {
+			
+			connection = connectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(command);
+			preparedStatement.setString(1, teleonomeName);
+			preparedStatement.setString(2, nucleusName);
+			rs = preparedStatement.executeQuery();
+			Timestamp time=null;
+			String name;
+			double value;
+			while(rs.next()){
+				name=rs.getString(1);
+				toReturn.put(name);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+		return toReturn;
+	}
+	
+	
 	public static String getUniqueIndex(){
 		java.rmi.dgc.VMID v = new java.rmi.dgc.VMID();
 		return v.toString();
