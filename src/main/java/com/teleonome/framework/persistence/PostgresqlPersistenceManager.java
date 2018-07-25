@@ -1426,7 +1426,8 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
-			String sql = "select data from lastOrganismPulse where TeleonomeName='"+teleonomeName +"'";
+			String sql = "select data from lastOrganismPulse where TeleonomeName='"+teleonomeName +"' order by createdOn desc limit 1";
+			logger.debug("getLastPulse, sql=" + sql);
 			rs = statement.executeQuery(sql);
 			while(rs.next()){
 				data = new JSONObject(rs.getObject(1).toString());
@@ -1447,6 +1448,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				logger.debug(Utils.getStringException(e));
 			}
 		}
+		logger.debug("getLastPulse, data=" + data.toString(4));
 		return data;
 	}
 
