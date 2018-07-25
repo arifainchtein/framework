@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.postgresql.util.PGobject;
 
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.Identity;
@@ -341,13 +342,13 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		}
 	}
 
-	public Object getOrganismDeneWordAttributeByIdentity(Identity identity, String attribute) {
+	public PGobject getOrganismDeneWordAttributeByIdentity(Identity identity, String attribute) {
 		String organismTeleonomeName = identity.getTeleonomeName();
 		String sql = "select DeneWord -> '"+ attribute+"' As Units from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where  Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' limit 1";
 		logger.debug("getOrganismDeneWordTimeSeriesByIdentity,sql=" + sql);
 		Connection connection = null;
 		Statement statement = null;
-		Object toReturn = "";
+		PGobject toReturn = null;
 		ResultSet rs=null;
 
 		try {
@@ -358,7 +359,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			JSONObject data=null;
 			Long L;
 			while(rs.next()){
-				toReturn = rs.getObject(1);
+				toReturn = (PGobject) rs.getObject(1);
 				
 			}
 
