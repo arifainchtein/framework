@@ -1937,7 +1937,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	}
 	
 	public JSONArray getDeneChainNamesForTeleonomeInOrganism(String teleonomeName, String nucleusName) {
-		String command = "select DeneChain  -> 'Name' from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus, jsonb_array_elements(Nucleus->'DeneChains') As DeneChain where teleonomeName=? and Nucleus->>'Name'=? and createdon in (select createdon from pulse order by createdon desc limit 1)";
+		String command = "select DeneChain  -> 'Name' from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus, jsonb_array_elements(Nucleus->'DeneChains') As DeneChain where teleonomeName=? and Nucleus->>'Name'=? and createdon in (select createdon from organismpulse where teleonomeName=? order by createdon desc limit 1)";
 		Connection connection=null;
 		PreparedStatement preparedStatement = null; 
 		ResultSet rs=null;
@@ -1948,6 +1948,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			preparedStatement = connection.prepareStatement(command);
 			preparedStatement.setString(1, teleonomeName);
 			preparedStatement.setString(2, nucleusName);
+			preparedStatement.setString(3, teleonomeName);
 			rs = preparedStatement.executeQuery();
 			Timestamp time=null;
 			String name;
