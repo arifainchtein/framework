@@ -1988,9 +1988,10 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
 			preparedStatement.setString(1, teleonomeName);
-			preparedStatement.setString(2, nucleusName);
-			preparedStatement.setString(3, deneChainName);
-			preparedStatement.setString(4, teleonomeName);
+			preparedStatement.setString(2, teleonomeName);
+			preparedStatement.setString(3, nucleusName);
+			preparedStatement.setString(4, deneChainName);
+			
 			rs = preparedStatement.executeQuery();
 			Timestamp time=null;
 			String name;
@@ -2029,10 +2030,11 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
 			preparedStatement.setString(1, teleonomeName);
-			preparedStatement.setString(2, nucleusName);
-			preparedStatement.setString(3, deneChainName);
-			preparedStatement.setString(4, deneName);
-			preparedStatement.setString(5, teleonomeName);
+			preparedStatement.setString(2, teleonomeName);
+			preparedStatement.setString(3, nucleusName);
+			preparedStatement.setString(4, deneChainName);
+			preparedStatement.setString(5, deneName);
+			
 			rs = preparedStatement.executeQuery();
 			Timestamp time=null;
 			String name;
