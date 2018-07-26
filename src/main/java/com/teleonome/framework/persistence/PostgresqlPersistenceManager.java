@@ -1894,7 +1894,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		//
 		// this command returns just the name of the nuclei
 		//
-		String command = "select  NU -> 'Name' from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei') as NU where teleonomeName=?  limit 1";
+		String command = "select  NU -> 'Name' from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei') as NU where teleonomeName=? and createdon in (select createdon from organismpulse where teleonomeName=? order by createdon desc limit 1)  order by NU -> 'Name'";
 		
 		
 		Connection connection=null;
@@ -1911,7 +1911,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			String name;
 			double value;
 			while(rs.next()){
-				name=rs.getString(1);
+				name=rs.getString(1).replace("\"", "");
 				toReturn.put(name);
 			}
 
@@ -1937,7 +1937,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	}
 	
 	public JSONArray getDeneChainNamesForTeleonomeInOrganism(String teleonomeName, String nucleusName) {
-		String command = "select DeneChain  -> 'Name' from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus, jsonb_array_elements(Nucleus->'DeneChains') As DeneChain where teleonomeName=? and Nucleus->>'Name'=? and createdon in (select createdon from organismpulse where teleonomeName=? order by createdon desc limit 1)";
+		String command = "select DeneChain  -> 'Name' from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus, jsonb_array_elements(Nucleus->'DeneChains') As DeneChain where teleonomeName=? and Nucleus->>'Name'=? and createdon in (select createdon from organismpulse where teleonomeName=? order by createdon desc limit 1) order by DeneChain -> 'Name'";
 		Connection connection=null;
 		PreparedStatement preparedStatement = null; 
 		ResultSet rs=null;
@@ -1954,7 +1954,90 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			String name;
 			double value;
 			while(rs.next()){
-				name=rs.getString(1);
+				name=rs.getString(1).replace("\"", "");;
+				toReturn.put(name);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+		return toReturn;
+	}
+	
+	public JSONArray getDeneNamesForTeleonomeInOrganism(String teleonomeName, String nucleusName, String deneChainName) {
+		String command = " select Dene -> 'Name' As denename from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene where teleonomeName=? and createdon in (select createdon from organismpulse where teleonomeName=? order by createdon desc limit 1) and Nucleus->>'Name'=? and DeneChain->>'Name'=? order by Dene -> 'Name'";
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		try {
+			
+			connection = connectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(command);
+			preparedStatement.setString(1, teleonomeName);
+			preparedStatement.setString(2, nucleusName);
+			preparedStatement.setString(3, deneChainName);
+			preparedStatement.setString(4, teleonomeName);
+			rs = preparedStatement.executeQuery();
+			Timestamp time=null;
+			String name;
+			double value;
+			while(rs.next()){
+				name=rs.getString(1).replace("\"", "");;
+				toReturn.put(name);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+		return toReturn;
+	}
+	
+	public JSONArray getDeneWordNamesForTeleonomeInOrganism(String teleonomeName, String nucleusName, String deneChainName, String deneName) {
+		String command = " select DeneWord -> 'Name' As deneWordName from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord  where teleonomeName=? and createdon in (select createdon from organismpulse where teleonomeName=? order by createdon desc limit 1) and Nucleus->>'Name'=? and DeneChain->>'Name'=? and Dene->>'Name'=?  order by DeneWord -> 'Name'";
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		try {
+			
+			connection = connectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(command);
+			preparedStatement.setString(1, teleonomeName);
+			preparedStatement.setString(2, nucleusName);
+			preparedStatement.setString(3, deneChainName);
+			preparedStatement.setString(4, deneName);
+			preparedStatement.setString(5, teleonomeName);
+			rs = preparedStatement.executeQuery();
+			Timestamp time=null;
+			String name;
+			double value;
+			while(rs.next()){
+				name=rs.getString(1).replace("\"", "");;
 				toReturn.put(name);
 			}
 		} catch (SQLException e) {
