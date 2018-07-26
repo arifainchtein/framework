@@ -1757,6 +1757,96 @@ public class DenomeUtils {
 		return getDeneChainByName( pulseJSONObject, identity.getNucleusName(), identity.getDenechainName()); 
 	}
 	
+	public static JSONArray getAllDeneChainsForNucleus(JSONObject pulseJSONObject, String nucleusName) {
+		// TODO Auto-generated method stub
+		JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
+		JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
+		String name;
+		JSONObject aJSONObject, selectedNucleus = null,purposeNucleus = null;
+
+		for(int i=0;i<nucleiArray.length();i++){
+			aJSONObject = (JSONObject) nucleiArray.get(i);
+			name = aJSONObject.getString("Name");
+			//System.out.println("nuclei name=" + name);
+			if(name.equals(nucleusName)){
+				selectedNucleus= aJSONObject;
+			}
+		}
+		if(selectedNucleus==null)return null;
+		JSONArray deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
+		return deneChainsArray;
+	}
+	
+	public static JSONArray getAllDenesForDeneChain(JSONObject pulseJSONObject, String nucleusName, String deneChainName) {
+		// TODO Auto-generated method stub
+		JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
+		JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
+		String name;
+		JSONObject aJSONObject, selectedNucleus = null,purposeNucleus = null;
+
+		for(int i=0;i<nucleiArray.length();i++){
+			aJSONObject = (JSONObject) nucleiArray.get(i);
+			name = aJSONObject.getString("Name");
+			//System.out.println("nuclei name=" + name);
+			if(name.equals(nucleusName)){
+				selectedNucleus= aJSONObject;
+			}
+		}
+		if(selectedNucleus==null)return null;
+		JSONArray deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
+		JSONArray deneNamesArrays = null;
+		for(int i=0;i<deneChainsArray.length();i++){
+			aJSONObject = (JSONObject) deneChainsArray.get(i);
+			//System.out.println("aJSONObject.getString()=" + aJSONObject.getString("Name") + " deneChainName=" + deneChainName);
+			if(aJSONObject.getString("Name").equals(deneChainName)){
+				JSONArray denes = aJSONObject.getJSONArray("Denes");
+				for(int j=0;j<denes.length();j++) {
+					deneNamesArrays.put(denes.getJSONObject(j).getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
+				}
+			}
+		}
+		
+		return deneNamesArrays;
+	}
+	
+	public static JSONArray getAllDeneWordsForDene(JSONObject pulseJSONObject, String nucleusName, String deneChainName, String deneName) {
+		// TODO Auto-generated method stub
+		JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
+		JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
+		String name;
+		JSONObject aJSONObject, selectedNucleus = null,purposeNucleus = null;
+
+		for(int i=0;i<nucleiArray.length();i++){
+			aJSONObject = (JSONObject) nucleiArray.get(i);
+			name = aJSONObject.getString("Name");
+			//System.out.println("nuclei name=" + name);
+			if(name.equals(nucleusName)){
+				selectedNucleus= aJSONObject;
+			}
+		}
+		if(selectedNucleus==null)return null;
+		JSONArray deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
+		JSONArray deneWordNamesArrays = null;
+		for(int i=0;i<deneChainsArray.length();i++){
+			aJSONObject = (JSONObject) deneChainsArray.get(i);
+			//System.out.println("aJSONObject.getString()=" + aJSONObject.getString("Name") + " deneChainName=" + deneChainName);
+			if(aJSONObject.getString("Name").equals(deneChainName)){
+				JSONArray denes = aJSONObject.getJSONArray("Denes");
+				for(int j=0;j<denes.length();j++) {
+					if(denes.getJSONObject(j).getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE).equals(deneName)) {
+						JSONObject dene = denes.getJSONObject(j);
+						JSONArray deneWords = dene.getJSONArray("DeneWords");
+						for(int k=0;k<deneWords.length();k++) {
+							deneWordNamesArrays.put(deneWords.getJSONObject(k).getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
+						}
+					}
+				}
+			}
+		}
+		
+		return deneWordNamesArrays;
+	}
+	
 	public static JSONObject getDeneChainByName(JSONObject pulseJSONObject, String nucleusName,  String deneChainName) throws InvalidDenomeException {
 		// TODO Auto-generated method stub
 		try {
@@ -1900,4 +1990,6 @@ public class DenomeUtils {
 		}
 		return sourceData;
 	}
+
+	
 }
