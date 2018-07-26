@@ -1906,6 +1906,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
 			preparedStatement.setString(1, teleonomeName);
+			preparedStatement.setString(2, teleonomeName);
 			rs = preparedStatement.executeQuery();
 			Timestamp time=null;
 			String name;
