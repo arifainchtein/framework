@@ -1886,7 +1886,17 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	}
 	
 	public JSONArray getNucleiNamesForTeleonomeInOrganism(String teleonomeName) {
-		String command = "select NU from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei') as NU where teleonomeName=?  limit 1";
+		
+		//
+		// this command returns the complete nucleus
+		//
+		//String command = "select NU from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei') as NU where teleonomeName=?  limit 1";
+		//
+		// this command returns just the name of the nuclei
+		//
+		String command = "select  NU -> 'Name' from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei') as NU where teleonomeName=?  limit 1";
+		
+		
 		Connection connection=null;
 		PreparedStatement preparedStatement = null; 
 		ResultSet rs=null;
