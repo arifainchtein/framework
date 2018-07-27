@@ -636,41 +636,55 @@ public class MnemosyneManager {
 						for(int j=0;j<denes.length();j++){
 							dene = denes.getJSONObject(j);
 							deneName=dene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
-							deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
-							deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
+							//
+							// check to see if there is a timestamp, if there is not, delete it
+							//
 							
-							logger.info("from todday, deneName=" + deneName + " currentDate=" + currentDate + " deneLocalDate=" + deneLocalDate);
-							if(!currentDate.equals(deneLocalDate)){
-								if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
-									mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
-									if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
-										logger.info("removing dene "+ deneName + " from daily,with prunning strategy remove deneLocalDate=" + deneLocalDate);
+							if(dene.has("Timestamp Milliseconds")) {
+								deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
+								deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
+								
+								logger.info("from todday, deneName=" + deneName + " currentDate=" + currentDate + " deneLocalDate=" + deneLocalDate);
+								if(!currentDate.equals(deneLocalDate)){
+									if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
+										mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
+										if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
+											logger.info("removing dene "+ deneName + " from daily,with prunning strategy remove deneLocalDate=" + deneLocalDate);
+											denes.remove(j);
+											keepGoing=true;
+											break start_again;
+										}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
+											//
+											// get this dene's denewords and loop over every one  and set its value to default
+											//
+											logger.info("resetting dene "+deneName +" from daily,with prunning strategy reset deneLocalDate=" + deneLocalDate);
+											
+											deneWords = dene.getJSONArray("DeneWords");
+											for(int k=0;k<deneWords.length();k++){
+												deneWord = deneWords.getJSONObject(k);
+												if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
+													logger.info("resetting dene "+deneName +" from daily,with prunning strategy reset reset value=" + deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
+													
+													deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
+												}
+											}
+										}
+									}else {
+										logger.info("removing dene from daily,no prunning strategy deneLocalDate=" + deneLocalDate);
 										denes.remove(j);
 										keepGoing=true;
 										break start_again;
-									}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
-										//
-										// get this dene's denewords and loop over every one  and set its value to default
-										//
-										logger.info("resetting dene "+deneName +" from daily,with prunning strategy reset deneLocalDate=" + deneLocalDate);
-										
-										deneWords = dene.getJSONArray("DeneWords");
-										for(int k=0;k<deneWords.length();k++){
-											deneWord = deneWords.getJSONObject(k);
-											if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
-												logger.info("resetting dene "+deneName +" from daily,with prunning strategy reset reset value=" + deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
-												
-												deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
-											}
-										}
 									}
-								}else {
-									logger.info("removing dene from daily,no prunning strategy deneLocalDate=" + deneLocalDate);
-									denes.remove(j);
-									keepGoing=true;
-									break start_again;
 								}
+							}else {
+								//
+								// it does not have a timestamp, therefore delete it
+								logger.info("removing dene from dailybecause there is no timesmps=");
+								denes.remove(j);
+								keepGoing=true;
+								break start_again;
 							}
+							
 						}
 					}while(keepGoing);
 					
