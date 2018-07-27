@@ -1851,7 +1851,86 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		}
 		return toReturn;
 	}
-
+	public JSONArray getTeleonomeDataAvailableRanges() {
+		String command = "select  min(createdon), max(createdon) from pulse";
+		Connection connection=null;
+		Statement statement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		JSONObject jsonObject;
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(command);
+			Timestamp timeMin=null;
+			Timestamp timeMax=null;
+			
+			while(rs.next()){
+				timeMin=rs.getTimestamp(1);
+				timeMax=rs.getTimestamp(2);
+				jsonObject = new JSONObject();
+				jsonObject.put("TimeMin", timeMin);
+				jsonObject.put("TimeMax", timeMax);
+				toReturn.put(jsonObject);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			if(statement!=null)
+				try {
+					if(rs!=null)rs.close();
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+		return toReturn;
+	}
+	public JSONArray getTeleonomeDataAvailableInOrganism() {
+		String command = "select teleonomeName, min(createdon), max(createdon) from organismpulse group by teleonomename";
+		Connection connection=null;
+		Statement statement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		JSONObject jsonObject;
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(command);
+			Timestamp timeMin=null;
+			Timestamp timeMax=null;
+			
+			String name;
+			while(rs.next()){
+				name=rs.getString(1);
+				timeMin=rs.getTimestamp(2);
+				timeMax=rs.getTimestamp(3);
+				jsonObject = new JSONObject();
+				jsonObject.put("Name", name);
+				jsonObject.put("TimeMin", timeMin);
+				jsonObject.put("TimeMax", timeMax);
+				toReturn.put(jsonObject);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			if(statement!=null)
+				try {
+					if(rs!=null)rs.close();
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+		return toReturn;
+	}
+	
 	public JSONArray getTeleonomeNamesInOrganism() {
 		String command = "select distinct(teleonomeName) from organismpulse";
 		Connection connection=null;
