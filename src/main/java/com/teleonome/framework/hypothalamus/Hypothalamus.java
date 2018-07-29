@@ -98,6 +98,7 @@ public abstract class Hypothalamus {
 	public Context exoZeroContext=null;
 	public DiscoverTeleonoms aDiscoverTeleonoms=null;
 	public Hashtable subscriberList = new Hashtable();
+	public Hashtable subscriberListByName = new Hashtable();
 	protected String processName;
 	private boolean waitingfromArduinoResponse=false;
 
