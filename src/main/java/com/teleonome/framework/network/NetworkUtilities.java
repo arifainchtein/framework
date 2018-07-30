@@ -197,7 +197,7 @@ public class NetworkUtilities {
 					line = (String) pingInfo.get(i);
 					logger.debug("isNetworkStatusOk, line=" + line);
 					
-					if(line.contains("Destination Host Unreachable")){
+					if(line.contains("Destination Host is Unreachable")){
 						networkStatusOk=false;
 						return networkStatusOk;
 					}
