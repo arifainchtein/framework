@@ -161,6 +161,7 @@ public class NetworkUtilities {
 		ArrayList routeInfo;
 		try {
 			routeInfo = Utils.executeCommand("ip route show default 0.0.0.0/0");
+			logger.debug("routeInfo=" + routeInfo);
 			//
 			// the answer will be one line like
 			// 
@@ -171,7 +172,7 @@ public class NetworkUtilities {
 			if(routeInfo.size()>0){
 				String line =((String) routeInfo.get(0)).trim();
 				String gatewayAddress = line.substring(12).split(" ")[0].trim();
-				////logger.debug("isNetworkStatusOk, gatewayAddress=" + gatewayAddress);
+				logger.debug("isNetworkStatusOk, gatewayAddress=" + gatewayAddress);
 				ArrayList pingInfo = Utils.executeCommand("ping " + gatewayAddress + " -c 3");
 				//
 				// the result will be 4 lines as follows if it can not find the gateway:
@@ -194,7 +195,7 @@ public class NetworkUtilities {
 				//
 				for(int i=1;i<pingInfo.size();i++){
 					line = (String) pingInfo.get(i);
-					////logger.debug("isNetworkStatusOk, line=" + line);
+					logger.debug("isNetworkStatusOk, line=" + line);
 					
 					if(line.contains("Destination Host Unreachable")){
 						networkStatusOk=false;
