@@ -209,7 +209,7 @@ public class NetworkUtilities {
 			e.printStackTrace();
 		}
 		
-		
+		logger.debug("isNetworkStatusOk, returning=" + networkStatusOk);
 		return networkStatusOk;
 	}
 }

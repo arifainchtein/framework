@@ -30,7 +30,7 @@ public class DiscoverTeleonoms extends Thread {
 	static JmDNS bonjourService=null;
 	//String bonjourServiceType = "_workstation._tcp.local.";
 	String bonjourServiceType = "_teleonome._tcp.local.";
-	Logger logger=null;
+	static Logger logger=null;
 	static Logger sampleListenerLogger= Logger.getLogger(SampleListener.class);
 	
 	
@@ -145,19 +145,19 @@ public class DiscoverTeleonoms extends Thread {
 	 static class SampleListener implements ServiceListener {
 	        @Override
 	        public void serviceAdded(ServiceEvent event) {
-	        	sampleListenerLogger.debug("Service added   : " + event.getName() + "." + event.getType());
+	        	logger.debug("Service added   : " + event.getName() + "." + event.getType());
 	        	 bonjourService.requestServiceInfo(event.getType(), event.getName());
 	            
 	        }
 
 	        @Override
 	        public void serviceRemoved(ServiceEvent event) {
-	        	sampleListenerLogger.debug("Service removed : " + event.getName() + "." + event.getType());
+	        	logger.debug("Service removed : " + event.getName() + "." + event.getType());
 	        }
 
 	        @Override
 	        public void serviceResolved(ServiceEvent ev) {
-	        	sampleListenerLogger.debug("Service resolved: " + ev.getInfo().getQualifiedName() + " port:" + ev.getInfo().getPort());
+	        	logger.debug("Service resolved: " + ev.getInfo().getQualifiedName() + " port:" + ev.getInfo().getPort());
 	        	        
 	        }
 	    }
