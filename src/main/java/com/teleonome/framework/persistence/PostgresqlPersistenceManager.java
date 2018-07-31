@@ -385,7 +385,114 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}
 	
+	public JSONObject getOrganismPulseByTeleonomeNameAndTimestamp(String teleonomeName, long timemillis) {
+		
+		String sql = "select data AS Pulse from organismpulse where pulsetimemillis="+ timemillis +" and teleonomeName='"+ teleonomeName +"' limit 1";
+		logger.debug("getOrganismPulseByTeleonomeNameAndTimestamp,sql=" + sql);
+		Connection connection = null;
+		Statement statement = null;
+		JSONObject toReturn = new JSONObject();
+		ResultSet rs=null;	
 
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(sql);
+			
+			JSONObject data=null;
+			Long L;
+			while(rs.next()){
+				//
+				// only one record comeback
+				//
+				String pulse = rs.getString(1);
+				//
+				// it comes with "" so remove them, also remove the first and last characrets because they are 
+				// also ""
+				pulse = pulse.replace("\"\"", "\"");
+				if(pulse.substring(0,1).equals("\"")) {
+					pulse=pulse.substring(1);
+				}
+				if(pulse.substring(pulse.length()-1).equals("\"")) {
+					pulse=pulse.substring(0,pulse.length()-1);
+				}
+				toReturn = new JSONObject(pulse);
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		}finally{
+			if(connection!=null){
+				try {
+					if(rs!=null)rs.close();
+					if(statement!=null)statement.close();
+					if(connection!=null)connectionPool.closeConnection(connection);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+		}
+		return toReturn;
+	}
+	public JSONArray getOrganismDeneWordValueOfTheDayByIdentity(Identity identity, Timestamp startTime, Timestamp endTime, boolean last) {
+		String organismTeleonomeName = identity.getTeleonomeName();
+		String order="asc";
+		if(last)order="desc";
+		SimpleDateFormat df = new SimpleDateFormat("YYYY-mm-dd HH:mm:ss");
+		
+		String createdOnStart = df.format(startTime);
+		String createdOnEnd = df.format(endTime);
+		String sql = "select pulsetimemillis,createdOn, DeneWord -> 'Value' As CurrentPulse from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where createdOn>='"+ createdOnStart + "' and createdOn<='" + createdOnEnd+"' and Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' order by createdOn "+ order;
+		logger.debug("getOrganismDeneWordTimeSeriesByIdentity,sql=" + sql);
+		Connection connection = null;
+		Statement statement = null;
+		JSONArray toReturn = new JSONArray();
+		ResultSet rs=null;
+
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(sql);
+			
+			JSONObject data=null;
+			Long L;
+			while(rs.next()){
+
+				data = new JSONObject();
+				data.put(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, rs.getLong(1));
+				data.put(TeleonomeConstants.PULSE_TIMESTAMP, rs.getTimestamp(2));
+				data.put("Value", rs.getString(2).replace("\"", ""));
+				toReturn.put(data);
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		}finally{
+			if(connection!=null){
+				try {
+					if(rs!=null)rs.close();
+					if(statement!=null)statement.close();
+					if(connection!=null)connectionPool.closeConnection(connection);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+		}
+		return toReturn;
+	}
+	
 	public JSONArray getOrganismDeneWordTimeSeriesByIdentity(Identity identity, long startTimeMillis, long endTimeMillis) {
 		String organismTeleonomeName = identity.getTeleonomeName();
 		String sql = "select pulsetimemillis,DeneWord -> 'Value' As CurrentPulse from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where pulsetimemillis>="+ startTimeMillis + " and pulsetimemillis<=" + endTimeMillis+" and Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' order by pulsetimemillis asc";
