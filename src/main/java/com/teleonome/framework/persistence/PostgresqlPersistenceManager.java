@@ -420,34 +420,34 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 					logger.debug(Utils.getStringException(e));
 				}
 				
-				
-				
-				pulse = pulse.replace("\"\"", "\"");
-				if(pulse.substring(0,1).equals("\"")) {
-					pulse=pulse.substring(1);
-				}
-				
-				
-				try {
-					logger.debug("point 2");
-					toReturn = new JSONObject(pulse);
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					logger.debug(Utils.getStringException(e));
-				}
-				
-				
-				
-				if(pulse.substring(pulse.length()-1).equals("\"")) {
-					pulse=pulse.substring(0,pulse.length()-1);
-				}
-				try {
-					logger.debug("point 3");
-					toReturn = new JSONObject(pulse);
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					logger.debug(Utils.getStringException(e));
-				}
+//				
+//				
+//				pulse = pulse.replace("\"\"", "\"");
+//				if(pulse.substring(0,1).equals("\"")) {
+//					pulse=pulse.substring(1);
+//				}
+//				
+//				
+//				try {
+//					logger.debug("point 2");
+//					toReturn = new JSONObject(pulse);
+//				} catch (JSONException e) {
+//					// TODO Auto-generated catch block
+//					logger.debug(Utils.getStringException(e));
+//				}
+//				
+//				
+//				
+//				if(pulse.substring(pulse.length()-1).equals("\"")) {
+//					pulse=pulse.substring(0,pulse.length()-1);
+//				}
+//				try {
+//					logger.debug("point 3");
+//					toReturn = new JSONObject(pulse);
+//				} catch (JSONException e) {
+//					// TODO Auto-generated catch block
+//					logger.debug(Utils.getStringException(e));
+//				}
 				
 				
 				toReturn = new JSONObject(pulse);
