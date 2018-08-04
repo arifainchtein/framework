@@ -5053,7 +5053,7 @@ public class DenomeManager {
 					wifiDataDene.put("Name", TeleonomeConstants.DENE_WIFI_INFO);
 					JSONArray wifiDataDeneWords = new JSONArray();
 					wifiDataDene.put("DeneWords", wifiDataDeneWords);
-
+xx
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Host IP Address",localIpAddress,null,"String",true);
 					wifiDataDeneWords.put(deneWord);
 
