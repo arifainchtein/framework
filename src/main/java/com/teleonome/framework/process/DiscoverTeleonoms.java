@@ -62,7 +62,13 @@ public class DiscoverTeleonoms extends Thread {
 					
 			try {
 				InetAddress ipToBindToZeroMQ = Utils.getIpAddressForNetworkMode();
-				bonjourService = JmDNS.create(ipToBindToZeroMQ,null);
+				InetAddress addr = InetAddress.getLocalHost();
+				  
+				String hostname = InetAddress.getByName(ipToBindToZeroMQ.getHostName()).toString();
+				logger.debug("ipToBindToZeroMQ=" + ipToBindToZeroMQ + " hostname=" + hostname + " addr=" + addr);
+				
+				
+				bonjourService = JmDNS.create(ipToBindToZeroMQ,hostname);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace(); 
