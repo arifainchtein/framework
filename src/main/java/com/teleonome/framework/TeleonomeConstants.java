@@ -458,6 +458,8 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_COMMAND_TO_EXECUTE = "Command To Execute";
 	public static final String DENE_PATHOLOGY ="Pathology";
 	public static final String DENEWORD_ACTIVE="Active";
+	public static final String DENEWORD_VISIBLE="Visible";
+	
 	public static final String DENEWORD_TYPE_POINTER="Dene Pointer";
 	//
 	// dene types

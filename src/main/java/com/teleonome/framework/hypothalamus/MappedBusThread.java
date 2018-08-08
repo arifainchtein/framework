@@ -92,8 +92,9 @@ class MappedBusThread extends Thread{
 				dataPayloadJSONObject = null;
 				if(aCommandRequest!=null){
 					command = aCommandRequest.getCommand();
-					logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
 					dataPayload = aCommandRequest.getDataPayload();
+					logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
+					
 					if(dataPayload!=null && !dataPayload.equals("")){
 						try {
 							dataPayloadJSONObject = new JSONObject(dataPayload);

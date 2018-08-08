@@ -2870,7 +2870,7 @@ public class DenomeManager {
 			mutationsJSONArray = denomeObject.getJSONArray("Mutations");
 			JSONObject mutationJSONObject, payloadJSONObject;
 			String updateTargetPointer;
-			Object updateTargetValue;
+			Object updateTargetValue, mutationTargetNewValue;
 			String[] tokens;
 			String targetDeneChain,targetDene,targetDeneWord;
 			for(int i=0;i<mutationsJSONArray.length();i++){
@@ -2895,6 +2895,16 @@ public class DenomeManager {
 						// each update object has two parameters, the target and the value
 						updateTargetPointer = updateJSNObject.getString("Target");
 						updateTargetValue = updateJSNObject.get("Value");
+						//
+						// the payload can have one more attribute, MutationTargetNewValue which changes the actual target
+						//
+						// this is enables one mutation to change any location in the denome.  this is used by the logic 
+						// used by teleonomewebapp to allow humans to update parameters in the Denome
+						//
+						mutationTargetNewValue="";
+						if(updateJSNObject.has("MutationTargetNewValue")) {
+							mutationTargetNewValue = updateJSNObject.getString("MutationTargetNewValue");
+						}
 						logger.debug("line 1982 demomemanager updateTargetPointer:" + updateTargetPointer + " updateTargetValue:" + updateTargetValue);
 						//
 						// the target contains a pointer which is relative to the mutation
@@ -2920,7 +2930,7 @@ public class DenomeManager {
 
 						for(int k=0;k<mutationDeneChains.length();k++){
 							mutationDeneChain=mutationDeneChains.getJSONObject(k);
-							logger.debug("line 2005 demomemanager mutationDeneChain.getString(Name):" + mutationDeneChain.getString("Name"));
+							logger.debug("line 2034 demomemanager mutationDeneChain.getString(Name):" + mutationDeneChain.getString("Name"));
 
 							if(mutationDeneChain.getString("Name").equals(targetDeneChain)){
 								mutationDenes = mutationDeneChain.getJSONArray("Denes");
@@ -2932,14 +2942,20 @@ public class DenomeManager {
 										mutationDeneWords=mutationDene.getJSONArray("DeneWords");
 										for(int m=0;m<mutationDeneWords.length();m++){
 											mutationDeneWord = mutationDeneWords.getJSONObject(m);
-											logger.debug("line 1958 demomemanager mutationDeneWord:" + mutationDeneWord.getString("Name"));
+											logger.debug("line 2946 demomemanager mutationDeneWord:" + mutationDeneWord.getString("Name"));
 
 
 
 											if(mutationDeneWord.getString("Name").equals(targetDeneWord)){
-												logger.debug("line 1963 demomemanager updating value:" + updateTargetValue + " mutationDeneWord=" + mutationDeneWord);
+												logger.debug("line 2951 demomemanager updating value:" + updateTargetValue + " mutationDeneWord=" + mutationDeneWord);
 
 												mutationDeneWord.put("Value",updateTargetValue);
+												if(!mutationTargetNewValue.equals("")) {
+													
+													logger.debug("line 2955 demomemanager updating value:" + updateTargetValue + " mutationDeneWord=" + mutationDeneWord);
+
+													mutationDeneWord.put("Target",mutationTargetNewValue);
+												}
 											}
 										}
 									}
