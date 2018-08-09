@@ -619,6 +619,7 @@ class MappedBusThread extends Thread{
 					// and update the database
 					logger.debug("about to mark commandrequest as cmpleted, " + aCommandRequest.getId());
 					hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
+					hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, ""+aCommandRequest.getId());
 
 			
 					//

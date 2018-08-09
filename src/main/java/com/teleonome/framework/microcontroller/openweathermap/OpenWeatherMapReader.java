@@ -117,6 +117,7 @@ public class OpenWeatherMapReader extends BufferedReader{
 				Calendar calendar = Calendar.getInstance();
 				String cityName="", cityCountry="";
 				double cityLatitude=0, cityLongitud=0;
+				logger.debug("forecastShortJSON=" + forecastShortJSON.toString(4));
 				if(forecastShortJSON.has("city")) {
 					JSONObject cityJSONObject = forecastShortJSON.getJSONObject("city");
 					cityName = cityJSONObject.getString("name");
