@@ -120,11 +120,18 @@ public class OpenWeatherMapReader extends BufferedReader{
 				logger.debug("forecastShortJSON=" + forecastShortJSON.toString(4));
 				if(forecastShortJSON.has("city")) {
 					JSONObject cityJSONObject = forecastShortJSON.getJSONObject("city");
-					cityName = cityJSONObject.getString("name");
-					cityCountry = cityJSONObject.getString("country");
-					JSONObject cityCoordJSONObject = cityJSONObject.getJSONObject("coord");
-					cityLatitude = cityCoordJSONObject.getDouble("lat");
-					cityLongitud = cityCoordJSONObject.getDouble("lon");
+					if(cityJSONObject.has("name")) {
+						cityName = cityJSONObject.getString("name");
+					}
+					if(cityJSONObject.has("country")) {
+						cityCountry = cityJSONObject.getString("country");
+					}
+					if(cityJSONObject.has("coord")) {
+						JSONObject cityCoordJSONObject = cityJSONObject.getJSONObject("coord");
+						if(cityCoordJSONObject.has("lat"))cityLatitude = cityCoordJSONObject.getDouble("lat");
+						if(cityCoordJSONObject.has("lon"))cityLongitud = cityCoordJSONObject.getDouble("lon");
+					}
+					
 					
 				}
 				if(forecastShortJSON.has("list")) {
