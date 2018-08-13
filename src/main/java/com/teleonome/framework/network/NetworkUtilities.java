@@ -36,6 +36,12 @@ public class NetworkUtilities {
 		FileUtils.writeStringToFile(new File("/etc/wpa_supplicant/wpa_supplicant.network"), supplicantFileContents.toString());
 	}
 	
+//	public static Object getNetworkingInfo() {
+//		ArrayList initialData = Utils.executeCommand("ip a");
+//		
+//	}
+	
+	
 	public static LinkedHashMap getConnectedClients() throws IOException, InterruptedException{
 		ArrayList initialData = Utils.executeCommand("sudo hostapd_cli all_sta");
 		//

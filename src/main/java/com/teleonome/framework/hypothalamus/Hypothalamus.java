@@ -316,6 +316,98 @@ public abstract class Hypothalamus {
 		}
 	}
 	
+	/**
+	 * this method is called one the human updates a microcontroller config param
+	 *  so that they get refreshed in the reader and writer
+	 * @param microControllerName
+	 */
+	public void reInitializeMicroControllerByName(String microControllerName) {
+		//
+		// now initialize every microcontroller
+		//
+		JSONObject componentDeneChain=null;
+		JSONArray microcontrollersJSONArray=null;
+		try {
+			componentDeneChain = aDenomeManager.getDeneChainByName(TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_COMPONENTS);
+			microcontrollersJSONArray = aDenomeManager.getDenesByDeneType(componentDeneChain, TeleonomeConstants.DENE_TYPE_MICROCONTROLLER);
+
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}
+
+
+		JSONObject microcontrollerJSONObject;
+		String microcontrollerProcessingClassName = "";
+		Class aProcessingClass;
+		MicroController aMicroController;
+		String aMicroControllerName;
+		String aMicroControllerPointer;
+		String denomeName = aDenomeManager.getDenomeName();
+		microControllerPointerMicroControllerIndex = new Hashtable();
+		JSONArray microControllerParams;
+		Object IsMother = null;
+		logger.info("Updating the  microcontroller " + microControllerName);
+		
+		for(int i=0;i<microcontrollersJSONArray.length();i++){
+			try {
+				microcontrollerJSONObject = microcontrollersJSONArray.getJSONObject(i);
+				aMicroControllerName = microcontrollerJSONObject.getString("Name");
+				
+				if(!microControllerName.equals(aMicroControllerName))continue;
+				
+				microControllerParams = aDenomeManager.getMicroControllerParamsForMicroController(aMicroControllerName);
+				
+				logger.debug("microControllerParams=" + microControllerParams.toString(4));
+				microcontrollerProcessingClassName = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(microcontrollerJSONObject, TeleonomeConstants.DENEWORD_TYPE_MICROCONTROLLER_PROCESSING_CLASSNAME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				logger.debug("reading microcontroller classname=" + microcontrollerProcessingClassName);
+				aProcessingClass = Class.forName(microcontrollerProcessingClassName);
+				aMicroController = (MicroController)aProcessingClass.getDeclaredConstructor(new Class[]{DenomeManager.class, String.class}).newInstance(aDenomeManager, aMicroControllerName);
+				aMicroController.init(microControllerParams);
+				logger.debug("invoked init in  microcontroller " + microcontrollerProcessingClassName);
+				
+				aMicroControllerPointer = "@" + denomeName +":"+ TeleonomeConstants.NUCLEI_INTERNAL + ":" + TeleonomeConstants.DENECHAIN_COMPONENTS+ ":" + aMicroControllerName;
+				microControllerPointerMicroControllerIndex.put(aMicroControllerPointer, aMicroController);
+				
+//				For now dont allow to reset the mother
+//				
+//				IsMother = aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(microcontrollerJSONObject, TeleonomeConstants.DENEWORD_MOTHER_MICROCONTROLER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				if(IsMother!=null && IsMother instanceof Boolean && ((Boolean)IsMother).booleanValue()) {
+//					motherMicroController = aMicroController;
+//					logger.debug("Found Mother=" + aMicroControllerName );
+//				}
+
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (MicrocontrollerCommunicationException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+		}
+	}
 	protected void stopExoZeroPublisher() {
 		boolean unbindedOk = exoZeroPublisher.unbind("tcp://" + ipToBindToZeroMQ + ":5563");
 		try {

@@ -5467,7 +5467,7 @@ public class DenomeManager {
 	 * @return
 	 * @throws JSONException 
 	 */
-	public Object extractDeneWordValueFromDene(JSONObject aDeneJSONObject, String deneWordLabel) throws JSONException{
+	public Object extractDeneWordValueFromDene(JSONObject aDeneJSONObject, String deneWordName) throws JSONException{
 		JSONObject aDeneWordJSONObject;
 		JSONArray deneWordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
 		Object object;
@@ -5476,7 +5476,7 @@ public class DenomeManager {
 			aDeneWordJSONObject = (JSONObject) deneWordsJSONArray.get(k);
 			object = aDeneWordJSONObject.get("Value");
 
-			if(aDeneWordJSONObject.getString("Name").equals(deneWordLabel)){
+			if(aDeneWordJSONObject.getString("Name").equals(deneWordName)){
 				return object;
 			}
 		}
@@ -5493,7 +5493,7 @@ public class DenomeManager {
 	 * @return
 	 * @throws JSONException 
 	 */
-	public Object extractDeneWordValueTypeFromDene(JSONObject aDeneJSONObject, String deneWordLabel) throws JSONException{
+	public Object extractDeneWordValueTypeFromDene(JSONObject aDeneJSONObject, String deneWordName) throws JSONException{
 		JSONObject aDeneWordJSONObject;
 		JSONArray deneWordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
 		Object object;
@@ -5502,7 +5502,7 @@ public class DenomeManager {
 			aDeneWordJSONObject = (JSONObject) deneWordsJSONArray.get(k);
 			object = aDeneWordJSONObject.get("Value Type");
 
-			if(aDeneWordJSONObject.getString("Name").equals(deneWordLabel)){
+			if(aDeneWordJSONObject.getString("Name").equals(deneWordName)){
 				return object;
 			}
 		}

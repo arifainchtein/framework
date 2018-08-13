@@ -862,6 +862,7 @@ public class TeleonomeConstants {
 	public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_EXTERNAL_DATA="Single Value Panel External Data";
 	public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_COMPLETE_WIDTH_EXTERNAL_DATA="Single Value Panel Complete Width External Data";
 	public static final String PANEL_VISUALIZATION_COMPLETE_DENE_STYLE_SINGLE_VALUE_PANEL_EXTERNAL_DATA="Complete Dene Single Value Panel External Data";
+	public static final String PANEL_VISUALIZATION_SEARCH_PANEL="Search Panel";
 	public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL="Single Value Panel";
     public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_COMPLETE_WIDTH="Single Value Panel Complete Width";
 	public static final String PANEL_VISUALIZATION_COMPLETE_DENE_STYLE_SINGLE_VALUE_PANEL="Complete Dene Single Value Panel";
