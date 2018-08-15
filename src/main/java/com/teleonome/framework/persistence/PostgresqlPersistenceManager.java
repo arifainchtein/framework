@@ -2005,13 +2005,13 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			rs = statement.executeQuery(command);
 			Timestamp timeMin=null;
 			Timestamp timeMax=null;
-			
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 			while(rs.next()){
 				timeMin=rs.getTimestamp(1);
 				timeMax=rs.getTimestamp(2);
 				jsonObject = new JSONObject();
-				jsonObject.put("TimeMin", timeMin);
-				jsonObject.put("TimeMax", timeMax);
+				jsonObject.put("TimeMin", sdf.format(timeMin));
+				jsonObject.put("TimeMax", sdf.format(timeMax));
 				toReturn.put(jsonObject);
 			}
 		} catch (SQLException e) {
