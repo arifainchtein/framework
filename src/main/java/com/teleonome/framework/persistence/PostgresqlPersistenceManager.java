@@ -2021,7 +2021,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				}else {
 					jsonObject.put("TimeMax", timeMax);
 				}
-				
+				logger.debug("getTeleonomeDataAvailableRanges,jsonObject=" + jsonObject.toString(4) );
 				toReturn.put(jsonObject);
 			}
 		} catch (SQLException e) {
