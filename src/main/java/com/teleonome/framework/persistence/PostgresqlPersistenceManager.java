@@ -2055,14 +2055,27 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			Timestamp timeMax=null;
 			
 			String name;
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+			
 			while(rs.next()){
 				name=rs.getString(1);
 				timeMin=rs.getTimestamp(2);
 				timeMax=rs.getTimestamp(3);
 				jsonObject = new JSONObject();
 				jsonObject.put("Name", name);
-				jsonObject.put("TimeMin", timeMin);
-				jsonObject.put("TimeMax", timeMax);
+				
+				if(timeMin!=null) {
+					jsonObject.put("TimeMin", sdf.format(timeMin));
+				}else {
+					jsonObject.put("TimeMin", timeMin);
+				}
+				
+				if(timeMax!=null) {
+					jsonObject.put("TimeMax", sdf.format(timeMax));
+				}else {
+					jsonObject.put("TimeMax", timeMax);
+				}
+				
 				toReturn.put(jsonObject);
 			}
 		} catch (SQLException e) {
