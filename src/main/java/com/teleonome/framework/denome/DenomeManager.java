@@ -4111,7 +4111,7 @@ public class DenomeManager {
 
 			}
 			//
-			// then do the DeneWord Injection chain, injecting the memwords
+			// then do the DeneWord Injection chain, injecting the denewords
 			// using the target parameter. There is only one dene in this chain
 			//
 			JSONObject deneWordInjections=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_DENEWORD_INJECTION);
