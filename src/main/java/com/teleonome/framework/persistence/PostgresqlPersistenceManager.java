@@ -2010,8 +2010,18 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				timeMin=rs.getTimestamp(1);
 				timeMax=rs.getTimestamp(2);
 				jsonObject = new JSONObject();
-				jsonObject.put("TimeMin", sdf.format(timeMin));
-				jsonObject.put("TimeMax", sdf.format(timeMax));
+				if(timeMin!=null) {
+					jsonObject.put("TimeMin", sdf.format(timeMin));
+				}else {
+					jsonObject.put("TimeMin", timeMin);
+				}
+				
+				if(timeMax!=null) {
+					jsonObject.put("TimeMax", sdf.format(timeMax));
+				}else {
+					jsonObject.put("TimeMax", timeMax);
+				}
+				
 				toReturn.put(jsonObject);
 			}
 		} catch (SQLException e) {
