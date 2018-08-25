@@ -2367,6 +2367,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 	}
 
+	
 	public boolean unwrap(TimeZone timeZone, String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value) {
 		String sql="";
 		Connection connection = null;

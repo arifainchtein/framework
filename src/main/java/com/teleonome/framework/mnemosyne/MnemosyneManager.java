@@ -497,6 +497,10 @@ public class MnemosyneManager {
 		return aDBManager.getDeneWordTimeSeriesByIdentity( identity,  startTimeMillis,  endTimeMillis);
 	}
 	
+		
+		
+		
+	
 	
 	public boolean unwrap(TimeZone timeZone, String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value) {
 		return aDBManager.unwrap(timeZone ,teleonomeName,  pulseTimeMillis,  identityString,  valueType,  value);
