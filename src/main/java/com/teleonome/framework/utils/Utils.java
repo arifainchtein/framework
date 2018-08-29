@@ -738,11 +738,18 @@ public class Utils {
 	public static String getIpAddress() throws SocketException, UnknownHostException{
 		NetworkInterface networkInterface;
 		InetAddress inetAddr, potential=null;
+		
+		//
+		// pay attention to the fact that if a teleonome has 2 network cards, 
+		// one as a host and one as part of a network, the inetAddress needs to belong
+		// to the network interface connected to the organism network, otherwise the exozero network
+		// will not receive the pulse
+		
 		for(Enumeration <NetworkInterface> enu = NetworkInterface.getNetworkInterfaces();enu.hasMoreElements();){
 			networkInterface  = enu.nextElement();
 			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
 				inetAddr = (InetAddress)ifaces.nextElement();
-				if(!inetAddr.isLoopbackAddress()){
+				if(!inetAddr.isLoopbackAddress() && !inetAddr.getHostAddress().equals("172.16.1.1")){
 					if(inetAddr.isSiteLocalAddress()){
 						return inetAddr.getHostAddress();
 					}else{
