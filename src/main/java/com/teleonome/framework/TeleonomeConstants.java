@@ -254,6 +254,9 @@ public class TeleonomeConstants {
 	
 	public static final String COMMAND_REBOOT="$Reboot";
 	public static final String COMMAND_SHUTDOWN="$Shutdown";
+	public static final String COMMAND_REBOOT_TEXT="Reboot";
+	public static final String COMMAND_SHUTDOWN_TEXT="Shutdown";
+	
 	public static final String SHUTDOWN_ACTION="Shutdown Action";
 	
 	public static final String COMMAND_SHUTDOWN_ENABLE_HOST="Shutdown Enable Host";
