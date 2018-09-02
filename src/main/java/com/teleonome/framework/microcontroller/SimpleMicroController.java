@@ -31,8 +31,8 @@ import com.teleonome.framework.utils.Utils;
 public class SimpleMicroController extends MotherMicroController {
 	StringWriter sw = new StringWriter();
 	String  dataString="dataString";
-	PlainReader plainReader = new PlainReader(new StringReader(dataString), sw);
-	PlainWriter plainWriter = new PlainWriter(sw, plainReader);
+	PlainReader plainReader;
+	PlainWriter plainWriter;
 	Logger logger = Logger.getLogger(getClass());
 	
 	public SimpleMicroController(DenomeManager d, String n) {
@@ -44,15 +44,14 @@ public class SimpleMicroController extends MotherMicroController {
 	@Override
 	public void init(JSONArray params) throws MicrocontrollerCommunicationException {
 		// TODO Auto-generated method stub
-
+		 plainReader = new PlainReader(new StringReader(dataString), sw);
+		 plainWriter = new PlainWriter(sw, plainReader);
 	}
 
 
 	@Override
 	public BufferedReader getReader() throws IOException {
-		
 		return  plainReader;
-		
 	}
 
 	@Override
