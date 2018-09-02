@@ -44,8 +44,7 @@ public class SimpleMicroController extends MotherMicroController {
 	@Override
 	public void init(JSONArray params) throws MicrocontrollerCommunicationException {
 		// TODO Auto-generated method stub
-		 plainReader = new PlainReader(new StringReader(dataString), sw);
-		 plainWriter = new PlainWriter(sw, plainReader);
+		 
 	}
 
 
@@ -57,6 +56,8 @@ public class SimpleMicroController extends MotherMicroController {
 	@Override
 	public BufferedWriter getWriter() throws IOException {
 		// TODO Auto-generated method stub
+		plainReader = new PlainReader(new StringReader(dataString), sw);
+		 plainWriter = new PlainWriter(sw, plainReader);
 		return plainWriter;
 	}
  
