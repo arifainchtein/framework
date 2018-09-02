@@ -15,10 +15,16 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,6 +32,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Base32;
+import org.apache.commons.codec.binary.Hex;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TimeZone;
@@ -41,6 +57,7 @@ import com.luckycatlabs.sunrisesunset.dto.Location;
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeUtils;
 import com.teleonome.framework.network.NetworkUtilities;
+import com.teleonome.framework.security.totp.TOTP;
 import com.teleonome.framework.utils.Utils;
 
 public class MethodTester {
@@ -52,19 +69,38 @@ public class MethodTester {
 		//pingURL(url,2000);
 		//calculateSunrise();
 		logger = Logger.getLogger(getClass());
-		//generateMemoryStatusDene();
+		//String arg="MyLegoDoor";
+		//String s= String.format("%040x", new BigInteger(1, arg.getBytes("UTF-8")));
+//	System.out.println(s);
+		//recognizeImages();generateTOTPString()
+	
+		TOTP totp = new TOTP();
+		String code;
 		try {
-			
-			String arg="MyLegoDoor";
-			String s= String.format("%040x", new BigInteger(1, arg.getBytes("UTF-8")));
-			System.out.println(s);
-			recognizeImages();
-		} catch (UnsupportedEncodingException e) {
+			code = totp.generateCurrentNumberFromUnencodedString("SecretCode");
+			System.out.println("code = " + code);
+		} catch (GeneralSecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		
 	}
+
 	
+	 
+	 
+	
+	
+	
+	
+	
+	
+	
+		
+		
+		
+
 	public void recognizeImages() {
 		try {
 			String path="/Users/arifainchtein/Data/Teleonome/Ra/ocr/";

@@ -8,18 +8,31 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
-
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.security.totp.TOTP;
 import com.teleonome.framework.utils.Utils;
 
-public class SimpleMicroController extends MicroController {
+public class SimpleMicroController extends MotherMicroController {
 	StringWriter sw = new StringWriter();
 	String  dataString="dataString";
 	PlainReader plainReader = new PlainReader(new StringReader(dataString), sw);
-	
+	Logger logger = Logger.getLogger(getClass());
 	
 	public SimpleMicroController(DenomeManager d, String n) {
 		super(d, n);
@@ -48,6 +61,22 @@ public class SimpleMicroController extends MicroController {
          BufferedWriter stringWriter = new BufferedWriter(sw) ;
          return stringWriter;
 
+	}
+ 
+	@Override
+	public String getCommandCode()  throws IOException {
+		String toReturn="";
+		String unEncodedKey = FileUtils.readFileToString(new File("SecretKey"), "UTF-8");
+		TOTP totp = new TOTP();
+		try {
+			toReturn = totp.generateCurrentNumberFromUnencodedString(unEncodedKey);
+
+		} catch (GeneralSecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("returning code = " + toReturn);
+		return toReturn;
 	}
 
 }

@@ -2851,6 +2851,11 @@ public class DenomeManager {
 	public boolean markAllNonExecutedAsSkipped(){
 		return aDBManager.markAllNonExecutedAsSkipped();
 	}
+	
+	public void markCommandAsBadCommandCode(int id){
+		aDBManager.markCommandAsBadCommandCode( id);
+	}
+	
 	public void markCommandCompleted(int id){
 		aDBManager.markCommandCompleted( id);
 	}

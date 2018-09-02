@@ -1356,7 +1356,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}	
 
-	public int requestCommandToExecute(String command,  String payLoad){
+	public int requestCommandToExecute(String command, String commandCode, String payLoad){
 		//System.out.println(Utils.generateMethodTrace());
 		int id=-1;
 		Connection connection = null;
@@ -1365,7 +1365,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
-			String sql = "insert into CommandRequests (createdOn,command, status, payLoad) values ("+ System.currentTimeMillis() + ",'"+ command+"','"+ TeleonomeConstants.COMMAND_REQUEST_NOT_EXECUTED +"','" + payLoad +"') returning id";
+			String sql = "insert into CommandRequests (createdOn,command, status, payLoad, commandCode) values ("+ System.currentTimeMillis() + ",'"+ command+"','"+ TeleonomeConstants.COMMAND_REQUEST_NOT_EXECUTED +"','" + payLoad +"','" + commandCode +"') returning id";
 			rs = statement.executeQuery(sql);
 			JSONObject data=null;
 			CommandRequest aCommandRequest = new CommandRequest();
@@ -1432,7 +1432,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 		Connection connection = null;
 		Statement statement = null;
-		String sql = "select id,command, payload from CommandRequests where status='"+ TeleonomeConstants.COMMAND_REQUEST_NOT_EXECUTED +"'  order by createdOn asc limit 1";
+		String sql = "select id,command,commandCode, payload from CommandRequests where status='"+ TeleonomeConstants.COMMAND_REQUEST_NOT_EXECUTED +"'  order by createdOn asc limit 1";
 		ResultSet rs = null;
 		CommandRequest aCommandRequest = new CommandRequest();
 
@@ -1447,7 +1447,8 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			while(rs.next()){
 				aCommandRequest.setId(rs.getInt(1));
 				aCommandRequest.setCommand(rs.getString(2));
-				aCommandRequest.setDataPayload(rs.getString(3));
+				aCommandRequest.setCommandCode(rs.getString(3));
+				aCommandRequest.setDataPayload(rs.getString(4));
 				found=true;
 			}
 			if(!found){
@@ -1470,7 +1471,33 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return aCommandRequest;
 	}
 
+	public boolean markCommandAsBadCommandCode(int id){
+		Connection connection = null;
+		Statement statement = null;
+		String sql = "update CommandRequests set executedOn="+System.currentTimeMillis()+", status='"+ TeleonomeConstants.COMMAND_REQUEST_INVALID_PASSWORD +"'   where id=" + id;
 
+		boolean toReturn=false;
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			statement.executeUpdate(sql);
+			toReturn=true;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		}finally{
+			try {
+				if(statement!=null)statement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+
+		}
+		return toReturn;
+	}	
+	
 	public boolean markCommandCompleted(int id){
 		Connection connection = null;
 		Statement statement = null;

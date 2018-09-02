@@ -77,9 +77,9 @@ public class TeleonomeConstants {
 	//
 	// the data when sending a commandrequest
 	//
-	public static final String COMMAND_REQUEST_PASSWORD="Command Request Password";
+	public static final String COMMAND_CODE="CommandCode";
 	public static final String COMMAND_REQUEST_EXECUTION_OK="Command Request Succesfull";
-	public static final String COMMAND_REQUEST_INVALID_PASSWORD="Command Request Invalid Password";
+	public static final String COMMAND_REQUEST_INVALID_PASSWORD="Invalid Password";
 	
 	
 	//
@@ -276,6 +276,11 @@ public class TeleonomeConstants {
 	public static final String COMMAND_SHUTINGDOWN="Shutingdown";
 	public static final String COMMAND_STOPPING_PULSE="StoppingPulse";
 	public static final String COMMAND_STATE_MUTATION_PAYLOAD_INJECTION = "State Mutation Payload Injection";
+	
+	public static final String COMMAND_VERIFY_FILE_CREATION_DATE = "$Verify_File_Creation_Date";
+	public static final String COMMAND_VERIFY_FILE_MODIFICATIN_DATE = "$Verify_File_Creation_Date";
+	
+	
 	
 	public static final String CAMERA_TIMESTAMP_FILENAME_FORMAT="dd-MM-yyyy_HHmm";
 	

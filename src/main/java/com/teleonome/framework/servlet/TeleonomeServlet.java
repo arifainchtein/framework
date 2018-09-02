@@ -432,8 +432,8 @@ public class TeleonomeServlet extends HttpServlet  {
 
 	public void sendCommand(String command, String payLoad){
 		System.out.println("Egg  sending.. =" + command);
-
-		int id = aDBManager.requestCommandToExecute(command, payLoad);
+		String commandCode="";
+		int id = aDBManager.requestCommandToExecute(command,commandCode, payLoad);
 		System.out.println("EggServlet id=" + id);
 		//
 		// now keep waiiting until the command is executed

@@ -61,7 +61,7 @@ public class DiscoverTeleonoms extends Thread {
 		while(true){
 					
 			try {
-				InetAddress ipToBindToZeroMQ = Utils.getIpAddressForNetworkMode();
+				InetAddress ipToBindToZeroMQ = Utils.getExoZeroNetworkAddress();
 				InetAddress addr = InetAddress.getLocalHost();
 				  
 				String hostname = InetAddress.getByName(ipToBindToZeroMQ.getHostName()).toString();

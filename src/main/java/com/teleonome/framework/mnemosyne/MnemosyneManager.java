@@ -1050,7 +1050,7 @@ public class MnemosyneManager {
 					exoZeroPublisher.setHWM(2);
 					String ipToBindToZeroMQ="";
 					try {
-						ipToBindToZeroMQ = Utils.getIpAddressForNetworkMode().getHostAddress();
+						ipToBindToZeroMQ = Utils.getExoZeroNetworkAddress().getHostAddress();
 					} catch (SocketException | UnknownHostException e2) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e2));
@@ -1241,7 +1241,7 @@ public class MnemosyneManager {
 					exoZeroPublisher.setHWM(2);
 					String ipToBindToZeroMQ="";
 					try {
-						ipToBindToZeroMQ = Utils.getIpAddressForNetworkMode().getHostAddress();
+						ipToBindToZeroMQ = Utils.getExoZeroNetworkAddress().getHostAddress();
 					} catch (SocketException | UnknownHostException e2) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e2));

@@ -767,7 +767,7 @@ public class Utils {
 	 * so make sure that you do not return this address, because this method is called to
 	 * identify which network card will be bound to ZeroMQ network
 	 */
-	public static InetAddress getIpAddressForNetworkMode() throws SocketException, UnknownHostException{
+	public static InetAddress getExoZeroNetworkAddress() throws SocketException, UnknownHostException{
 		NetworkInterface networkInterface;
 		InetAddress inetAddr, potential=null;
 		for(Enumeration <NetworkInterface> enu = NetworkInterface.getNetworkInterfaces();enu.hasMoreElements();){
@@ -788,7 +788,33 @@ public class Utils {
 		return potential;
 	}
 
+	/**
+	 * the address 172.16.1.1 (TeleonomeConstants.ADA_INTERNAL_HOST_IPADDRESS) is hardwired as the address that the adas are going to connect to
+	 * so make sure that you do not return this address, because this method is called to
+	 * identify which network card will be bound to ZeroMQ network
+	 */
+	public static InetAddress getEndoZeroNetworkAddress() throws SocketException, UnknownHostException{
+		NetworkInterface networkInterface;
+		InetAddress inetAddr, potential=null;
+		for(Enumeration <NetworkInterface> enu = NetworkInterface.getNetworkInterfaces();enu.hasMoreElements();){
+			networkInterface  = enu.nextElement();
+			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
+				inetAddr = (InetAddress)ifaces.nextElement();
+				if(inetAddr.getHostAddress().equals(TeleonomeConstants.ADA_INTERNAL_HOST_IPADDRESS)) {
+					if(!inetAddr.isLoopbackAddress()){
+						if(inetAddr.isSiteLocalAddress()){
+							return inetAddr;
+						}else{
+							potential=inetAddr;
+						}
+					}
+				}
+			}
+		}
+		return potential;
+	}
 
+	
 	public static void zipFile(File sourceFile, File destinationFile) throws IOException {
 
 		FileOutputStream fos = new FileOutputStream(destinationFile);

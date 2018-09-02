@@ -74,17 +74,19 @@ class MappedBusThread extends Thread{
 			}
 			 */
 			String command=null;
+			String commandCode="";
 			String message=null;
 			byte[] buffer = new byte[512];
 			String[] tokens;
 			String microControllerPointer;
 			CommandRequest aCommandRequest=null ;
 			JSONObject dataPayloadJSONObject = null;
-			
+			String motherCommandCode=null;
 			while(keepRunning){
 				
-				
+				motherCommandCode=null;
 				command=null;
+				commandCode="";
 				//
 				// get the command from the database
 				//
@@ -92,17 +94,35 @@ class MappedBusThread extends Thread{
 				dataPayloadJSONObject = null;
 				if(aCommandRequest!=null){
 					command = aCommandRequest.getCommand();
-					dataPayload = aCommandRequest.getDataPayload();
-					logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
+					commandCode = aCommandRequest.getCommandCode();
+					try {
+						motherCommandCode = hypothalamus.motherMicroController.getCommandCode();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 					
-					if(dataPayload!=null && !dataPayload.equals("")){
-						try {
-							dataPayloadJSONObject = new JSONObject(dataPayload);
-						} catch (JSONException e) {
-							// TODO Auto-generated catch block
-							logger.warn(Utils.getStringException(e));
+					if(motherCommandCode==null || commandCode==null || !motherCommandCode.equals(commandCode)) {
+						//
+						// if we are here, then something was wrong with either the code coming
+						// from the mother, or an invalid code from the originator
+						//
+						hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId());
+						aCommandRequest=null;
+					}else {
+						dataPayload = aCommandRequest.getDataPayload();
+						logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
+						
+						if(dataPayload!=null && !dataPayload.equals("")){
+							try {
+								dataPayloadJSONObject = new JSONObject(dataPayload);
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								logger.warn(Utils.getStringException(e));
+							}
 						}
 					}
+					
 				}
 				
 				
@@ -315,15 +335,18 @@ class MappedBusThread extends Thread{
 									// token 0 is the word fault
 									// token 1 is the type f mutation
 									// token 2 is the name of the mutation to be executed
-									// token 3 is the payload for the command about the fault
-
+									// token 3 is the commandCode for the command about the fault
+									// token 4 is the payload for the command about the fault
+									
+									
 									tokens = inputLine.split("#");
 									String mutationType=tokens[1];
 									command=tokens[2];
 									//password = tokens[3];
-									String faultDataTarget = tokens[3];
+									commandCode = tokens[3];
+									String faultDataTarget = tokens[4];
 									String faultData = "";
-									if(tokens.length>4)faultData=tokens[4];
+									if(tokens.length>5)faultData=tokens[5];
 									logger.info("line 546 faultDataTarget=" + faultDataTarget + " faultData="+ faultData);
 
 									hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_PULSE_STATUS_INFO, inputLine);
@@ -374,7 +397,7 @@ class MappedBusThread extends Thread{
 									//
 									// create the commandRequest
 									//
-									int id = hypothalamus.aDBManager.requestCommandToExecute(command,dataPayloadJSONObject.toString());	
+									int id = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString());	
 									logger.debug("Received Fault, mutationType:" + mutationType + " command:" + command + " commandRquestId=" + id);
 
 
@@ -393,15 +416,16 @@ class MappedBusThread extends Thread{
 									//
 									// token 0 is the word TimerFinished
 									// token 1 is the name of the mutation to be executed
-
-									// token 2 is the econds the timer run for the command about the fault
+									// token 2 is the commandCode
+									// token 3 is the econds the timer run for the command about the fault
 									logger.debug("line 612 inputLine=" + inputLine);
 
 									tokens = inputLine.split("#");
 									command=tokens[1];
-									int secondsRunning = Integer.parseInt(tokens[2]);
-									String extraData = tokens[3];
-									String updatetDataTarget = tokens[4];
+									command=tokens[2];
+									int secondsRunning = Integer.parseInt(tokens[3]);
+									String extraData = tokens[4];
+									String updatetDataTarget = tokens[5];
 									logger.debug("line 617 command=" + command + " secondsRunning=" + secondsRunning + " extraData="+ extraData + " updatetDataTarget=" + updatetDataTarget);
 
 
@@ -433,7 +457,7 @@ class MappedBusThread extends Thread{
 									//
 									// create the commandRequest
 									//
-									int id = hypothalamus.aDBManager.requestCommandToExecute(command, dataPayloadJSONObject.toString());	
+									int id = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString());	
 									logger.debug("line 650 Received Timer Ended,  command:" + command + " commandRquestId=" + id);
 								}else {
 									logger.debug("input line not recognized");

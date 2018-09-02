@@ -26,6 +26,7 @@ import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.exception.SerialPortCommunicationException;
 import com.teleonome.framework.microcontroller.MicroController;
+import com.teleonome.framework.microcontroller.MotherMicroController;
 import com.teleonome.framework.utils.Utils;
 
 import gnu.io.CommPortIdentifier;
@@ -33,7 +34,7 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
-public class GNUArduinoUno extends MicroController implements SerialPortEventListener {
+public class GNUArduinoUno extends MotherMicroController implements SerialPortEventListener {
 
 	Logger logger;
 	String SerialPortID = "/dev/ttyAMA0";
@@ -236,6 +237,26 @@ public class GNUArduinoUno extends MicroController implements SerialPortEventLis
 	public void serialEvent(SerialPortEvent arg0) {
 		// TODO Auto-generated method stub
 		//logger.debug("serialEvent received " + arg0.getEventType() );
+	}
+
+
+	@Override
+	public String getCommandCode() throws IOException {
+		// TODO Auto-generated method stub
+		output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
+		String actuatorCommand = "GetCommandCode";
+		output.write(actuatorCommand,0,actuatorCommand.length());
+		//serialPortOutputStream.write( actuatorCommand.getBytes() );
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		output.flush();
+		input = new GNUArduinoReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())));
+		String inputLine = input.readLine();
+		return inputLine;
 	}
 	
 

@@ -51,6 +51,7 @@ import com.teleonome.framework.exception.InvalidMutation;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.exception.MissingDenomeException;
 import com.teleonome.framework.microcontroller.MicroController;
+import com.teleonome.framework.microcontroller.MotherMicroController;
 import com.teleonome.framework.mnemosyne.MnemosyneManager;
 import com.teleonome.framework.persistence.PostgresqlPersistenceManager;
 import com.teleonome.framework.process.DiscoverTeleonoms;
@@ -68,7 +69,7 @@ public abstract class Hypothalamus {
 	public Vector teleonomesToReconnect =new Vector();
 	SimpleDateFormat simpleFormatter = new SimpleDateFormat("dd/MM/yy HH:mm");
 	SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
-	MicroController motherMicroController=null;
+	MotherMicroController motherMicroController=null;
 	String mqttBrokerAddress = "tcp://localhost:1883";
     String mqttClientId = TeleonomeConstants.PROCESS_HYPOTHALAMUS;
     MemoryPersistence persistence = new MemoryPersistence();
@@ -83,11 +84,14 @@ public abstract class Hypothalamus {
 	 * end f variables configure via gui
 	 */
 	DecimalFormat decimalFormat = new DecimalFormat("###.##");
-	String ipToBindToZeroMQ="";
+	String exoZeroNetworkIpAddress="";
+	String endoZeroNetworkIpAddress="";
 	
 	public MnemosyneManager aMnemosyneManager=null;
 	Socket exoZeroPublisher=null;
-	
+	boolean exoZeroNetworkActive=false;
+	Socket endoZeroPublisher=null;
+	boolean endoZeroNetworkActive=false;
 	int currentPulseInMilliSeconds=0;
 	int basePulseInMilliSeconds=60;
 	boolean actuatorStatus=true;
@@ -96,6 +100,7 @@ public abstract class Hypothalamus {
 	public Socket subscriber;
 
 	public Context exoZeroContext=null;
+	public Context endoZeroContext=null;
 	public DiscoverTeleonoms aDiscoverTeleonoms=null;
 	public Hashtable subscriberList = new Hashtable();
 	public Hashtable subscriberListByName = new Hashtable();
@@ -242,7 +247,7 @@ public abstract class Hypothalamus {
 					
 					IsMother = aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(microcontrollerJSONObject, TeleonomeConstants.DENEWORD_MOTHER_MICROCONTROLER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					if(IsMother!=null && IsMother instanceof Boolean && ((Boolean)IsMother).booleanValue()) {
-						motherMicroController = aMicroController;
+						motherMicroController = (MotherMicroController) aMicroController;
 						logger.debug("Found Mother=" + aMicroControllerName );
 					}
 
@@ -409,7 +414,7 @@ public abstract class Hypothalamus {
 		}
 	}
 	protected void stopExoZeroPublisher() {
-		boolean unbindedOk = exoZeroPublisher.unbind("tcp://" + ipToBindToZeroMQ + ":5563");
+		boolean unbindedOk = exoZeroPublisher.unbind("tcp://" + exoZeroNetworkIpAddress + ":5563");
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
@@ -419,24 +424,69 @@ public abstract class Hypothalamus {
 		logger.info("unbinding exozero publisher returns " + unbindedOk);
 	}
 	
+	protected void stopEndoZeroPublisher() {
+		boolean unbindedOk = endoZeroPublisher.unbind("tcp://" + endoZeroNetworkIpAddress + ":5563");
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}        
+		logger.info("unbinding endozero publisher returns " + unbindedOk);
+	}
+	
+	public boolean isExoZeroNetworkActive() {
+		return exoZeroNetworkActive;
+	}
+	
+	public boolean isEndoZeroNetworkActive() {
+		return endoZeroNetworkActive;
+	}
+	
+	
+	
 	protected void startExoZeroPublisher() {
 		// TODO Auto-generated method stub
-		
-		exoZeroPublisher = exoZeroContext.socket(ZMQ.PUB);
-		exoZeroPublisher.setHWM(1);
-		
 		try {
-			ipToBindToZeroMQ = Utils.getIpAddressForNetworkMode().getHostAddress();
+			InetAddress exoZeroInetAddress = Utils.getExoZeroNetworkAddress();
+			//
+			// if the teleonome has only one network card and it is set 
+			// to host, then exoZeroInetAddress will be null
+			if(exoZeroInetAddress!=null) {
+				exoZeroPublisher = exoZeroContext.socket(ZMQ.PUB);
+				exoZeroPublisher.setHWM(1);
+				exoZeroNetworkIpAddress = exoZeroInetAddress.getHostAddress();
+				logger.info("binding zeromq to " + exoZeroNetworkIpAddress);
+				exoZeroPublisher.bind("tcp://" + exoZeroNetworkIpAddress + ":5563");
+				exoZeroNetworkActive=true;
+			}
 		} catch (SocketException | UnknownHostException e2) {
 			// TODO Auto-generated catch block
-			logger.warn(Utils.getStringException(e2));
-			
+			logger.warn(Utils.getStringException(e2));	
 		}
-		logger.info("binding zeromq to " + ipToBindToZeroMQ);
-		exoZeroPublisher.bind("tcp://" + ipToBindToZeroMQ + ":5563");
-		
 	}
 
+	protected void startEndoZeroPublisher() {
+		// TODO Auto-generated method stub
+		try {
+			InetAddress endoZeroInetAddress = Utils.getEndoZeroNetworkAddress();
+			//
+			// if the teleonome has only one network card and it is set 
+			// to network, then endooZeroInetAddress will be null
+			if(endoZeroInetAddress!=null) {
+				endoZeroPublisher = endoZeroContext.socket(ZMQ.PUB);
+				endoZeroPublisher.setHWM(1);
+				endoZeroNetworkIpAddress = endoZeroInetAddress.getHostAddress();
+				logger.info("binding zeromq to " + endoZeroNetworkIpAddress);
+				endoZeroPublisher.bind("tcp://" + endoZeroNetworkIpAddress + ":5563");
+				endoZeroNetworkActive=true;
+			}
+		} catch (SocketException | UnknownHostException e2) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e2));	
+		}
+	}
+	
 	public DenomeManager getDenomeManager() {
 		return aDenomeManager;
 	}

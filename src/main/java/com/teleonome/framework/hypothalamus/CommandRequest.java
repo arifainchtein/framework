@@ -9,6 +9,8 @@ public class CommandRequest {
 	private String command;
 	private String status;
 	private String dataPayload="";
+	private String commandCode;
+	
 	
 	public int getId() {
 		return id;
@@ -45,6 +47,12 @@ public class CommandRequest {
 	}
 	public void setDataPayload(String dataPayload) {
 		this.dataPayload = dataPayload;
+	}
+	public String getCommandCode() {
+		return commandCode;
+	}
+	public void setCommandCode(String commandCode) {
+		this.commandCode = commandCode;
 	}
 
 

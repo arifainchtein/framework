@@ -614,11 +614,7 @@ public class PulseThread extends Thread{
 				//FileUtils.writeByteArrayToFile(new File(Utils.getLocalDirectory() + "EndPulse.info"), (""+System.currentTimeMillis()).getBytes());
 				//logger.debug("wrote EndPulse");
 
-				//
-				// store and publish the pulse
-				//
-				anHypothalamus.exoZeroPublisher.sendMore ("Status");
-				logger.debug("published  sendmore to zeromq, about to generate pulse");
+				
 
 				JSONObject jsonMessage = this.aDenomeManager.generatePulse();
 				logger.debug("generated pulse");
@@ -635,9 +631,14 @@ public class PulseThread extends Thread{
 				long  startStoringAndPublishing= System.currentTimeMillis();
 				//
 				// notify both buses
+				//
+				if(anHypothalamus.isExoZeroNetworkActive()) {
+					anHypothalamus.exoZeroPublisher.sendMore ("Status");
+					logger.debug("published  sendmore to zeromq, about to generate pulse");
+					anHypothalamus.exoZeroPublisher.send(pulse); 
+					logger.debug("published  pulse to zeromq");
+				}
 				
-				anHypothalamus.exoZeroPublisher.send(pulse); 
-				logger.debug("published  pulse to zeromq");
 				byte[] pulseBytes = StringCompressor.compress(pulse);
 				logger.warn("published  pulse to zeromq, byte size=" + pulseBytes.length);
 				//JSONObject purpose = aDenomeManager.getDeneByPointer( TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA, TeleonomeConstants.DENE_VITAL);
@@ -921,6 +922,9 @@ public class PulseThread extends Thread{
 										}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_SET_MICROCONTROLLER_RTC)){
 											Calendar cal = Calendar.getInstance();
 											actuatorCommand="SetClock#" + cal.get(Calendar.YEAR) + "#" + (cal.get(Calendar.MONTH)+1) + "#" + cal.get(Calendar.DATE) + "#" + cal.get(Calendar.HOUR_OF_DAY) + "#" + cal.get(Calendar.MINUTE) + "#"  + cal.get(Calendar.SECOND);
+										}else if(actuatorCommand.equals(TeleonomeConstants.COMMAND_VERIFY_FILE_CREATION_DATE)){
+											Calendar cal = Calendar.getInstance();
+											actuatorCommand="SetClock#" + cal.get(Calendar.YEAR) + "#" + (cal.get(Calendar.MONTH)+1) + "#" + cal.get(Calendar.DATE) + "#" + cal.get(Calendar.HOUR_OF_DAY) + "#" + cal.get(Calendar.MINUTE) + "#"  + cal.get(Calendar.SECOND);
 										}else{
 											actuatorCommand = Utils.renderCommand(actuatorCommand);
 										}
@@ -1040,9 +1044,10 @@ public class PulseThread extends Thread{
 									// we need to create a Command that will be executed
 									// after the pulse, during the CommandRequests
 									commandToExecute = entry.getKey();
-
+									String commandCode = anHypothalamus.motherMicroController.getCommandCode();
+									
 									payload="";
-									int id = anHypothalamus.aDBManager.requestCommandToExecute(commandToExecute, payload);
+									int id = anHypothalamus.aDBManager.requestCommandToExecute(commandToExecute,commandCode, payload);
 									logger.info("line 2442, stored post pulse,commandToExecute=" + commandToExecute + " id=" + id );
 								}{
 
