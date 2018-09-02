@@ -1,14 +1,19 @@
 package com.teleonome.framework.microcontroller;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.Writer;
 
 public class PlainWriter extends BufferedWriter{
 
-	public PlainWriter(Writer out) {
+	PlainReader plainReader;
+	
+	public PlainWriter(Writer out, PlainReader p) {
 		super(out);
-		// TODO Auto-generated constructor stub
+		plainReader=p;
 	}
 	
-
+	public void write(String command, int off, int len) throws IOException {
+		plainReader.setCurrentCommand(command);
+	}
 }

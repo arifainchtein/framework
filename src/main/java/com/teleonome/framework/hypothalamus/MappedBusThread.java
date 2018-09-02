@@ -99,7 +99,7 @@ class MappedBusThread extends Thread{
 						motherCommandCode = hypothalamus.motherMicroController.getCommandCode();
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						logger.warn(Utils.getStringException(e1));
 					}
 					
 					if(motherCommandCode==null || commandCode==null || !motherCommandCode.equals(commandCode)) {

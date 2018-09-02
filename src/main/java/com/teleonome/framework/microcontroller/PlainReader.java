@@ -17,22 +17,33 @@ public class PlainReader extends BufferedReader{
 	int maximum=2;
 	int value=0;
 	StringWriter stringWriter;
+	String currentCommand="";
 	public PlainReader(Reader in, StringWriter s) {
 		super(in);
 		stringWriter=s;
 	}
 
-	public String readLine(){
-		
-		if(counter<maximum){
-			counter++;
-		}else{
-			counter=0;
-			if(value==0)value=1;
-			else value=0;
-		}
-		//System.out.println("counter="+ counter + " value" + value);
-		return value + "#";
+	public void setCurrentCommand(String command) {
+		// TODO Auto-generated method stub
+		currentCommand=command;
+	}
 
+	public String readLine(){
+
+		if(currentCommand.contains("PulseStart")) {
+			return "Ok-PulseStart";
+		}else if(currentCommand.contains("PulseFinished")) {
+			return "Ok-PulseFinished";
+		}else {
+			if(counter<maximum){
+				counter++;
+			}else{
+				counter=0;
+				if(value==0)value=1;
+				else value=0;
+			}
+			//System.out.println("counter="+ counter + " value" + value);
+			return value + "#";
+		}
 	}
 }
