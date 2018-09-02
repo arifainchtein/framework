@@ -138,7 +138,7 @@ public class MethodTester {
 			double recognisedBatteryNetToday = Double.parseDouble(recognizedText.substring(0, 3))/10;
 			logger.debug("recgnized SelectronicBatteryNetToday=" + recognisedBatteryNetToday);
 			
-			
+			 
 			//
 			// code to extract and recognized the Battery Net Today
 			//
