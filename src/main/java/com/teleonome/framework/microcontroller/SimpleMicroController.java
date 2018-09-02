@@ -32,6 +32,7 @@ public class SimpleMicroController extends MotherMicroController {
 	StringWriter sw = new StringWriter();
 	String  dataString="dataString";
 	PlainReader plainReader = new PlainReader(new StringReader(dataString), sw);
+	PlainWriter plainWriter = new PlainWriter(sw, plainReader);
 	Logger logger = Logger.getLogger(getClass());
 	
 	public SimpleMicroController(DenomeManager d, String n) {
@@ -57,12 +58,10 @@ public class SimpleMicroController extends MotherMicroController {
 	@Override
 	public BufferedWriter getWriter() throws IOException {
 		// TODO Auto-generated method stub
-		 
-         BufferedWriter stringWriter = new BufferedWriter(sw) ;
-         return stringWriter;
-
+		return plainWriter;
 	}
  
+	
 	@Override
 	public String getCommandCode()  throws IOException {
 		String toReturn="";
