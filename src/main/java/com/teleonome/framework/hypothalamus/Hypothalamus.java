@@ -142,7 +142,8 @@ public abstract class Hypothalamus {
 		try {
 			exoZeroContext = ZMQ.context(1);
 			startExoZeroPublisher();
-			
+			endoZeroContext = ZMQ.context(1);
+			startEndoZeroPublisher();
 			
            connectToHeart();
             
