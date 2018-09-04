@@ -1481,14 +1481,16 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	public JSONObject markCommandAsBadCommandCode(int id){
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
-		String sql = "update CommandRequests set executedOn="+System.currentTimeMillis()+", status='"+ TeleonomeConstants.COMMAND_REQUEST_INVALID_PASSWORD +"'   where id=? returning  createdon, executedon, command, status, commandcode";
+		String sql = "update CommandRequests set executedOn=?, status=?   where id=? returning  createdon, executedon, command, status, commandcode";
 		ResultSet rs=null;
 		JSONObject toReturn=new JSONObject();
 		toReturn.put("id", id);
 		try {
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(sql);
-			preparedStatement.setInt(1, id);
+			preparedStatement.setLong(1, System.currentTimeMillis());
+			preparedStatement.setString(2,  TeleonomeConstants.COMMAND_REQUEST_EXECUTED );
+			preparedStatement.setInt(3, id);
 			
 			rs = preparedStatement.executeQuery(sql);
 			while(rs.next()){
@@ -1527,14 +1529,17 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	public JSONObject markCommandCompleted(int id){
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
-		String sql = "update CommandRequests set executedOn="+System.currentTimeMillis()+", status='"+ TeleonomeConstants.COMMAND_REQUEST_EXECUTED +"'   where id=? returning  createdon, executedon, command, status, commandcode";
+		String sql = "update CommandRequests set executedOn=?, status=?   where id=? returning  createdon, executedon, command, status, commandcode";
 		ResultSet rs=null;
 		JSONObject toReturn=new JSONObject();
 		toReturn.put("id", id);
 		try {
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(sql);
-			preparedStatement.setInt(1, id);
+			preparedStatement.setLong(1, System.currentTimeMillis());
+			preparedStatement.setString(2,  TeleonomeConstants.COMMAND_REQUEST_EXECUTED );
+			preparedStatement.setInt(3, id);
+			
 			rs = preparedStatement.executeQuery(sql);
 			while(rs.next()){
 				
