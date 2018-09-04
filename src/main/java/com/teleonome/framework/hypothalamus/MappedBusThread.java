@@ -82,11 +82,13 @@ class MappedBusThread extends Thread{
 			CommandRequest aCommandRequest=null ;
 			JSONObject dataPayloadJSONObject = null;
 			String motherCommandCode=null;
+			boolean goodCommandCode=false;
 			while(keepRunning){
 				
 				motherCommandCode=null;
 				command=null;
 				commandCode="";
+				goodCommandCode=false;
 				//
 				// get the command from the database
 				//
@@ -113,7 +115,7 @@ class MappedBusThread extends Thread{
 					}else {
 						dataPayload = aCommandRequest.getDataPayload();
 						logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
-						
+						goodCommandCode=true;
 						if(dataPayload!=null && !dataPayload.equals("")){
 							try {
 								dataPayloadJSONObject = new JSONObject(dataPayload);
@@ -484,7 +486,7 @@ class MappedBusThread extends Thread{
 				//}
 				//
 				
-				if(aCommandRequest!=null && command!=null && !command.equals("")){
+				if(aCommandRequest!=null && command!=null && !command.equals("")  && goodCommandCode){
 					logger.debug("line 673about to execute aCommandRequest=" + aCommandRequest + " command " + command + " dataPayloadJSONObject=" + dataPayloadJSONObject);
 						//executeCommand( aMicroController, input,  output,  command,  aCommandRequest,  dataPayloadJSONObject );
 					executeCommand(  command,  aCommandRequest,  dataPayloadJSONObject );
