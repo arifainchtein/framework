@@ -1492,7 +1492,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			preparedStatement.setString(2,  TeleonomeConstants.COMMAND_REQUEST_EXECUTED );
 			preparedStatement.setInt(3, id);
 			
-			rs = preparedStatement.executeQuery(sql);
+			rs = preparedStatement.executeQuery();
 			while(rs.next()){
 				
 				long createdon = rs.getLong(1);
@@ -1540,7 +1540,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			preparedStatement.setString(2,  TeleonomeConstants.COMMAND_REQUEST_EXECUTED );
 			preparedStatement.setInt(3, id);
 			
-			rs = preparedStatement.executeQuery(sql);
+			rs = preparedStatement.executeQuery();
 			while(rs.next()){
 				
 				long createdon = rs.getLong(1);
