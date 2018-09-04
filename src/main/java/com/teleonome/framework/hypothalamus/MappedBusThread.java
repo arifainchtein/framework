@@ -102,7 +102,7 @@ class MappedBusThread extends Thread{
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e1));
-					}
+					} 
 					logger.debug("commandCode=" + commandCode + " motherCommandCode=" + motherCommandCode);
 					if(motherCommandCode==null || commandCode==null || commandCode.equals("") || !motherCommandCode.equals(commandCode)) {
 						//
@@ -487,7 +487,7 @@ class MappedBusThread extends Thread{
 				//
 				
 				if(aCommandRequest!=null && command!=null && !command.equals("")  && goodCommandCode){
-					logger.debug("line 673about to execute aCommandRequest=" + aCommandRequest + " command " + command + " dataPayloadJSONObject=" + dataPayloadJSONObject);
+					logger.debug("line 674about to execute aCommandRequest=" + aCommandRequest + " command " + command + " dataPayloadJSONObject=" + dataPayloadJSONObject);
 						//executeCommand( aMicroController, input,  output,  command,  aCommandRequest,  dataPayloadJSONObject );
 					executeCommand(  command,  aCommandRequest,  dataPayloadJSONObject );
 				
