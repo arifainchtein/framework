@@ -111,7 +111,8 @@ class MappedBusThread extends Thread{
 						//
 						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId());
 						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
-						
+						logger.debug("commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
+						commandCode=null;
 					}else {
 						dataPayload = aCommandRequest.getDataPayload();
 						logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
