@@ -101,8 +101,8 @@ class MappedBusThread extends Thread{
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e1));
 					}
-					
-					if(motherCommandCode==null || commandCode==null || !motherCommandCode.equals(commandCode)) {
+					logger.debug("commandCode=" + commandCode + " motherCommandCode=" + motherCommandCode);
+					if(motherCommandCode==null || commandCode==null || commandCode.equals("") || !motherCommandCode.equals(commandCode)) {
 						//
 						// if we are here, then something was wrong with either the code coming
 						// from the mother, or an invalid code from the originator
