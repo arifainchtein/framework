@@ -107,8 +107,9 @@ class MappedBusThread extends Thread{
 						// if we are here, then something was wrong with either the code coming
 						// from the mother, or an invalid code from the originator
 						//
-						hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId());
-						aCommandRequest=null;
+						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId());
+						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
+						
 					}else {
 						dataPayload = aCommandRequest.getDataPayload();
 						logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
@@ -487,6 +488,7 @@ class MappedBusThread extends Thread{
 					logger.debug("line 673about to execute aCommandRequest=" + aCommandRequest + " command " + command + " dataPayloadJSONObject=" + dataPayloadJSONObject);
 						//executeCommand( aMicroController, input,  output,  command,  aCommandRequest,  dataPayloadJSONObject );
 					executeCommand(  command,  aCommandRequest,  dataPayloadJSONObject );
+				
 					hypothalamus.mutationIsInEffect=false;
 				}
 				
@@ -509,8 +511,7 @@ class MappedBusThread extends Thread{
 			}
 		}
 		
-		//public void executeCommand(MicroController aMicroController1,BufferedReader input, BufferedWriter output1, String command, CommandRequest aCommandRequest, JSONObject dataPayloadJSONObject ){
-		public void executeCommand( String command, CommandRequest aCommandRequest, JSONObject dataPayloadJSONObject ){
+			public void executeCommand( String command, CommandRequest aCommandRequest, JSONObject dataPayloadJSONObject ){
 			try {
 				
 				logger.debug("pulse is executing command1=" + command );
@@ -642,10 +643,8 @@ class MappedBusThread extends Thread{
 					//
 					// and update the database
 					logger.debug("about to mark commandrequest as cmpleted, " + aCommandRequest.getId());
-					hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
-					hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, ""+aCommandRequest.getId());
-
-			
+					JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
+					hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
 					//
 					// finally, if the comand was to reboot or shutdown
 					// changing mode, execute the reboot or shutdown

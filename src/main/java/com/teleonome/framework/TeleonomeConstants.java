@@ -74,12 +74,6 @@ public class TeleonomeConstants {
 	public static final String TELEONOME_IDENTITY_SELF = "Self";
 	public static final String TELEONOME_IDENTITY_ORGANISM = "Organism";
 	
-	//
-	// the data when sending a commandrequest
-	//
-	public static final String COMMAND_CODE="CommandCode";
-	public static final String COMMAND_REQUEST_EXECUTION_OK="Command Request Succesfull";
-	public static final String COMMAND_REQUEST_INVALID_PASSWORD="Invalid Password";
 	
 	
 	//
@@ -567,6 +561,12 @@ public class TeleonomeConstants {
 	public static final String COMMAND_REQUEST_NOT_EXECUTED="Not Executed";
 	public static final String COMMAND_REQUEST_EXECUTED="Executed";
 	public static final String COMMAND_REQUEST_SKIPPED_AT_INIT="Skipped at init";
+	public static final String COMMAND_EXECUTED_ON="ExecutedOn";
+	public static final String COMMAND_EXECUTION_STATUS="Status";
+	public static final String COMMAND_CODE="CommandCode";
+	public static final String COMMAND_REQUEST_EXECUTION_OK="Command Request Succesfull";
+	public static final String COMMAND_REQUEST_INVALID_PASSWORD="Invalid Password";
+	
 	
 	//
 	// the index for the front end

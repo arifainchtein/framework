@@ -2852,20 +2852,18 @@ public class DenomeManager {
 		return aDBManager.markAllNonExecutedAsSkipped();
 	}
 	
-	public void markCommandAsBadCommandCode(int id){
-		aDBManager.markCommandAsBadCommandCode( id);
+	public JSONObject markCommandAsBadCommandCode(int id){
+		return aDBManager.markCommandAsBadCommandCode( id);
 	}
 	
-	public void markCommandCompleted(int id){
-		aDBManager.markCommandCompleted( id);
+	public JSONObject markCommandCompleted(int id){
+		return aDBManager.markCommandCompleted( id);
 	}
 	public CommandRequest getNextCommandToExecute(){
 		return aDBManager.getNextCommandToExecute();
 	}
 
-	public void getNextCommandToExecute(int id){
-		aDBManager.markCommandCompleted(id);
-	}
+	
 
 	public JSONObject getDenomicElementByIdentity(Identity identity){
 

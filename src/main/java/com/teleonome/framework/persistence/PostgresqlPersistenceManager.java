@@ -1393,22 +1393,29 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 	}
 
-	public boolean isCommandCompleted(int id){
-		boolean toReturn=false;
+	public JSONObject isCommandCompleted(int id){
+		
 		Connection connection = null;;
 		Statement statement = null;
-		String sql = "select status from CommandRequests where id="+ id;
+		String sql = "select executedOn,status from CommandRequests where id="+ id;
 		ResultSet rs = null;
-
+		JSONObject toReturn = new JSONObject();
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
 			rs = statement.executeQuery(sql);
 			CommandRequest aCommandRequest = new CommandRequest();
+			String status;
+			long executedOn;
 			while(rs.next()){
-				if(rs.getString(1).equals(TeleonomeConstants.COMMAND_REQUEST_EXECUTED)){
-					toReturn= true;
+				executedOn=rs.getLong(1);
+				status=rs.getString(2);
+				
+				if(executedOn>0) {
+					toReturn.put(TeleonomeConstants.COMMAND_EXECUTED_ON, executedOn);
+					toReturn.put(TeleonomeConstants.COMMAND_EXECUTION_STATUS, status);
 				}
+				
 			}
 
 		} catch (SQLException e) {
@@ -1471,23 +1478,42 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return aCommandRequest;
 	}
 
-	public boolean markCommandAsBadCommandCode(int id){
+	public JSONObject markCommandAsBadCommandCode(int id){
 		Connection connection = null;
-		Statement statement = null;
-		String sql = "update CommandRequests set executedOn="+System.currentTimeMillis()+", status='"+ TeleonomeConstants.COMMAND_REQUEST_INVALID_PASSWORD +"'   where id=" + id;
-
-		boolean toReturn=false;
+		PreparedStatement preparedStatement = null;
+		String sql = "update CommandRequests set executedOn="+System.currentTimeMillis()+", status='"+ TeleonomeConstants.COMMAND_REQUEST_INVALID_PASSWORD +"'   where id=? returning  createdon, executedon, command, status, commandcode";
+		ResultSet rs=null;
+		JSONObject toReturn=new JSONObject();
+		toReturn.put("id", id);
 		try {
 			connection = connectionPool.getConnection();
-			statement = connection.createStatement();
-			statement.executeUpdate(sql);
-			toReturn=true;
+			preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setInt(1, id);
+			
+			rs = preparedStatement.executeQuery(sql);
+			while(rs.next()){
+				
+				long createdon = rs.getLong(1);
+				long executedon = rs.getLong(2);
+				String command = rs.getString(3);
+				String status = rs.getString(4);
+				String commandcode = rs.getString(5);
+				
+				
+				toReturn.put("Createdon", createdon);
+				toReturn.put("Executedon", executedon);
+				toReturn.put("Command", command);
+				toReturn.put("Status", status);
+				toReturn.put("CommandCode", commandcode);
+			}
+			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.debug(Utils.getStringException(e));
 		}finally{
 			try {
-				if(statement!=null)statement.close();
+				if(rs!=null)rs.close();
+				if(preparedStatement!=null)preparedStatement.close();
 				if(connection!=null)connectionPool.closeConnection(connection);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -1498,23 +1524,41 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}	
 	
-	public boolean markCommandCompleted(int id){
+	public JSONObject markCommandCompleted(int id){
 		Connection connection = null;
-		Statement statement = null;
-		String sql = "update CommandRequests set executedOn="+System.currentTimeMillis()+", status='"+ TeleonomeConstants.COMMAND_REQUEST_EXECUTED +"'   where id=" + id;
-
-		boolean toReturn=false;
+		PreparedStatement preparedStatement = null;
+		String sql = "update CommandRequests set executedOn="+System.currentTimeMillis()+", status='"+ TeleonomeConstants.COMMAND_REQUEST_EXECUTED +"'   where id=? returning  createdon, executedon, command, status, commandcode";
+		ResultSet rs=null;
+		JSONObject toReturn=new JSONObject();
+		toReturn.put("id", id);
 		try {
 			connection = connectionPool.getConnection();
-			statement = connection.createStatement();
-			statement.executeUpdate(sql);
-			toReturn=true;
+			preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setInt(1, id);
+			rs = preparedStatement.executeQuery(sql);
+			while(rs.next()){
+				
+				long createdon = rs.getLong(1);
+				long executedon = rs.getLong(2);
+				String command = rs.getString(3);
+				String status = rs.getString(4);
+				String commandcode = rs.getString(5);
+				
+				
+				toReturn.put("Createdon", createdon);
+				toReturn.put("Executedon", executedon);
+				toReturn.put("Command", command);
+				toReturn.put("Status", status);
+				toReturn.put("CommandCode", commandcode);
+			}
+			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.debug(Utils.getStringException(e));
 		}finally{
 			try {
-				if(statement!=null)statement.close();
+				if(rs!=null)rs.close();
+				if(preparedStatement!=null)preparedStatement.close();
 				if(connection!=null)connectionPool.closeConnection(connection);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
