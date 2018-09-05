@@ -1495,6 +1495,55 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return aCommandRequest;
 	}
 
+	public JSONArray getAllCommandRequests(){
+
+		Connection connection = null;
+		Statement statement = null;
+		String sql = "select id,createdon, executedon,command, status,payload from CommandRequests  order by createdOn desc";
+		ResultSet rs = null;
+		CommandRequest aCommandRequest = new CommandRequest();
+
+		JSONArray toReturn = new JSONArray();
+		JSONObject o;
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(sql);
+			
+			while(rs.next()){
+				int id = rs.getInt(1);
+				long createdon = rs.getLong(2);
+				long executedon = rs.getLong(3);
+				String command = rs.getString(4);
+				String status = rs.getString(5);
+				String payload = rs.getString(6);
+				
+				o = new JSONObject();
+				o.put("id", id);
+				o.put("Createdon", createdon);
+				o.put("Executedon", executedon);
+				o.put("Command", command);
+				o.put("Status", status);
+				o.put("Payload", payload);
+				toReturn.put(o);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		}finally{
+			try {
+				if(rs!=null)rs.close();
+				if(statement!=null)statement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+
+		}
+		return toReturn;
+	}
+	
 	public JSONObject markCommandAsBadCommandCode(int id){
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
