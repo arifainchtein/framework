@@ -519,7 +519,7 @@ class MappedBusThread extends Thread{
 				
 				logger.debug("pulse is executing command1=" + command );
 
-				if(command.equals(TeleonomeConstants.COMMAND_SHUTDOWN)){
+				if(command.equals(TeleonomeConstants.COMMAND_SHUTDOWN) || command.equals(TeleonomeConstants.COMMAND_SHUTDOWN_TEXT)){
 					logger.debug("receive from command shuttind down");
 
 					hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
@@ -538,7 +538,7 @@ class MappedBusThread extends Thread{
 					Runtime.getRuntime().exec("sudo shutdown -h now");
 
 
-				}else if(command.equals(TeleonomeConstants.COMMAND_REBOOT)){
+				}else if(command.equals(TeleonomeConstants.COMMAND_REBOOT) || command.equals(TeleonomeConstants.COMMAND_REBOOT_TEXT)){
 					logger.debug("receive from command reboot");
 
 					hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
