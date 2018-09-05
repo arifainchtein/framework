@@ -1337,7 +1337,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
-			String sql = "update CommandRequests set status='"+ TeleonomeConstants.COMMAND_REQUEST_SKIPPED_AT_INIT +"'   where status='" + TeleonomeConstants.COMMAND_REQUEST_NOT_EXECUTED +"'";
+			String sql = "update CommandRequests set status='"+ TeleonomeConstants.COMMAND_REQUEST_SKIPPED_AT_INIT +"'   where status ='"+ TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION +"' or status='" + TeleonomeConstants.COMMAND_REQUEST_NOT_EXECUTED +"'";
 			statement.executeUpdate(sql);
 			toReturn= true;
 		} catch (SQLException e) {
@@ -1456,7 +1456,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 		Connection connection = null;
 		Statement statement = null;
-		String sql = "select id,command,commandCode, payload from CommandRequests where status='"+ TeleonomeConstants.COMMAND_REQUEST_NOT_EXECUTED +"'  order by createdOn asc limit 1";
+		String sql = "select id,command,commandCode, payload from CommandRequests where status='"+ TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION +"'  order by createdOn asc limit 1";
 		ResultSet rs = null;
 		CommandRequest aCommandRequest = new CommandRequest();
 
