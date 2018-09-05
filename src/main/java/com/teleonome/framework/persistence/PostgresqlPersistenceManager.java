@@ -1356,22 +1356,40 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}	
 
-	public int requestCommandToExecute(String command, String commandCode, String payLoad){
+	public JSONObject requestCommandToExecute(String command, String commandCode, String payLoad){
 		//System.out.println(Utils.generateMethodTrace());
 		int id=-1;
 		Connection connection = null;
-		Statement statement=null;
+		PreparedStatement preparedStatement=null;
 		ResultSet rs=null;
+		JSONObject toReturn=new JSONObject();
+		long createdOn = System.currentTimeMillis();
 		try {
 			connection = connectionPool.getConnection();
-			statement = connection.createStatement();
-			String sql = "insert into CommandRequests (createdOn,command, status, payLoad, commandCode) values ("+ System.currentTimeMillis() + ",'"+ command+"','"+ TeleonomeConstants.COMMAND_REQUEST_NOT_EXECUTED +"','" + payLoad +"','" + commandCode +"') returning id";
-			rs = statement.executeQuery(sql);
+			String sql = "insert into CommandRequests (createdOn,command, status, payLoad, commandCode) values (?,?,?,?,?) returning id";
+			
+			preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setLong(1, createdOn);
+			preparedStatement.setString(2,  command );
+			preparedStatement.setString(3, TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION);
+			preparedStatement.setString(4, payLoad);
+			preparedStatement.setString(5, commandCode);
+			
+			
+			rs = preparedStatement.executeQuery(sql);
 			JSONObject data=null;
 			CommandRequest aCommandRequest = new CommandRequest();
-
+			
+			
+			
 			while(rs.next()){
 				id = rs.getInt(1);
+				toReturn.put("id", id);
+				toReturn.put("Createdon", createdOn);
+				
+				toReturn.put("Command", command);
+				toReturn.put("Status", TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION);
+				toReturn.put("CommandCode", commandCode);
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -1379,7 +1397,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		}finally{
 			try {
 				if(rs!=null)rs.close();
-				if(statement!=null)statement.close();
+				if(preparedStatement!=null)preparedStatement.close();
 				if(connection!=null)connectionPool.closeConnection(connection);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -1389,7 +1407,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		}
 		//System.out.println("erturnign from createcommand id=" + id + " command=" + command);
 
-		return id;
+		return toReturn;
 
 	}
 
