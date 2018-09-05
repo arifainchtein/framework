@@ -83,6 +83,7 @@ class MappedBusThread extends Thread{
 			JSONObject dataPayloadJSONObject = null;
 			String motherCommandCode=null;
 			boolean goodCommandCode=false;
+			String clientIp;
 			while(keepRunning){
 				
 				motherCommandCode=null;
@@ -94,9 +95,11 @@ class MappedBusThread extends Thread{
 				//
 				aCommandRequest = hypothalamus.aDenomeManager.getNextCommandToExecute();
 				dataPayloadJSONObject = null;
+				clientIp="127.0.0.1";
 				if(aCommandRequest!=null){
 					command = aCommandRequest.getCommand();
 					commandCode = aCommandRequest.getCommandCode();
+					clientIp = aCommandRequest.getClientIp();
 					try {
 						motherCommandCode = hypothalamus.motherMicroController.getCommandCode();
 					} catch (IOException e1) {
@@ -401,7 +404,7 @@ class MappedBusThread extends Thread{
 									//
 									// create the commandRequest
 									//
-									JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString());	
+									JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString(), clientIp);	
 									logger.debug("Received Fault, mutationType:" + mutationType + " command:" + command + " commandRquestId=" + commandRequestJSONObject.getInt("id"));;
 
 
@@ -461,7 +464,7 @@ class MappedBusThread extends Thread{
 									//
 									// create the commandRequest
 									//
-									JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString());	
+									JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString(), clientIp);	
 									logger.debug("line 650 Received Timer Ended,  command:" + command + " commandRquestId=" + commandRequestJSONObject.getInt("id"));
 								}else {
 									logger.debug("input line not recognized");

@@ -1356,7 +1356,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}	
 
-	public JSONObject requestCommandToExecute(String command, String commandCode, String payLoad){
+	public JSONObject requestCommandToExecute(String command, String commandCode, String payLoad, String clientIp){
 		//System.out.println(Utils.generateMethodTrace());
 		int id=-1;
 		Connection connection = null;
@@ -1366,7 +1366,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		long createdOn = System.currentTimeMillis();
 		try {
 			connection = connectionPool.getConnection();
-			String sql = "insert into CommandRequests (createdOn,command, status, payLoad, commandCode) values (?,?,?,?,?) returning id";
+			String sql = "insert into CommandRequests (createdOn,command, status, payLoad, commandCode, clientIp) values (?,?,?,?,?,?) returning id";
 			
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setLong(1, createdOn);
@@ -1374,7 +1374,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			preparedStatement.setString(3, TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION);
 			preparedStatement.setString(4, payLoad);
 			preparedStatement.setString(5, commandCode);
-			
+			preparedStatement.setString(6, clientIp);
 			
 			rs = preparedStatement.executeQuery();
 			JSONObject data=null;
@@ -1499,7 +1499,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 		Connection connection = null;
 		Statement statement = null;
-		String sql = "select id,createdon, executedon,command, status,payload from CommandRequests  order by createdOn desc";
+		String sql = "select id,createdon, executedon,command, status,payload, clientIp from CommandRequests  order by createdOn desc";
 		ResultSet rs = null;
 		CommandRequest aCommandRequest = new CommandRequest();
 
@@ -1517,6 +1517,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				String command = rs.getString(4);
 				String status = rs.getString(5);
 				String payload = rs.getString(6);
+				String clientIp = rs.getString(7);
 				
 				o = new JSONObject();
 				o.put("id", id);
@@ -1525,6 +1526,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				o.put("Command", command);
 				o.put("Status", status);
 				o.put("Payload", payload);
+				o.put("ClientIp", clientIp);
 				toReturn.put(o);
 			}
 		} catch (SQLException e) {

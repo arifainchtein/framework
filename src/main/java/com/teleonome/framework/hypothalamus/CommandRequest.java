@@ -10,6 +10,7 @@ public class CommandRequest {
 	private String status;
 	private String dataPayload="";
 	private String commandCode;
+	private String clientIp;
 	
 	
 	public int getId() {
@@ -53,6 +54,12 @@ public class CommandRequest {
 	}
 	public void setCommandCode(String commandCode) {
 		this.commandCode = commandCode;
+	}
+	public String getClientIp() {
+		return clientIp;
+	}
+	public void setClientIp(String clientIp) {
+		this.clientIp = clientIp;
 	}
 
 
