@@ -1376,7 +1376,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			preparedStatement.setString(5, commandCode);
 			
 			
-			rs = preparedStatement.executeQuery(sql);
+			rs = preparedStatement.executeQuery();
 			JSONObject data=null;
 			CommandRequest aCommandRequest = new CommandRequest();
 			
