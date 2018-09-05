@@ -65,7 +65,7 @@ public class SimpleMicroController extends MotherMicroController {
 	@Override
 	public String getCommandCode()  throws IOException {
 		String toReturn="";
-		String unEncodedKey = FileUtils.readFileToString(new File("SecretKey"), "UTF-8");
+		String unEncodedKey = "MyLegoDoor";//FileUtils.readFileToString(new File("SecretKey"), "UTF-8");
 		TOTP totp = new TOTP();
 		try {
 			toReturn = totp.generateCurrentNumberFromUnencodedString(unEncodedKey);
