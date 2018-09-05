@@ -1047,7 +1047,7 @@ public class PulseThread extends Thread{
 									String commandCode = anHypothalamus.motherMicroController.getCommandCode();
 									
 									payload="";
-									JSONObject responseJSON = anHypothalamus.aDBManager.requestCommandToExecute(commandToExecute,commandCode, payload);
+									JSONObject responseJSON = anHypothalamus.aDBManager.requestCommandToExecute(commandToExecute,commandCode, payload, "127.0.0.1");
 									logger.info("line 2442, stored post pulse,commandToExecute=" + commandToExecute + " id=" + responseJSON.getInt("id") );
 								}{
 
