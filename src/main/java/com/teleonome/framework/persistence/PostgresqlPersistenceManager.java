@@ -1386,7 +1386,6 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				id = rs.getInt(1);
 				toReturn.put("id", id);
 				toReturn.put("Createdon", createdOn);
-				
 				toReturn.put("Command", command);
 				toReturn.put("Status", TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION);
 				toReturn.put("CommandCode", commandCode);
