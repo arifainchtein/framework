@@ -22,6 +22,7 @@ import java.time.Month;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -744,19 +745,30 @@ public class Utils {
 		// one as a host and one as part of a network, the inetAddress needs to belong
 		// to the network interface connected to the organism network, otherwise the exozero network
 		// will not receive the pulse
+		int numberOfNetworkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces()).size();
+		
 		
 		for(Enumeration <NetworkInterface> enu = NetworkInterface.getNetworkInterfaces();enu.hasMoreElements();){
 			networkInterface  = enu.nextElement();
 			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
 				inetAddr = (InetAddress)ifaces.nextElement();
-				if(!inetAddr.isLoopbackAddress() && !inetAddr.getHostAddress().equals("172.16.1.1")){
-					if(inetAddr.isSiteLocalAddress()){
-						return inetAddr.getHostAddress();
-					}else{
-						potential=inetAddr;
+				if(numberOfNetworkInterfaces>1) {
+					if(!inetAddr.isLoopbackAddress() && !inetAddr.getHostAddress().equals("172.16.1.1")){
+						if(inetAddr.isSiteLocalAddress()){
+							return inetAddr.getHostAddress();
+						}else{
+							potential=inetAddr;
+						}
+					}
+				}else {
+					if(!inetAddr.isLoopbackAddress()){
+						if(inetAddr.isSiteLocalAddress()){
+							return inetAddr.getHostAddress();
+						}else{
+							potential=inetAddr;
+						}
 					}
 				}
-
 			}
 		}
 		return potential.getHostAddress();
