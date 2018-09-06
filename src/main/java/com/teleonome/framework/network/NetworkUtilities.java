@@ -159,6 +159,7 @@ public class NetworkUtilities {
 				logger.debug("ssidInfo=" + ssidInfo.toString(4));
 			}
 		}
+		logger.debug("getssid returning =" + units.toString(4));
 		return units;
 	}
 	

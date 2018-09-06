@@ -549,7 +549,17 @@ public class PulseThread extends Thread{
 								logger.debug("skiping mnemosycon " + name + " because is not Active");
 								continue;
 							}
-							mnemosyconProfileIdentity = new Identity((String)this.aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_PROFILE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+							//
+							// check to see if there is a profile, if there is not then skip it
+							// it means this mnemosycon is a remembered deneword type
+							//
+							String mnemosyconProfileIdentityPointer = (String)this.aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_PROFILE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							if(mnemosyconProfileIdentityPointer==null) {
+								String name = (String) this.aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+								logger.debug("skiping mnemosycon " + name + " because it does not have a profile");
+								continue;
+							}
+							mnemosyconProfileIdentity = new Identity(mnemosyconProfileIdentityPointer);
 							logger.debug("mnemosyconProfileIdentity=" + mnemosyconProfileIdentity);
 							mnemosyconProfileDene = this.aDenomeManager.getDeneByIdentity(mnemosyconProfileIdentity);
 							functionName = (String) this.aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconProfileDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_PROCESSING_FUNCTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
