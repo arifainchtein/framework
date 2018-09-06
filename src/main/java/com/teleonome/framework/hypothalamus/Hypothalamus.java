@@ -185,9 +185,28 @@ public abstract class Hypothalamus {
 			Integer I = (Integer)aDenomeManager.getDeneWordValueByName(TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_DESCRIPTIVE, TeleonomeConstants.DENE_VITAL, "Base Pulse Frequency");
 			if(I!=null)basePulseInMilliSeconds = I.intValue();
 
+			//
+			// only start the observer thread if
+			// we are in organu=ism mode,
+			// if we are in host mode, dont start it
+			InetAddress exoZeroInetAddress=null;
+			try {
+				exoZeroInetAddress = Utils.getExoZeroNetworkAddress();
+			} catch (SocketException | UnknownHostException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+			//
+			// if the teleonome has only one network card and it is set 
+			// to host, then exoZeroInetAddress will be null
+			if(exoZeroInetAddress!=null) {
+				logger.debug("Starting DiscoverTeleonomes");
+				aDiscoverTeleonoms = new DiscoverTeleonoms();
+				aDiscoverTeleonoms.start();
+			}else {
+				logger.debug("NOT Starting DiscoverTeleonomes");
+			}
 			
-			aDiscoverTeleonoms = new DiscoverTeleonoms();
-			aDiscoverTeleonoms.start();
 
 
 			/*
