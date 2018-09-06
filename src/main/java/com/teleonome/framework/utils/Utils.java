@@ -746,15 +746,15 @@ public class Utils {
 		// to the network interface connected to the organism network, otherwise the exozero network
 		// will not receive the pulse
 		int numberOfNetworkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces()).size();
-		logger.debug("numberOfNetworkInterfaces=" + numberOfNetworkInterfaces);
+		logger.info("numberOfNetworkInterfaces=" + numberOfNetworkInterfaces);
 		
 		for(Enumeration <NetworkInterface> enu = NetworkInterface.getNetworkInterfaces();enu.hasMoreElements();){
 			networkInterface  = enu.nextElement();
-			logger.debug("networkInterface=" + networkInterface.getDisplayName());
+			logger.info("networkInterface=" + networkInterface.getDisplayName());
 			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
 				
 				inetAddr = (InetAddress)ifaces.nextElement();
-				logger.debug("inetAddr=" + inetAddr.getHostAddress());
+				logger.info("inetAddr=" + inetAddr.getHostAddress());
 				if(numberOfNetworkInterfaces>1) {
 					if(!inetAddr.isLoopbackAddress() && !inetAddr.getHostAddress().equals("172.16.1.1")){
 						if(inetAddr.isSiteLocalAddress()){
