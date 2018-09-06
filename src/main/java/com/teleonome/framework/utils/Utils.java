@@ -25,6 +25,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -746,35 +747,61 @@ public class Utils {
 		// to the network interface connected to the organism network, otherwise the exozero network
 		// will not receive the pulse
 		int numberOfNetworkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces()).size();
-		logger.info("numberOfNetworkInterfaces=" + numberOfNetworkInterfaces);
+		boolean hasEth0=false;
+		boolean hasWlan0=false;
+		boolean hasWlan1=false;
+		Hashtable interfacesNameIndex = new Hashtable();
 		
+		logger.info("numberOfNetworkInterfaces=" + numberOfNetworkInterfaces);
 		for(Enumeration <NetworkInterface> enu = NetworkInterface.getNetworkInterfaces();enu.hasMoreElements();){
 			networkInterface  = enu.nextElement();
-			logger.info("networkInterface=" + networkInterface.getDisplayName());
+			if(networkInterface.getDisplayName().equals("eth0")) {
+				hasEth0=true;
+				interfacesNameIndex.put("eth0", networkInterface);
+			}
+			else if(networkInterface.getDisplayName().equals("wlan0")) {
+				hasWlan0=true;
+				interfacesNameIndex.put("wlan0", networkInterface);
+			}
+			else if(networkInterface.getDisplayName().equals("wlan1")) {
+				hasWlan1=true;
+				interfacesNameIndex.put("wlan1", networkInterface);
+			}
+		}
+		//
+		// if eth0 is available return that
+		//
+		if(hasEth0) {
+			networkInterface = (NetworkInterface) interfacesNameIndex.get("eth0");
 			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
-				
 				inetAddr = (InetAddress)ifaces.nextElement();
 				logger.info("inetAddr=" + inetAddr.getHostAddress());
-				if(numberOfNetworkInterfaces>1) {
-					if(!inetAddr.isLoopbackAddress() && !inetAddr.getHostAddress().equals("172.16.1.1")){
-						if(inetAddr.isSiteLocalAddress()){
-							return inetAddr.getHostAddress();
-						}else{
-							potential=inetAddr;
-						}
+				if(!inetAddr.isLoopbackAddress() && !inetAddr.getHostAddress().equals("172.16.1.1")){
+					if(inetAddr.isSiteLocalAddress()){
+						return inetAddr.getHostAddress();
 					}
-				}else {
-					if(!inetAddr.isLoopbackAddress()){
-						if(inetAddr.isSiteLocalAddress()){
-							return inetAddr.getHostAddress();
-						}else{
-							potential=inetAddr;
-						}
+				}
+			} 
+		}
+		//
+		// now check to see if we have one or two wifis,
+		// if so then wlan0 is the external facing
+		// and wlan1 is the internal wifi,
+		// therefore either way return wlan0
+		//
+		if(hasWlan0) {
+			networkInterface = (NetworkInterface) interfacesNameIndex.get("wlan0");
+			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
+				inetAddr = (InetAddress)ifaces.nextElement();
+				logger.info("inetAddr=" + inetAddr.getHostAddress());
+				if(!inetAddr.isLoopbackAddress() ){
+					if(inetAddr.isSiteLocalAddress()){
+						return inetAddr.getHostAddress();
 					}
 				}
 			}
 		}
-		return potential.getHostAddress();
+		return null;
 	}
 
 	/**
