@@ -604,7 +604,9 @@ class MappedBusThread extends Thread{
 						}else if(command.equals(TeleonomeConstants.COMMAND_REBOOT_ENABLE_NETWORK) || 
 								command.equals(TeleonomeConstants.COMMAND_SHUTDOWN_ENABLE_NETWORK)
 								){
-									if(dataPayloadJSONObject==null)mutationJSONObject = hypothalamus.aDenomeManager.readImmediateMutation("SetNetworkMode");
+									if(dataPayloadJSONObject==null) {
+										mutationJSONObject = hypothalamus.aDenomeManager.readImmediateMutation("SetNetworkMode");
+									}
 									
 						}else{
 							if(dataPayloadJSONObject==null)mutationJSONObject = hypothalamus.aDenomeManager.readImmediateMutation(command);
@@ -655,7 +657,7 @@ class MappedBusThread extends Thread{
 					// finally, if the comand was to reboot or shutdown
 					// changing mode, execute the reboot or shutdown
 					//
-
+					logger.debug("line 658, command=" + command);
 					if(command.equals(TeleonomeConstants.COMMAND_SHUTDOWN_ENABLE_HOST)){
 						String logFileName="/home/pi/Teleonome/hostmode.log";
 						
