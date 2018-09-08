@@ -691,8 +691,6 @@ class MappedBusThread extends Thread{
 							// command so that the password is not visible
 							JSONObject payload = new JSONObject(aCommandRequest.getDataPayload());
 							
-
-// ********************
 							JSONObject payloadJSONObject = payload.getJSONObject("Payload");
 							JSONArray updatesJSONArray = payloadJSONObject.getJSONArray("Updates");
 							logger.debug("line 698 of inject, payloadJSONObject=" + payloadJSONObject);
@@ -712,13 +710,6 @@ class MappedBusThread extends Thread{
 									updateJSNObject.put("Value", "*");
 								}
 							}
-// *********************
-							
-							
-							
-							
-							
-							
 							hypothalamus.aDenomeManager. offuscateWifiPasswordInCommand(aCommandRequest.getId(), payload.toString());
 							
 							String logFileName="/home/pi/Teleonome/networkmode.log";
@@ -756,6 +747,33 @@ class MappedBusThread extends Thread{
 							logger.debug("about to create supplicant with " + ssid + " " + password);
 							NetworkUtilities.createNetworkSupplicant(ssid, password);
 							String logFileName="/home/pi/Teleonome/networkmode.log";
+							
+							//
+							// now that the supplicant has been created, update the
+							// command so that the password is not visible
+							JSONObject payload = new JSONObject(aCommandRequest.getDataPayload());
+							
+							JSONObject payloadJSONObject = payload.getJSONObject("Payload");
+							JSONArray updatesJSONArray = payloadJSONObject.getJSONArray("Updates");
+							logger.debug("line 758 of inject, payloadJSONObject=" + payloadJSONObject);
+
+							JSONObject updateJSNObject;
+							String updateTargetPointer;
+							Object updateTargetValue;
+							
+							for(int j=0;j<updatesJSONArray.length();j++){
+								updateJSNObject = updatesJSONArray.getJSONObject(j);
+								//
+								// each update object has two parameters, the target and the value
+								//
+								updateTargetPointer = updateJSNObject.getString("Target");
+								updateTargetValue = updateJSNObject.get("Value");
+								if(updateTargetPointer.equals("@On Load:Update PSK:Update PSK")) {
+									updateJSNObject.put("Value", "*");
+								}
+							}
+							hypothalamus.aDenomeManager. offuscateWifiPasswordInCommand(aCommandRequest.getId(), payload.toString());
+							
 							
 							Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/networkmode.sh  " );
 							File file = new File(logFileName);

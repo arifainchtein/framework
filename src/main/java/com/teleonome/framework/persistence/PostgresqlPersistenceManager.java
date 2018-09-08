@@ -1662,7 +1662,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			preparedStatement.setString(1,  updatedPayload );
 			preparedStatement.setInt(2, id);
 			preparedStatement.execute();
-			
+			logger.debug("offuscate wifi password=" + updatedPayload);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.debug(Utils.getStringException(e));
