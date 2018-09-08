@@ -1640,7 +1640,45 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 		}
 		return toReturn;
-	}	
+	}
+	/**
+	 * This method is called when executing a command of type Reboot in networkmode
+	 * because the servlet needs to store the wifi password in clear text so that
+	 * the asynccycle can create the supplicant,the asunccycle invokes this method
+	 * after it created the supplicant to shtat the wifi password is never shared
+	 * @param id
+	 * @return
+	 */
+	public boolean offuscateWifiPasswordInCommand(int id, String updatedPayload){
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		String sql = "update CommandRequests set payload=?   where id=? ";
+		ResultSet rs=null;
+		boolean toReturn=false;
+		
+		try {
+			connection = connectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1,  updatedPayload );
+			preparedStatement.setInt(2, id);
+			preparedStatement.execute();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		}finally{
+			try {
+				if(rs!=null)rs.close();
+				if(preparedStatement!=null)preparedStatement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+
+		}
+		return toReturn;
+	}
 
 	public JSONObject getLastPulse(){
 		Statement statement=null;

@@ -678,12 +678,49 @@ class MappedBusThread extends Thread{
 						
 						try {
 							
+							
+							
 							String teleonomeName = hypothalamus.aDenomeManager.getDenomeName();
 							MutationIdentity identity = new MutationIdentity(teleonomeName,"SetNetworkMode", "On Load", "Update SSID", "Update SSID");
 							String ssid = (String) DenomeUtils.getDeneWordAttributeFromMutationByMutationIdentity(mutationJSONObject, identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							identity = new MutationIdentity(teleonomeName,"SetNetworkMode", "On Load", "Update PSK", "Update PSK");
 							String password = (String) DenomeUtils.getDeneWordAttributeFromMutationByMutationIdentity(mutationJSONObject, identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							NetworkUtilities.createNetworkSupplicant(ssid, password);
+							//
+							// now that the supplicant has been created, update the
+							// command so that the password is not visible
+							JSONObject payload = new JSONObject(aCommandRequest.getDataPayload());
+							
+
+// ********************
+							JSONObject payloadJSONObject = payload.getJSONObject("Payload");
+							JSONArray updatesJSONArray = payloadJSONObject.getJSONArray("Updates");
+							logger.debug("line 698 of inject, payloadJSONObject=" + payloadJSONObject);
+
+							JSONObject updateJSNObject;
+							String updateTargetPointer;
+							Object updateTargetValue;
+							
+							for(int j=0;j<updatesJSONArray.length();j++){
+								updateJSNObject = updatesJSONArray.getJSONObject(j);
+								//
+								// each update object has two parameters, the target and the value
+								//
+								updateTargetPointer = updateJSNObject.getString("Target");
+								updateTargetValue = updateJSNObject.get("Value");
+								if(updateTargetPointer.equals("@On Load:Update PSK:Update PSK")) {
+									updateJSNObject.put("Value", "*");
+								}
+							}
+// *********************
+							
+							
+							
+							
+							
+							
+							hypothalamus.aDenomeManager. offuscateWifiPasswordInCommand(aCommandRequest.getId(), payload.toString());
+							
 							String logFileName="/home/pi/Teleonome/networkmode.log";
 							
 							Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/networkmode.sh " );
