@@ -39,8 +39,8 @@ public class DenomeValidator {
 			Hashtable info = e1.getDetails();
 			String problemIdentity=(String) info.get("ProblemIdentity");
 			String errorTitle=(String) info.get("Error Title");
-			
 			String currentValue=(String) info.get("CurrentValue");
+			
 			errorJSONObject = generateError( problemIdentity,  errorTitle,  currentValue);
 			errorReportJSONArray.put(errorJSONObject);
 		}
@@ -53,7 +53,7 @@ public class DenomeValidator {
 		
 		JSONObject nucleusJSONObject, deneChainJSONObject,deneJSONObject,resolvedDeneWordJSONObject, deneWordJSONObject, resolvedDeneJSONObject;
 		JSONArray deneChainsJSONArray, denesJSONArray, deneWordsJSONArray;
-		String name, valueType, denePointer,errorMessage;
+		String name, valueType, denePointer,errorMessage, deneWordType;
 		Object denePointerObject;
 		
 		for(int i=0;i<nucleiArray.length();i++){
@@ -112,6 +112,8 @@ public class DenomeValidator {
 									
 								}else{
 									valueType = deneWordJSONObject.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+									deneWordType = deneWordJSONObject.getString(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE);
+									
 									if(valueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER)){
 										if(!deneWordJSONObject.has(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)){
 											String problemIdentity= "@" + teleonomeName + ":" + nucleusJSONObject.getString("Name") + 
@@ -134,8 +136,11 @@ public class DenomeValidator {
 												if(identity.isDene()){
 													resolvedDeneJSONObject = aDenomeViewerManager.getDeneByIdentity(identity);
 													//System.out.println("line 160 denePointer=" + denePointer + "       DeneWord is null=" + (resolvedDeneJSONObject==null) );
-													
-													if(resolvedDeneJSONObject==null){
+													//
+													// remembered denewords will not be found in the denome
+													// so is ok for resolvedDeneJSONObject==null as long as the deneword is of type remembered
+													//
+													if(resolvedDeneJSONObject==null && !deneWordType.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENEWORD)){
 														
 														String problemIdentity= "@" + teleonomeName + ":" + nucleusJSONObject.getString("Name") + 
 																":" + deneChainJSONObject.getString("Name") + ":" + deneJSONObject.getString("Name") ;
