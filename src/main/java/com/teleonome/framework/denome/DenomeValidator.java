@@ -112,7 +112,11 @@ public class DenomeValidator {
 									
 								}else{
 									valueType = deneWordJSONObject.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
-									deneWordType = deneWordJSONObject.getString(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE);
+									deneWordType="";
+									if(deneWordJSONObject.has(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE)) {
+										deneWordType = deneWordJSONObject.getString(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE);
+									}
+									
 									
 									if(valueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER)){
 										if(!deneWordJSONObject.has(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)){
