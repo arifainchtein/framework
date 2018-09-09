@@ -144,7 +144,7 @@ public class DenomeValidator {
 													// remembered denewords will not be found in the denome
 													// so is ok for resolvedDeneJSONObject==null as long as the deneword is of type remembered
 													//
-													if(resolvedDeneJSONObject==null && !deneWordType.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENEWORD)){
+													if(resolvedDeneJSONObject==null){
 														
 														String problemIdentity= "@" + teleonomeName + ":" + nucleusJSONObject.getString("Name") + 
 																":" + deneChainJSONObject.getString("Name") + ":" + deneJSONObject.getString("Name") ;
@@ -155,7 +155,7 @@ public class DenomeValidator {
 														errorJSONObject = generateError( problemIdentity,  errorTitle,  currentValue);
 														errorReportJSONArray.put(errorJSONObject);
 													}
-												}else if(identity.isDeneWord()){
+												}else if(identity.isDeneWord()  && !deneWordType.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENEWORD)){
 													logger.debug("about to get " + identity);
 													resolvedDeneWordJSONObject = aDenomeViewerManager.getDeneWordByIdentity(identity);
 													//System.out.println("line 77 denePointer=" + denePointer + "       DeneWord is null=" + (resolvedDeneWordJSONObject==null) );
