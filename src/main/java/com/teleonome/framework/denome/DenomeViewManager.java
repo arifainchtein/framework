@@ -54,6 +54,7 @@ import com.teleonome.framework.exception.InvalidDeneStructureRequestException;
 import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.MissingDenomeException;
 import com.teleonome.framework.exception.PersistenceException;
+import com.teleonome.framework.exception.TeleonomeValidationException;
 import com.teleonome.framework.persistence.PostgresqlPersistenceManager;
 import com.teleonome.framework.utils.Utils;
 
@@ -190,7 +191,7 @@ public class DenomeViewManager {
 
 
 
-	public void loadDenome(String denomeFileInString) throws MissingDenomeException{
+	public void loadDenome(String denomeFileInString) throws MissingDenomeException, TeleonomeValidationException{
 		//
 		// read the denome from the hard disk
 		//  if its not found, then read it from the db
@@ -513,6 +514,12 @@ public class DenomeViewManager {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
+								if(actionListDene==null) {
+									Hashtable info = new Hashtable();
+									String m = "The denome file was not formated properly.  actionListPointer is missing: " + actionListPointer ;
+									info.put("message", m);
+									throw new TeleonomeValidationException(info);
+								}
 							}
 							actuatorExecutionPositionDeneIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(actionListDene, new Integer(executionPosition)));
 						}
@@ -535,6 +542,8 @@ public class DenomeViewManager {
 
 					actionListDene = entry.getKey();
 					System.out.println("k=" + actionListDene + " v=" + entry.getValue() );
+					
+					
 					actionListDeneName = actionListDene.getString("Name");
 					//
 					// the actionListDene contains denewords of type Dene Pointer which we need to resolve

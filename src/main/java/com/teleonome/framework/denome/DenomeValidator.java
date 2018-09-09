@@ -1,5 +1,7 @@
 package com.teleonome.framework.denome;
 
+import java.util.Hashtable;
+
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -8,6 +10,7 @@ import org.json.JSONObject;
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.MissingDenomeException;
+import com.teleonome.framework.exception.TeleonomeValidationException;
 import com.teleonome.framework.utils.Utils;
 
 public class DenomeValidator {
@@ -24,7 +27,23 @@ public class DenomeValidator {
 		JSONObject pulse = new JSONObject(denomeInString);
 		JSONObject denomeObject = pulse.getJSONObject("Denome");
 		String teleonomeName = denomeObject.getString("Name");
-		aDenomeViewerManager.loadDenome(denomeInString);
+		
+		JSONArray errorReportJSONArray = new JSONArray();
+		JSONObject errorJSONObject;
+		
+		try {
+			aDenomeViewerManager.loadDenome(denomeInString);
+		} catch (TeleonomeValidationException e1) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e1));
+			Hashtable info = e1.getDetails();
+			String problemIdentity=(String) info.get("ProblemIdentity");
+			String errorTitle=(String) info.get("Error Title");
+			
+			String currentValue=(String) info.get("CurrentValue");
+			errorJSONObject = generateError( problemIdentity,  errorTitle,  currentValue);
+			errorReportJSONArray.put(errorJSONObject);
+		}
 		//
 		// perform the tests
 		// verify that every pointer resolves correctly
@@ -36,8 +55,7 @@ public class DenomeValidator {
 		JSONArray deneChainsJSONArray, denesJSONArray, deneWordsJSONArray;
 		String name, valueType, denePointer,errorMessage;
 		Object denePointerObject;
-		JSONArray errorReportJSONArray = new JSONArray();
-		JSONObject errorJSONObject;
+		
 		for(int i=0;i<nucleiArray.length();i++){
 			nucleusJSONObject = (JSONObject) nucleiArray.get(i);
 			//System.out.println("looking at nucleus " + nucleusJSONObject.getString("Name"));
