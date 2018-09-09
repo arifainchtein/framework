@@ -516,8 +516,14 @@ public class DenomeViewManager {
 								}
 								if(actionListDene==null) {
 									Hashtable info = new Hashtable();
-									String m = "The denome file was not formated properly.  actionListPointer is missing: " + actionListPointer ;
-									info.put("message", m);
+									String m = "The denome file was not formated properly.  actionListPointer is missing: " ;
+									
+									
+									
+									info.put("ProblemIdentity", actionListPointer);
+									info.put("Error Title",m);
+									info.put("CurrentValue", actionListPointer);
+									
 									throw new TeleonomeValidationException(info);
 								}
 							}
