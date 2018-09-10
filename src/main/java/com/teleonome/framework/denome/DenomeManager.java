@@ -6959,7 +6959,9 @@ public class DenomeManager {
 						actuatorActionConditionVariable_Name = actuatorActionConditionVariableJSONObject.getString("Name");
 						actuatorActionConditionVariable_Type = actuatorActionConditionVariableJSONObject.getString("Value Type");
 
-						
+						logger.debug("actuatorActionConditionVariable_Name=" + actuatorActionConditionVariable_Name);
+						logger.debug("actuatorActionConditionVariable_Type=" + actuatorActionConditionVariable_Type);
+						logger.debug("line 6964 deneWordPointer=" + deneWordPointer);
 						//
 						// now check to see if this data came from the external data and if so, whether is stale or not
 						//
@@ -6970,7 +6972,7 @@ public class DenomeManager {
 							// it is danger, it means its stall and therefore set allVariableInConditionRenderedSuccesfully=false; 
 							Identity deneWordIdentity = new Identity(deneWordPointer);
 							Identity denewordStatusIdentity = new Identity(deneWordIdentity.getTeleonomeName(),deneWordIdentity.getNucleusName(), deneWordIdentity.getDenechainName(),deneWordIdentity.getDeneName(), TeleonomeConstants.EXTERNAL_DATA_STATUS);
-							logger.debug("the dene for external denewordStatusIdentity is " + denewordStatusIdentity.toString());
+							logger.debug("line 6975 the dene for external denewordStatusIdentity is " + denewordStatusIdentity.toString());
 							//
 							// now get the value
 							String externalDeneStatus=TeleonomeConstants.EXTERNAL_DATA_STATUS_STALE;
@@ -7102,13 +7104,14 @@ public class DenomeManager {
 								}
 							}else{
 
-
+								logger.debug("line 7107 actuatorActionConditionVariable_Value =" + actuatorActionConditionVariable_Value);
 								if(actuatorActionConditionVariable_Value.equals(TeleonomeConstants.VALUE_UNDEFINED)){
 									//
 									// check to see if there is a default, will throw an exception if its not there
 									//
 									try{
 										actuatorActionConditionVariable_Value = actuatorActionConditionVariableJSONObject.getString("Default");
+										logger.debug("line 7114 actuatorActionConditionVariable_Value =" + actuatorActionConditionVariable_Value);
 										if(actuatorActionConditionVariable_Value.equals(TeleonomeConstants.VALUE_UNDEFINED)){
 											allVariableInConditionRenderedSuccesfully=false;
 										}
@@ -7132,9 +7135,10 @@ public class DenomeManager {
 
 
 							actuatorLogicProcessingDeneDeneWords.put(actuatorLogicProcessingCodonDeneDeneWord);
-
+							logger.debug("line 7138 actuatorActionConditionVariable_Value_Rendered=" + actuatorActionConditionVariable_Value_Rendered);
+							
 							if(!actuatorActionConditionVariable_Value_Rendered.equals(TeleonomeConstants.VALUE_UNDEFINED)){
-								logger.debug("line 3137 actuatorActionConditionVariable_Name=" + actuatorActionConditionVariable_Name + " actuatorActionConditionVariable_Value_Rendered=" + actuatorActionConditionVariable_Value_Rendered);
+								logger.debug("line 7141 actuatorActionConditionVariable_Name=" + actuatorActionConditionVariable_Name + " actuatorActionConditionVariable_Value_Rendered=" + actuatorActionConditionVariable_Value_Rendered);
 
 								jexlConditionContext.set(actuatorActionConditionVariable_Name,actuatorActionConditionVariable_Value_Rendered);
 							}
@@ -7148,7 +7152,7 @@ public class DenomeManager {
 					// as long as allVariableInConditionRenderedSuccesfully=true
 					//
 					// and set this value in the actionMap
-					logger.debug("line 4893 allVariableInConditionRenderedSuccesfully=" + allVariableInConditionRenderedSuccesfully);
+					logger.debug("line 7155 allVariableInConditionRenderedSuccesfully=" + allVariableInConditionRenderedSuccesfully);
 					if(allVariableInConditionRenderedSuccesfully){
 						conditionEval = ((Boolean)conditionExpression.evaluate(jexlConditionContext)).booleanValue();
 						jexlActionContext.set(conditionName,conditionEval);
