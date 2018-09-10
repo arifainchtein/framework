@@ -6936,7 +6936,7 @@ public class DenomeManager {
 
 					actuatorLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Result", new Boolean(conditionEval).toString(),null,"boolean",true);
 					actuatorLogicProcessingDeneDeneWords.put(actuatorLogicProcessingCodonDeneDeneWord);
-					logger.warn("conditionName=" + conditionName+ " pointing to " + actuatorActionConditionVariable_Expression + " conditionEval=" + conditionEval);
+					logger.warn("line 6939 conditionName=" + conditionName+ " pointing to " + actuatorActionConditionVariable_Expression + " conditionEval=" + conditionEval);
 
 
 				}else{
@@ -7155,11 +7155,12 @@ public class DenomeManager {
 					logger.warn("line 7155 allVariableInConditionRenderedSuccesfully=" + allVariableInConditionRenderedSuccesfully);
 					if(allVariableInConditionRenderedSuccesfully){
 						conditionEval = ((Boolean)conditionExpression.evaluate(jexlConditionContext)).booleanValue();
+						logger.warn("line 7162 conditionName=" + conditionName+ " conditionEval=" + conditionEval + " actionExpression=" + actionExpression.getExpression() + " dump=" + actionExpression.dump());
 						jexlActionContext.set(conditionName,conditionEval);
 
 						actuatorLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_CONDITION_PROCESSING_RESULT, new Boolean(conditionEval),null,"boolean",true);
 						actuatorLogicProcessingDeneDeneWords.put(actuatorLogicProcessingCodonDeneDeneWord);
-						logger.warn("conditionName=" + conditionName+ " conditionEval=" + conditionEval);
+						
 
 					}else{
 						logger.warn("conditionName=" + conditionName+ " onLackOfDataForCondition=" + conditionEval);
@@ -7188,6 +7189,7 @@ public class DenomeManager {
 			// but we can still have a action success failure tasks
 			boolean result =false;
 			if(allVariableInConditionRenderedSuccesfully){
+				
 				result = ((Boolean)actionExpression.evaluate(jexlActionContext)).booleanValue();
 				logger.warn("action expression evaluation "+ actionExpressionString + " result="+ result);
 			}else {
