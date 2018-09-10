@@ -6767,7 +6767,7 @@ public class DenomeManager {
 	public AbstractMap.SimpleEntry<String, JSONArray>  evaluateAction(String teleonomeName, JSONObject actuatorActionJSONObject) throws JSONException{
 		String commandToExecute="";
 		//logger.debug("evaluate action actuatorActionJSONObject=" + actuatorActionJSONObject);
-		//logger.debug("processing " + actuatorActionJSONObject.toString(4));
+		logger.debug("processing " + actuatorActionJSONObject.toString(4));
 		String actuatorActionConditionVariable_Name, actuatorActionConditionPointer;
 		Object actuatorActionConditionVariable_Value = null;
 		Object actuatorActionConditionVariable_Value_Rendered=null, actuatorActionConditionVariable_Type;
@@ -7158,6 +7158,7 @@ public class DenomeManager {
 						logger.debug("conditionName=" + conditionName+ " conditionEval=" + conditionEval);
 
 					}else{
+						logger.debug("conditionName=" + conditionName+ " onLackOfDataForCondition=" + conditionEval);
 						jexlActionContext.set(conditionName,onLackOfDataForCondition);
 						actuatorLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_CONDITION_PROCESSING_RESULT, new Boolean(onLackOfDataForCondition),null,"boolean",true);
 						actuatorLogicProcessingDeneDeneWords.put(actuatorLogicProcessingCodonDeneDeneWord);
@@ -7185,6 +7186,8 @@ public class DenomeManager {
 			if(allVariableInConditionRenderedSuccesfully){
 				result = ((Boolean)actionExpression.evaluate(jexlActionContext)).booleanValue();
 				logger.debug("action expression evaluation "+ actionExpressionString + " result="+ result);
+			}else {
+				logger.debug("action expression evaluation failed allVariableInConditionRenderedSuccesfully is false");
 			}
 
 			if(result){
