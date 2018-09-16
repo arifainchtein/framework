@@ -6958,7 +6958,7 @@ public class DenomeManager {
 
 						actuatorActionConditionVariable_Name = actuatorActionConditionVariableJSONObject.getString("Name");
 						actuatorActionConditionVariable_Type = actuatorActionConditionVariableJSONObject.getString("Value Type");
-						allVariableInConditionRenderedSuccesfully=true;
+						
 						logger.debug("actuatorActionConditionVariable_Name=" + actuatorActionConditionVariable_Name);
 						logger.debug("actuatorActionConditionVariable_Type=" + actuatorActionConditionVariable_Type);
 						logger.debug("line 6964 deneWordPointer=" + deneWordPointer);
