@@ -339,6 +339,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_CONDITION_VARIABLE_POINTER = "Condition Variable Pointer";
 	public static final String DENEWORD_TYPE_SENSOR_VALUE = "Sensor Value";
 	public static final String DENEWORD_TYPE_UPDATE_DENEWORD_VALUE = "Update DeneWord Value";
+	public static final String DENEWORD_TYPE_APPEND_DENEWORD_VALUE = "Append DeneWord Value";
 	public static final String DENEWORD_TYPE_FIRMWARE_COMMAND_POINTER = "Firmware Command Pointer";
 	public static final String DENEWORD_TYPE_FIRMWARE_COMMAND = "Firmware Command";
 	public static final String DENEWORD_TYPE_SENSOR_MICROCONTROLLER_POINTER = "Sensor Microcontroller Pointer";
