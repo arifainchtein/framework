@@ -1087,6 +1087,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 			}
 		}
+		pulseData=null;
 		return toReturn;
 	}
 
@@ -1197,7 +1198,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			JSONObject testJSON = new JSONObject(pulseData);
 		} catch (JSONException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.warn(Utils.getStringException(e1));
 			return false;
 		}
 
