@@ -9,14 +9,17 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Vector;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.teleonome.framework.TeleonomeConstants;
+import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.denome.DenomeUtils;
 import com.teleonome.framework.denome.Identity;
 import com.teleonome.framework.denome.MutationIdentity;
@@ -24,6 +27,7 @@ import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.InvalidMutation;
 import com.teleonome.framework.exception.PersistenceException;
 import com.teleonome.framework.microcontroller.MicroController;
+import com.teleonome.framework.mnemosyne.MnemosyneManager;
 import com.teleonome.framework.network.NetworkUtilities;
 import com.teleonome.framework.utils.Utils;
 
@@ -84,6 +88,16 @@ class MappedBusThread extends Thread{
 			String motherCommandCode=null;
 			boolean goodCommandCode=false;
 			String clientIp;
+			//
+			// Before going into the loop, processed this teleonome's remembered words
+			//
+			try {
+				logger.debug("about to do rememberedwords for teleonome");
+				processRememberedWords();
+			} catch (InvalidDenomeException e2) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e2));
+			}
 			while(keepRunning){
 				
 				motherCommandCode=null;
@@ -834,4 +848,199 @@ class MappedBusThread extends Thread{
 			}
 		}
 		
-	}
+			private void processRememberedWords() throws InvalidDenomeException {
+				//
+				// now check to see if any chains or words need to be unwrapped
+				// first do the chains
+				//
+				DenomeManager aDenomeManager = hypothalamus.aDenomeManager;
+				JSONObject currentPulse = aDenomeManager.getCurrentlyCreatingPulseJSONObject();
+				String lastPulseTimestamp = currentPulse.getString(TeleonomeConstants.PULSE_TIMESTAMP);
+				long lastPulseTime = currentPulse.getLong(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS);
+				MnemosyneManager aMnemosyneManager = hypothalamus.aMnemosyneManager;
+				Hashtable<String,ArrayList> deneChainsToRememberByTeleonome = aDenomeManager.getDeneChainsToRememberByTeleonome();
+				String rememberedeneChainPointer;
+				
+				String valueType;
+				TimeZone timeZone = aDenomeManager.getTeleonomeTimeZone();
+				String teleonomeName = aDenomeManager.getDenomeName();
+				ArrayList teleonomeRememberedDeneChainsArrayList = deneChainsToRememberByTeleonome.get(teleonomeName);
+				logger.debug("for " + teleonomeName + " teleonomeRememberedDeneChainsArrayList: " + teleonomeRememberedDeneChainsArrayList );
+				Object value;
+				if(teleonomeRememberedDeneChainsArrayList!=null && teleonomeRememberedDeneChainsArrayList.size()>0) {
+					Identity deneChainIdentity;
+					for( int i=0;i<teleonomeRememberedDeneChainsArrayList.size();i++) {
+						
+						rememberedeneChainPointer = (String) teleonomeRememberedDeneChainsArrayList.get(i);	
+						deneChainIdentity = new Identity(rememberedeneChainPointer);
+						JSONObject deneChainJSONObject = aDenomeManager.getDeneChainByIdentity(deneChainIdentity);
+						Hashtable toReturn = new Hashtable();
+						JSONArray denes = deneChainJSONObject.getJSONArray("Denes");
+						JSONObject dene, deneWord;
+						JSONArray deneWords;
+						boolean b;
+						Identity includedRememberedIdentity;
+						for(int l=0;l<denes.length();l++) {
+							dene = (JSONObject)denes.get(l);
+							deneWords = dene.getJSONArray("DeneWords");
+							for(int j=0;j<deneWords.length();j++) {
+								deneWord = (JSONObject)deneWords.get(j);
+								includedRememberedIdentity = new Identity(deneChainIdentity.getTeleonomeName(), deneChainIdentity.getNucleusName(), deneChainIdentity.getDenechainName(), dene.getString(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE),deneWord.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
+								value = getDeneWordByIdentity(currentPulse,includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+								valueType = (String) getDeneWordByIdentity(currentPulse, includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+								logger.debug("about to unwrap " + includedRememberedIdentity.toString() + " with value:" + value  + " and valueType=" + valueType);
+								aMnemosyneManager.unwrap(timeZone, teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), valueType,value);			
+							}
+						}
+					}
+				}
+				//
+				// now do the denes
+				//
+				
+				Hashtable<String,ArrayList> denesToRememberByTeleonome = aDenomeManager.getDenesToRememberByTeleonome();
+				String rememberedenePointer;
+				
+				ArrayList teleonomeRememberedDenesArrayList = denesToRememberByTeleonome.get(teleonomeName);
+				logger.debug("for " + teleonomeName + " teleonomeRememberedDenesArrayList: " + teleonomeRememberedDenesArrayList );
+				
+				if(teleonomeRememberedDenesArrayList!=null && teleonomeRememberedDenesArrayList.size()>0) {
+					Identity deneIdentity;
+					for( int i=0;i<teleonomeRememberedDenesArrayList.size();i++) {
+						
+						rememberedenePointer = (String) teleonomeRememberedDenesArrayList.get(i);	
+						deneIdentity = new Identity(rememberedenePointer);
+						JSONObject deneJSONObject = aDenomeManager.getDeneByIdentity(deneIdentity);
+						Hashtable toReturn = new Hashtable();
+						JSONArray deneWords = deneJSONObject.getJSONArray("DeneWords");
+						JSONObject dene, deneWord;
+						boolean b;
+						Identity includedRememberedIdentity;
+						for(int j=0;j<deneWords.length();j++) {
+							deneWord = (JSONObject)deneWords.get(j);
+							includedRememberedIdentity = new Identity(deneIdentity.getTeleonomeName(), deneIdentity.getNucleusName(), deneIdentity.getDenechainName(), deneJSONObject.getString(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE),deneWord.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
+							value = getDeneWordByIdentity(currentPulse,includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							valueType = (String) getDeneWordByIdentity(currentPulse, includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+							logger.debug("about to unwrap " + includedRememberedIdentity.toString() + " with value:" + value  + " and valueType=" + valueType);
+							aMnemosyneManager.unwrap(timeZone, teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), valueType,value);			
+						}
+						
+					}
+				}
+				
+				//
+				// now do the denewords
+				//
+				
+				String rememberedWordPointer;
+				
+				Hashtable<String,ArrayList> deneWordsToRememberByTeleonome = aDenomeManager.getDeneWordsToRememberByTeleonome();
+				logger.debug("deneWordsToRememberByTeleonome " + deneWordsToRememberByTeleonome );
+				
+				ArrayList teleonomeRememberedWordsArrayList = deneWordsToRememberByTeleonome.get(teleonomeName);
+				logger.debug("for " + teleonomeName + " teleonomeRememberedWordsArrayList: " + teleonomeRememberedWordsArrayList );
+				
+				if(teleonomeRememberedWordsArrayList!=null && teleonomeRememberedWordsArrayList.size()>0) {
+					
+					for( int i=0;i<teleonomeRememberedWordsArrayList.size();i++) {
+						rememberedWordPointer = (String) teleonomeRememberedWordsArrayList.get(i);
+						value = getDeneWordByIdentity(currentPulse,new Identity(rememberedWordPointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						valueType = (String) getDeneWordByIdentity(currentPulse, new Identity(rememberedWordPointer), TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+						logger.debug("about to unwrap " + rememberedWordPointer + " with value:" + value  + " and valueType=" + valueType);
+						aMnemosyneManager.unwrap(timeZone, teleonomeName, lastPulseTime, rememberedWordPointer, valueType,value);
+					}
+				}
+			}
+			
+			
+			public  Object getDeneWordByIdentity(JSONObject dataSource, Identity identity, String whatToBring) throws InvalidDenomeException{
+				JSONArray deneChainsArray=null;
+				Object toReturn=null;
+				try {
+
+					String nucleusName=identity.getNucleusName();
+					String deneChainName=identity.getDenechainName();
+					String deneName=identity.getDeneName();
+					String deneWordName=identity.getDeneWordName();
+					
+					//	//System.out.println("poijbt 1");
+					//
+					// now parse them
+					JSONObject denomeObject = dataSource.getJSONObject("Denome");
+					JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
+					String name;
+					JSONObject aJSONObject, internalNucleus = null,purposeNucleus = null,mnemosyneNucleus=null, humanInterfaceNucleus=null;
+					//	//System.out.println("poijbt 2");
+					for(int i=0;i<nucleiArray.length();i++){
+						aJSONObject = (JSONObject) nucleiArray.get(i);
+						name = aJSONObject.getString("Name");
+						if(name.equals(TeleonomeConstants.NUCLEI_INTERNAL)){
+							internalNucleus= aJSONObject;
+							deneChainsArray = internalNucleus.getJSONArray("DeneChains");
+						}else if(name.equals(TeleonomeConstants.NUCLEI_PURPOSE)){
+							purposeNucleus= aJSONObject;
+							deneChainsArray = purposeNucleus.getJSONArray("DeneChains");
+						}else if(name.equals(TeleonomeConstants.NUCLEI_MNEMOSYNE)){
+							mnemosyneNucleus= aJSONObject;
+						}else if(name.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
+							humanInterfaceNucleus= aJSONObject;
+						}
+
+					}
+					//	//System.out.println("poijbt 3");
+					if(nucleusName.equals(TeleonomeConstants.NUCLEI_INTERNAL)){
+						deneChainsArray = internalNucleus.getJSONArray("DeneChains");
+					}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_PURPOSE)){
+						deneChainsArray = purposeNucleus.getJSONArray("DeneChains");
+					}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_MNEMOSYNE)){
+						deneChainsArray = mnemosyneNucleus.getJSONArray("DeneChains");
+					}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
+						deneChainsArray = humanInterfaceNucleus.getJSONArray("DeneChains");
+					}
+					//	//System.out.println("poijbt 4");
+					JSONObject aDeneJSONObject, aDeneWordJSONObject;
+					JSONArray denesJSONArray, deneWordsJSONArray;
+					String valueType, valueInString;
+					Object object;
+					for(int i=0;i<deneChainsArray.length();i++){
+						aJSONObject = (JSONObject) deneChainsArray.get(i);
+						if(aJSONObject.getString("Name").equals(deneChainName)){
+							denesJSONArray = aJSONObject.getJSONArray("Denes");
+							for(int j=0;j<denesJSONArray.length();j++){
+								aDeneJSONObject = (JSONObject) denesJSONArray.get(j);
+								//	//System.out.println("poijbt 5");
+								if(aDeneJSONObject.getString("Name").equals(deneName)){
+									deneWordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
+									for(int k=0;k<deneWordsJSONArray.length();k++){
+										
+										aDeneWordJSONObject = (JSONObject) deneWordsJSONArray.get(k);
+										//subscriberThreadLogger.debug("aDeneWordJSONObject=" + aDeneWordJSONObject.getString("Name") + " deneWordName=" + deneWordName);
+										if(aDeneWordJSONObject.getString("Name").equals(deneWordName)){
+											//	//System.out.println("poijbt 7");
+											if(whatToBring.equals(TeleonomeConstants.COMPLETE)){
+												toReturn= aDeneWordJSONObject;
+											}else{
+												toReturn= aDeneWordJSONObject.get(whatToBring);
+											}
+										}
+									}
+								}
+							}
+
+						}
+					}
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					// TODO Auto-generated catch block
+					Hashtable info = new Hashtable();
+
+					String m = "The denome is not formated Correctly. Error:" + e.getMessage() +" Stacktrace:" + ExceptionUtils.getStackTrace(e);
+					info.put("message", m);
+					throw new InvalidDenomeException(info);
+				}
+				dataSource=null;
+				return toReturn;
+			}
+			
+		}
+	
