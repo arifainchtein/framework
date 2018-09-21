@@ -120,6 +120,25 @@ class MappedBusThread extends Thread{
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e1));
 					} 
+					
+					if(motherCommandCode!=null && commandCode!=null && !commandCode.equals("") && !motherCommandCode.equals(commandCode)) {
+						//
+						// if we are here then the commandcode is wrong, but it could be a question of timing
+						// fr this reason, wait 5 seconds and ask the mother for another code
+						try {
+							Thread.sleep(5000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						try {
+							motherCommandCode = hypothalamus.motherMicroController.getCommandCode();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					
 					logger.info("commandCode=" + commandCode + " motherCommandCode=" + motherCommandCode);
 					if(motherCommandCode==null || commandCode==null || commandCode.equals("") || !motherCommandCode.equals(commandCode)) {
 						//
@@ -128,7 +147,7 @@ class MappedBusThread extends Thread{
 						//
 						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId());
 						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
-						logger.debug("commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
+						logger.debug("COMMANDS CODE DO NOT MATCH commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
 						commandCode=null;
 					}else {
 						dataPayload = aCommandRequest.getDataPayload();
