@@ -12,4 +12,5 @@ public abstract class MotherMicroController extends MicroController {
 	}
 
 	public abstract String getCommandCode() throws IOException ;
+	
 }

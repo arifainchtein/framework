@@ -256,6 +256,12 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 		output.flush();
 		input = new GNUArduinoReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())));
 		String inputLine = input.readLine();
+		if(inputLine.length()==8) {
+			//
+			// remove the first two digits
+			//
+			inputLine = inputLine.substring(2);
+		}
 		return inputLine;
 	}
 	

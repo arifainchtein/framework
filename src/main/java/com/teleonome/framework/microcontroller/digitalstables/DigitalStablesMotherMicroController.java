@@ -201,6 +201,14 @@ public class DigitalStablesMotherMicroController extends MotherMicroController {
 			// TODO Auto-generated method stub
 			output = getWriter();
 			String actuatorCommand = "GetCommandCode";
+			return sendCommand( actuatorCommand);
+		}
+		
+
+		private String sendCommand(String actuatorCommand) throws IOException {
+			// TODO Auto-generated method stub
+			output = getWriter();
+			
 			output.write(actuatorCommand,0,actuatorCommand.length());
 			//serialPortOutputStream.write( actuatorCommand.getBytes() );
 			try {
