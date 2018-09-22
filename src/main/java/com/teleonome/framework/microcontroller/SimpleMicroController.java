@@ -23,6 +23,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
+
+import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.security.totp.TOTP;
@@ -34,6 +36,10 @@ public class SimpleMicroController extends MotherMicroController {
 	PlainReader plainReader;
 	PlainWriter plainWriter;
 	Logger logger = Logger.getLogger(getClass());
+	String[] previousCodes= new String[3];
+	int currentCommandCodeHistoryPos;
+	int numberOfCommandCodesInHistory=0;
+	String[] commandCodeHistory = new String[3];
 	
 	public SimpleMicroController(DenomeManager d, String n) {
 		super(d, n);
@@ -61,21 +67,52 @@ public class SimpleMicroController extends MotherMicroController {
 		return plainWriter;
 	}
  
+	public boolean verifyUserCommandCode(String userCode) throws IOException{
+		boolean toReturn=false;
+		
+		String code = getCommandCode();
+		if(userCode.equals(code)) {
+			return true;
+		}else {
+			for(int i=0;i<numberOfCommandCodesInHistory;i++){
+				if(userCode.equals(commandCodeHistory[i])) {
+					return true;
+				}
+			}
+		}
+		return toReturn;
+	}
+	
 	
 	@Override
 	public String getCommandCode()  throws IOException {
-		String toReturn="";
+		String code="";
 		String unEncodedKey = "MyLegoDoor";//FileUtils.readFileToString(new File("SecretKey"), "UTF-8");
 		TOTP totp = new TOTP();
 		try {
-			toReturn = totp.generateCurrentNumberFromUnencodedString(unEncodedKey);
+			code = totp.generateCurrentNumberFromUnencodedString(unEncodedKey);
 
 		} catch (GeneralSecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("returning code = " + toReturn);
-		return toReturn;
+		System.out.println("returning code = " + code);
+		
+		
+		
+		if(currentCommandCodeHistoryPos<numberOfCommandCodesInHistory){
+			commandCodeHistory[currentCommandCodeHistoryPos]=code;
+			currentCommandCodeHistoryPos++;
+		}else{
+			for(int i=0;i<numberOfCommandCodesInHistory-1;i++){
+				commandCodeHistory[i]=commandCodeHistory[i+1];
+			}
+			commandCodeHistory[numberOfCommandCodesInHistory-1]=code;
+		}
+
+		
+		
+		return code;
 	}
 
 }

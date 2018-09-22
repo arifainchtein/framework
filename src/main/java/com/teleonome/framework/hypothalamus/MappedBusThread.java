@@ -98,6 +98,8 @@ class MappedBusThread extends Thread{
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e2));
 			}
+			boolean commandCodeVerified;
+			
 			while(keepRunning){
 				
 				motherCommandCode=null;
@@ -113,43 +115,17 @@ class MappedBusThread extends Thread{
 				if(aCommandRequest!=null){
 					command = aCommandRequest.getCommand();
 					commandCode = aCommandRequest.getCommandCode();
+					logger.info("commandCode=" + commandCode);
 					clientIp = aCommandRequest.getClientIp();
+					commandCodeVerified=false;
 					try {
-						motherCommandCode = hypothalamus.motherMicroController.getCommandCode();
+						commandCodeVerified = hypothalamus.motherMicroController.verifyUserCommandCode(commandCode);
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e1));
-					} 
-					
-					if(motherCommandCode!=null && commandCode!=null && !commandCode.equals("") && !motherCommandCode.equals(commandCode)) {
-						//
-						// if we are here then the commandcode is wrong, but it could be a question of timing
-						// fr this reason, wait 5 seconds and ask the mother for another code
-						try {
-							Thread.sleep(5000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						try {
-							motherCommandCode = hypothalamus.motherMicroController.getCommandCode();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
 					}
-					
-					logger.info("commandCode=" + commandCode + " motherCommandCode=" + motherCommandCode);
-					if(motherCommandCode==null || commandCode==null || commandCode.equals("") || !motherCommandCode.equals(commandCode)) {
-						//
-						// if we are here, then something was wrong with either the code coming
-						// from the mother, or an invalid code from the originator
-						//
-						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId());
-						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
-						logger.debug("COMMANDS CODE DO NOT MATCH commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
-						commandCode=null;
-					}else {
+					 
+					if(commandCodeVerified) {
 						dataPayload = aCommandRequest.getDataPayload();
 						logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
 						goodCommandCode=true;
@@ -161,7 +137,20 @@ class MappedBusThread extends Thread{
 								logger.warn(Utils.getStringException(e));
 							}
 						}
+					}else {
+						//
+						// if we are here, the user code was wron
+						// from the mother, or an invalid code from the originator
+						//
+						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId());
+						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
+						logger.debug("COMMANDS CODE DO NOT MATCH commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
+						commandCode=null;
 					}
+					
+					
+					
+					
 					
 				}
 				

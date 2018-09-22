@@ -239,12 +239,29 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 		//logger.debug("serialEvent received " + arg0.getEventType() );
 	}
 
+	public boolean verifyUserCommandCode(String userCode) throws IOException{
+		String actuatorCommand = "VerifyUserCode#" + userCode;
+		String result = sendCommand(actuatorCommand);
+		boolean toReturn=true;
+		if(result.equals(TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE)) {
+			toReturn=false;
+		}
+		return toReturn;
+	}
 
 	@Override
 	public String getCommandCode() throws IOException {
 		// TODO Auto-generated method stub
 		output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
 		String actuatorCommand = "GetCommandCode";
+		return sendCommand(actuatorCommand);
+		
+	}
+	
+	private String sendCommand(String actuatorCommand) throws IOException {
+		// TODO Auto-generated method stub
+		output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
+		
 		output.write(actuatorCommand,0,actuatorCommand.length());
 		//serialPortOutputStream.write( actuatorCommand.getBytes() );
 		try {

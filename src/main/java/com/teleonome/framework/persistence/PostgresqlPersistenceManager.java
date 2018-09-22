@@ -1558,7 +1558,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setLong(1, System.currentTimeMillis());
-			preparedStatement.setString(2,  TeleonomeConstants.COMMAND_REQUEST_INVALID_PASSWORD );
+			preparedStatement.setString(2,  TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE );
 			preparedStatement.setInt(3, id);
 			
 			rs = preparedStatement.executeQuery();

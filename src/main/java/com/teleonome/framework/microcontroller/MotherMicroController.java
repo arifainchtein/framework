@@ -12,5 +12,5 @@ public abstract class MotherMicroController extends MicroController {
 	}
 
 	public abstract String getCommandCode() throws IOException ;
-	
+	public abstract boolean verifyUserCommandCode(String userCode) throws IOException ;
 }

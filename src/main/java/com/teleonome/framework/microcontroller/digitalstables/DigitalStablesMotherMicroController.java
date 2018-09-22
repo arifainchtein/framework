@@ -204,6 +204,15 @@ public class DigitalStablesMotherMicroController extends MotherMicroController {
 			return sendCommand( actuatorCommand);
 		}
 		
+		public boolean verifyUserCommandCode(String userCode) throws IOException{
+			String actuatorCommand = "VerifyUserCode#" + userCode;
+			String result = sendCommand(actuatorCommand);
+			boolean toReturn=true;
+			if(result.equals(TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE)) {
+				toReturn=false;
+			}
+			return toReturn;
+		}
 
 		private String sendCommand(String actuatorCommand) throws IOException {
 			// TODO Auto-generated method stub
