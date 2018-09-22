@@ -261,7 +261,7 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 	private String sendCommand(String actuatorCommand) throws IOException {
 		// TODO Auto-generated method stub
 		output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
-		
+		logger.debug("sending command:"+ actuatorCommand);
 		output.write(actuatorCommand,0,actuatorCommand.length());
 		//serialPortOutputStream.write( actuatorCommand.getBytes() );
 		try {
@@ -273,12 +273,8 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 		output.flush();
 		input = new GNUArduinoReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())));
 		String inputLine = input.readLine();
-		if(inputLine.length()==8) {
-			//
-			// remove the first two digits
-			//
-			inputLine = inputLine.substring(2);
-		}
+		logger.debug("receivibg response :"+ inputLine);
+		
 		return inputLine;
 	}
 	
