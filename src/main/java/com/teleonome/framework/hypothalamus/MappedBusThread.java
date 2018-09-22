@@ -373,6 +373,7 @@ class MappedBusThread extends Thread{
 									command=tokens[2];
 									//password = tokens[3];
 									commandCode = tokens[3];
+									clientIp="127.0.0.1";
 									String faultDataTarget = tokens[4];
 									String faultData = "";
 									if(tokens.length>5)faultData=tokens[5];
