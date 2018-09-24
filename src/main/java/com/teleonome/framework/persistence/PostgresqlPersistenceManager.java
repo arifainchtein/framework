@@ -299,14 +299,20 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			while(rs.next()){
 				sizeString=rs.getString(1);
 			}
-
-			String[] tokens = sizeString.split(" ");
-			size = Double.parseDouble(tokens[0]);
-			String units = tokens[1];
-			if(units.equalsIgnoreCase("KB"))size= size/1000;
-			else if(units.equalsIgnoreCase("MB"))size= size;
-			else if(units.equalsIgnoreCase("GB"))size= size*1000;
-			else if(units.equalsIgnoreCase("TB"))size= size*1000000;
+			//
+			// if there are no rows, sizeString will be empty
+			if(sizeString.length()>1) {
+				String[] tokens = sizeString.split(" ");
+				size = Double.parseDouble(tokens[0]);
+				String units = tokens[1];
+				if(units.equalsIgnoreCase("KB"))size= size/1000;
+				else if(units.equalsIgnoreCase("MB"))size= size;
+				else if(units.equalsIgnoreCase("GB"))size= size*1000;
+				else if(units.equalsIgnoreCase("TB"))size= size*1000000;
+			}else {
+				size=0;
+			}
+			
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
