@@ -104,10 +104,15 @@ public class SimpleMicroController extends MotherMicroController {
 			commandCodeHistory[currentCommandCodeHistoryPos]=code;
 			currentCommandCodeHistoryPos++;
 		}else{
-			for(int i=0;i<numberOfCommandCodesInHistory-1;i++){
-				commandCodeHistory[i]=commandCodeHistory[i+1];
+			if(numberOfCommandCodesInHistory>0) {
+				for(int i=0;i<numberOfCommandCodesInHistory-1;i++){
+					commandCodeHistory[i]=commandCodeHistory[i+1];
+				}
+				commandCodeHistory[numberOfCommandCodesInHistory-1]=code;
+			}else {
+				commandCodeHistory[numberOfCommandCodesInHistory]=code;
 			}
-			commandCodeHistory[numberOfCommandCodesInHistory-1]=code;
+			
 		}
 
 		
