@@ -1502,15 +1502,37 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return aCommandRequest;
 	}
 
-	public JSONArray getAllCommandRequests(){
+	public JSONObject getAllCommandRequests(boolean includeHuman, boolean includeInternal, int offset, int limit){
 
 		Connection connection = null;
+		Connection connection2 = null;
 		Statement statement = null;
-		String sql = "select id,createdon, executedon,command, status,payload, clientIp from CommandRequests  order by createdOn desc";
+		Statement statement2 = null;
+		String whereClause="";
+		//
+		// now build the where clause
+		// if they are both true then
+		// no need for a where clause
+		//
+		if(includeHuman && !includeInternal) {
+			whereClause = " where clientIp != '127.0.0.1'";
+		}else if(!includeHuman && includeInternal) {
+			whereClause = " where clientIp = '127.0.0.1'";
+		}
+		
+		String sql = "select id,createdon, executedon,command, status,payload, clientIp from CommandRequests " +  whereClause + "  order by createdOn desc limit " + limit + " offset " + offset;
 		ResultSet rs = null;
+		ResultSet rs2 = null;
 		CommandRequest aCommandRequest = new CommandRequest();
-
-		JSONArray toReturn = new JSONArray();
+		JSONObject toReturn = new JSONObject();
+		JSONArray valuesJSONArray = new JSONArray();
+		toReturn.put("Values", valuesJSONArray);
+		//
+		// put these two variables for convenience
+		//
+		toReturn.put("Limit", limit);
+		toReturn.put("Offset", offset);
+		
 		JSONObject o;
 		try {
 			connection = connectionPool.getConnection();
@@ -1534,7 +1556,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				o.put("Status", status);
 				o.put("Payload", payload);
 				o.put("ClientIp", clientIp);
-				toReturn.put(o);
+				valuesJSONArray.put(o);
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -1544,6 +1566,33 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				if(rs!=null)rs.close();
 				if(statement!=null)statement.close();
 				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+
+		}
+		try {
+			//
+			// now repeat the same command with out the limit and the offset to get the total
+			//
+			sql = "select count(*) from CommandRequests " +  whereClause ;
+			connection2 = connectionPool.getConnection();
+			statement2 = connection.createStatement();
+			rs2 = statement2.executeQuery(sql);
+
+			while(rs.next()){
+				int total = rs2.getInt(1);
+				toReturn.put("Total", total);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		}finally{
+			try {
+				if(rs2!=null)rs2.close();
+				if(statement2!=null)statement2.close();
+				if(connection2!=null)connectionPool.closeConnection(connection2);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				logger.debug(Utils.getStringException(e));

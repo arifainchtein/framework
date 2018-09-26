@@ -908,7 +908,7 @@ public class TeleonomeConstants {
 	public static final String PANEL_VISUALIZATION_STYLE_ACTION_EVALUATION_REPORT="Action Evaluation Report";
 	public static final String PANEL_VISUALIZATION_STYLE_NETWORK_MODE_SELECTOR="Network Mode Selector";
 	public static final String PANEL_VISUALIZATION_STYLE_SETTINGS_INFO="Settings Info";
-
+	public static final String PANEL_VISUALIZATION_STYLE_DIAGNOSTICS_INFO="Diagnostics Info";
 	
 	public static final String DENE_TYPE_HUMAN_INTERFACE_PAGE="Human Interface Page";
 	public static final String DENE_TYPE_HUMAN_INTERFACE_COMPONENT="Human Interface Component";
