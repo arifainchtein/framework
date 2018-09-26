@@ -1578,10 +1578,10 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			//
 			sql = "select count(*) from CommandRequests " +  whereClause ;
 			connection2 = connectionPool.getConnection();
-			statement2 = connection.createStatement();
+			statement2 = connection2.createStatement();
 			rs2 = statement2.executeQuery(sql);
 
-			while(rs.next()){
+			while(rs2.next()){
 				int total = rs2.getInt(1);
 				toReturn.put("Total", total);
 			}
