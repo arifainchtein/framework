@@ -910,6 +910,15 @@ public class TeleonomeConstants {
 	public static final String PANEL_VISUALIZATION_STYLE_SETTINGS_INFO="Settings Info";
 	public static final String PANEL_VISUALIZATION_STYLE_DIAGNOSTICS_INFO="Diagnostics Info";
 	
+	//
+	// LocalStorage Keys
+	//
+	public static final String LOCAL_STORAGE_SEARCH_KEY="Search";
+	public static final String LOCAL_STORAGE_CURRENT_VIEW_KEY="Current View";
+
+	
+	
+	
 	public static final String DENE_TYPE_HUMAN_INTERFACE_PAGE="Human Interface Page";
 	public static final String DENE_TYPE_HUMAN_INTERFACE_COMPONENT="Human Interface Component";
 	public static final String DENEWORD_TYPE_HUMAN_INTERFACE_COMPONENT_PROPERTY="Human Interface Component Property";
