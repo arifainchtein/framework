@@ -73,7 +73,7 @@ public abstract class Hypothalamus {
 	String mqttBrokerAddress = "tcp://localhost:1883";
     String mqttClientId = TeleonomeConstants.PROCESS_HYPOTHALAMUS;
     MemoryPersistence persistence = new MemoryPersistence();
-    boolean performTimePrunningAnalysis=false;
+    public boolean performTimePrunningAnalysis=false;
     int pacemakerPid=-1;
   //private String buildNumber="17/05/2017 00:52";
   	public PostgresqlPersistenceManager aDBManager=null;
@@ -305,22 +305,7 @@ public abstract class Hypothalamus {
 
 
 
-			ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
-			ses.scheduleAtFixedRate(new Runnable() {
-			    @Override
-			    public void run() {
-			    	logger.info("about to execute TimeBasedMutations");
-			    	performTimePrunningAnalysis=true;
-			    	
-			    	try {
-						executeTimeBasedMutations();
-					} catch (InvalidMutation | InvalidDenomeException e) {
-						// TODO Auto-generated catch block
-						logger.warn(Utils.getStringException(e));
-					}
-			    	//aMnemosyneManager.performTimePrunningAnalysis();
-			    }
-			}, 0, 2, TimeUnit.MINUTES);
+			
 			
 			//
 			// at the begining of the thread make all the pending commands as skipped
