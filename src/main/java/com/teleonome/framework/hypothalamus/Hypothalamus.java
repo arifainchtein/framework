@@ -684,7 +684,7 @@ public abstract class Hypothalamus {
 			logger.info("mutationTimeConfigurationDene " +(mutationTimeConfigurationDene!=null));
 				
 			if(mutationTimeConfigurationDene!=null) {
-				mutationExecutionTime = (String)aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mutationTimeConfigurationDene, TeleonomeConstants.DENEWORD_TYPE_TIME_BASED_MUTATION_EXECUTION_TIME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				mutationExecutionTime = (String)aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mutationTimeConfigurationDene, TeleonomeConstants.DENEWORD_TYPE_TIME_BASED_MUTATION_EXECUTION_TIME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 				logger.info("mutationExecutionTime= " +mutationExecutionTime);
 				
 				if(mutationExecutionTime.equals(TeleonomeConstants.MNEMOSYNE_HOURLY_MUTATION)) {
