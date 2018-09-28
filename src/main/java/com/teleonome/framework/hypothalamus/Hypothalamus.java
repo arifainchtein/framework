@@ -304,7 +304,7 @@ public abstract class Hypothalamus {
 
 
 
-			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(), 0, 1, TimeUnit.MINUTES);
+			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(), 1, 1, TimeUnit.MINUTES);
 			
 			
 			//
@@ -613,11 +613,16 @@ public abstract class Hypothalamus {
 		}
 	    @Override
 	    public void run() {
-	            logger.info("about to execute TimeBasedMutations");
+	            
 		    	performTimePrunningAnalysis=true;
 		    	
 		    	try {
-					executeTimeBasedMutations();
+					if(aDenomeManager.getCurrentlyCreatingPulseJSONObject() != null) {
+						logger.info("about to execute TimeBasedMutations");
+						executeTimeBasedMutations();
+					}else {
+						logger.info("Did not execute TimeBasedMutations because getCurrentlyCreatingPulseJSONObject is null ");
+					}
 				} catch (InvalidMutation | InvalidDenomeException e) {
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
