@@ -304,9 +304,13 @@ public abstract class Hypothalamus {
 
 
 			Calendar calendar = Calendar.getInstance();
-			long millisToNextHour = Utils.millisToNextHour(calendar);
-			logger.info("about to start the timebsased executor, with a delay of " + millisToNextHour + " milliseconds ");
-			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),millisToNextHour , 60*60*1000, TimeUnit.MILLISECONDS);
+//			long millisToNextHour = Utils.millisToNextHour(calendar);
+//			logger.info("about to start the timebsased executor, with a delay of " + millisToNextHour + " milliseconds ");
+//			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),millisToNextHour , 60*60*1000, TimeUnit.MILLISECONDS);
+			
+			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),1 , 2, TimeUnit.MINUTES);
+			
+			
 			//
 			// at the begining of the thread make all the pending commands as skipped
 			// so that there are no commands to execute before the first pulse
@@ -659,8 +663,8 @@ public abstract class Hypothalamus {
 			timeBasedMutationJSONObject = timeBasedMutationsJSONArray.getJSONObject(i);
 			JSONArray mutationDeneChains = timeBasedMutationJSONObject.getJSONArray("DeneChains");
 			logger.info(timeBasedMutationJSONObject.getString("Name")  + " has mutationDeneChains.length()=" + mutationDeneChains.length());
-			
-			found:
+			mutationTimeConfigurationDene=null;
+			//found:
 			for(int j=0;j<mutationDeneChains.length();j++) {
 				deneChainJSONObject = mutationDeneChains.getJSONObject(j);
 				logger.info("looking at " + deneChainJSONObject.getString("Name") );
@@ -671,11 +675,13 @@ public abstract class Hypothalamus {
 						if(mutationTimeConfigurationDenes.getJSONObject(k).getString("Name").equals("Time Mutation Configuration")) {
 							mutationTimeConfigurationDene = mutationTimeConfigurationDenes.getJSONObject(k);
 							logger.info("found  dene " + mutationTimeConfigurationDene.toString(4));
-							break found;
+							//break found;
 						}
 				}
 			}
-				logger.info("mutationTimeConfigurationDene " +(mutationTimeConfigurationDene!=null));
+		
+				
+			logger.info("mutationTimeConfigurationDene " +(mutationTimeConfigurationDene!=null));
 				
 			if(mutationTimeConfigurationDene!=null) {
 				mutationExecutionTime = (String)aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mutationTimeConfigurationDene, TeleonomeConstants.DENEWORD_TYPE_TIME_BASED_MUTATION_EXECUTION_TIME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
@@ -692,6 +698,8 @@ public abstract class Hypothalamus {
 
 				if(mutationExecutionTime.equals(TeleonomeConstants.MNEMOSYNE_DAILY_MUTATION) ) {
 					mutationHourInTheDay = (int)aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mutationTimeConfigurationDene, TeleonomeConstants.DENEWORD_HOUR_IN_DAY, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.info("mutationHourInTheDay= " +mutationHourInTheDay + " currentHour=" + currentHour);
+					
 					if(currentHour==mutationHourInTheDay) {
 						try {
 							executeMutation(timeBasedMutationJSONObject);
