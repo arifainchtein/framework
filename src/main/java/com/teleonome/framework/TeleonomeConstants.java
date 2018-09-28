@@ -567,6 +567,7 @@ public class TeleonomeConstants {
 	public static final String COMMAND_CODE="CommandCode";
 	public static final String COMMAND_REQUEST_EXECUTION_OK="Command Request Succesfull";
 	public static final String COMMAND_REQUEST_INVALID_CODE="Invalid Code";
+	public static final String COMMAND_REQUEST_VALID_CODE="Valid Code";
 	public static final String COMMAND_REQUEST_PENDING_EXECUTION="Pending Execution";
 	
 	//

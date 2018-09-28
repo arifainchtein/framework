@@ -240,10 +240,30 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 
 	public boolean verifyUserCommandCode(String userCode) throws IOException{
 		String actuatorCommand = "VerifyUserCode#" + userCode;
-		String result = sendCommand(actuatorCommand);
+		String result = "";
 		boolean toReturn=true;
-		if(result.equals(TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE)) {
-			toReturn=false;
+		boolean keepGoing=true;
+		String commandCode="";
+		while(keepGoing) {
+			result = sendCommand(actuatorCommand);
+			if(	result.equals(TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE) ||
+				result.equals(TeleonomeConstants.COMMAND_REQUEST_VALID_CODE)
+			) {
+				if(result.equals(TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE)) {
+					toReturn=false;
+				}else if(result.equals(TeleonomeConstants.COMMAND_REQUEST_VALID_CODE)) {
+					toReturn=true;
+				}
+				keepGoing=false;
+			}else {
+				logger.debug("bad response to valideuser result=" + result + " asking again");;
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		return toReturn;
 	}
@@ -253,7 +273,23 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 		// TODO Auto-generated method stub
 		output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
 		String actuatorCommand = "GetCommandCode";
-		return sendCommand(actuatorCommand);
+		boolean keepGoing=true;
+		String commandCode="";
+		while(keepGoing) {
+			commandCode = sendCommand(actuatorCommand);
+			if(commandCode!=null && commandCode.length()==6) {
+				keepGoing=false;
+			}else {
+				logger.debug("bad command code=" + commandCode + " asking again");;
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return commandCode;
 		
 	}
 	
