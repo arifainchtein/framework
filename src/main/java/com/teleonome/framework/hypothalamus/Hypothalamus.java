@@ -658,11 +658,12 @@ public abstract class Hypothalamus {
 		for(int i=0;i<timeBasedMutationsJSONArray.length();i++) {
 			timeBasedMutationJSONObject = timeBasedMutationsJSONArray.getJSONObject(i);
 			JSONArray mutationDeneChains = timeBasedMutationJSONObject.getJSONArray("DeneChains");
-			logger.info("mutationDeneChains.length()=" + mutationDeneChains.length());
+			logger.info(timeBasedMutationJSONObject.getString("Name")  + " has mutationDeneChains.length()=" + mutationDeneChains.length());
 			
 			found:
 			for(int j=0;j<mutationDeneChains.length();j++) {
 				deneChainJSONObject = mutationDeneChains.getJSONObject(j);
+				logger.info("looking at " + deneChainJSONObject.getString("Name") );
 				if(deneChainJSONObject.getString("Name").equals("Mutation Configuration")){
 					mutationTimeConfigurationDenes = deneChainJSONObject.getJSONArray("Denes");	
 					for(int k=0;k<mutationTimeConfigurationDenes.length();k++) {
