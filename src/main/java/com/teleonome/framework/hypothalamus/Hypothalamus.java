@@ -303,10 +303,8 @@ public abstract class Hypothalamus {
 			}
 
 
-
-			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(), 1, 1, TimeUnit.MINUTES);
-			
-			
+			Calendar calendar = Calendar.getInstance();
+			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(), Utils.millisToNextHour(calendar), 60*60*1000, TimeUnit.MILLISECONDS);
 			//
 			// at the begining of the thread make all the pending commands as skipped
 			// so that there are no commands to execute before the first pulse
