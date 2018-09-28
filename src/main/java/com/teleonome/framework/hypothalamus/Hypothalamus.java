@@ -670,6 +670,7 @@ public abstract class Hypothalamus {
 						logger.info("looking at dene " + mutationTimeConfigurationDenes.getJSONObject(k).getString("Name"));
 						if(mutationTimeConfigurationDenes.getJSONObject(k).getString("Name").equals("Time Mutation Configuration")) {
 							mutationTimeConfigurationDene = mutationTimeConfigurationDenes.getJSONObject(k);
+							logger.info("found  dene " + mutationTimeConfigurationDene.toString(4));
 							break found;
 						}
 				}
