@@ -895,7 +895,7 @@ public class TeleonomeConstants {
 	public static final String PANEL_VISUALIZATION_STYLE_PATHOLOGY="Pathology Panel";
 	public static final String PANEL_VISUALIZATION_STYLE_LINE_CHART="Line Chart Panel";
 	public static final String PANEL_VISUALIZATION_STYLE_CSV_MULTI_LINE_CHART="CSV File MultiLine Chart Panel";
-	public static final String PANEL_VISUALIZATION_STYLE_PI_CHART="Pie Chart Panel";
+	public static final String PANEL_VISUALIZATION_STYLE_PIE_CHART="Pie Chart Panel";
 
 	
 	public static final String PANEL_VISUALIZATION_STYLE_BAR_CHART="Bar Chart Panel";

@@ -244,6 +244,8 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 		boolean toReturn=true;
 		boolean keepGoing=true;
 		String commandCode="";
+		int maxTries=5;
+		int counter=0;
 		while(keepGoing) {
 			result = sendCommand(actuatorCommand);
 			if(	result.equals(TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE) ||
@@ -256,13 +258,20 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 				}
 				keepGoing=false;
 			}else {
-				logger.debug("bad response to valideuser result=" + result + " asking again");;
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				logger.debug("bad response to validate user result=" + result + " asking again");
+				counter++;
+				if(counter>=maxTries) {
+					toReturn=false;
+					keepGoing=false;
+				}else {
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
+				
 			}
 		}
 		return toReturn;
@@ -275,17 +284,25 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 		String actuatorCommand = "GetCommandCode";
 		boolean keepGoing=true;
 		String commandCode="";
+		int maxTries=5;
+		int counter=0;
 		while(keepGoing) {
 			commandCode = sendCommand(actuatorCommand);
 			if(commandCode!=null && commandCode.length()==6) {
 				keepGoing=false;
 			}else {
 				logger.debug("bad command code=" + commandCode + " asking again");;
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				counter++;
+				if(counter>=maxTries) {
+					commandCode="999999";
+					keepGoing=false;
+				}else {
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}
