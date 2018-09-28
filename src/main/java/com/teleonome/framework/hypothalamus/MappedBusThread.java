@@ -189,7 +189,7 @@ class MappedBusThread extends Thread{
 								}while(!inputLine.startsWith("Ok") 
 										&& !inputLine.startsWith("Command") 
 										&& !inputLine.startsWith("Fault")
-										&& !inputLine.startsWith("AsyncCycleUpdate")
+										&& !inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE)
 										&& !inputLine.startsWith(TeleonomeConstants.COMMAND_SHUTDOWN)
 										&& !inputLine.startsWith(TeleonomeConstants.COMMAND_REBOOT)
 										);

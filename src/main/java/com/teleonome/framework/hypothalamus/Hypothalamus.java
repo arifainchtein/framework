@@ -320,7 +320,7 @@ public abstract class Hypothalamus {
 					}
 			    	//aMnemosyneManager.performTimePrunningAnalysis();
 			    }
-			}, 0, 1, TimeUnit.HOURS);
+			}, 0, 2, TimeUnit.MINUTES);
 			
 			//
 			// at the begining of the thread make all the pending commands as skipped
