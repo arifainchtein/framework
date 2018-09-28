@@ -304,11 +304,11 @@ public abstract class Hypothalamus {
 
 
 			Calendar calendar = Calendar.getInstance();
-//			long millisToNextHour = Utils.millisToNextHour(calendar);
-//			logger.info("about to start the timebsased executor, with a delay of " + millisToNextHour + " milliseconds ");
-//			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),millisToNextHour , 60*60*1000, TimeUnit.MILLISECONDS);
+			long millisToNextHour = Utils.millisToNextHour(calendar);
+			logger.info("about to start the timebsased executor, with a delay of " + millisToNextHour + " milliseconds ");
+			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),millisToNextHour , 60*60*1000, TimeUnit.MILLISECONDS);
 			
-			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),1 , 2, TimeUnit.MINUTES);
+			//new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),1 , 2, TimeUnit.MINUTES);
 			
 			
 			//
@@ -686,7 +686,7 @@ public abstract class Hypothalamus {
 			if(mutationTimeConfigurationDene!=null) {
 				mutationExecutionTime = (String)aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mutationTimeConfigurationDene, TeleonomeConstants.DENEWORD_TYPE_TIME_BASED_MUTATION_EXECUTION_TIME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 				logger.info("mutationExecutionTime= " +mutationExecutionTime);
-				
+				if(mutationExecutionTime==null)mutationExecutionTime="";
 				if(mutationExecutionTime.equals(TeleonomeConstants.MNEMOSYNE_HOURLY_MUTATION)) {
 					try {
 						executeMutation(timeBasedMutationJSONObject);
