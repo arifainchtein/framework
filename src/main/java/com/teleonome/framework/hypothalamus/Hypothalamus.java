@@ -305,7 +305,7 @@ public abstract class Hypothalamus {
 
 			Calendar calendar = Calendar.getInstance();
 			long millisToNextHour = Utils.millisToNextHour(calendar);
-			logger.info("about to start the timebsased executor, with a delay of " + millisToNextHour + " milliseconds ");
+			logger.info("about to start the timebsased executor, with a delay of " + Utils.getElapsedTimeHoursMinutesSecondsString(millisToNextHour) + " milliseconds ");
 			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),millisToNextHour , 60*60*1000, TimeUnit.MILLISECONDS);
 			
 			//new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),1 , 2, TimeUnit.MINUTES);
