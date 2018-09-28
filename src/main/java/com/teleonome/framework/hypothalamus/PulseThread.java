@@ -45,8 +45,8 @@ public class PulseThread extends Thread{
 	private final Hypothalamus anHypothalamus;
 	private boolean executedFirstPulseSinceReboot=false;
 	private DenomeManager aDenomeManager=null;
-	private boolean persistenceOrganismPulses=true;
-	private boolean persistencePulse=true;
+	private boolean persistenceOrganismPulses=false;
+	private boolean persistencePulse=false;
 	BufferedWriter motherOutputStream = null;
 	BufferedReader motherInputStream = null;
 	
