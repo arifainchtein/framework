@@ -258,8 +258,8 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 				}
 				keepGoing=false;
 			}else {
-				logger.debug("bad response to validate user result=" + result + " asking again");
 				counter++;
+				logger.debug("bad response to validate user result=" + result + " asking again,counter=" + counter + " maxTries=" + maxTries);
 				if(counter>=maxTries) {
 					toReturn=false;
 					keepGoing=false;
@@ -291,8 +291,9 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 			if(commandCode!=null && commandCode.length()==6) {
 				keepGoing=false;
 			}else {
-				logger.debug("bad command code=" + commandCode + " asking again");;
 				counter++;
+				logger.debug("bad command code=" + commandCode + " asking again,counter=" + counter + " maxTries=" + maxTries);
+				
 				if(counter>=maxTries) {
 					commandCode="999999";
 					keepGoing=false;

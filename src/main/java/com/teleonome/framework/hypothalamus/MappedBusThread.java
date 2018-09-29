@@ -158,9 +158,11 @@ class MappedBusThread extends Thread{
 				
 				String asyncData="AsyncData";
 				logger.debug("line 105 microControllerPointerMicroControllerIndex=" + hypothalamus.microControllerPointerMicroControllerIndex);
+				long asyncRequestDelayMillis=0;
 				for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
 					microControllerPointer = (String)en.nextElement();
 					aMicroController = (MicroController)hypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
+					asyncRequestDelayMillis = aMicroController.getAsyncRequestMillisecondsDelay();
 					logger.debug("AsyncCycle is processing " + aMicroController.getName());
 					if(aMicroController.isEnableAsyncUpdate()) {
 						try {
@@ -500,6 +502,14 @@ class MappedBusThread extends Thread{
 								logger.debug("Closing input because is not ready");
 								if(input!=null)input.close();
 								if(output!=null)output.close();
+							}
+							if(asyncRequestDelayMillis>0) {
+								try {
+									Thread.sleep(asyncRequestDelayMillis);
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									logger.warn(Utils.getStringException(e));
+								}
 							}
 						} catch (IOException e) {
 							logger.warn("IOException processing " + aMicroController.getName());	

@@ -14,12 +14,29 @@ import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 public abstract class MicroController {
 	private String name;
 	protected DenomeManager aDenomeManager; 
+	protected boolean enableAsyncUpdate=false;
+	protected long asyncRequestMillisecondsDelay=1000;
+	
 	public MicroController(DenomeManager d, String n){
 		aDenomeManager=d;
 		name=n;
 	}
 	
-	protected boolean enableAsyncUpdate=false;
+	public long getAsyncRequestMillisecondsDelay() {
+		return asyncRequestMillisecondsDelay;
+	}
+
+
+
+	public void setAsyncRequestMillisecondsDelay(long asyncRequestMillisecondsDelay) {
+		this.asyncRequestMillisecondsDelay = asyncRequestMillisecondsDelay;
+	}
+
+
+
+	
+	
+	
 	
 	public String getName(){
 		return name;
