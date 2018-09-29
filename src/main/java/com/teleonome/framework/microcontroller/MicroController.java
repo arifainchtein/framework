@@ -15,20 +15,20 @@ public abstract class MicroController {
 	private String name;
 	protected DenomeManager aDenomeManager; 
 	protected boolean enableAsyncUpdate=false;
-	protected long asyncRequestMillisecondsDelay=1000;
+	protected int asyncRequestMillisecondsDelay=1000;
 	
 	public MicroController(DenomeManager d, String n){
 		aDenomeManager=d;
 		name=n;
 	}
 	
-	public long getAsyncRequestMillisecondsDelay() {
+	public int getAsyncRequestMillisecondsDelay() {
 		return asyncRequestMillisecondsDelay;
 	}
 
 
 
-	public void setAsyncRequestMillisecondsDelay(long asyncRequestMillisecondsDelay) {
+	public void setAsyncRequestMillisecondsDelay(int asyncRequestMillisecondsDelay) {
 		this.asyncRequestMillisecondsDelay = asyncRequestMillisecondsDelay;
 	}
 
