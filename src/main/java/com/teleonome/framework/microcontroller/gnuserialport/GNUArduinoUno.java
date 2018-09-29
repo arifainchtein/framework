@@ -115,6 +115,16 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 				h.put("message","Could not find COM port");
 				throw new MicrocontrollerCommunicationException(h);
 			}
+			try {
+				
+				Object o = aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(microcontrollerDene, TeleonomeConstants.DENEWORD_MICROCONTROLLER_ASYNC_REQUEST_DELAY_MILLIS, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				if(o!=null) {
+					asyncRequestMillisecondsDelay = (long)o;
+					logger.info("Using asyncRequestMillisecondsDelay=" + asyncRequestMillisecondsDelay);
+				}
+			}catch(Exception e) {
+				logger.warn(Utils.getStringException(e));
+			}
 			String pointerToCommParamsDene =  (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(arduinoUnoMicrocontrollerDene, TeleonomeConstants.DENEWORD_MICROCONTROLLER_COMMUNICATION_PROTOCOL, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			logger.debug("using pointerToCommParamsDene=" + pointerToCommParamsDene);
 			

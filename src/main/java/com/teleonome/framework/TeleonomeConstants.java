@@ -559,6 +559,8 @@ public class TeleonomeConstants {
 	//
 	public static int MAPPED_BUS_RECORD_SIZE=300000;
 	public static final String DENEWORD_TYPE_MICROCONTROLLER_PROCESSING_CLASSNAME="Microcontroller Processing Class Name";
+	public static final String DENEWORD_MICROCONTROLLER_ASYNC_REQUEST_DELAY_MILLIS="Async Request Delay Millis";
+	
 	public static final String COMMAND_REQUEST_NOT_EXECUTED="Not Executed";
 	public static final String COMMAND_REQUEST_EXECUTED="Executed";
 	public static final String COMMAND_REQUEST_SKIPPED_AT_INIT="Skipped at init";
