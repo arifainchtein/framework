@@ -121,7 +121,10 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 				if(o!=null) {
 					asyncRequestMillisecondsDelay = (long)o;
 					logger.info("Using asyncRequestMillisecondsDelay=" + asyncRequestMillisecondsDelay);
+				}else {
+					logger.info("Did not find asyncRequestMillisecondsDelay");
 				}
+				
 			}catch(Exception e) {
 				logger.warn(Utils.getStringException(e));
 			}
