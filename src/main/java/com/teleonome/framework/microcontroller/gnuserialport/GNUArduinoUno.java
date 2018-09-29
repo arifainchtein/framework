@@ -116,8 +116,7 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 				throw new MicrocontrollerCommunicationException(h);
 			}
 			try {
-				
-				Object o = aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(microcontrollerDene, TeleonomeConstants.DENEWORD_MICROCONTROLLER_ASYNC_REQUEST_DELAY_MILLIS, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				Object o =  DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(arduinoUnoMicrocontrollerDene, TeleonomeConstants.DENEWORD_MICROCONTROLLER_ASYNC_REQUEST_DELAY_MILLIS, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 				if(o!=null) {
 					asyncRequestMillisecondsDelay = (long)o;
 					logger.info("Using asyncRequestMillisecondsDelay=" + asyncRequestMillisecondsDelay);
