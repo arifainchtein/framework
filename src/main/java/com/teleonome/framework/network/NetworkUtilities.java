@@ -2,7 +2,12 @@ package com.teleonome.framework.network;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
 
 import org.apache.commons.io.FileUtils;
@@ -99,6 +104,24 @@ public class NetworkUtilities {
 		}
 		return toReturn;
 	}
+	
+	
+	public static JSONObject getNetworkInterfaces() throws SocketException, UnknownHostException{
+		NetworkInterface networkInterface;
+		JSONObject toReturn = new JSONObject();
+		InetAddress inetAddr, potential=null;
+		for(Enumeration <NetworkInterface> enu = NetworkInterface.getNetworkInterfaces();enu.hasMoreElements();){
+			networkInterface  = enu.nextElement();
+			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
+				inetAddr = (InetAddress)ifaces.nextElement();
+				if(!inetAddr.isLoopbackAddress()){
+					toReturn.put(networkInterface.getName(), inetAddr.getHostAddress());
+				}
+			}
+		}
+		return toReturn;
+	}
+	
 	
 	public static JSONArray getSSID(boolean debug){
 		ArrayList result=new ArrayList();;
