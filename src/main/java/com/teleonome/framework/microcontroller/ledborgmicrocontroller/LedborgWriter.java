@@ -8,7 +8,6 @@ import org.apache.log4j.Logger;
 
 import com.pi4j.wiringpi.SoftPwm;
 
-
 public class LedborgWriter extends BufferedWriter {
 	
 	public static void SetLedBorg(float red, float green, float blue)
