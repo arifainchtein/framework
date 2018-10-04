@@ -4750,9 +4750,10 @@ public class DenomeManager {
 			JSONObject localDenomeJSONObject = new JSONObject(FileUtils.readFileToString(selectedFile));
 			logger.debug("targetDeneWordIdentity=" + targetDeneWordIdentity.toString());
 
-			JSONObject deneWord = (JSONObject) DenomeUtils.getDeneWordByIdentity(localDenomeJSONObject, targetDeneWordIdentity, TeleonomeConstants.COMPLETE);
+			Object o =  DenomeUtils.getDeneWordByIdentity(localDenomeJSONObject, targetDeneWordIdentity, TeleonomeConstants.COMPLETE);
 			
-			if(deneWord!=null) {
+			if(o!=null) {
+				JSONObject deneWord = (JSONObject)o;
 				logger.debug("readAndModifyDeneWordByIdentity, deneWord " +deneWord + " value=" + value);
 				deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, value);
 
