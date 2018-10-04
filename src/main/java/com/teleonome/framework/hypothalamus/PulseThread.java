@@ -865,8 +865,9 @@ public class PulseThread extends Thread{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		logger.debug("line 871 actuatorOperonActive=" + actuatorOperonActive + " actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
 		if(actuatorOperonActive && actuatorExecutionPositionDeneIndex!=null && actuatorExecutionPositionDeneIndex.size()>0){
-			logger.debug("line 2349 actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
+			
 			for (Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionDeneIndex) {
 				
 				anActuatorDeneJSONObject = entry4.getKey();
