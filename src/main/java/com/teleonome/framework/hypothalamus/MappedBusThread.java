@@ -558,7 +558,7 @@ class MappedBusThread extends Thread{
 				if(command.equals(TeleonomeConstants.COMMAND_SHUTDOWN) || command.equals(TeleonomeConstants.COMMAND_SHUTDOWN_TEXT)){
 					logger.debug("receive from command shuttind down");
 					boolean shutdownOk = hypothalamus.motherMicroController.shuttingDownHypothalamus();
-					
+					logger.debug("receive from command shuttind down, shutdownOk=" + shutdownOk);
 					if(shutdownOk) {
 						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
 						//

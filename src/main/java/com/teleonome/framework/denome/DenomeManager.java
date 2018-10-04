@@ -4751,18 +4751,22 @@ public class DenomeManager {
 			logger.debug("targetDeneWordIdentity=" + targetDeneWordIdentity.toString());
 
 			JSONObject deneWord = (JSONObject) DenomeUtils.getDeneWordByIdentity(localDenomeJSONObject, targetDeneWordIdentity, TeleonomeConstants.COMPLETE);
-			logger.debug("readAndModifyDeneWordByIdentity, deneWord " +deneWord + " value=" + value);
-			deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, value);
+			
+			if(deneWord!=null) {
+				logger.debug("readAndModifyDeneWordByIdentity, deneWord " +deneWord + " value=" + value);
+				deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, value);
 
-			try {
-				FileUtils.write(selectedFile, localDenomeJSONObject.toString(4));
-				FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome"), localDenomeJSONObject.toString(4));
-				toReturn=true;
-			} catch (IOException | JSONException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
+				try {
+					FileUtils.write(selectedFile, localDenomeJSONObject.toString(4));
+					FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome"), localDenomeJSONObject.toString(4));
+					toReturn=true;
+				} catch (IOException | JSONException e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
+				}
+				logger.debug("Saved pulse to " + selectedDenomeFileName);
 			}
-			logger.debug("Saved pulse to " + selectedDenomeFileName);
+			
 
 
 		} catch (IOException e) {
