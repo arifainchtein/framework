@@ -1602,7 +1602,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}
 	
-	public JSONObject markCommandAsBadCommandCode(int id){
+	public JSONObject markCommandAsBadCommandCode(int id, String reason){
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		String sql = "update CommandRequests set executedOn=?, status=?   where id=? returning  createdon, executedon, command, status, commandcode";
@@ -1613,7 +1613,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setLong(1, System.currentTimeMillis());
-			preparedStatement.setString(2,  TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE );
+			preparedStatement.setString(2,  reason );
 			preparedStatement.setInt(3, id);
 			
 			rs = preparedStatement.executeQuery();

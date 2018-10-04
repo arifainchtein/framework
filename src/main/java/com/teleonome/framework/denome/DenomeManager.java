@@ -2852,8 +2852,8 @@ public class DenomeManager {
 		return aDBManager.markAllNonExecutedAsSkipped();
 	}
 	
-	public JSONObject markCommandAsBadCommandCode(int id){
-		return aDBManager.markCommandAsBadCommandCode( id);
+	public JSONObject markCommandAsBadCommandCode(int id, String reason){
+		return aDBManager.markCommandAsBadCommandCode( id, reason);
 	}
 	
 	public JSONObject markCommandCompleted(int id){

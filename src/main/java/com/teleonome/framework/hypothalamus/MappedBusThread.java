@@ -142,7 +142,7 @@ class MappedBusThread extends Thread{
 						// if we are here, the user code was wron
 						// from the mother, or an invalid code from the originator
 						//
-						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId());
+						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId(), TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE);
 						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
 						logger.debug("COMMANDS CODE DO NOT MATCH commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
 						commandCode=null;
@@ -557,28 +557,65 @@ class MappedBusThread extends Thread{
 
 				if(command.equals(TeleonomeConstants.COMMAND_SHUTDOWN) || command.equals(TeleonomeConstants.COMMAND_SHUTDOWN_TEXT)){
 					logger.debug("receive from command shuttind down");
-
-					hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
-					//
-					// now check to see if the action that executes the shutdown command
-					// that should have an identity of @NewEgg:Internal:Actuators:Shutdown:Active
-					// should be set to false, so is not active on next startup
-					Identity shutdownActionIdentity = new Identity(hypothalamus.aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_ACTUATORS,TeleonomeConstants.SHUTDOWN_ACTION,TeleonomeConstants.DENEWORD_ACTIVE);
-					try {
-						hypothalamus.aDenomeManager.readAndModifyDeneWordByIdentity(shutdownActionIdentity, false);
-					} catch (JSONException | InvalidDenomeException e) {
-						// TODO Auto-generated catch block
-						logger.warn(Utils.getStringException(e));
+					boolean shutdownOk = hypothalamus.motherMicroController.shuttingDownHypothalamus();
+					
+					if(shutdownOk) {
+						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
+						//
+						// now check to see if the action that executes the shutdown command
+						// that should have an identity of @Egg:Internal:Actuators:Shutdown:Active
+						// should be set to false, so is not active on next startup
+						Identity shutdownActionIdentity = new Identity(hypothalamus.aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_ACTUATORS,TeleonomeConstants.SHUTDOWN_ACTION,TeleonomeConstants.DENEWORD_ACTIVE);
+						try {
+							hypothalamus.aDenomeManager.readAndModifyDeneWordByIdentity(shutdownActionIdentity, false);
+						} catch (JSONException | InvalidDenomeException e) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e));
+						}
+						
+						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
+						//
+						// wait a couple of seconds to make sure the heart does its job
+						//
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e));
+						}
+						
+						Runtime.getRuntime().exec("sudo shutdown -h now");
+					}else {
+						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId(),TeleonomeConstants.MOTHER_INVALIDATED_SHUTDOWN);
+						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
 					}
 					
-					Runtime.getRuntime().exec("sudo shutdown -h now");
+					
+					
+					
 
 
 				}else if(command.equals(TeleonomeConstants.COMMAND_REBOOT) || command.equals(TeleonomeConstants.COMMAND_REBOOT_TEXT)){
 					logger.debug("receive from command reboot");
-
-					hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
-					Runtime.getRuntime().exec("sudo reboot");
+					boolean rebootOk = hypothalamus.motherMicroController.rebootingHypothalamus();
+					if(rebootOk) {
+						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
+						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
+						//
+						// wait a couple of seconds to make sure the heart does its job
+						//
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e));
+						}
+						Runtime.getRuntime().exec("sudo reboot");
+					}else {
+						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId(),TeleonomeConstants.MOTHER_INVALIDATED_REBOOT);
+						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
+					}
+					
 
 
 				}else if(command.equals(TeleonomeConstants.COMMAND_KILL_PULSE)){

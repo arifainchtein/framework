@@ -83,6 +83,18 @@ public class SimpleMicroController extends MotherMicroController {
 		return toReturn;
 	}
 	
+	@Override
+	public  boolean rebootingHypothalamus() throws IOException{
+		boolean toReturn=true;
+		return toReturn;
+	}
+	
+	@Override
+	public  boolean shuttingDownHypothalamus() throws IOException{
+		boolean toReturn=true;
+		return toReturn;
+	}
+	
 	
 	@Override
 	public String getCommandCode()  throws IOException {
@@ -114,9 +126,6 @@ public class SimpleMicroController extends MotherMicroController {
 			}
 			
 		}
-
-		
-		
 		return code;
 	}
 

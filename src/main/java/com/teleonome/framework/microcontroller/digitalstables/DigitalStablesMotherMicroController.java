@@ -197,6 +197,72 @@ public class DigitalStablesMotherMicroController extends MotherMicroController {
 		}
 		
 		@Override
+		public  boolean rebootingHypothalamus() throws IOException{
+			
+			String result = "";
+			boolean toReturn=true;
+			boolean keepGoing=true;
+			String commandCode="";
+			int maxTries=5;
+			int counter=0;
+			while(keepGoing) {
+				result = sendCommand(TeleonomeConstants.MOTHER_COMMAND_REBOOT_HYPOTHALAMUS);
+				if(	result.equals(TeleonomeConstants.MOTHER_COMMAND_REBOOT_HYPOTHALAMUS_OK)) {
+					toReturn=true;
+					keepGoing=false;
+				}else {
+					counter++;
+					logger.debug("bad response to rebootingHypothalamus  result=" + result + " asking again,counter=" + counter + " maxTries=" + maxTries);
+					if(counter>=maxTries) {
+						toReturn=false;
+						keepGoing=false;
+					}else {
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					
+				}
+			}
+			return toReturn;
+		}
+		
+		@Override
+		public  boolean shuttingDownHypothalamus() throws IOException{
+			String result = "";
+			boolean toReturn=true;
+			boolean keepGoing=true;
+			String commandCode="";
+			int maxTries=5;
+			int counter=0;
+			while(keepGoing) {
+				result = sendCommand(TeleonomeConstants.MOTHER_COMMAND_SHUTDOWN_HYPOTHALAMUS);
+				if(	result.equals(TeleonomeConstants.MOTHER_COMMAND_SHUTDOWN_HYPOTHALAMUS_OK)) {
+					toReturn=true;
+					keepGoing=false;
+				}else {
+					counter++;
+					logger.debug("bad response to shuttingDownHypothalamus  result=" + result + " asking again,counter=" + counter + " maxTries=" + maxTries);
+					if(counter>=maxTries) {
+						toReturn=false;
+						keepGoing=false;
+					}else {
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					
+				}
+			}
+			return toReturn;
+		}
+		@Override
 		public String getCommandCode() throws IOException {
 			// TODO Auto-generated method stub
 			output = getWriter();

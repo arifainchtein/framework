@@ -569,6 +569,14 @@ public class TeleonomeConstants {
 	public static final String COMMAND_CODE="CommandCode";
 	public static final String COMMAND_REQUEST_EXECUTION_OK="Command Request Succesfull";
 	public static final String COMMAND_REQUEST_INVALID_CODE="Invalid Code";
+	public static final String MOTHER_COMMAND_REBOOT_HYPOTHALAMUS="RebootHypothalamus";
+	public static final String MOTHER_COMMAND_REBOOT_HYPOTHALAMUS_OK="RebootHypothalamusOK";
+	public static final String MOTHER_COMMAND_SHUTDOWN_HYPOTHALAMUS="ShutdownHypothalamus";
+	public static final String MOTHER_COMMAND_SHUTDOWN_HYPOTHALAMUS_OK="RebootHypothalamusNotOK";
+	public static final String MOTHER_INVALIDATED_REBOOT="Mother Invalidated Reboot";
+	public static final String MOTHER_INVALIDATED_SHUTDOWN="Mother Invalidated Shutdown";
+	
+	
 	public static final String COMMAND_REQUEST_VALID_CODE="Valid Code";
 	public static final String COMMAND_REQUEST_PENDING_EXECUTION="Pending Execution";
 	
