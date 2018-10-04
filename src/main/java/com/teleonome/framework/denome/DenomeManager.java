@@ -820,7 +820,7 @@ public class DenomeManager {
 
 						actionListDene = entry.getKey();
 						actionListDeneName = actionListDene.getString("Name");
-						logger.info("line 813 , actionListDeneName=" + actionListDeneName);
+						logger.info("line 823 , actionListDeneName=" + actionListDeneName);
 						
 						//
 						// the actionListDene contains denewords of type Dene Pointer which we need to resolve
@@ -7590,6 +7590,21 @@ public class DenomeManager {
 	}
 
 	public ArrayList<Map.Entry<JSONObject, Integer>> getActuatorExecutionPositionDeneByMicroControllerPointerIndex(String pointer){
+		
+		
+		logger.debug("line 7593 pointer=" + pointer);
+		for(Enumeration en = pointerToMicroControllerActuatorExecutionPositionDeneIndex.keys();en.hasMoreElements();) {
+			String p = (String) en.nextElement();
+			logger.debug("line 7596 p=" + p);
+			ArrayList<Map.Entry<JSONObject, Integer>> a = (ArrayList<Entry<JSONObject, Integer>>) pointerToMicroControllerActuatorExecutionPositionDeneIndex.get(p);
+		
+			for (Map.Entry<JSONObject, Integer> entry4 : a) {
+				Object anActuatorDeneJSONObject = entry4.getKey();
+				logger.debug("line 7601 anActuatorDeneJSONObject=" + anActuatorDeneJSONObject);
+			}
+		}
+		
+		
 		return (ArrayList<Entry<JSONObject, Integer>>) pointerToMicroControllerActuatorExecutionPositionDeneIndex.get(pointer);
 	}
 
