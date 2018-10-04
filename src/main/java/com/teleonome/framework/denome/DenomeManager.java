@@ -4748,10 +4748,10 @@ public class DenomeManager {
 		boolean toReturn=false;
 		try {
 			JSONObject localDenomeJSONObject = new JSONObject(FileUtils.readFileToString(selectedFile));
-			logger.debug("targetDeneWordIdentity=" + targetDeneWordIdentity.toString());
+			
 
 			Object o =  DenomeUtils.getDeneWordByIdentity(localDenomeJSONObject, targetDeneWordIdentity, TeleonomeConstants.COMPLETE);
-			
+			logger.debug("targetDeneWordIdentity=" + targetDeneWordIdentity.toString() + " o="+o);
 			if(o!=null) {
 				JSONObject deneWord = (JSONObject)o;
 				logger.debug("readAndModifyDeneWordByIdentity, deneWord " +deneWord + " value=" + value);
