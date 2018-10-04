@@ -776,14 +776,14 @@ public class DenomeManager {
 
 				for(Enumeration<String> en = pointerToMicroControllerActuatorDenesVectorIndex.keys();en.hasMoreElements();){
 					pointerToMicroController = en.nextElement();
-					logger.debug("pointerToMicroController=" + pointerToMicroController);
+					logger.debug("line 779 pointerToMicroController=" + pointerToMicroController);
 					v = (Vector)pointerToMicroControllerActuatorDenesVectorIndex.get(pointerToMicroController);
 					actuatorExecutionPositionDeneIndex = new ArrayList();
 					for(int j=0;j<v.size();j++){
 						aDeneJSONObject = (JSONObject) v.elementAt(j);
 						actuatorDeneName = aDeneJSONObject.getString("Name");
 						executionPosition = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneJSONObject,"Execution Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						logger.debug("actuatorDeneName=" + actuatorDeneName+ " executionPosition=" + executionPosition);
+						logger.debug(" line 786 actuatorDeneName=" + actuatorDeneName+ " executionPosition=" + executionPosition);
 						if(executionPosition!=null && executionPosition>-1){
 							//
 							// The Dene that contains the executive position deneword also has a dene of type Action list,
@@ -798,7 +798,7 @@ public class DenomeManager {
 							if(actionListPointer!=null){
 								try {
 									actionListDene = getDeneByIdentity(new Identity(actionListPointer));
-									logger.debug("actionListDene=" + actionListDene.toString(4));
+									logger.debug("line 801 actionListDene=" + actionListDene.toString(4));
 								} catch (InvalidDenomeException e) {
 									// TODO Auto-generated catch block
 									logger.warn(Utils.getStringException(e));
