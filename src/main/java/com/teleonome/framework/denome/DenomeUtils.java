@@ -335,7 +335,7 @@ public class DenomeUtils {
 								}
 								
 				    		}else if(processName.equals(TeleonomeConstants.PROCESS_HEART)) {
-				    			String heartPingInfoS = FileUtils.readFileToString(new File("HeartPing.info"));
+				    			String heartPingInfoS = FileUtils.readFileToString(new File("heart/HeartPing.info"));
 								if(heartPingInfoS!=null) {
 									JSONObject heartPingInfo = new JSONObject(heartPingInfoS);
 									double heartAvailableMemory = heartPingInfo.getDouble(TeleonomeConstants.HEART_PROCESS_AVAILABLE_MEMORY);
