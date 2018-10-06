@@ -5064,9 +5064,8 @@ public class DenomeManager {
 					long totalSpace = directory.getTotalSpace()/1024000;
 					long freeSpace = directory.getFreeSpace()/1024000;
 					long usableSpace = directory.getUsableSpace()/1024000;
-					System.gc();
-					double availableMemory = Runtime.getRuntime().freeMemory()/1024000;
-					double maxMemory = Runtime.getRuntime().maxMemory()/1024000;
+					
+					
 					double dbSize = aDBManager.getDatabaseSizeInMB();
 					double pulseSize = aDBManager.getTableSizeMB("pulse");
 					double organimsPulseSize = aDBManager.getTableSizeMB("organismpulse");
@@ -5083,9 +5082,6 @@ public class DenomeManager {
 					systemDataDeneWords.put(deneWord);
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Usable Space",""+usableSpace,"MB","double",true);
 					systemDataDeneWords.put(deneWord);
-					deneWord = DenomeUtils.buildDeneWordJSONObject("Available Memory",""+availableMemory,"MB","double",true);
-					systemDataDeneWords.put(deneWord);
-					deneWord = DenomeUtils.buildDeneWordJSONObject("Maximum Memory",""+maxMemory,"MB","double",true);
 					systemDataDeneWords.put(deneWord);
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Database Size",""+dbSize,"MB","double",true);
 					systemDataDeneWords.put(deneWord);
@@ -7591,18 +7587,18 @@ public class DenomeManager {
 
 	public ArrayList<Map.Entry<JSONObject, Integer>> getActuatorExecutionPositionDeneByMicroControllerPointerIndex(String pointer){
 		
-		
-		logger.debug("line 7593 pointer=" + pointer);
-		for(Enumeration en = pointerToMicroControllerActuatorExecutionPositionDeneIndex.keys();en.hasMoreElements();) {
-			String p = (String) en.nextElement();
-			logger.debug("line 7596 p=" + p);
-			ArrayList<Map.Entry<JSONObject, Integer>> a = (ArrayList<Entry<JSONObject, Integer>>) pointerToMicroControllerActuatorExecutionPositionDeneIndex.get(p);
-		
-			for (Map.Entry<JSONObject, Integer> entry4 : a) {
-				Object anActuatorDeneJSONObject = entry4.getKey();
-				logger.debug("line 7601 anActuatorDeneJSONObject=" + anActuatorDeneJSONObject);
-			}
-		}
+//		
+//		logger.debug("line 7593 pointer=" + pointer);
+//		for(Enumeration en = pointerToMicroControllerActuatorExecutionPositionDeneIndex.keys();en.hasMoreElements();) {
+//			String p = (String) en.nextElement();
+//			logger.debug("line 7596 p=" + p);
+//			ArrayList<Map.Entry<JSONObject, Integer>> a = (ArrayList<Entry<JSONObject, Integer>>) pointerToMicroControllerActuatorExecutionPositionDeneIndex.get(p);
+//		
+//			for (Map.Entry<JSONObject, Integer> entry4 : a) {
+//				Object anActuatorDeneJSONObject = entry4.getKey();
+//				logger.debug("line 7601 anActuatorDeneJSONObject=" + anActuatorDeneJSONObject);
+//			}
+//		}
 		
 		
 		return (ArrayList<Entry<JSONObject, Integer>>) pointerToMicroControllerActuatorExecutionPositionDeneIndex.get(pointer);

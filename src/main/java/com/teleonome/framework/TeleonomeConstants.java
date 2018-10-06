@@ -90,7 +90,15 @@ public class TeleonomeConstants {
 	public static final String DATATYPE_VIDEO_FILE = "Video File";
 	
 	public static final String  DATATYPE_TIMESTAMP_MILLISECONDS = "Timestamp Milliseconds";
-
+	public static final String  WEBSERVER_PROCESS_AVAILABLE_MEMORY="Available Memory to the Webserver JVM";
+	public static final String  WEBSERVER_PROCESS_MAXIMUM_MEMORY="Maximum Memory for the Webserver JVM";
+	
+	public static final String  HYPOTHALAMUS_PROCESS_AVAILABLE_MEMORY="Available Memory to the Hypothalamus JVM";
+	public static final String  HYPOTHALAMUS_PROCESS_MAXIMUM_MEMORY="Maximum Memory for the Hypothalamus JVM";
+	
+	public static final String  HEART_PROCESS_AVAILABLE_MEMORY="Available Memory to the Heart JVM";
+	public static final String  HEART_PROCESS_MAXIMUM_MEMORY="Maximum Memory for the Heart JVM";
+	
 	public static final String DATATYPE_LONG = "long";
 	public static final String DATATYPE_FILE="File";
 	public static final String DATATYPE_TIME_SERIES="Time Series";

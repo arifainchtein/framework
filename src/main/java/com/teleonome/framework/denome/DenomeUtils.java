@@ -314,6 +314,38 @@ public class DenomeUtils {
 				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Time Process Has Been Running",""+timeUsedByProcessAsPercentage,"Kb","double",true);
 				    		processStatusDeneWords.put(deneWord);
 				    		
+				    		if(processName.equals(TeleonomeConstants.PROCESS_HYPOTHALAMUS)) {
+				    			double hypothalamusAvailableMemory = Runtime.getRuntime().freeMemory()/1024000;
+								double hypothalamusMaxMemory = Runtime.getRuntime().maxMemory()/1024000;
+								
+								deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HYPOTHALAMUS_PROCESS_AVAILABLE_MEMORY,""+hypothalamusAvailableMemory,"Kb","double",true);
+					    		processStatusDeneWords.put(deneWord);
+					    		deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HYPOTHALAMUS_PROCESS_MAXIMUM_MEMORY,""+hypothalamusMaxMemory,"Kb","double",true);
+					    		processStatusDeneWords.put(deneWord);
+				    		}else if(processName.equals(TeleonomeConstants.PROCESS_WEB_SERVER)) {
+				    			String webserverPingInfoS = FileUtils.readFileToString(new File("WebServerPing.info"));
+								if(webserverPingInfoS!=null) {
+									JSONObject webserverPingInfo = new JSONObject(webserverPingInfoS);
+									double webserverAvailableMemory = webserverPingInfo.getDouble(TeleonomeConstants.WEBSERVER_PROCESS_AVAILABLE_MEMORY);
+									double webserverMaxMemory = webserverPingInfo.getDouble(TeleonomeConstants.WEBSERVER_PROCESS_MAXIMUM_MEMORY);
+									deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.WEBSERVER_PROCESS_AVAILABLE_MEMORY,""+webserverAvailableMemory,"Kb","double",true);
+						    		processStatusDeneWords.put(deneWord);
+						    		deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.WEBSERVER_PROCESS_MAXIMUM_MEMORY,""+webserverMaxMemory,"Kb","double",true);
+						    		processStatusDeneWords.put(deneWord);
+								}
+								
+				    		}else if(processName.equals(TeleonomeConstants.PROCESS_HEART)) {
+				    			String heartPingInfoS = FileUtils.readFileToString(new File("HeartPing.info"));
+								if(heartPingInfoS!=null) {
+									JSONObject heartPingInfo = new JSONObject(heartPingInfoS);
+									double heartAvailableMemory = heartPingInfo.getDouble(TeleonomeConstants.HEART_PROCESS_AVAILABLE_MEMORY);
+									double heartMaxMemory = heartPingInfo.getDouble(TeleonomeConstants.HEART_PROCESS_MAXIMUM_MEMORY);
+									deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HEART_PROCESS_AVAILABLE_MEMORY,""+heartAvailableMemory,"Kb","double",true);
+						    		processStatusDeneWords.put(deneWord);
+						    		deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HEART_PROCESS_MAXIMUM_MEMORY,""+heartMaxMemory,"Kb","double",true);
+						    		processStatusDeneWords.put(deneWord);
+								}
+				    		}
 				    		//System.out.println("processStatusDene=" + processStatusDene.toString(4));
 				    		toReturn.put(processStatusDene);
 				    		break;
