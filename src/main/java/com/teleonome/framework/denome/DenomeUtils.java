@@ -1036,10 +1036,10 @@ public class DenomeUtils {
 		JSONObject deneWord = new JSONObject();
 		deneWord.put("Name", name);
 		if(value!=null) {
-			if(valueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
+			if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
 				double d = Double.parseDouble(value);
 				deneWord.put("Value", d);
-			}else if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
+			}else if(valueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
 				int i = Integer.parseInt(value);
 				deneWord.put("Value", i);
 			}else if(valueType.equals(TeleonomeConstants.DATATYPE_LONG)) {
