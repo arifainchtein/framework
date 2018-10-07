@@ -167,6 +167,9 @@ public class DenomeUtils {
 			    		double freeSystemMemory = Double.parseDouble(splited[1].trim().split("\\s+")[0])/1000;
 			    		double memoryUsed = Double.parseDouble(splited[2].trim().split("\\s+")[0]);
 			    		double bufferCache = Double.parseDouble(splited[3].trim().split("\\s+")[0]);
+			    		logger.debug("lines[i]=" + lines[i]);
+			    		logger.debug("splited[2]="+ splited[2]);
+			    		logger.debug("memoryUsed="+ memoryUsed);
 			    		
 			    		deneWord = DenomeUtils.buildDeneWordJSONObject("Total System Memory",""+totalSystemMemory,"Mb","double",true);
 						memoryStatusDeneWords.put(deneWord);
