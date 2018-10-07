@@ -165,7 +165,7 @@ public class DenomeUtils {
 			    		splited = lines[i].split(":")[1].split(",");
 			    		double totalSystemMemory = Double.parseDouble(splited[0].trim().split("\\s+")[0])/1000;
 			    		double freeSystemMemory = Double.parseDouble(splited[1].trim().split("\\s+")[0])/1000;
-			    		double memoryUsed = Double.parseDouble(splited[2].trim().split("\\s+")[0]);
+			    		double memoryUsed = Double.parseDouble(splited[2].trim().split("\\s+")[0])/1000;
 			    		double bufferCache = Double.parseDouble(splited[3].trim().split("\\s+")[0]);
 			    		logger.debug("lines[i]=" + lines[i]);
 			    		logger.debug("splited[2]="+ splited[2]);
@@ -175,7 +175,7 @@ public class DenomeUtils {
 						memoryStatusDeneWords.put(deneWord);
 						deneWord = DenomeUtils.buildDeneWordJSONObject("Free System Memory",""+freeSystemMemory,"Mb","double",true);
 						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Memory Used",""+memoryUsed,"Kb","double",true);
+						deneWord = DenomeUtils.buildDeneWordJSONObject("Memory Used",""+memoryUsed,"Mb","double",true);
 						memoryStatusDeneWords.put(deneWord);
 						deneWord = DenomeUtils.buildDeneWordJSONObject("Buffer Cache",""+bufferCache,"Kb","double",true);
 						memoryStatusDeneWords.put(deneWord);
