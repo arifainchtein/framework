@@ -1035,7 +1035,21 @@ public class DenomeUtils {
 	public static JSONObject buildDeneWordJSONObject(String name, String value, String units,String valueType, boolean required) throws JSONException{
 		JSONObject deneWord = new JSONObject();
 		deneWord.put("Name", name);
-		if(value!=null)deneWord.put("Value", value);
+		if(value!=null) {
+			if(valueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
+				double d = Double.parseDouble(value);
+				deneWord.put("Value", d);
+			}else if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
+				int i = Integer.parseInt(value);
+				deneWord.put("Value", i);
+			}else if(valueType.equals(TeleonomeConstants.DATATYPE_LONG)) {
+				long l = Long.parseLong(value);
+				deneWord.put("Value", l);
+			}else {
+				deneWord.put("Value", value);
+			}
+			
+		}
 		deneWord.put("Value Type", valueType);
 		if(units!=null)deneWord.put("Units", units);
 		deneWord.put("Required", required);
