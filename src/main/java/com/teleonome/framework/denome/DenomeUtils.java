@@ -163,18 +163,18 @@ public class DenomeUtils {
 			    		//
 			    		//KiB Mem:    380416 total,   364956 used,    15460 free,     5028 buffers
 			    		splited = lines[i].split(":")[1].split(",");
-			    		double totalSystemMemory = Double.parseDouble(splited[0].trim().split("\\s+")[0]);
-			    		double freeSystemMemory = Double.parseDouble(splited[1].trim().split("\\s+")[0]);
-			    		double memoryUsed = Double.parseDouble(splited[2].trim().split("\\s+")[0]);
-			    		double bufferCache = Double.parseDouble(splited[3].trim().split("\\s+")[0]);
+			    		double totalSystemMemory = Double.parseDouble(splited[0].trim().split("\\s+")[0])/1000;
+			    		double freeSystemMemory = Double.parseDouble(splited[1].trim().split("\\s+")[0])/1000;
+			    		double memoryUsed = Double.parseDouble(splited[2].trim().split("\\s+")[0])/1024;
+			    		double bufferCache = Double.parseDouble(splited[3].trim().split("\\s+")[0])/1024;
 			    		
-			    		deneWord = DenomeUtils.buildDeneWordJSONObject("Total System Memory",""+totalSystemMemory,"Kb","double",true);
+			    		deneWord = DenomeUtils.buildDeneWordJSONObject("Total System Memory",""+totalSystemMemory,"Mb","double",true);
 						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Free System Memory",""+freeSystemMemory,"Kb","double",true);
+						deneWord = DenomeUtils.buildDeneWordJSONObject("Free System Memory",""+freeSystemMemory,"Mb","double",true);
 						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Memory Used",""+memoryUsed,"Kb","double",true);
+						deneWord = DenomeUtils.buildDeneWordJSONObject("Memory Used",""+memoryUsed,"Mb","double",true);
 						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Buffer Cache",""+bufferCache,"Kb","double",true);
+						deneWord = DenomeUtils.buildDeneWordJSONObject("Buffer Cache",""+bufferCache,"Mb","double",true);
 						memoryStatusDeneWords.put(deneWord);
 
 			    		break;
@@ -307,20 +307,20 @@ public class DenomeUtils {
 				    		processStatusDeneWords.put(deneWord);
 				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Shareable Memory",""+shareableMemory,"Kb","int",true);
 				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Current Status",""+currentStatus,"Kb","int",true);
+				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Current Status",""+currentStatus,null,"int",true);
 				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Used By Process As Percentage",""+cpuUsedByProcessAsPercentage,"Kb","double",true);
+				    		deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Used By Process As Percentage",""+cpuUsedByProcessAsPercentage,"%","double",true);
 				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Time Process Has Been Running",""+timeUsedByProcessAsPercentage,"Kb","double",true);
+				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Time Process Has Been Running",""+timeUsedByProcessAsPercentage,"%","double",true);
 				    		processStatusDeneWords.put(deneWord);
 				    		
 				    		if(processName.equals(TeleonomeConstants.PROCESS_HYPOTHALAMUS)) {
 				    			double hypothalamusAvailableMemory = Runtime.getRuntime().freeMemory()/1024000;
 								double hypothalamusMaxMemory = Runtime.getRuntime().maxMemory()/1024000;
 								
-								deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HYPOTHALAMUS_PROCESS_AVAILABLE_MEMORY,""+hypothalamusAvailableMemory,"Kb","double",true);
+								deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HYPOTHALAMUS_PROCESS_AVAILABLE_MEMORY,""+hypothalamusAvailableMemory,"Mb","double",true);
 					    		processStatusDeneWords.put(deneWord);
-					    		deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HYPOTHALAMUS_PROCESS_MAXIMUM_MEMORY,""+hypothalamusMaxMemory,"Kb","double",true);
+					    		deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HYPOTHALAMUS_PROCESS_MAXIMUM_MEMORY,""+hypothalamusMaxMemory,"Mb","double",true);
 					    		processStatusDeneWords.put(deneWord);
 				    		}else if(processName.equals(TeleonomeConstants.PROCESS_WEB_SERVER)) {
 				    			String webserverPingInfoS = FileUtils.readFileToString(new File("WebServerPing.info"));
@@ -328,9 +328,9 @@ public class DenomeUtils {
 									JSONObject webserverPingInfo = new JSONObject(webserverPingInfoS);
 									double webserverAvailableMemory = webserverPingInfo.getDouble(TeleonomeConstants.WEBSERVER_PROCESS_AVAILABLE_MEMORY);
 									double webserverMaxMemory = webserverPingInfo.getDouble(TeleonomeConstants.WEBSERVER_PROCESS_MAXIMUM_MEMORY);
-									deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.WEBSERVER_PROCESS_AVAILABLE_MEMORY,""+webserverAvailableMemory,"Kb","double",true);
+									deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.WEBSERVER_PROCESS_AVAILABLE_MEMORY,""+webserverAvailableMemory,"Mb","double",true);
 						    		processStatusDeneWords.put(deneWord);
-						    		deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.WEBSERVER_PROCESS_MAXIMUM_MEMORY,""+webserverMaxMemory,"Kb","double",true);
+						    		deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.WEBSERVER_PROCESS_MAXIMUM_MEMORY,""+webserverMaxMemory,"Mb","double",true);
 						    		processStatusDeneWords.put(deneWord);
 								}
 								
@@ -340,9 +340,9 @@ public class DenomeUtils {
 									JSONObject heartPingInfo = new JSONObject(heartPingInfoS);
 									double heartAvailableMemory = heartPingInfo.getDouble(TeleonomeConstants.HEART_PROCESS_AVAILABLE_MEMORY);
 									double heartMaxMemory = heartPingInfo.getDouble(TeleonomeConstants.HEART_PROCESS_MAXIMUM_MEMORY);
-									deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HEART_PROCESS_AVAILABLE_MEMORY,""+heartAvailableMemory,"Kb","double",true);
+									deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HEART_PROCESS_AVAILABLE_MEMORY,""+heartAvailableMemory,"Mb","double",true);
 						    		processStatusDeneWords.put(deneWord);
-						    		deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HEART_PROCESS_MAXIMUM_MEMORY,""+heartMaxMemory,"Kb","double",true);
+						    		deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HEART_PROCESS_MAXIMUM_MEMORY,""+heartMaxMemory,"Mb","double",true);
 						    		processStatusDeneWords.put(deneWord);
 								}
 				    		}
