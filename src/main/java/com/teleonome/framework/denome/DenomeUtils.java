@@ -310,11 +310,11 @@ public class DenomeUtils {
 				    		processStatusDeneWords.put(deneWord);
 				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Shareable Memory",""+shareableMemory,"Kb","int",true);
 				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Current Status",""+currentStatus,null,"int",true);
+				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Current Status",""+currentStatus,null,"String",true);
 				    		processStatusDeneWords.put(deneWord);
 				    		deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Used By Process As Percentage",""+cpuUsedByProcessAsPercentage,"%","double",true);
 				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Time Process Has Been Running",""+timeUsedByProcessAsPercentage,"%","double",true);
+				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Time Process Has Been Running",""+timeUsedByProcessAsPercentage,null,"String",true);
 				    		processStatusDeneWords.put(deneWord);
 				    		
 				    		if(processName.equals(TeleonomeConstants.PROCESS_HYPOTHALAMUS)) {
