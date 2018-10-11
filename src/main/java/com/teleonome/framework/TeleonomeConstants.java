@@ -131,8 +131,10 @@ public class TeleonomeConstants {
 	public static final String DENE_TYPE_VITAL = "Vital";
 	public static final String DENE_TYPE_CODON_ELEMENT = "Codon Element";
 	public static final String DENE_TYPE_ON_LOAD_MUTATION = "On Load";
+	public static final String DENE_TYPE_ON_FINISH_MUTATION = "On Finish";
 	public static final String DENE_TYPE_DENEWORD_CARRIER= "DeneWord Carrier";
 	public static final String DENE_TYPE_ACTION_LIST= "Action List";
+	public static final String DENE_NAME_ATTRIBUTE= "Dene Name";
 	
 	public static final String DENE_TYPE_HUMAN_INTERFACE_STATE_VARIABLES= "Human Interface State Variables";
 	public static final String DENE_TYPE_ACTUATOR_ACTION_PROCESSING="Actuator Action Processing";
@@ -291,6 +293,7 @@ public class TeleonomeConstants {
 	//
 	public static final String MUTATION_COMMAND_SET_DENEWORD = "Set DeneWord";
 	public static final String MUTATION_COMMAND_TARGET = "Target";
+	public static final String MUTATION_INJECTION_TARGET = "Injection Target";
 	public static final String MUTATION_COMMAND_DENEWORD_NAME = "Mutation Name";
 	public static final String MUTATION_COMMAND_DENEWORD_VALUE = "Mutation Value";
 	//
@@ -348,6 +351,10 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_SENSOR_VALUE = "Sensor Value";
 	public static final String DENEWORD_TYPE_UPDATE_DENEWORD_VALUE = "Update DeneWord Value";
 	public static final String DENEWORD_TYPE_APPEND_DENEWORD_VALUE = "Append DeneWord Value";
+	public static final String DENE_TYPE_UPDATE_DENEWORD_VALUE = "Update DeneWord Value";
+	public static final String DENE_TYPE_UPDATE_DENE_NAME = "Update Dene Name";
+	
+	
 	public static final String DENEWORD_TYPE_FIRMWARE_COMMAND_POINTER = "Firmware Command Pointer";
 	public static final String DENEWORD_TYPE_FIRMWARE_COMMAND = "Firmware Command";
 	public static final String DENEWORD_TYPE_SENSOR_MICROCONTROLLER_POINTER = "Sensor Microcontroller Pointer";

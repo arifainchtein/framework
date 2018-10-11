@@ -2969,6 +2969,7 @@ public class DenomeManager {
 						// each update object has two parameters, the target and the value
 						updateTargetPointer = updateJSNObject.getString("Target");
 						updateTargetValue = updateJSNObject.get("Value");
+						
 						//
 						// the payload can have one more attribute, MutationTargetNewValue which changes the actual target
 						//
@@ -3013,21 +3014,17 @@ public class DenomeManager {
 									//	logger.debug("line 1566 demomemanager mutationDene:" + mutationDene.getString("Name"));
 
 									if(mutationDene.getString("Name").equals(targetDene)){
+										//
+										// this is the correct dene, therefore
 										mutationDeneWords=mutationDene.getJSONArray("DeneWords");
 										for(int m=0;m<mutationDeneWords.length();m++){
 											mutationDeneWord = mutationDeneWords.getJSONObject(m);
 											logger.debug("line 2946 demomemanager mutationDeneWord:" + mutationDeneWord.getString("Name"));
-
-
-
 											if(mutationDeneWord.getString("Name").equals(targetDeneWord)){
 												logger.debug("line 2951 demomemanager updating value:" + updateTargetValue + " mutationDeneWord=" + mutationDeneWord);
-
 												mutationDeneWord.put("Value",updateTargetValue);
 												if(!mutationTargetNewValue.equals("")) {
-													
 													logger.debug("line 2955 demomemanager updating value:" + updateTargetValue + " mutationDeneWord=" + mutationDeneWord);
-
 													mutationDeneWord.put("Target",mutationTargetNewValue);
 												}
 											}
@@ -4201,11 +4198,15 @@ public class DenomeManager {
 				for(int j=0;j<deneWordsJSONArray.length();j++){
 					deneWord = (JSONObject) deneWordsJSONArray.get(j);
 					deneWordName = deneWord.getString("Name");
-					logger.debug("in denewordinjections, deneWordName=" + deneWordName);
-					target = deneWord.getString("Target");
+					//
+					// target must be a dene
+					target = deneWord.getString(TeleonomeConstants.MUTATION_INJECTION_TARGET);
+					logger.debug("in denewordinjections, deneWordName=" + deneWordName + " injection target=" + target);
 					targetDeneWordValue = deneWord.getString("Value");
 					injectionTarget = getDenomicElementByIdentity(new Identity(target));
-					injectionTarget.put(deneWordName, targetDeneWordValue);
+					JSONArray deneWords = injectionTarget.getJSONArray("DeneWords");
+					
+					deneWords.put(deneWord);
 
 				}
 			}
@@ -4219,21 +4220,28 @@ public class DenomeManager {
 				denes = deneInjections.getJSONArray("Denes");
 				for(int i=0;i<denes.length();i++){
 					mutationDeneJSONObject = (JSONObject) denes.get(i);
-					injectionTargetPointer = mutationDeneJSONObject.getString("Injection Target");
+					injectionTargetPointer = mutationDeneJSONObject.getString(TeleonomeConstants.MUTATION_INJECTION_TARGET);
 					//
 					// mutationDeneJSONObject has an expiration time in seconds after
 					// the mutation, ie if the value is 600, it means ten minutes from now
 					// therefore add the expiration time it with the correct timestamp
-					int expirationSeconds = mutationDeneJSONObject.getInt("Expiration Seconds");
-					mutationDeneJSONObject.put("Expiration", System.currentTimeMillis() + expirationSeconds*1000);
-
+					if(mutationDeneJSONObject.has("Expiration Seconds")) {
+						int expirationSeconds = mutationDeneJSONObject.getInt("Expiration Seconds");
+						mutationDeneJSONObject.put("Expiration", System.currentTimeMillis() + expirationSeconds*1000);
+					}
+					//
+					// injection target is always a denechain
 					injectionTarget = getDenomicElementByIdentity(new Identity(injectionTargetPointer));
-					injectionTarget.put("Denes",mutationDeneJSONObject);
+					//
+					// remove the target attribute
+					mutationDeneJSONObject.remove(TeleonomeConstants.MUTATION_INJECTION_TARGET);
+					JSONArray denesInjection = injectionTarget.getJSONArray("Denes");
+					denesInjection.put(mutationDeneJSONObject);
 				}
 			}
 
 			//
-			// finally do the Dene Actions Executions
+			// then do the Dene Actions Executions
 			// which must be executed now
 			//
 			JSONObject actionToExecute=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_ACTIONS_TO_EXECUTE);
@@ -4321,6 +4329,76 @@ public class DenomeManager {
 
 					}
 				}
+			}
+			//
+			// finally do the On Finish
+			// The On Finish does the same sort of things as the On Load, update denewords, update dene etc, 
+			// it is usefull to update values of denomic structures created in the mutation
+			//
+			JSONObject onFinishMutationDeneChainJSONObject=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENE_TYPE_ON_FINISH_MUTATION);
+			logger.debug("load immediate mutation  onFinishMutationDeneChainJSONObject="  + onFinishMutationDeneChainJSONObject);
+			String deneType="";
+			String newDeneName="";
+			if(onFinishMutationDeneChainJSONObject!=null){
+				denes = onFinishMutationDeneChainJSONObject.getJSONArray("Denes");
+				for(int i=0;i<denes.length();i++){
+					mutationDeneJSONObject = (JSONObject) denes.get(i);
+					//
+					// get the dene type, if it does not have it, the skip it
+					if(mutationDeneJSONObject.has(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE)) {
+						deneType = mutationDeneJSONObject.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
+						JSONArray deneWordsJSONArray = mutationDeneJSONObject.getJSONArray("DeneWords");
+						if(deneType.equals(TeleonomeConstants.DENE_TYPE_UPDATE_DENEWORD_VALUE)) {
+							//
+							// because we are on the On Finish dene chain, every dene will have three denewords:
+							// Name="Target"  the value will contain a pointer to the the target deneword to alter
+							// Name="Mutation Name" the name of the deneword to change the value
+							// Name="Mutation Value" the new value to set the deneword  
+							for(int j=0;j<deneWordsJSONArray.length();j++){
+
+								deneWord = (JSONObject) deneWordsJSONArray.get(j);
+								target = deneWord.getString("Target");
+								logger.debug("denewordName=" + deneWord.getString("Name") + " target=" + target);
+
+								//
+								// the value can beString, int booolean, date
+								targetDeneWordValue = deneWord.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+								//
+								// the target can be either a pointer to another dene
+								// or it can start with a $ for example $FileSystem which means it will 
+								// not modify another section of the denome, but rather it will be used by
+								// some code to mify the file system
+								if(target.startsWith("@")){
+									injectionTarget = getDenomicElementByIdentity(new Identity(target));
+									injectionTarget.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, targetDeneWordValue);
+									logger.debug("load immediate mutation  onLoadMutation  just performed an edit in onFinish target=" + target + " targetDeneWordValue=" + targetDeneWordValue );
+								}
+							}	
+						}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_UPDATE_DENE_NAME)) {
+							//// in this case the dene will have denewords, and every deneword will have a target attribute
+							// which will point to a dene.  the value attribute will have the new name of the dene
+							for(int j=0;j<deneWordsJSONArray.length();j++){
+
+								deneWord = (JSONObject) deneWordsJSONArray.get(j);
+								target = deneWord.getString("Target");
+								logger.debug("in DENE_TYPE_UPDATE_DENE_NAME denewordName=" + deneWord.getString("Name") + " target=" + target);
+
+								//
+								// the value can beString, int booolean, date
+								newDeneName = deneWord.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+								//
+								// the target will always be a  pointer to a denetem
+								if(target.startsWith("@")){
+									injectionTarget = getDenomicElementByIdentity(new Identity(target));
+									injectionTarget.put(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE, newDeneName);
+									logger.debug("load immediate mutation  onLoadMutation  just updated denename in onFinish target=" + target + " newDeneName=" + newDeneName );
+								}
+							}
+							
+						}
+					}
+				}
+
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
