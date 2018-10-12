@@ -260,6 +260,8 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 		int counter=0;
 		while(keepGoing) {
 			result = sendCommand(actuatorCommand);
+			logger.debug("actuatorCommandt=" + actuatorCommand + " resultr=" + result);
+			
 			if(	result.equals(TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE) ||
 				result.equals(TeleonomeConstants.COMMAND_REQUEST_VALID_CODE)
 			) {

@@ -330,32 +330,32 @@ class MappedBusThread extends Thread{
 									String[] sensorDataTokens = inputLine.substring(17).split("#");
 									String reportingAddress;
 									JSONObject dataToPublishJSONObject = new JSONObject();
+									if(sensorRequestQueuePositionDeneWordIndex!=null && sensorDataTokens!=null && sensorDataTokens.length>0) {
+										for (Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
+											currentlyProcessingSensorValueDeneJSONObject = entry2.getKey();
+											logger.debug("currentlyProcessingSensorValueDeneJSONObject=" + currentlyProcessingSensorValueDeneJSONObject);
 
-									for (Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
-										currentlyProcessingSensorValueDeneJSONObject = entry2.getKey();
-										logger.debug("currentlyProcessingSensorValueDeneJSONObject=" + currentlyProcessingSensorValueDeneJSONObject);
-
-										adjustedIndex = ((Integer)entry2.getValue()).intValue()-1;
-										logger.debug("processing sensor token:" + adjustedIndex );   
-										sensorValueString = sensorDataTokens[adjustedIndex];
-										logger.debug("processing sensor token:" + adjustedIndex + " resutled in " + sensorValueString);   
-										//
-										// the sensorRequestQueuePosition starts at 1 but the sensorDataTokens start at 0 so
-										// 
-										// logger.debug("inputLIne=" + inputLine);
-										if(sensorValueString!=null && !sensorValueString.equals("")){
-											reportingAddress = (String)  hypothalamus.aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDeneJSONObject,"Reporting Address");
-											try{
-												Double parseValue = Double.parseDouble(sensorValueString.trim());
-												dataToPublishJSONObject.put(reportingAddress, parseValue);
-											}catch(NumberFormatException e){
-												logger.debug(inputLine + " is not numeric");
+											adjustedIndex = ((Integer)entry2.getValue()).intValue()-1;
+											logger.debug("processing sensor token:" + adjustedIndex );   
+											sensorValueString = sensorDataTokens[adjustedIndex];
+											logger.debug("processing sensor token:" + adjustedIndex + " resutled in " + sensorValueString);   
+											//
+											// the sensorRequestQueuePosition starts at 1 but the sensorDataTokens start at 0 so
+											// 
+											// logger.debug("inputLIne=" + inputLine);
+											if(sensorValueString!=null && !sensorValueString.equals("")){
+												reportingAddress = (String)  hypothalamus.aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDeneJSONObject,"Reporting Address");
+												try{
+													Double parseValue = Double.parseDouble(sensorValueString.trim());
+													dataToPublishJSONObject.put(reportingAddress, parseValue);
+												}catch(NumberFormatException e){
+													logger.debug(inputLine + " is not numeric");
+												}
 											}
+											//}
 										}
-										//}
 									}
 									logger.debug("about to send asyn update to the herarrt " + dataToPublishJSONObject.toString());   
-
 									hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, dataToPublishJSONObject.toString());
 
 
