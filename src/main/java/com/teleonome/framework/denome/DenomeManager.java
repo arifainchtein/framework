@@ -3004,6 +3004,8 @@ public class DenomeManager {
 						//logger.debug("line 1560 demomemanager mutationDeneChains:" + mutationDeneChains.length());
 
 						for(int k=0;k<mutationDeneChains.length();k++){
+							//
+							
 							mutationDeneChain=mutationDeneChains.getJSONObject(k);
 							logger.debug("line 2034 demomemanager mutationDeneChain.getString(Name):" + mutationDeneChain.getString("Name"));
 
@@ -3011,7 +3013,7 @@ public class DenomeManager {
 								mutationDenes = mutationDeneChain.getJSONArray("Denes");
 								for(int l=0;l<mutationDenes.length();l++){
 									mutationDene = mutationDenes.getJSONObject(l);
-									//	logger.debug("line 1566 demomemanager mutationDene:" + mutationDene.getString("Name"));
+									logger.debug("line 1566 demomemanager mutationDene:" + mutationDene.getString("Name"));
 
 									if(mutationDene.getString("Name").equals(targetDene)){
 										//
