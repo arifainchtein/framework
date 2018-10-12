@@ -4220,8 +4220,12 @@ public class DenomeManager {
 
 			if(deneInjections!=null){
 				denes = deneInjections.getJSONArray("Denes");
+				JSONObject clonedDene;
 				for(int i=0;i<denes.length();i++){
 					mutationDeneJSONObject = (JSONObject) denes.get(i);
+					
+					
+					clonedDene = new JSONObject(mutationDeneJSONObject, JSONObject.getNames(mutationDeneJSONObject));
 					injectionTargetPointer = mutationDeneJSONObject.getString(TeleonomeConstants.MUTATION_INJECTION_TARGET);
 					//
 					// mutationDeneJSONObject has an expiration time in seconds after
@@ -4234,11 +4238,12 @@ public class DenomeManager {
 					//
 					// injection target is always a denechain
 					injectionTarget = getDenomicElementByIdentity(new Identity(injectionTargetPointer));
+					logger.debug("injectionTargetPointer="+ injectionTargetPointer + " injectionTarget="+ injectionTarget);
 					//
 					// remove the target attribute
-					mutationDeneJSONObject.remove(TeleonomeConstants.MUTATION_INJECTION_TARGET);
+					clonedDene.remove(TeleonomeConstants.MUTATION_INJECTION_TARGET);
 					JSONArray denesInjection = injectionTarget.getJSONArray("Denes");
-					denesInjection.put(mutationDeneJSONObject);
+					denesInjection.put(clonedDene);
 				}
 			}
 
