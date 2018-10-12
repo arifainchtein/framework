@@ -4381,11 +4381,12 @@ public class DenomeManager {
 
 								deneWord = (JSONObject) deneWordsJSONArray.get(j);
 								target = deneWord.getString("Target");
-								logger.debug("in DENE_TYPE_UPDATE_DENE_NAME denewordName=" + deneWord.getString("Name") + " target=" + target);
-
+								
 								//
 								// the value can beString, int booolean, date
 								newDeneName = deneWord.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+								logger.debug("in DENE_TYPE_UPDATE_DENE_NAME newDeneName=" + newDeneName + " target=" + target);
+
 								//
 								// the target will always be a  pointer to a denetem
 								if(target.startsWith("@")){
