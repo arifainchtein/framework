@@ -25,6 +25,24 @@ public class ZhinuPublisher implements MqttCallback{
 	static final Boolean publisher = true;
 	public ZhinuPublisher() {
 		logger = Logger.getLogger(getClass());
+		connOpt = new MqttConnectOptions();
+		
+		connOpt.setCleanSession(true);
+		connOpt.setKeepAliveInterval(30);
+		//connOpt.setUserName(userName);
+		//connOpt.setPassword(password.toCharArray());
+		
+		// Connect to Broker
+		try {
+			myClient = new MqttClient(BROKER_URL, clientID);
+			myClient.setCallback(this);
+			myClient.connect(connOpt);
+		} catch (MqttException e) {
+			logger.warn(Utils.getStringException(e));
+			//System.exit(-1);
+		}
+		
+		logger.debug("Connected to " + BROKER_URL);
 	}
 	/**
 	 * 
@@ -56,24 +74,7 @@ public class ZhinuPublisher implements MqttCallback{
 	
 	
 	public void publish(String topicName,String messageText) {
-		connOpt = new MqttConnectOptions();
 		
-		connOpt.setCleanSession(true);
-		connOpt.setKeepAliveInterval(30);
-		//connOpt.setUserName(userName);
-		//connOpt.setPassword(password.toCharArray());
-		
-		// Connect to Broker
-		try {
-			myClient = new MqttClient(BROKER_URL, clientID);
-			myClient.setCallback(this);
-			myClient.connect(connOpt);
-		} catch (MqttException e) {
-			logger.warn(Utils.getStringException(e));
-			//System.exit(-1);
-		}
-		
-		logger.debug("Connected to " + BROKER_URL);
 
 		// setup topic
 		// topics on m2m.io are in the form <domain>/<stuff>/<thing>
