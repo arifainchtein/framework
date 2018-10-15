@@ -74,7 +74,14 @@ public class ZhinuPublisher implements MqttCallback{
 	
 	
 	public void publish(String topicName,String messageText) {
-		
+		if(!myClient.isConnected()) {
+			try {
+				myClient.connect(connOpt);
+			} catch (MqttException e) {
+				logger.warn(Utils.getStringException(e));
+				//System.exit(-1);
+			}
+		}
 
 		// setup topic
 		// topics on m2m.io are in the form <domain>/<stuff>/<thing>
