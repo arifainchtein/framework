@@ -540,6 +540,7 @@ public class TeleonomeConstants {
 
 	public static final String DENEWORD_DEFAULT_VALUE = "Default";
 	public static final String DENEWORD_VALUE_ATTRIBUTE = "Value";
+	public static final String DENEWORD_IDENTITY_ATTRIBUTE = "Identity";
 	public static final String DENEWORD_QUANTITY_ATTRIBUTE = "Quantity";
 	
 	public static final String DENEWORD_TARGET_ATTRIBUTE = "Target";
