@@ -297,7 +297,7 @@ public class TeleonomeConstants {
 	public static final String DENE_TYPE_ON_FINISH_MUTATION = "On Finish";
 	public static final String DENE_TYPE_DENEWORD_CARRIER= "DeneWord Carrier";
 	public static final String DENE_TYPE_ACTION_LIST= "Action List";
-	public static final String DENE_NAME_ATTRIBUTE= "Dene Name";
+	public static final String DENE_NAME_ATTRIBUTE= "Name";
 	
 	//
 	// the mutation actions dene types
