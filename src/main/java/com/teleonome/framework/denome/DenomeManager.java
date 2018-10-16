@@ -3024,13 +3024,13 @@ public class DenomeManager {
 												}
 												
 												if(updateJSNObject.has(TeleonomeConstants.MUTATION_INJECTION_TARGET)) {
-													mutationDeneWord.put("Value",updateJSNObject.getString(TeleonomeConstants.MUTATION_INJECTION_TARGET));
+													mutationDeneWord.put(TeleonomeConstants.MUTATION_INJECTION_TARGET,updateJSNObject.getString(TeleonomeConstants.MUTATION_INJECTION_TARGET));
 													logger.debug("line 3029 updating :" + TeleonomeConstants.MUTATION_INJECTION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_INJECTION_TARGET));
 													
 												}
 												
 												if(updateJSNObject.has(TeleonomeConstants.MUTATION_DELETION_TARGET)) {
-													mutationDeneWord.put("Value",updateJSNObject.getString(TeleonomeConstants.MUTATION_DELETION_TARGET));
+													mutationDeneWord.put(TeleonomeConstants.MUTATION_DELETION_TARGET,updateJSNObject.getString(TeleonomeConstants.MUTATION_DELETION_TARGET));
 													logger.debug("line 3029 updating :" + TeleonomeConstants.MUTATION_DELETION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_DELETION_TARGET));
 													
 												}
