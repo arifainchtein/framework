@@ -130,11 +130,7 @@ public class TeleonomeConstants {
 	
 	public static final String DENE_TYPE_VITAL = "Vital";
 	public static final String DENE_TYPE_CODON_ELEMENT = "Codon Element";
-	public static final String DENE_TYPE_ON_LOAD_MUTATION = "On Load";
-	public static final String DENE_TYPE_ON_FINISH_MUTATION = "On Finish";
-	public static final String DENE_TYPE_DENEWORD_CARRIER= "DeneWord Carrier";
-	public static final String DENE_TYPE_ACTION_LIST= "Action List";
-	public static final String DENE_NAME_ATTRIBUTE= "Dene Name";
+	
 	
 	public static final String DENE_TYPE_HUMAN_INTERFACE_STATE_VARIABLES= "Human Interface State Variables";
 	public static final String DENE_TYPE_ACTUATOR_ACTION_PROCESSING="Actuator Action Processing";
@@ -196,10 +192,7 @@ public class TeleonomeConstants {
 	public static final String DENECHAIN_OPERATIONAL_DATA ="Operational Data";
 	public static final String DENECHAIN_SENSOR_DATA ="Sensor Data";
 	
-	public static final String DENECHAIN_DENE_INJECTION ="Dene Injections";
-	public static final String DENECHAIN_DENEWORD_INJECTION ="DeneWord Injections";
-	public static final String DENECHAIN_ACTIONS_TO_EXECUTE="Actions To Execute";
-	public static final String DENECHAIN_MNEMOSYNE_OPERATIONS="Mnemosyne Operations";
+	
 	
 	public static final String DENECHAIN_ORGANISM_CONFIGURATION="Organism Configuration";
 	public static final String DENECHAIN_ORGANISM_STATUS="Organism Status";
@@ -289,11 +282,35 @@ public class TeleonomeConstants {
 	public static final String CAMERA_TIMESTAMP_FILENAME_FORMAT="dd-MM-yyyy_HHmm";
 	
 	//
+	// the mutations denechains
+	//
+	public static final String DENE_TYPE_ON_LOAD_MUTATION = "On Load";
+	public static final String DENECHAIN_DENE_INJECTION ="Dene Injections";
+	public static final String DENECHAIN_DENEWORD_INJECTION ="DeneWord Injections";
+	public static final String DENECHAIN_DENE_DELETION ="Dene Deletion";
+	public static final String DENECHAIN_DENEWORD_DELETION ="DeneWord Deletion";
+	
+	public static final String DENECHAIN_ACTIONS_TO_EXECUTE="Actions To Execute";
+	public static final String DENECHAIN_MNEMOSYNE_OPERATIONS="Mnemosyne Operations";
+	
+	
+	public static final String DENE_TYPE_ON_FINISH_MUTATION = "On Finish";
+	public static final String DENE_TYPE_DENEWORD_CARRIER= "DeneWord Carrier";
+	public static final String DENE_TYPE_ACTION_LIST= "Action List";
+	public static final String DENE_NAME_ATTRIBUTE= "Dene Name";
+	
+	//
 	// the mutation actions dene types
 	//
 	public static final String MUTATION_COMMAND_SET_DENEWORD = "Set DeneWord";
-	public static final String MUTATION_COMMAND_TARGET = "Target";
+	public static final String MUTATION_TARGET = "Target";
+	public static final String MUTATION_PAYLOAD_VALUE="Mutation Payload Value";
+	public static final String MUTATION_PAYLOAD_VALUETYPE="Mutation Payload Value Type";
+	
 	public static final String MUTATION_INJECTION_TARGET = "Injection Target";
+	public static final String MUTATION_DELETION_TARGET = "Deletion Target";
+	public static final String MUTATION_PAYLOAD_UPDATE_TARGET = "Payload Update Target";
+	
 	public static final String MUTATION_COMMAND_DENEWORD_NAME = "Mutation Name";
 	public static final String MUTATION_COMMAND_DENEWORD_VALUE = "Mutation Value";
 	//

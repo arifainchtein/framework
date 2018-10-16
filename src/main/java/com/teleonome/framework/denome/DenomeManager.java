@@ -2943,8 +2943,8 @@ public class DenomeManager {
 			JSONArray updatesJSONArray;
 			mutationsJSONArray = denomeObject.getJSONArray("Mutations");
 			JSONObject mutationJSONObject, payloadJSONObject;
-			String updateTargetPointer;
-			Object updateTargetValue, mutationTargetNewValue;
+			String payloadUpdateTargetPointer;
+			Object mutationPayloadValue, mutationTargetNewValue;
 			String[] tokens;
 			String targetDeneChain,targetDene,targetDeneWord;
 			for(int i=0;i<mutationsJSONArray.length();i++){
@@ -2961,26 +2961,15 @@ public class DenomeManager {
 					payloadJSONObject = payload.getJSONObject("Payload");
 					updatesJSONArray = payloadJSONObject.getJSONArray("Updates");
 					logger.debug("line 1965 of inject, payloadJSONObject=" + payloadJSONObject);
-
+					String mutationTarget, injectionTarget,deletionTarget, valueAttribute;
+					
 					JSONObject updateJSNObject;
 					for(int j=0;j<updatesJSONArray.length();j++){
 						updateJSNObject = updatesJSONArray.getJSONObject(j);
 						//
 						// each update object has two parameters, the target and the value
-						updateTargetPointer = updateJSNObject.getString("Target");
-						updateTargetValue = updateJSNObject.get("Value");
+						payloadUpdateTargetPointer = updateJSNObject.getString(TeleonomeConstants.MUTATION_PAYLOAD_UPDATE_TARGET);
 						
-						//
-						// the payload can have one more attribute, MutationTargetNewValue which changes the actual target
-						//
-						// this is enables one mutation to change any location in the denome.  this is used by the logic 
-						// used by teleonomewebapp to allow humans to update parameters in the Denome
-						//
-						mutationTargetNewValue="";
-						if(updateJSNObject.has("MutationTargetNewValue")) {
-							mutationTargetNewValue = updateJSNObject.getString("MutationTargetNewValue");
-						}
-						logger.debug("line 1982 demomemanager updateTargetPointer:" + updateTargetPointer + " updateTargetValue:" + updateTargetValue);
 						//
 						// the target contains a pointer which is relative to the mutation
 						// ie the path begins with the name of the denechain in the mutation object
@@ -2988,7 +2977,7 @@ public class DenomeManager {
 						// "Target":"@On Load:Update Only When In Float:Update Only When In Float",
 						//
 						// so taht
-						tokens = updateTargetPointer.split(":");
+						tokens = payloadUpdateTargetPointer.split(":");
 						targetDeneChain = tokens[0];
 						if(targetDeneChain.startsWith("@"))targetDeneChain = targetDeneChain.substring(1);
 						targetDene = tokens[1];
@@ -3023,11 +3012,73 @@ public class DenomeManager {
 											mutationDeneWord = mutationDeneWords.getJSONObject(m);
 											logger.debug("line 2946 demomemanager mutationDeneWord:" + mutationDeneWord.getString("Name"));
 											if(mutationDeneWord.getString("Name").equals(targetDeneWord)){
-												logger.debug("line 2951 demomemanager updating value:" + updateTargetValue + " mutationDeneWord=" + mutationDeneWord);
-												mutationDeneWord.put("Value",updateTargetValue);
-												if(!mutationTargetNewValue.equals("")) {
-													logger.debug("line 2955 demomemanager updating value:" + updateTargetValue + " mutationDeneWord=" + mutationDeneWord);
-													mutationDeneWord.put("Target",mutationTargetNewValue);
+												
+												mutationTarget = (String) updateJSNObject.get(TeleonomeConstants.MUTATION_TARGET);
+												injectionTarget = (String) updateJSNObject.get(TeleonomeConstants.MUTATION_INJECTION_TARGET);
+												deletionTarget = (String) updateJSNObject.get(TeleonomeConstants.MUTATION_DELETION_TARGET);
+												//
+												// the payload can update these fields:
+												//
+												logger.debug("line 3030 demomemanager mutationTarget:" + mutationTarget + " injectionTarget:" + injectionTarget + " deletionTarget=" + deletionTarget);
+												//
+												// now find where is the new value going
+												//
+												if(updateJSNObject.has(TeleonomeConstants.MUTATION_TARGET)) {
+													mutationDeneWord.put(TeleonomeConstants.MUTATION_TARGET,updateJSNObject.getString(TeleonomeConstants.MUTATION_TARGET));
+													logger.debug("line 3029 updating :" + TeleonomeConstants.MUTATION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_TARGET));
+													
+												}
+												
+												if(updateJSNObject.has(TeleonomeConstants.MUTATION_INJECTION_TARGET)) {
+													mutationDeneWord.put("Value",updateJSNObject.getString(TeleonomeConstants.MUTATION_INJECTION_TARGET));
+													logger.debug("line 3029 updating :" + TeleonomeConstants.MUTATION_INJECTION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_INJECTION_TARGET));
+													
+												}
+												
+												if(updateJSNObject.has(TeleonomeConstants.MUTATION_DELETION_TARGET)) {
+													mutationDeneWord.put("Value",updateJSNObject.getString(TeleonomeConstants.MUTATION_DELETION_TARGET));
+													logger.debug("line 3029 updating :" + TeleonomeConstants.MUTATION_DELETION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_DELETION_TARGET));
+													
+												}
+												
+												if(updateJSNObject.has(TeleonomeConstants.MUTATION_PAYLOAD_VALUE)) {
+													//
+													// the payload value is different than the others because while the others
+													// are always strings, in the case of updating the value attribute it can be
+													// string, int, double, long,  if the payload does  not include a updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE
+													// assume is string
+													if(updateJSNObject.has(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE)) {
+														if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_INTEGER)) {
+															mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.debug("line 3052 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getInt(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															
+														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
+															mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.debug("line 3056 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getDouble(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+														
+														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_LONG)) {
+															mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.debug("line 3061 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getLong(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+														
+														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_DENE_POINTER)) {
+															mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.debug("line 3065 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getString(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+														
+														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_STRING)) {
+															mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.debug("line 3069 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getString(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+														
+														}
+													}else {
+														
+														//
+														// asume is string
+														//
+														mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+														logger.debug("line 3029 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+														
+													}
+													
 												}
 											}
 										}
@@ -4183,6 +4234,88 @@ public class DenomeManager {
 				}
 
 			}
+
+			
+			//
+			// then do the DeneWord Deletion chain, deleting the denewords
+			// using the target parameter. There is only one dene in this chain
+			//
+			JSONObject deneWordDeletions=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_DENEWORD_DELETION);
+			logger.debug("load immediate mutation  deneWordDeletions " + deneWordDeletions);
+			String deletionTargetPointer;
+
+			if(deneWordDeletions!=null){
+				denes = deneWordDeletions.getJSONArray("Denes");
+				//
+				// there is only one dene
+				JSONObject dene = denes.getJSONObject(0);
+				JSONArray deneWordsJSONArray = dene.getJSONArray("DeneWords");
+				for(int j=0;j<deneWordsJSONArray.length();j++){
+					deneWord = (JSONObject) deneWordsJSONArray.get(j);
+					deneWordName = deneWord.getString("Name");
+					//
+					// target must be a deneword
+					target = deneWord.getString(TeleonomeConstants.MUTATION_DELETION_TARGET);
+					logger.debug("in deneworddeletion, deneWordName=" + deneWordName + " deletion target=" + target);
+					//
+					// use the identity to get the dene
+					Identity deneWordToDeleteIdentity = new Identity(target);
+					Identity deneOfDeneWordToDeleteIdentity = new Identity(deneWordToDeleteIdentity.getTeleonomeName(), deneWordToDeleteIdentity.getNucleusName(), deneWordToDeleteIdentity.getDenechainName(), deneWordToDeleteIdentity.getDeneName());
+					JSONObject deneOfDeneWordToDelete  = getDeneByIdentity(deneOfDeneWordToDeleteIdentity);
+					//
+					// nw loop over the denewords
+					JSONArray deneWords = deneOfDeneWordToDelete.getJSONArray("DeneWords");
+					found:
+					for(int k=0;k<deneWords.length();k++){
+						if(deneWords.getJSONObject(k).getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE).equals(deneWordToDeleteIdentity.getDeneWordName())) {
+							deneWords.remove(k);
+							logger.debug("in deneworddeletion, removed denword position=" + k );
+							break found;
+						}
+					}
+				}
+			}
+			//
+			// then do the Dene Deletion Chain
+			//
+			JSONObject deneDeletions=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_DENE_DELETION);
+			logger.debug("load immediate mutation  deneInjections " + deneDeletions);
+
+			if(deneDeletions!=null){
+				denes = deneDeletions.getJSONArray("Denes");
+				JSONObject deletionTargetDene, deletionTargetDeneChain;
+				String deletionTargetDeneName;
+				
+				for(int i=0;i<denes.length();i++){
+					mutationDeneJSONObject = (JSONObject) denes.get(i);
+					deletionTargetPointer = mutationDeneJSONObject.getString(TeleonomeConstants.MUTATION_DELETION_TARGET);
+					
+					//
+					// injection target is always a denechain
+					Identity deletionTargetIdentity = new Identity(deletionTargetPointer);
+					
+					deletionTargetDene = getDenomicElementByIdentity(deletionTargetIdentity);
+					deletionTargetDeneChain = getDenomicElementByIdentity(new Identity(deletionTargetIdentity.getTeleonomeName(), deletionTargetIdentity.getNucleusName(), deletionTargetIdentity.getDenechainName()));
+					deletionTargetDeneName = deletionTargetDene.getString(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE);
+					logger.debug("deletionTargetPointer="+ deletionTargetPointer + " deletionTargetDeneName="+ deletionTargetDeneName + " deletionTargetDeneChain=" + deletionTargetDeneChain.getString("Name"));
+					//
+					// remove the target attribute
+					
+					JSONArray denesDeletion = deletionTargetDeneChain.getJSONArray("Denes");
+					//
+					// now loop over all the denes and remove the one
+					found:
+					for(int j=0;j<denesDeletion.length();j++) {
+						if(denesDeletion.getJSONObject(j).getString(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE).equals(deletionTargetDeneName)) {
+							denesDeletion.remove(j);
+							break found;
+						}
+					}
+				}
+			}
+			
+			
+			
 			//
 			// then do the DeneWord Injection chain, injecting the denewords
 			// using the target parameter. There is only one dene in this chain
