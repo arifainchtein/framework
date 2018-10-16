@@ -1863,14 +1863,14 @@ public class DenomeUtils {
 		}
 		if(selectedNucleus==null)return null;
 		JSONArray deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
-		JSONArray deneNamesArrays = null;
+		JSONArray deneNamesArrays = new JSONArray();
 		for(int i=0;i<deneChainsArray.length();i++){
 			aJSONObject = (JSONObject) deneChainsArray.get(i);
-			System.out.println("aJSONObject.getString()=" + aJSONObject.getString("Name") + " deneChainName=" + deneChainName);
+			//System.out.println("aJSONObject.getString()=" + aJSONObject.getString("Name") + " deneChainName=" + deneChainName);
 			if(aJSONObject.getString("Name").equals(deneChainName)){
 				JSONArray denes = aJSONObject.getJSONArray("Denes");
 				for(int j=0;j<denes.length();j++) {
-					System.out.println("deneNamesArrays)=" + deneNamesArrays + " denes.getJSONObject(j)=" + denes.getJSONObject(j));
+					//System.out.println("deneNamesArrays)=" + deneNamesArrays + " denes.getJSONObject(j)=" + denes.getJSONObject(j));
 					deneNamesArrays.put(denes.getJSONObject(j).getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
 				}
 			}
@@ -1907,7 +1907,7 @@ public class DenomeUtils {
 		}
 		if(selectedNucleus==null)return null;
 		JSONArray deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
-		JSONArray deneWordNamesArrays = null;
+		JSONArray deneWordNamesArrays = new JSONArray();
 		for(int i=0;i<deneChainsArray.length();i++){
 			aJSONObject = (JSONObject) deneChainsArray.get(i);
 			//System.out.println("aJSONObject.getString()=" + aJSONObject.getString("Name") + " deneChainName=" + deneChainName);
