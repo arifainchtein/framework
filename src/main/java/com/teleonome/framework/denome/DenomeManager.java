@@ -3013,15 +3013,9 @@ public class DenomeManager {
 											logger.debug("line 2946 demomemanager mutationDeneWord:" + mutationDeneWord.getString("Name"));
 											if(mutationDeneWord.getString("Name").equals(targetDeneWord)){
 												
-												mutationTarget = (String) updateJSNObject.get(TeleonomeConstants.MUTATION_TARGET);
-												injectionTarget = (String) updateJSNObject.get(TeleonomeConstants.MUTATION_INJECTION_TARGET);
-												deletionTarget = (String) updateJSNObject.get(TeleonomeConstants.MUTATION_DELETION_TARGET);
+												
 												//
-												// the payload can update these fields:
-												//
-												logger.debug("line 3030 demomemanager mutationTarget:" + mutationTarget + " injectionTarget:" + injectionTarget + " deletionTarget=" + deletionTarget);
-												//
-												// now find where is the new value going
+												// check fr every potential field
 												//
 												if(updateJSNObject.has(TeleonomeConstants.MUTATION_TARGET)) {
 													mutationDeneWord.put(TeleonomeConstants.MUTATION_TARGET,updateJSNObject.getString(TeleonomeConstants.MUTATION_TARGET));
