@@ -1806,6 +1806,17 @@ public class DenomeUtils {
 		return getDeneChainByName( pulseJSONObject, identity.getNucleusName(), identity.getDenechainName()); 
 	}
 	
+	public static JSONArray getAllDeneChainNamesForNucleus(JSONObject pulseJSONObject, String nucleusName) {
+		JSONArray deneChains = getAllDeneChainsForNucleus( pulseJSONObject,  nucleusName);
+		JSONArray toReturn = new JSONArray();
+		JSONObject deneChain;
+		for(int i=0;i<deneChains.length();i++){
+			deneChain = (JSONObject) deneChains.get(i);
+			toReturn.put(deneChain.getString("Name"));
+		}
+		return toReturn;
+	}
+	
 	public static JSONArray getAllDeneChainsForNucleus(JSONObject pulseJSONObject, String nucleusName) {
 		// TODO Auto-generated method stub
 		JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
@@ -1825,7 +1836,16 @@ public class DenomeUtils {
 		JSONArray deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
 		return deneChainsArray;
 	}
-	
+	public static JSONArray getAllDeneNamesForDeneChain(JSONObject pulseJSONObject, String nucleusName, String deneChainName) {
+		JSONArray denes = getAllDenesForDeneChain( pulseJSONObject,  nucleusName,  deneChainName);
+		JSONArray toReturn = new JSONArray();
+		JSONObject dene;
+		for(int j=0;j<denes.length();j++) {
+			 dene = denes.getJSONObject(j);
+			toReturn.put(dene.getString("Name"));
+		}
+		return toReturn;
+	}
 	public static JSONArray getAllDenesForDeneChain(JSONObject pulseJSONObject, String nucleusName, String deneChainName) {
 		// TODO Auto-generated method stub
 		JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
@@ -1856,6 +1876,17 @@ public class DenomeUtils {
 		}
 		
 		return deneNamesArrays;
+	}
+	
+	public static JSONArray getAllDeneWordNamesForDene(JSONObject pulseJSONObject, String nucleusName, String deneChainName, String deneName) {
+		JSONArray deneWords = getAllDeneWordsForDene( pulseJSONObject,  nucleusName,  deneChainName, deneName);
+		JSONArray toReturn = new JSONArray();
+		JSONObject deneWord;
+		for(int j=0;j<deneWords.length();j++) {
+			deneWord = deneWords.getJSONObject(j);
+			toReturn.put(deneWord.getString("Name"));
+		}
+		return toReturn;
 	}
 	
 	public static JSONArray getAllDeneWordsForDene(JSONObject pulseJSONObject, String nucleusName, String deneChainName, String deneName) {
