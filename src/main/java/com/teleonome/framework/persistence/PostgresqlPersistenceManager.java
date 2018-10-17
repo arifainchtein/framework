@@ -1554,7 +1554,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				o.put("Executedon", executedon);
 				o.put("Command", command);
 				o.put("Status", status);
-				o.put("Payload", new JSONObject(payload).toString(4));
+				o.put("Payload", payload);
 				o.put("ClientIp", clientIp);
 				valuesJSONArray.put(o);
 			}
