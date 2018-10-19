@@ -414,6 +414,9 @@ public class TeleonomeConstants {
 
 	
 	public static final String DENEWORD_TYPE_DATA_SOURCE_POINTER="Data Source Pointer";
+	public static final String DENEWORD_TYPE_NAVBAR_POINTER="NavBar Pointer";
+	public static final String DENEWORD_TYPE_NAVBAR_POSITION="NavBar Position";
+	public static final String DENEWORD_TYPE_NAVBAR_TEXT="NavBar Text";
 	
 	
 	public static final String DENEWORD_TYPE_TIMESERIES_DATA_SOURCE_POINTER="Time Series Data Source Pointer";
