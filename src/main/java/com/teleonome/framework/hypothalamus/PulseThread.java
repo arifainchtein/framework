@@ -696,26 +696,20 @@ public class PulseThread extends Thread{
 				//  if there is a mother,  let it know that the pulse is done
 				//
 				if(anHypothalamus.motherMicroController!=null) {
-					try {
-						
-						
-						motherOutputStream = anHypothalamus.motherMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
-						logger.info("telling mama pulse is done");
-						Calendar cal = Calendar.getInstance();//TimeZone.getTimeZone("GMT+10:00"));
-						String commandToSend = "PulseFinished#"+anHypothalamus.timeFormatter.format(cal.getTime());
-						
-						//output.write("GetSensorData",0,"GetSensorData".length());
-						motherOutputStream.write(commandToSend,0,commandToSend.length());
-						motherOutputStream.flush();
-					}catch(Exception e){
-						logger.warn(Utils.getStringException(e));
-					}
 					
+					String commandToSend="";
+					Calendar cal = Calendar.getInstance();//TimeZone.getTimeZone("GMT+10:00"));
+					logger.info("telling mama pulse is done");
 					try {
+						motherOutputStream = anHypothalamus.motherMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
+						
 						//String inputLine = motherInputStream.readLine();
 						//logger.info("received inputLine=" + inputLine);
 						String inputLine="";
 						do {
+							commandToSend = "PulseFinished#"+anHypothalamus.timeFormatter.format(cal.getTime());
+							motherOutputStream.write(commandToSend,0,commandToSend.length());
+							motherOutputStream.flush();
 							motherInputStream = anHypothalamus.motherMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
 							inputLine = motherInputStream.readLine();
 							logger.info("received inputLine=" + inputLine);
