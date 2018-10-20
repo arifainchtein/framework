@@ -4185,7 +4185,7 @@ public class DenomeManager {
 			JSONObject injectionTarget;
 			Object targetDeneWordValue;
 			JSONArray denes;
-
+			String targetDeneWordValueType;
 			JSONObject onLoadMutationDeneChainJSONObject=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENE_TYPE_ON_LOAD_MUTATION);
 			logger.debug("load immediate mutation  onLoadMutationDeneChainJSONObject="  + onLoadMutationDeneChainJSONObject);
 
@@ -4210,7 +4210,8 @@ public class DenomeManager {
 
 						//
 						// the value can beString, int booolean, date
-						targetDeneWordValue = deneWord.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						//targetDeneWordValue = deneWord.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						targetDeneWordValueType = deneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
 						//
 						// the target can be either a pointer to another dene
 						// or it can start with a $ for example $FileSystem which means it will 
@@ -4218,8 +4219,26 @@ public class DenomeManager {
 						// some code to mify the file system
 						if(target.startsWith("@")){
 							injectionTarget = getDenomicElementByIdentity(new Identity(target));
-							injectionTarget.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, targetDeneWordValue);
-							logger.debug("load immediate mutation  onLoadMutation  just performed an edit in onLoad target=" + target + " targetDeneWordValue=" + targetDeneWordValue );
+							//injectionTarget.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, targetDeneWordValue);
+							
+							if(targetDeneWordValueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
+								injectionTarget.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+								
+							}else if(targetDeneWordValueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
+								injectionTarget.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.getDouble(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+								
+							}else if(targetDeneWordValueType.equals(TeleonomeConstants.DATATYPE_LONG)) {
+								injectionTarget.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.getLong(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+								
+							}else if(targetDeneWordValueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER)) {
+								injectionTarget.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+							
+							}else if(targetDeneWordValueType.equals(TeleonomeConstants.DATATYPE_STRING)) {
+								injectionTarget.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+							}
+							
+							
+							logger.debug("load immediate mutation  onLoadMutation  just performed an edit in onLoad target=" + target + " targetDeneWordValue=" + deneWord.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE) );
 
 						}
 
