@@ -3043,15 +3043,15 @@ public class DenomeManager {
 													// assume is string
 													if(updateJSNObject.has(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE)) {
 														if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_INTEGER)) {
-															mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															mutationDeneWord.put("Value",updateJSNObject.getInt(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 															logger.debug("line 3052 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getInt(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 															
 														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
-															mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															mutationDeneWord.put("Value",updateJSNObject.getDouble(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 															logger.debug("line 3056 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getDouble(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 														
 														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_LONG)) {
-															mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															mutationDeneWord.put("Value",updateJSNObject.getLong(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 															logger.debug("line 3061 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getLong(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 														
 														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_DENE_POINTER)) {
