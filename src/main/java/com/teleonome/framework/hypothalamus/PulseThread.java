@@ -737,7 +737,7 @@ public class PulseThread extends Thread{
 				//	}
 				}
 				
-				logger.info("starting mappbus thread1");  
+				logger.info("starting mappbus thread, pulse is going to sleep for " + anHypothalamus.currentPulseInMilliSeconds);  
 				
 				anHypothalamus.aMappedBusThread= new MappedBusThread(anHypothalamus);
 				anHypothalamus.aMappedBusThread.start();
