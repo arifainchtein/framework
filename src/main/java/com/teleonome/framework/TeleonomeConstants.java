@@ -951,6 +951,7 @@ public class TeleonomeConstants {
 	public static final String PANEL_VISUALIZATION_STYLE_UPDATE_MULTIPLE_DENEWORDS_FORM="Update Multiple Denewords Form Panel";
 	public static final String DENEWORD_TYPE_PANEL_DATA_DISPLAY_NAME="Panel Display Name";
 	public static final String DENEWORD_RECORD_TIMESTAMP="Record Timestamp";
+	public static final String DENEWORD_TYPE_RESTART_NEEDED="Restart Needed";
 	
 	public static final String PANEL_VISUALIZATION_STYLE_ACTION_EVALUATION_REPORT="Action Evaluation Report";
 	public static final String PANEL_VISUALIZATION_STYLE_NETWORK_MODE_SELECTOR="Network Mode Selector";
