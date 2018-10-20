@@ -720,15 +720,15 @@ public class PulseThread extends Thread{
 						logger.warn(Utils.getStringException(e));
 					}
 					
-					//if(motherInputStream!=null) {
+					if(motherInputStream!=null) {
 						logger.info("about to close motherInputStream,="+ motherInputStream);	
-						//motherInputStream.close();
-					//}
+						motherInputStream.close();
+					}
 					
-				//	if(motherOutputStream!=null) {
+					if(motherOutputStream!=null) {
 						logger.info("about to close motheroutputstream");
-						//motherOutputStream.close();
-				//	}
+						motherOutputStream.close();
+					}
 				}
 				
 				logger.info("starting mappbus thread, pulse is going to sleep for " + anHypothalamus.currentPulseInMilliSeconds);  

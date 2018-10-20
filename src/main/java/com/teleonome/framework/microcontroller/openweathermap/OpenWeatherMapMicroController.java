@@ -27,7 +27,8 @@ public class OpenWeatherMapMicroController  extends MicroController{
 	OpenWeatherMapReader anOpenWeatherMapReader;
 	CSVReader cvsReader;
 	JSONArray configParams;
-	String latitude, longitud, units, appid, timeZoneId;
+	String units, appid, timeZoneId;
+	int latitude, longitud;
 	int dailyCount=10;
 	Logger logger;
 	int connectTimeoutMilliseconds,readTimeoutMilliseconds;
@@ -80,9 +81,9 @@ public class OpenWeatherMapMicroController  extends MicroController{
 				deneName = dene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
 				//System.out.println("denemanem="+ deneName);
 				if(deneName.equals("Latitude")) {
-					latitude = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Latitude", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
+					latitude = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Latitude", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
 				}else if(deneName.equals("Longitude")) {
-					longitud = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Longitude", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
+					longitud = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Longitude", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
 				}else if(deneName.equals("Units")) {
 					units = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Units", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
 				}else if(deneName.equals("OpenWeatherAPIKey")) {
