@@ -1003,7 +1003,13 @@ class MappedBusThread extends Thread{
 						value = getDeneWordByIdentity(currentPulse,new Identity(rememberedWordPointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						valueType = (String) getDeneWordByIdentity(currentPulse, new Identity(rememberedWordPointer), TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
 						logger.debug("about to unwrap " + rememberedWordPointer + " with value:" + value  + " and valueType=" + valueType);
-						aMnemosyneManager.unwrap(timeZone, teleonomeName, lastPulseTime, rememberedWordPointer, valueType,value);
+						
+						if(value!=null && valueType!=null) {
+							aMnemosyneManager.unwrap(timeZone, teleonomeName, lastPulseTime, rememberedWordPointer, valueType,value);
+						}else {
+							logger.warn("Unwrap of " + rememberedWordPointer + " FAILED because value:" + value  + " and valueType=" + valueType);
+							
+						}
 					}
 				}
 			}
