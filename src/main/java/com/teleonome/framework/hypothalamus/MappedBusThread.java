@@ -429,7 +429,10 @@ class MappedBusThread extends Thread{
 									//
 									// create the commandRequest
 									//
-									JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString(), clientIp);	
+									// for now assume that you will not need to restart
+									// that might change latter
+									boolean restarRequired=false;
+									JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString(), clientIp, restarRequired);	
 									logger.debug("Received Fault, mutationType:" + mutationType + " command:" + command + " commandRquestId=" + commandRequestJSONObject.getInt("id"));;
 
 
@@ -489,7 +492,11 @@ class MappedBusThread extends Thread{
 									//
 									// create the commandRequest
 									//
-									JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString(), clientIp);	
+									//
+									// for now assume that you will not need to restart
+									// that might change latter
+									boolean restarRequired=false;
+									JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString(), clientIp, restarRequired);	
 									logger.debug("line 650 Received Timer Ended,  command:" + command + " commandRquestId=" + commandRequestJSONObject.getInt("id"));
 								}else {
 									logger.debug("input line not recognized");

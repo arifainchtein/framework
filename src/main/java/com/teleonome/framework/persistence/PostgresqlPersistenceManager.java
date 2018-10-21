@@ -1363,7 +1363,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}	
 
-	public JSONObject requestCommandToExecute(String command, String commandCode, String payLoad, String clientIp){
+	public JSONObject requestCommandToExecute(String command, String commandCode, String payLoad, String clientIp, boolean restartRequired){
 		//System.out.println(Utils.generateMethodTrace());
 		int id=-1;
 		Connection connection = null;
@@ -1373,7 +1373,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		long createdOn = System.currentTimeMillis();
 		try {
 			connection = connectionPool.getConnection();
-			String sql = "insert into CommandRequests (createdOn,command, status, payLoad, commandCode, clientIp) values (?,?,?,?,?,?) returning id";
+			String sql = "insert into CommandRequests (createdOn,command, status, payLoad, commandCode, clientIp, restartRequired) values (?,?,?,?,?,?,?) returning id";
 			
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setLong(1, createdOn);
@@ -1382,6 +1382,8 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			preparedStatement.setString(4, payLoad);
 			preparedStatement.setString(5, commandCode);
 			preparedStatement.setString(6, clientIp);
+			preparedStatement.setBoolean(6, restartRequired);
+			
 			
 			rs = preparedStatement.executeQuery();
 			JSONObject data=null;
@@ -1653,7 +1655,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	public JSONObject markCommandCompleted(int id){
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
-		String sql = "update CommandRequests set executedOn=?, status=?   where id=? returning  createdon, executedon, command, status, commandcode";
+		String sql = "update CommandRequests set executedOn=?, status=?   where id=? returning  createdon, executedon, command, status, commandcode, restartRequired";
 		ResultSet rs=null;
 		JSONObject toReturn=new JSONObject();
 		toReturn.put("id", id);
@@ -1672,13 +1674,15 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				String command = rs.getString(3);
 				String status = rs.getString(4);
 				String commandcode = rs.getString(5);
-				
+				boolean restartRequired = rs.getBoolean(6);
 				
 				toReturn.put("Createdon", createdon);
 				toReturn.put("Executedon", executedon);
 				toReturn.put("Command", command);
 				toReturn.put("Status", status);
 				toReturn.put("CommandCode", commandcode);
+				toReturn.put("RestartRequired", restartRequired);
+				
 			}
 			
 		} catch (SQLException e) {
