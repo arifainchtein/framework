@@ -99,7 +99,7 @@ public class SimpleMicroController extends MotherMicroController {
 	@Override
 	public String getCommandCode()  throws IOException {
 		String code="";
-		String unEncodedKey = "MyLegoDoor";//FileUtils.readFileToString(new File("SecretKey"), "UTF-8");
+		String unEncodedKey = FileUtils.readFileToString(new File("SecretKey"), "UTF-8");
 		TOTP totp = new TOTP();
 		try {
 			code = totp.generateCurrentNumberFromUnencodedString(unEncodedKey);
