@@ -110,9 +110,9 @@ public class MnemosyneManager {
 	public void forget(JSONObject aMnemosyconForgetParameters, String mnemosyconType) {
 
 		if(mnemosyconType.equals(TeleonomeConstants.MNEMOSYCON_TYPE_DYNAMIC)) {
-			forgetStatic(aMnemosyconForgetParameters);
+			forgetDynamic(aMnemosyconForgetParameters);
 		}else if(mnemosyconType.equals(TeleonomeConstants.MNEMOSYCON_TYPE_STATIC)) {
-			forgetDynamic( aMnemosyconForgetParameters);
+			forgetStatic( aMnemosyconForgetParameters);
 		}
 
 	}
