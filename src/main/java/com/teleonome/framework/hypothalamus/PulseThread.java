@@ -572,7 +572,7 @@ public class PulseThread extends Thread{
 							Object[] parameters =  {mnemosyconProfileDene, mnemosyconType};
 							logger.debug("parameters=" + parameters);
 							
-							Method mnemomsyneMethod = MnemosyneManager.class.getMethod(functionName, JSONObject.class);
+							Method mnemomsyneMethod = MnemosyneManager.class.getMethod(functionName, JSONObject.class, String.class);
 							logger.debug("mnemomsyneMethod=" + mnemomsyneMethod);
 							
 							anHypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_PULSE_STATUS_INFO, "Executing Mnemosycon " + mnemosyconDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE)+ "  " + (i+1) + " out of "  + mnemosyconsDenesJSONArray.length());
