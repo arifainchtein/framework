@@ -2049,6 +2049,22 @@ public class DenomeManager {
 		return toReturn;
 	}
 
+	public JSONArray renderDenesFromPointers(JSONArray denePointers){
+		JSONArray toReturn = new JSONArray();
+		JSONObject dene;
+		for(int i=0;i<denePointers.length();i++){
+			try {
+				dene = getDeneByIdentity(new Identity(denePointers.getString(i)));
+				logger.debug("deneWordPointers.getString(i)=" + denePointers.getString(i) + " dene=" + dene);
+				toReturn.put(dene);
+			} catch (InvalidDenomeException | JSONException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+		}
+		return toReturn;
+	}
+	
 	public JSONArray renderDeneWordsFromPointers(JSONArray deneWordPointers){
 		JSONArray toReturn = new JSONArray();
 		JSONObject deneWord;

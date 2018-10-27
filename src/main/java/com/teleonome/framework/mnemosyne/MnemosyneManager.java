@@ -171,7 +171,7 @@ public class MnemosyneManager {
 		logger.debug("mnemosyconRulesListDeneJSONObject=" + mnemosyconRulesListDeneJSONObject.toString(4));
 		
 		JSONArray mnemosyconRulesPointersJSONArray = aDenomeManager.getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRulesListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_RULE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-		JSONArray mnemosyconRulesJSONArray = aDenomeManager.renderDeneWordsFromPointers(mnemosyconRulesPointersJSONArray);
+		JSONArray mnemosyconRulesJSONArray = aDenomeManager.renderDenesFromPointers(mnemosyconRulesPointersJSONArray);
 		logger.debug("mnemosyconRulesPointersJSONArray=" + mnemosyconRulesPointersJSONArray + " mnemosyconRulesJSONArray=" + mnemosyconRulesJSONArray.toString(4));
 		JSONObject mnemosyconRuleJSONObject;
 		int executionPosition;
