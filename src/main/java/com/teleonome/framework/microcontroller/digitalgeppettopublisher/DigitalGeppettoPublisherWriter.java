@@ -380,7 +380,11 @@ public class DigitalGeppettoPublisherWriter extends BufferedWriter implements Sf
 					}
 					 destinationDir="/home/pi/Teleonome/" + teleonomeName;
 						
-					uploadFile( destinationDir, sourceFilename,   value);
+					if(new File(sourceFilename).isFile()) {
+						uploadFile( destinationDir, sourceFilename,   value);
+					}else {
+						logger.debug("Did not upload " + sourceFilename + " because it could not be found");
+					}
 					
 				}else if(deneName.equals("DG Publish Contents")) {
 					String contentsPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "Publish Contents", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);

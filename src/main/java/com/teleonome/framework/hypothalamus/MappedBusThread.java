@@ -147,7 +147,23 @@ class MappedBusThread extends Thread{
 						logger.debug("COMMANDS CODE DO NOT MATCH commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
 						commandCode=null;
 					}
+					//
+					// execute the command in case is an internal action, so that you dont have to wait
+					// for all the micro controllers to do a loop
+					// this is specially important if a microcontroller takes a long time to do an asyncdata
+					// and could take long enough that the code expires waiting to be excuted
 					
+					
+					if(aCommandRequest!=null && command!=null && !command.equals("")  && goodCommandCode){
+						logger.debug("line 674about to execute aCommandRequest=" + aCommandRequest + " command " + command + " dataPayloadJSONObject=" + dataPayloadJSONObject);
+							//executeCommand( aMicroController, input,  output,  command,  aCommandRequest,  dataPayloadJSONObject );
+						executeCommand(  command,  aCommandRequest,  dataPayloadJSONObject );
+						//
+						// now that the command has been executed, set the to null
+						aCommandRequest=null;
+						command=null;
+						hypothalamus.mutationIsInEffect=false;
+					}
 					
 					
 					
