@@ -993,7 +993,7 @@ public class TeleonomeConstants {
 	public static final String MNEMOSYCON_RULE_FILE_PREFIX="Mnemosycon Rule File Prefix";
 	public static final String MNEMOSYCON_RULE_ALL_FILES="*";
 			
-	public static final String DENECHAIN_MNEMOSYCON_LOGIC_PROCESSING="Mnemosycon Logic Processing";
+	//public static final String DENECHAIN_MNEMOSYCON_LOGIC_PROCESSING="Mnemosycon Logic Processing";
 	public static final String DENE_TYPE_MNEMOSYCON_PROCESSING="Mnemosycon Processing";
 	public static final String DENEWORD_TYPE_MNEMOSYCON_RULES_LIST_POINTER="Mnemosycon Rules List Pointer";
 	public static final String DENEWORD_TYPE_MNEMOSYCON_RULE_POINTER="Mnemosycon Rule Pointer";
