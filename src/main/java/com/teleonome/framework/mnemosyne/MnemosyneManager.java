@@ -185,7 +185,7 @@ public class MnemosyneManager {
 			mnemosyneRulesExecutionPositionIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(mnemosyconRuleJSONObject, new Integer(executionPosition)));
 		}
 		Collections.sort(mnemosyneRulesExecutionPositionIndex, new IntegerCompare());
-		logger.debug("after sorting there are=" + mnemosyneRulesExecutionPositionIndex.size());
+		logger.debug("after sorting ther are=" + mnemosyneRulesExecutionPositionIndex.size());
 		
 		int counter=0;
 		String mnemosyconRuleSource,mnemosyconRuleFilePrefix,mnemosyconRuleLocation,mnemosyconRuleTimeUnit, mnemosyconRuleTeamParameter=null;
@@ -201,7 +201,6 @@ public class MnemosyneManager {
 		long startRuleMillis;
 		long ruleDurationMillis;
 		long totalSpace = new File("/").getTotalSpace()/1024000;
-		int maximumPercentageDatabase = (int) DenomeUtils.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_MAXIMUM_PERCENTAGE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 		double sizeToCompare=0;
 		boolean executedSuccesfully=true;
 		BasicFileAttributes attr;
@@ -271,6 +270,7 @@ logger.debug("about to enter loop " + mnemosyneRulesExecutionPositionIndex.size(
 			logger.debug("processing millisToDeleteFrom=" + millisToDeleteFrom);
 			
 			if(mnemosyconRuleSource.equals(TeleonomeConstants.MNEMOSYCON_DATA_SOURCE_DATABASE)) {
+				
 				if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_PULSE)) {
 					rowsDeleted = aDBManager.deleteByPeriodFromPulse(millisToDeleteFrom);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_REMEMBERED_DENEWORDS)) {
