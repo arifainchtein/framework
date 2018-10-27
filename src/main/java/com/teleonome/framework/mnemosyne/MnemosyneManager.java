@@ -185,6 +185,8 @@ public class MnemosyneManager {
 			mnemosyneRulesExecutionPositionIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(mnemosyconRuleJSONObject, new Integer(executionPosition)));
 		}
 		Collections.sort(mnemosyneRulesExecutionPositionIndex, new IntegerCompare());
+		logger.debug("after sorting there are=" + mnemosyneRulesExecutionPositionIndex.size());
+		
 		int counter=0;
 		String mnemosyconRuleSource,mnemosyconRuleFilePrefix,mnemosyconRuleLocation,mnemosyconRuleTimeUnit, mnemosyconRuleTeamParameter=null;
 		int mnemosyconRuleTimeUnitValue;
@@ -212,7 +214,7 @@ public class MnemosyneManager {
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-
+logger.debug("about to enter loop " + mnemosyneRulesExecutionPositionIndex.size());
 		for(int j=0;j<mnemosyneRulesExecutionPositionIndex.size();j++) {
 			//
 			// get the next rule
