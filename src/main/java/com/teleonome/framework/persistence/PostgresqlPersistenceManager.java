@@ -2686,7 +2686,7 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 			//statement = connection.createStatement();
 			java.sql.Timestamp dateTimeValue = new java.sql.Timestamp(pulseTimeMillis);
 			
-			sql = "insert into RememberedDeneWords (time,timeMillis teleonomeName,identityString,value) values(?,?,?,?,?) ON CONFLICT (timeMillis, teleonomeName,identityString) DO NOTHING";
+			sql = "insert into RememberedDeneWords (time,timeMillis, teleonomeName,identityString,value) values(?,?,?,?,?) ON CONFLICT (timeMillis, teleonomeName,identityString) DO NOTHING";
 			logger.debug("unwrap=" + sql);
 			//Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
 
