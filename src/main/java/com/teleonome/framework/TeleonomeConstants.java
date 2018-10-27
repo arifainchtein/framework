@@ -709,17 +709,7 @@ public class TeleonomeConstants {
 	public static final String MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION_AGGREGATE_Value="Aggregate Value";
 	public static final String MNEMOSYCON_MAXIMUM_PERCENTAGE="Maximum Percentage";
 
-	public static final String DENECHAIN_MNEMOSYCON_LOGIC_PROCESSING="Mnemosycon Logic Processing";
-	public static final String DENE_TYPE_MNEMOSYCON_PROCESSING="Mnemosycon Processing";
-	public static final String DENEWORD_TYPE_MNEMOSYCON_RULES_LIST_POINTER="Mnemosycon Rules List Pointer";
-	public static final String DENEWORD_TYPE_MNEMOSYCON_RULE_POINTER="Mnemosycon Rule Pointer";
-	public static final String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_DATABASE_SIZE_TO_DISK_SIZE="Percentage Database To Disk";
-	public static final String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_ORGANISMPULSE_SIZE_TO_DISK_SIZE="Percentage OrganismPulse To Disk";
-	public static final String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_PULSE_SIZE_TO_DISK_SIZE="Percentage Pulse To Disk";
-	public static final String MNEMOSYCON_PATHOLOGY_MNEMOSYNE_LOCATION="Mnemosycon Pathology Mnemosyne Location";
-	public static final String MNEMOSYCON_RULE_SOURCE="Mnemosycon Rule Source";
-	public static final String MNEMOSYCON_RULE_TIME_UNIT="Mnemosycon Rule Until Time Unit";
-	public static final String MNEMOSYCON_RULE_TIME_UNIT_VALUE="Mnemosycon Rule Until Time Value";
+	
 	public static final String TIME_UNIT_DAY="Day";
 	public static final String TIME_UNIT_WEEK="Week";
 	public static final String TIME_UNIT_MONTH="Month";
@@ -985,11 +975,42 @@ public class TeleonomeConstants {
 	//
 	// everything related to the mnemotycons
 	//
+	public static final String DENEWORD_TYPE_MNEMOSYCON_TYPE="Mnemosycon Type";
+	public static final String MNEMOSYCON_TYPE_STATIC="Static";
+	public static final String MNEMOSYCON_TYPE_DYNAMIC="Dynamic";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD="Mnemosycon Rule Database Field";
+	
+	public static final String MNEMOSYCON_DATA_SOURCE_FILE_SYSTEM="File System";
+	public static final String MNEMOSYCON_DATA_SOURCE_DATABASE="Database";
+	public static final String MNEMOSYCON_DATA_LOCATION_PULSE="Pulse";
+	public static final String MNEMOSYCON_DATA_LOCATION_ORGANISM="OrganismPulse";
+	public static final String MNEMOSYCON_DATA_LOCATION_REMEMBERED_DENEWORDS="RememberedDeneWords";
+	public static final String MNEMOSYCON_DATA_LOCATION_COMMAND_REQUESTS="CommandRequests";
+	public static final String MNEMOSYCON_DATA_LOCATION_MUTATION_EVENT="MutationEvent";
+	
+	public static final String MNEMOSYCON_RULE_SOURCE="Mnemosycon Rule Source";
+	public static final String MNEMOSYCON_RULE_LOCATION="Mnemosycon Rule Location";
+	public static final String MNEMOSYCON_RULE_FILE_PREFIX="Mnemosycon Rule File Prefix";
+	public static final String MNEMOSYCON_RULE_ALL_FILES="*";
+			
+	public static final String DENECHAIN_MNEMOSYCON_LOGIC_PROCESSING="Mnemosycon Logic Processing";
+	public static final String DENE_TYPE_MNEMOSYCON_PROCESSING="Mnemosycon Processing";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_RULES_LIST_POINTER="Mnemosycon Rules List Pointer";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_RULE_POINTER="Mnemosycon Rule Pointer";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_DATABASE_SIZE_TO_DISK_SIZE="Percentage Database To Disk";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_ORGANISMPULSE_SIZE_TO_DISK_SIZE="Percentage OrganismPulse To Disk";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_PULSE_SIZE_TO_DISK_SIZE="Percentage Pulse To Disk";
+	
+	
+	public static final String MNEMOSYCON_PATHOLOGY_MNEMOSYNE_LOCATION="Mnemosycon Pathology Mnemosyne Location";
+	
+	public static final String MNEMOSYCON_RULE_TIME_UNIT="Mnemosycon Rule Until Time Unit";
+	public static final String MNEMOSYCON_RULE_TIME_UNIT_VALUE="Mnemosycon Rule Until Time Value";
+	
 	public static final String DENECHAIN_MNEMOSYCONS="Mnemosycons";
 	public static final String DENE_TYPE_MNEMOSYCON="Mnemosycon";
 	public static final String DENE_TYPE_MNEMOSYCON_DATA_SOURCE="Mnemosycon Data Source";
-	public static final String MNEMOSYCON_DATA_SOURCE_PULSE="Pulse Data Source";
-	public static final String MNEMOSYCON_DATA_SOURCE_ORGANISM="Organism Data Source";
+	
 	public static final String DENEWORD_TYPE_MNEMOSYCON_PROFILE_POINTER="Mnemosycon Profile Pointer";
 	public static final String MNEMOSYCON_MILLIS_STARTING_POINT="MillisStartingPoint";
 	public static final String MNEMOSYCON_NEXT_BATCH_MILLIS_STARTING_POINT="NextBatchMillisStartingPoint";

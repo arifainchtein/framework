@@ -197,7 +197,22 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		String command = "delete from pulse where pulsetimemillis < " +  millisToDeleteFrom;
 		return deleteByPeriod( command);
 	}
+	
+	public int deleteByPeriodFromRememberedDeneWords(long millisToDeleteFrom) {
+		String command = "delete from remembereddenewords where timeMillis  < " +  millisToDeleteFrom;
+		return deleteByPeriod( command);
+	}
+	
+	public int deleteByPeriodFromCommandRequests(long millisToDeleteFrom) {
+		String command = "delete from CommandRequests where createdon  < " +  millisToDeleteFrom;
+		return deleteByPeriod( command);
+	}
 
+	public int deleteByPeriodFromMutationEvent(long millisToDeleteFrom) {
+		String command = "delete from MutationEvent where createdonMillis  < " +  millisToDeleteFrom;
+		return deleteByPeriod( command);
+	}
+	
 	private int deleteByPeriod(String command) {
 		Connection connection=null;
 		Statement statement=null;
@@ -348,7 +363,56 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		}
 	}
 
-	public PGobject getOrganismDeneWordAttributeByIdentity(Identity identity, String attribute) {
+	public PGobject extractOrganismDeneWordAttributeValueByIdentityByPeriod(Identity identity, String attribute, long fromMillis, long untilMillis) {
+		String organismTeleonomeName = identity.getTeleonomeName();
+		String identityString = identity.toString();
+		String sql = "select data->>'Pulse Timestamp in Milliseconds', DeneWord -> 'Value Type' As valuetype, DeneWord -> 'Value' As Value from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where  Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' and cast(data->>'Pulse Timestamp in Milliseconds' as BIGINT) > "+ fromMillis+" and cast(data->>'Pulse Timestamp in Milliseconds' as BIGINT)< "+ untilMillis+" order by data->>'Pulse Timestamp in Milliseconds' asc";
+		logger.debug("extractOrganismDeneWordAttributeValueByIdentityByPeriod,sql=" + sql);
+		Connection connection = null;
+		Statement statement = null;
+		PGobject toReturn = null;
+		ResultSet rs=null;
+
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+
+			rs = statement.executeQuery(sql);
+			JSONObject data=null;
+			long pulseTimestampMillis;
+			String valueType;
+			Object value;
+			while(rs.next()){
+				pulseTimestampMillis =  rs.getLong(1);
+				valueType=rs.getString(2);
+				value = rs.getObject(3);
+				unwrap(organismTeleonomeName, pulseTimestampMillis, identityString, valueType, value);
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		}finally{
+			if(connection!=null){
+				try {
+					if(rs!=null)rs.close();
+					if(statement!=null)statement.close();
+					if(connection!=null)connectionPool.closeConnection(connection);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+		}
+		return toReturn;
+	}
+	
+		
+public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identity, String attribute) {
 		String organismTeleonomeName = identity.getTeleonomeName();
 		String sql = "select DeneWord -> '"+ attribute+"' As Units from organismpulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where  Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' limit 1";
 		logger.debug("getOrganismDeneWordTimeSeriesByIdentity,sql=" + sql);
@@ -912,8 +976,9 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
 			//.replace("\"", "\\\"")
-			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
-			sql = "insert into MutationEvent (createdOn,data) values(" + createdOn + ",'" + mutationEventData.toString() +"')";
+			long now = System.currentTimeMillis();
+			String createdOn = getPostgresDateString(new Timestamp(now));
+			sql = "insert into MutationEvent (createdOn,createdOnMillis, data) values(" + createdOn + ","+ now+",'" + mutationEventData.toString() +"')";
 			int result = statement.executeUpdate(sql);
 
 			toReturn=true;
@@ -2611,7 +2676,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	}
 
 	
-	public boolean unwrap(TimeZone timeZone, String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value) {
+	public boolean unwrap( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value) {
 		String sql="";
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
@@ -2620,15 +2685,17 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			connection = connectionPool.getConnection();
 			//statement = connection.createStatement();
 			java.sql.Timestamp dateTimeValue = new java.sql.Timestamp(pulseTimeMillis);
-
-			sql = "insert into RememberedDeneWords (time, teleonomeName,identityString,value) values(?,?,?,?)";
-			logger.debug("storePurposeChainInfo=" + sql);
-			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
+			
+			sql = "insert into RememberedDeneWords (time,timeMillis teleonomeName,identityString,value) values(?,?,?,?,?) ON CONFLICT (timeMillis, teleonomeName,identityString) DO NOTHING";
+			logger.debug("unwrap=" + sql);
+			//Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
 
 			preparedStatement = connection.prepareStatement(sql);
-			preparedStatement.setTimestamp(1, dateTimeValue, calendarTimeZone);
-			preparedStatement.setString(2, teleonomeName);
-			preparedStatement.setString(3, identityString);
+			preparedStatement.setTimestamp(1, dateTimeValue);
+			preparedStatement.setLong(2, pulseTimeMillis);
+			
+			preparedStatement.setString(3, teleonomeName);
+			preparedStatement.setString(4, identityString);
 			double d = 0;
 			if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
 
@@ -2643,7 +2710,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 					d = (double)value;
 				}
 
-				preparedStatement.setDouble(4, d);
+				preparedStatement.setDouble(5, d);
 			}else if(valueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
 
 				if(value instanceof String) {
@@ -2653,7 +2720,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				}
 
 
-				preparedStatement.setDouble(4, d);
+				preparedStatement.setDouble(5, d);
 			}
 			int result = preparedStatement.executeUpdate();
 			preparedStatement.close();

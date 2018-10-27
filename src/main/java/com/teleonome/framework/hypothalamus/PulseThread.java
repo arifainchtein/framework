@@ -559,13 +559,19 @@ public class PulseThread extends Thread{
 								logger.debug("skiping mnemosycon " + name + " because it does not have a profile");
 								continue;
 							}
+							String mnemosyconType = (String)this.aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_TYPE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							logger.debug("mnemosyconType=" + mnemosyconType);
+							
 							mnemosyconProfileIdentity = new Identity(mnemosyconProfileIdentityPointer);
 							logger.debug("mnemosyconProfileIdentity=" + mnemosyconProfileIdentity);
 							mnemosyconProfileDene = this.aDenomeManager.getDeneByIdentity(mnemosyconProfileIdentity);
 							functionName = (String) this.aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconProfileDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_PROCESSING_FUNCTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							logger.debug("functionName=" + functionName);
-							Object[] parameters =  {mnemosyconProfileDene};
+							
+							
+							Object[] parameters =  {mnemosyconProfileDene, mnemosyconType};
 							logger.debug("parameters=" + parameters);
+							
 							Method mnemomsyneMethod = MnemosyneManager.class.getMethod(functionName, JSONObject.class);
 							logger.debug("mnemomsyneMethod=" + mnemomsyneMethod);
 							

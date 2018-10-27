@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -70,7 +74,7 @@ public class MnemosyneManager {
 	private DenomeManager aDenomeManager;
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.US);
 	SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss",Locale.US);
-	
+
 	Socket exoZeroPublisher=null;
 	MqttClient anMqttClient=null;
 	public MnemosyneManager(DenomeManager d, MqttClient m){
@@ -98,21 +102,29 @@ public class MnemosyneManager {
 		return aMnemosyneManager;
 	}
 
-	
+
 	private void init(){
 
 	}
 
-	public void forget(JSONObject aMnemosyconForgetParameters) {
+	public void forget(JSONObject aMnemosyconForgetParameters, String mnemosyconType) {
+
+		if(mnemosyconType.equals(TeleonomeConstants.MNEMOSYCON_TYPE_DYNAMIC)) {
+			forgetStatic(aMnemosyconForgetParameters);
+		}else if(mnemosyconType.equals(TeleonomeConstants.MNEMOSYCON_TYPE_STATIC)) {
+			forgetDynamic( aMnemosyconForgetParameters);
+		}
+
+	}
+
+	private void forgetStatic(JSONObject aMnemosyconForgetParameters) {
 		long mnemosyconProcessingStartingTime = System.currentTimeMillis();
+
 		//
 		// the Codon has the Mnemosycon Name
 		//
 		String aMnemosyconName = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(aMnemosyconForgetParameters, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-		//
-		// Get the expression for the mnemosycon
-		//
-		String mnemosyconForgetApproach = (String) DenomeUtils.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
 		//
 		// create the dene for the processing
 		//
@@ -141,14 +153,11 @@ public class MnemosyneManager {
 		JSONArray mnemosyconProcessingDeneDeneWords = new JSONArray();
 		mnemosyconProcessingDene.put("DeneWords", mnemosyconProcessingDeneDeneWords);
 		mnemosyconLogicProcessingDeneName = aMnemosyconName + " Processing";
-		
+
 		JSONObject mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-		//
-		// now evaluate the expression
-		// if it returns true then enter into the rules loop
-		//
-		boolean keepGoing=true;
+
+
 		String mnemosyconRulesPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_RULES_LIST_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 		JSONObject mnemosyconRulesListDeneJSONObject=null;
 		try {
@@ -159,7 +168,7 @@ public class MnemosyneManager {
 		}
 		JSONArray mnemosyconRulesPointersJSONArray = aDenomeManager.getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRulesListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_RULE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 		JSONArray mnemosyconRulesJSONArray = aDenomeManager.renderDeneWordsFromPointers(mnemosyconRulesPointersJSONArray);
-		
+
 		JSONObject mnemosyconRuleJSONObject;
 		int executionPosition;
 		ArrayList<Map.Entry<JSONObject, Integer>> mnemosyneRulesExecutionPositionIndex = new ArrayList();
@@ -171,7 +180,7 @@ public class MnemosyneManager {
 		}
 		Collections.sort(mnemosyneRulesExecutionPositionIndex, new IntegerCompare());
 		int counter=0;
-		String mnemosyconRuleSource,mnemosyconRuleTimeUnit, mnemosyconRuleTeamParameter=null;
+		String mnemosyconRuleSource,mnemosyconRuleFilePrefix,mnemosyconRuleLocation,mnemosyconRuleTimeUnit, mnemosyconRuleTeamParameter=null;
 		int mnemosyconRuleTimeUnitValue;
 		long now=0;
 		long millisToDeleteFrom=0;
@@ -187,70 +196,76 @@ public class MnemosyneManager {
 		int maximumPercentageDatabase = (int) DenomeUtils.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_MAXIMUM_PERCENTAGE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 		double sizeToCompare=0;
 		boolean executedSuccesfully=true;
-		
-		do {
-			if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_DATABASE_SIZE_TO_DISK_SIZE)){
-				sizeToCompare = aDBManager.getDatabaseSizeInMB();
-				
-				 mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Database Size", sizeToCompare,"mb","double",true);
-				mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-				
-			}else if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_ORGANISMPULSE_SIZE_TO_DISK_SIZE)){
-				sizeToCompare = aDBManager.getTableSizeInMB("OrganismPulse");
-				
-				mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("OrganismPulse Table Size", sizeToCompare,"mb","double",true);
-				mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-			
-			}else if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_PULSE_SIZE_TO_DISK_SIZE)){
-				sizeToCompare = aDBManager.getTableSizeInMB("Pulse"); 
-				mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Pulse Table Size", sizeToCompare,"mb","double",true);
-				mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-			
+		BasicFileAttributes attr;
+		FileTime creationTime;
+		Path path;
+
+
+
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Total Space", totalSpace,null,"double",true);
+		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
+		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+
+		for(int j=0;j<mnemosyneRulesExecutionPositionIndex.size();j++) {
+			//
+			// get the next rule
+			startRuleMillis =  System.currentTimeMillis();
+
+			mnemosyconRuleTeamParameter=null;
+			Map.Entry<JSONObject, Integer> entry = (Map.Entry<JSONObject, Integer>)mnemosyneRulesExecutionPositionIndex.get(j);
+			mnemosyconRuleJSONObject = entry.getKey();
+			mnemosyconRuleSource = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			mnemosyconRuleLocation = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_LOCATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			mnemosyconRuleTimeUnit= (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			mnemosyconRuleTimeUnitValue= (int) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			now=System.currentTimeMillis();
+			millisToDeleteFrom=0;
+
+			//
+			// now create a dene for this rule 
+			// also create a deneword for the parent dene
+			// that contains the pointer to this dene as a 
+			// deneword
+
+			mnemosyconRuleProcessingDene = new JSONObject();
+			mnemosyconLogicProcessingDenes.put(mnemosyconRuleProcessingDene);
+			mnemosyconRuleProcessingDene.put("Name", mnemosyconRuleJSONObject.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE) + " Processing");
+			mnemosyconRuleProcessingDene.put("Dene Type", TeleonomeConstants.DENE_TYPE_MNEMOSYCON_RULE_PROCESSING);
+			mnemosyconRuleProcessingDeneDeneWords = new JSONArray();
+			mnemosyconRuleProcessingDene.put("DeneWords", mnemosyconRuleProcessingDeneDeneWords);
+
+
+			if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_DAY)) {
+
+				millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*24*60*60*1000;
+
+			}else if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_WEEK)) {
+
+				millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*7*24*60*60*1000;
+
+			}else if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_MONTH)) {
+
+				millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*30*24*60*60*1000;
+
+			}else if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_YEAR)) {
+
+				millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*365*24*60*60*1000;
+
 			}
-			
-			keepGoing = sizeToCompare>(totalSpace*maximumPercentageDatabase)/100;
-			mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Total Space", totalSpace,null,"double",true);
-			mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-			mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
-			mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-			
-			
-			if(keepGoing) {
-				//
-				// get the next rule
-				startRuleMillis =  System.currentTimeMillis();
-				
-				mnemosyconRuleTeamParameter=null;
-				Map.Entry<JSONObject, Integer> entry = (Map.Entry<JSONObject, Integer>)mnemosyneRulesExecutionPositionIndex.get(counter);
-				mnemosyconRuleJSONObject = entry.getKey();
-				mnemosyconRuleSource = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				mnemosyconRuleTimeUnit= (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				mnemosyconRuleTimeUnitValue= (int) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				now=System.currentTimeMillis();
-				millisToDeleteFrom=0;
-				if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_DAY)) {
-					
-					millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*24*60*60*1000;
-					
-				}else if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_WEEK)) {
-
-					millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*7*24*60*60*1000;
-					
-				}else if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_MONTH)) {
-
-					millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*30*24*60*60*1000;
-					
-				}else if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_YEAR)) {
-
-					millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*365*24*60*60*1000;
-					
-				}
-				//
-				// excute the delete
-				//
-				if(mnemosyconRuleSource.equals(TeleonomeConstants.PULSE_TABLE)) {
+			//
+			// excute the delete
+			//
+			if(mnemosyconRuleSource.equals(TeleonomeConstants.MNEMOSYCON_DATA_SOURCE_DATABASE)) {
+				if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_PULSE)) {
 					rowsDeleted = aDBManager.deleteByPeriodFromPulse(millisToDeleteFrom);
-				}else if(mnemosyconRuleSource.equals(TeleonomeConstants.ORGANISMPULSE_TABLE)) {
+				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_REMEMBERED_DENEWORDS)) {
+					rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(millisToDeleteFrom);
+				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_COMMAND_REQUESTS)) {
+					rowsDeleted = aDBManager.deleteByPeriodFromCommandRequests(millisToDeleteFrom);
+				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_MUTATION_EVENT)) {
+					rowsDeleted = aDBManager.deleteByPeriodFromMutationEvent(millisToDeleteFrom);
+				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_ORGANISM)) {
 					//
 					// teamParam is just text that gets added to the delete command
 					// so it must contain all the rendered values in sql form
@@ -258,12 +273,12 @@ public class MnemosyneManager {
 					teamParam="";
 					mnemosyconRuleTeamParameter= (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TEAM_PARAMETER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					if(mnemosyconRuleTeamParameter!=null && !mnemosyconRuleTeamParameter.equals(TeleonomeConstants.MNEMOSYCON_RULE_TEAM_PARAMETER_ALL)) {
-						
+
 						StringBuffer teamsList = new StringBuffer();
 						try {
 							JSONObject teamDefinitionJSONObject = aDenomeManager.getDeneByIdentity(new Identity(aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_MNEMOSYCONS, TeleonomeConstants.DENE_MNEMOSYCON_TEAM_DEFINITION));
 							JSONArray allTeamMembers = aDenomeManager.getAllDeneWordAttributeByDeneWordTypeFromDene(teamDefinitionJSONObject, TeleonomeConstants.MNEMOSYCON_TEAM_MEMBER,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-							
+
 							for(int i=0;i<allTeamMembers.length();i++) {
 								if(i>0)teamsList.append(",");
 								teamsList.append("'"+allTeamMembers.getString(i)+"'");
@@ -272,85 +287,518 @@ public class MnemosyneManager {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						
-						
-						
+
+
+
 						//
 						// allTeamMembers contains all the names of the teleonome in this teleonome'team
 						if(mnemosyconRuleTeamParameter.equals(TeleonomeConstants.MNEMOSYCON_RULE_TEAM_PARAMETER_TEAM)) {
 							//
 							// in this case we want to delete records from the team members so 
 							teamParam = " and teleonomeName in (" + teamsList + ")";
-							
+
 						}else if(mnemosyconRuleTeamParameter.equals(TeleonomeConstants.MNEMOSYCON_RULE_TEAM_PARAMETER_NOT_TEAM)) {
 							//
 							// in this case we want to delete records from the not  team members so 
 							teamParam = " and teleonomeName not in (" + teamsList + ")";
 						}
 					}
-					
+
 					rowsDeleted = aDBManager.deleteByPeriodFromOrganismPulse(millisToDeleteFrom, teamParam);
-				}
+				}	
+
 				aDBManager.vacuum();
-				
-				
-				formattedToDeleteFromTimestamp = mnemosyneTimeFormat.format(millisToDeleteFrom);
-				
-				
+
+				mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Rows Deleted", rowsDeleted,null,"int",true);
+				mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+			}else if(mnemosyconRuleSource.equals(TeleonomeConstants.MNEMOSYCON_DATA_SOURCE_FILE_SYSTEM)) {
+
+				//
+				// in this case mnemosyconRuleLocation contains the fully qualified path
+				// check to see if there is a prefix
+				mnemosyconRuleFilePrefix = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_FILE_PREFIX, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+				File pathToDelete = new File(mnemosyconRuleLocation);
+				if(pathToDelete.isDirectory()) {
+					File[] files = pathToDelete.listFiles();
+					int deletedFileCounter=0;
+					File oldestFileNameDeleted=null, newestFileNameDeleted=null;
+					FileTime oldestCeationTime=null, newestCeationTime=null;
+					for(int i=0;i<files.length;i++) {
+						if(files[i]!=null) {
+							if(mnemosyconRuleFilePrefix!=null && 
+									!mnemosyconRuleFilePrefix.equals(TeleonomeConstants.MNEMOSYCON_RULE_ALL_FILES) &&
+									!files[i].getAbsolutePath().contains(mnemosyconRuleFilePrefix)
+									) {
+								logger.debug("mnemosyconRuleFilePrefix=" + mnemosyconRuleFilePrefix + " skipping file " + files[i].getAbsolutePath());
+								continue;
+							}
+							path = files[i].toPath();
+
+							try {
+								attr = Files.readAttributes(path, BasicFileAttributes.class);
+								creationTime = attr.creationTime();
+								if(millisToDeleteFrom>creationTime.toMillis()) {
+
+
+									if(oldestFileNameDeleted==null) {
+										oldestFileNameDeleted=files[i].getAbsoluteFile();
+										oldestCeationTime = creationTime;
+									}else {
+										if(oldestCeationTime.toMillis()>creationTime.toMillis()) {
+											oldestCeationTime=creationTime;
+											oldestFileNameDeleted= files[i].getAbsoluteFile();
+										}
+									}
+
+									if(newestFileNameDeleted==null) {
+										newestFileNameDeleted=files[i].getAbsoluteFile();
+										newestCeationTime = creationTime;
+									}else {
+										if(newestCeationTime.toMillis()<creationTime.toMillis()) {
+											newestCeationTime=creationTime;
+											newestFileNameDeleted= files[i].getAbsoluteFile();
+										}
+									}	
+
+									FileUtils.deleteQuietly(files[i]);
+									deletedFileCounter++;
+								}
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								logger.warn(Utils.getStringException(e));
+							}	
+						}
+					}
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Files Deleted", deletedFileCounter,null,"int",true);
+					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Oldest File Deleted", oldestFileNameDeleted,null,"String",true);
+					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Newest File Deleted", newestFileNameDeleted,null,"String",true);
+					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+				}else if(pathToDelete.isFile()){
+					FileUtils.deleteQuietly(pathToDelete);
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Files Deleted", 1,null,"int",true);
+					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+				}
+
+			}
+
+
+
+
+			formattedToDeleteFromTimestamp = mnemosyneTimeFormat.format(millisToDeleteFrom);
+
+
+
+			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
+			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+
+
+			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Delete Until ", formattedToDeleteFromTimestamp,null,"String",true);
+			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+
+			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Total Space", totalSpace,null,"double",true);
+			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_SOURCE, mnemosyconRuleSource,null,"String",true);
+			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_LOCATION, mnemosyconRuleLocation,null,"String",true);
+			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT, mnemosyconRuleTimeUnit,null,"String",true);
+			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT_VALUE, mnemosyconRuleTimeUnitValue,null,"int",true);
+			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+			ruleDurationMillis = System.currentTimeMillis()-startRuleMillis;
+			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_EXECUTION_MILLIS, ruleDurationMillis,"milliseconds","long",true);
+			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+
+			//
+			// now check to see if we need to keep going and if so,
+			// if there are any rules left, if its not, then 
+			// add a pathology dene saying that  eventough we executed all the rules
+			// the expression was not satisfied
+			counter++;
+		}
+
+
+		long totalExecutionDuration = System.currentTimeMillis()-mnemosyconProcessingStartingTime;
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Total Execution Duration Milliseconds", totalExecutionDuration,"milliseconds","long",true);
+		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Number Rules Processed", counter,"","int",true);
+		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+		//
+		// now check to see if the mnemosycon executed succesfully if so return the tasks for success, if not return the task for failure
+		//
+		String pointerToTasks = null;
+		if(executedSuccesfully) {
+			pointerToTasks =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_SUCCESS_TASKS_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		}else {
+			pointerToTasks =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FAILURE_TASKS_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		}
+
+		if(pointerToTasks!=null && !pointerToTasks.equals("")) {
+			aDenomeManager.executeActionSuccessTasks(pointerToTasks);
+		}
+
+	}
+
+
+	private void forgetDynamic(JSONObject aMnemosyconForgetParameters) {
+		long mnemosyconProcessingStartingTime = System.currentTimeMillis();
+
+		//
+		// the Codon has the Mnemosycon Name
+		//
+		String aMnemosyconName = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(aMnemosyconForgetParameters, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+		//
+		// create the dene for the processing
+		//
+		JSONObject mnemosyconLogicProcessingDeneChain=null;
+		JSONArray mnemosyconLogicProcessingDenes=null;
+		try {
+			mnemosyconLogicProcessingDeneChain = aDenomeManager.getDeneChainByPointer(TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_MNEMOSYCON_LOGIC_PROCESSING);
+			logger.debug("mnemosyconLogicProcessingDeneChain=" + mnemosyconLogicProcessingDeneChain);
+			mnemosyconLogicProcessingDenes = mnemosyconLogicProcessingDeneChain.getJSONArray("Denes");
+
+		} catch (JSONException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} catch (InvalidDenomeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		JSONObject mnemosyconProcessingDene = new JSONObject();
+		mnemosyconLogicProcessingDenes.put(mnemosyconProcessingDene);
+		String mnemosyconLogicProcessingDeneName = aMnemosyconName + " "  + "Processing";
+
+		mnemosyconProcessingDene.put("Name",mnemosyconLogicProcessingDeneName);
+		mnemosyconProcessingDene.put("Dene Type", TeleonomeConstants.DENE_TYPE_MNEMOSYCON_PROCESSING);
+
+		JSONArray mnemosyconProcessingDeneDeneWords = new JSONArray();
+		mnemosyconProcessingDene.put("DeneWords", mnemosyconProcessingDeneDeneWords);
+		mnemosyconLogicProcessingDeneName = aMnemosyconName + " Processing";
+
+		JSONObject mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
+		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+		//
+		// Get the Forget Apprach for a dynamic mnemosycon
+		//
+		String mnemosyconForgetApproach = (String) DenomeUtils.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+		//
+		// now evaluate the expression
+		// if it returns true then enter into the rules loop
+		//
+		boolean keepGoing=true;
+		String mnemosyconRulesPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_RULES_LIST_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		JSONObject mnemosyconRulesListDeneJSONObject=null;
+		try {
+			mnemosyconRulesListDeneJSONObject = aDenomeManager.getDeneByIdentity(new Identity(mnemosyconRulesPointer));
+		} catch (InvalidDenomeException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		JSONArray mnemosyconRulesPointersJSONArray = aDenomeManager.getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRulesListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_RULE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		JSONArray mnemosyconRulesJSONArray = aDenomeManager.renderDeneWordsFromPointers(mnemosyconRulesPointersJSONArray);
+
+		JSONObject mnemosyconRuleJSONObject;
+		int executionPosition;
+		ArrayList<Map.Entry<JSONObject, Integer>> mnemosyneRulesExecutionPositionIndex = new ArrayList();
+
+		for(int i=0;i<mnemosyconRulesJSONArray.length();i++){
+			mnemosyconRuleJSONObject = mnemosyconRulesJSONArray.getJSONObject(i);
+			executionPosition = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconRuleJSONObject,TeleonomeConstants.DENEWORD_EXECUTION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			mnemosyneRulesExecutionPositionIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(mnemosyconRuleJSONObject, new Integer(executionPosition)));
+		}
+		Collections.sort(mnemosyneRulesExecutionPositionIndex, new IntegerCompare());
+		int counter=0;
+		String mnemosyconRuleSource,mnemosyconRuleFilePrefix,mnemosyconRuleLocation,mnemosyconRuleTimeUnit, mnemosyconRuleTeamParameter=null;
+		int mnemosyconRuleTimeUnitValue;
+		long now=0;
+		long millisToDeleteFrom=0;
+		int rowsDeleted=0;
+		JSONObject mnemosyconRuleProcessingDene, mnemosyconRuleProcessingDeneWord;
+		JSONArray mnemosyconRuleProcessingDeneDeneWords;
+		SimpleDateFormat mnemosyneTimeFormat = new SimpleDateFormat(TeleonomeConstants.MNEMOSYNE_TIMESTAMP_FORMAT);
+		String formattedToDeleteFromTimestamp, teamParam;
+		long ruleExecutionDurationMillis,mnemosyconExecutionDuration;
+		long startRuleMillis;
+		long ruleDurationMillis;
+		long totalSpace = new File("/").getTotalSpace()/1024000;
+		int maximumPercentageDatabase = (int) DenomeUtils.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_MAXIMUM_PERCENTAGE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		double sizeToCompare=0;
+		boolean executedSuccesfully=true;
+		BasicFileAttributes attr;
+		FileTime creationTime;
+		Path path;
+		do {
+			if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_DATABASE_SIZE_TO_DISK_SIZE)){
+				sizeToCompare = aDBManager.getDatabaseSizeInMB();
+
+				mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Database Size", sizeToCompare,"mb","double",true);
+				mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+
+			}else if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_ORGANISMPULSE_SIZE_TO_DISK_SIZE)){
+				sizeToCompare = aDBManager.getTableSizeInMB("OrganismPulse");
+
+				mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("OrganismPulse Table Size", sizeToCompare,"mb","double",true);
+				mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+
+			}else if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_PULSE_SIZE_TO_DISK_SIZE)){
+				sizeToCompare = aDBManager.getTableSizeInMB("Pulse"); 
+				mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Pulse Table Size", sizeToCompare,"mb","double",true);
+				mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+
+			}
+
+			keepGoing = sizeToCompare>(totalSpace*maximumPercentageDatabase)/100;
+			mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Total Space", totalSpace,null,"double",true);
+			mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+			mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
+			mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+
+
+			if(keepGoing) {
+				//
+				// get the next rule
+				startRuleMillis =  System.currentTimeMillis();
+
+				mnemosyconRuleTeamParameter=null;
+				Map.Entry<JSONObject, Integer> entry = (Map.Entry<JSONObject, Integer>)mnemosyneRulesExecutionPositionIndex.get(counter);
+				mnemosyconRuleJSONObject = entry.getKey();
+				mnemosyconRuleSource = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				mnemosyconRuleLocation = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_LOCATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				mnemosyconRuleTimeUnit= (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				mnemosyconRuleTimeUnitValue= (int) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				now=System.currentTimeMillis();
+				millisToDeleteFrom=0;
+
 				//
 				// now create a dene for this rule 
 				// also create a deneword for the parent dene
 				// that contains the pointer to this dene as a 
 				// deneword
-				
+
 				mnemosyconRuleProcessingDene = new JSONObject();
 				mnemosyconLogicProcessingDenes.put(mnemosyconRuleProcessingDene);
 				mnemosyconRuleProcessingDene.put("Name", mnemosyconRuleJSONObject.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE) + " Processing");
 				mnemosyconRuleProcessingDene.put("Dene Type", TeleonomeConstants.DENE_TYPE_MNEMOSYCON_RULE_PROCESSING);
 				mnemosyconRuleProcessingDeneDeneWords = new JSONArray();
 				mnemosyconRuleProcessingDene.put("DeneWords", mnemosyconRuleProcessingDeneDeneWords);
-				
+
+
+				if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_DAY)) {
+
+					millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*24*60*60*1000;
+
+				}else if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_WEEK)) {
+
+					millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*7*24*60*60*1000;
+
+				}else if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_MONTH)) {
+
+					millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*30*24*60*60*1000;
+
+				}else if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_YEAR)) {
+
+					millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*365*24*60*60*1000;
+
+				}
+				//
+				// excute the delete
+				//
+				if(mnemosyconRuleSource.equals(TeleonomeConstants.MNEMOSYCON_DATA_SOURCE_DATABASE)) {
+					if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_PULSE)) {
+						rowsDeleted = aDBManager.deleteByPeriodFromPulse(millisToDeleteFrom);
+					}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_REMEMBERED_DENEWORDS)) {
+						rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(millisToDeleteFrom);
+					}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_COMMAND_REQUESTS)) {
+						rowsDeleted = aDBManager.deleteByPeriodFromCommandRequests(millisToDeleteFrom);
+					}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_MUTATION_EVENT)) {
+						rowsDeleted = aDBManager.deleteByPeriodFromMutationEvent(millisToDeleteFrom);
+					}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_ORGANISM)) {
+						//
+						// teamParam is just text that gets added to the delete command
+						// so it must contain all the rendered values in sql form
+						// there are three potential values
+						teamParam="";
+						mnemosyconRuleTeamParameter= (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TEAM_PARAMETER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						if(mnemosyconRuleTeamParameter!=null && !mnemosyconRuleTeamParameter.equals(TeleonomeConstants.MNEMOSYCON_RULE_TEAM_PARAMETER_ALL)) {
+
+							StringBuffer teamsList = new StringBuffer();
+							try {
+								JSONObject teamDefinitionJSONObject = aDenomeManager.getDeneByIdentity(new Identity(aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_MNEMOSYCONS, TeleonomeConstants.DENE_MNEMOSYCON_TEAM_DEFINITION));
+								JSONArray allTeamMembers = aDenomeManager.getAllDeneWordAttributeByDeneWordTypeFromDene(teamDefinitionJSONObject, TeleonomeConstants.MNEMOSYCON_TEAM_MEMBER,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+								for(int i=0;i<allTeamMembers.length();i++) {
+									if(i>0)teamsList.append(",");
+									teamsList.append("'"+allTeamMembers.getString(i)+"'");
+								}
+							} catch (InvalidDenomeException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+
+
+							//
+							// allTeamMembers contains all the names of the teleonome in this teleonome'team
+							if(mnemosyconRuleTeamParameter.equals(TeleonomeConstants.MNEMOSYCON_RULE_TEAM_PARAMETER_TEAM)) {
+								//
+								// in this case we want to delete records from the team members so 
+								teamParam = " and teleonomeName in (" + teamsList + ")";
+
+							}else if(mnemosyconRuleTeamParameter.equals(TeleonomeConstants.MNEMOSYCON_RULE_TEAM_PARAMETER_NOT_TEAM)) {
+								//
+								// in this case we want to delete records from the not  team members so 
+								teamParam = " and teleonomeName not in (" + teamsList + ")";
+							}
+						}
+
+						rowsDeleted = aDBManager.deleteByPeriodFromOrganismPulse(millisToDeleteFrom, teamParam);
+					}	
+
+					aDBManager.vacuum();
+
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Rows Deleted", rowsDeleted,null,"int",true);
+					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+				}else if(mnemosyconRuleSource.equals(TeleonomeConstants.MNEMOSYCON_DATA_SOURCE_FILE_SYSTEM)) {
+
+					//
+					// in this case mnemosyconRuleLocation contains the fully qualified path
+					// check to see if there is a prefix
+					mnemosyconRuleFilePrefix = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_FILE_PREFIX, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+					File pathToDelete = new File(mnemosyconRuleLocation);
+					if(pathToDelete.isDirectory()) {
+						File[] files = pathToDelete.listFiles();
+						int deletedFileCounter=0;
+						File oldestFileNameDeleted=null, newestFileNameDeleted=null;
+						FileTime oldestCeationTime=null, newestCeationTime=null;
+						for(int i=0;i<files.length;i++) {
+							if(files[i]!=null) {
+								if(mnemosyconRuleFilePrefix!=null && 
+										!mnemosyconRuleFilePrefix.equals(TeleonomeConstants.MNEMOSYCON_RULE_ALL_FILES) &&
+										!files[i].getAbsolutePath().contains(mnemosyconRuleFilePrefix)
+										) {
+									logger.debug("mnemosyconRuleFilePrefix=" + mnemosyconRuleFilePrefix + " skipping file " + files[i].getAbsolutePath());
+									continue;
+								}
+								path = files[i].toPath();
+
+								try {
+									attr = Files.readAttributes(path, BasicFileAttributes.class);
+									creationTime = attr.creationTime();
+									if(millisToDeleteFrom>creationTime.toMillis()) {
+
+
+										if(oldestFileNameDeleted==null) {
+											oldestFileNameDeleted=files[i].getAbsoluteFile();
+											oldestCeationTime = creationTime;
+										}else {
+											if(oldestCeationTime.toMillis()>creationTime.toMillis()) {
+												oldestCeationTime=creationTime;
+												oldestFileNameDeleted= files[i].getAbsoluteFile();
+											}
+										}
+
+										if(newestFileNameDeleted==null) {
+											newestFileNameDeleted=files[i].getAbsoluteFile();
+											newestCeationTime = creationTime;
+										}else {
+											if(newestCeationTime.toMillis()<creationTime.toMillis()) {
+												newestCeationTime=creationTime;
+												newestFileNameDeleted= files[i].getAbsoluteFile();
+											}
+										}	
+
+										FileUtils.deleteQuietly(files[i]);
+										deletedFileCounter++;
+									}
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									logger.warn(Utils.getStringException(e));
+								}	
+							}
+						}
+						mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Files Deleted", deletedFileCounter,null,"int",true);
+						mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+						mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Oldest File Deleted", oldestFileNameDeleted,null,"String",true);
+						mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+
+						mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Newest File Deleted", newestFileNameDeleted,null,"String",true);
+						mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+					}else if(pathToDelete.isFile()){
+						FileUtils.deleteQuietly(pathToDelete);
+						mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Files Deleted", 1,null,"int",true);
+						mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+					}
+
+				}
+
+
+
+
+				formattedToDeleteFromTimestamp = mnemosyneTimeFormat.format(millisToDeleteFrom);
+
+
+
 				mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
 				mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-				
-				mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Rows Deleted", rowsDeleted,null,"int",true);
-				mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-				
+
+
+
 				mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Delete Until ", formattedToDeleteFromTimestamp,null,"String",true);
 				mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-				
+
 				//
 				// now check again to see if we need to keepGoing to the next rule
 				//
 				if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_DATABASE_SIZE_TO_DISK_SIZE)){
 					sizeToCompare = aDBManager.getDatabaseSizeInMB();
-					
+
 					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Database Size", sizeToCompare,"mb","double",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-					
+
 				}else if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_ORGANISMPULSE_SIZE_TO_DISK_SIZE)){
 					sizeToCompare = aDBManager.getTableSizeInMB("OrganismPulse");
-					
+
 					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("OrganismPulse Table Size", sizeToCompare,"mb","double",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-				
+
 				}else if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_PULSE_SIZE_TO_DISK_SIZE)){
 					sizeToCompare = aDBManager.getTableSizeInMB("Pulse");
 					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Pulse Table Size", sizeToCompare,"mb","double",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-				
+
 				}
-				
-				
+
+
 				mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Apply Next Rule", keepGoing,null,"boolean",true);
 				mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-				
+
 				mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Total Space", totalSpace,null,"double",true);
 				mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-				
+
 				mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_SOURCE, mnemosyconRuleSource,null,"String",true);
 				mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-				
+
+				mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_LOCATION, mnemosyconRuleLocation,null,"String",true);
+				mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 				mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT, mnemosyconRuleTimeUnit,null,"String",true);
 				mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 
@@ -360,7 +808,7 @@ public class MnemosyneManager {
 				ruleDurationMillis = System.currentTimeMillis()-startRuleMillis;
 				mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_EXECUTION_MILLIS, ruleDurationMillis,"milliseconds","long",true);
 				mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-				
+
 				//
 				// now compare
 				keepGoing = sizeToCompare>(totalSpace*maximumPercentageDatabase)/100;
@@ -370,7 +818,7 @@ public class MnemosyneManager {
 				// if there are any rules left, if its not, then 
 				// add a pathology dene saying that  eventough we executed all the rules
 				// the expression was not satisfied
-				
+
 				if(keepGoing && (counter>=mnemosyneRulesExecutionPositionIndex.size())) {
 					//
 					// set executedSuccesfully to false
@@ -392,23 +840,23 @@ public class MnemosyneManager {
 					String pathologyName = TeleonomeConstants.PATHOLOGY_MNEMOSYCON_FAILED;
 					String pathologyCause = TeleonomeConstants.PATHOLOGY_MNEMOSYCON_FAILED;
 					String pathologyLocation = aMnemosyconName;
-					
-					
+
+
 					Vector extraDeneWords = new Vector();
 					Calendar cal = Calendar.getInstance();//TimeZone.getTimeZone("GMT+10:00"));
 					JSONObject pathologyDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_MILLISECONDS, "" + cal.getTime().getTime() ,null,"long",true);
 					extraDeneWords.addElement(pathologyDeneDeneWord);
 					pathologyDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_TIMESTAMP, mnemosyneTimeFormat.format(cal.getTime()) ,null,"long",true);
 					extraDeneWords.addElement(pathologyDeneDeneWord);
-					
+
 					keepGoing = sizeToCompare>(totalSpace*maximumPercentageDatabase)/100;
-					
+
 					String data = "Size to Compare=" + sizeToCompare + " totalSpace*maximumPercentageDatabase=" + (totalSpace*maximumPercentageDatabase)/100;
-					
+
 					pathologyDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_DETAILS_LABEL, data ,null,"String",true);
 					extraDeneWords.addElement(pathologyDeneDeneWord);
-					
-					
+
+
 					JSONArray pathologyDenes=null, pathologyDeneDeneWords;
 					JSONObject pathologyDene;
 					try {
@@ -428,12 +876,12 @@ public class MnemosyneManager {
 					pathologyDene.put("Name", pathologyName);
 					pathologyDeneDeneWords = new JSONArray();
 					pathologyDene.put(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE, TeleonomeConstants.DENE_PATHOLOGY);
-					
+
 					LocalDateTime currentTime = LocalDateTime.now();
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TeleonomeConstants.MNEMOSYNE_TIMESTAMP_FORMAT);
 					String formatedCurrentTime = currentTime.format(formatter);
 					pathologyDene.put(TeleonomeConstants.DATATYPE_TIMESTAMP, formatedCurrentTime);
-					
+
 					pathologyDene.put(TeleonomeConstants.DATATYPE_TIMESTAMP_MILLISECONDS, System.currentTimeMillis());
 					pathologyDene.put("DeneWords", pathologyDeneDeneWords);
 					//
@@ -452,14 +900,14 @@ public class MnemosyneManager {
 						pathologyDeneDeneWord=(JSONObject)extraDeneWords.elementAt(i);
 						pathologyDeneDeneWords.put(pathologyDeneDeneWord);
 					}
-					
+
 					//
 					// now set keepGoing to false to exit the loop
 					keepGoing=false;
 				}
 			}
 		}while(keepGoing);
-		
+
 		long totalExecutionDuration = System.currentTimeMillis()-mnemosyconProcessingStartingTime;
 		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Total Execution Duration Milliseconds", totalExecutionDuration,"milliseconds","long",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
@@ -474,38 +922,38 @@ public class MnemosyneManager {
 		}else {
 			pointerToTasks =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FAILURE_TASKS_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 		}
-		
+
 		if(pointerToTasks!=null && !pointerToTasks.equals("")) {
 			aDenomeManager.executeActionSuccessTasks(pointerToTasks);
 		}
-		
+
 	}
-	
+
 
 	class IntegerCompare implements Comparator<Map.Entry<?, Integer>>{
 		public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
 			return o1.getValue().compareTo(o2.getValue());
 		}
 	}
-	
-	
+
+
 	public JSONArray getRemeberedDeneWord(TimeZone timeZone, String identityString, long startTimeMillis, long endTimeMillis) {
 		return aDBManager.getRemeberedDeneWord( timeZone,identityString,  startTimeMillis,  endTimeMillis);
 	}
-	
+
 	public JSONArray getDeneWordFromPulseByRange(Identity identity, long startTimeMillis, long endTimeMillis) {
 		return aDBManager.getDeneWordTimeSeriesByIdentity( identity,  startTimeMillis,  endTimeMillis);
 	}
-	
-		
-		
-		
-	
-	
-	public boolean unwrap(TimeZone timeZone, String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value) {
-		return aDBManager.unwrap(timeZone ,teleonomeName,  pulseTimeMillis,  identityString,  valueType,  value);
+
+
+
+
+
+
+	public boolean unwrap( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value) {
+		return aDBManager.unwrap( teleonomeName,  pulseTimeMillis,  identityString,  valueType,  value);
 	}
-	
+
 	public void performTimePrunningAnalysis(){
 		logger.info("entering time prunning analysis");
 		long timePrunningAnalysisStartTime=System.currentTimeMillis();
@@ -520,12 +968,12 @@ public class MnemosyneManager {
 			JSONArray nuclei = denomeObject.getJSONArray("Nuclei");
 			JSONObject mnemosyneJSONObject=null;
 			found:
-			for(int i=0;i<nuclei.length();i++){
-				if(nuclei.getJSONObject(i).getString("Name").equals(TeleonomeConstants.NUCLEI_MNEMOSYNE)){
-					mnemosyneJSONObject = nuclei.getJSONObject(i);
-					break found;
+				for(int i=0;i<nuclei.length();i++){
+					if(nuclei.getJSONObject(i).getString("Name").equals(TeleonomeConstants.NUCLEI_MNEMOSYNE)){
+						mnemosyneJSONObject = nuclei.getJSONObject(i);
+						break found;
+					}
 				}
-			}
 			JSONArray mnemosyneDeneChains = mnemosyneJSONObject.getJSONArray("DeneChains");
 			JSONObject mnemosyneDeneChain;
 			String mnemosyneDeneChainName="";
@@ -538,7 +986,7 @@ public class MnemosyneManager {
 
 			LocalDateTime deneDateTime;
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TeleonomeConstants.MNEMOSYNE_TIMESTAMP_FORMAT);
-			
+
 			//
 			// do the count no matter what
 			for(int i=0;i<mnemosyneDeneChains.length();i++){
@@ -548,35 +996,35 @@ public class MnemosyneManager {
 				if(mnemosyneDeneChainName.equals(TeleonomeConstants.MNEMOSYNE_DENECHAIN_PULSE_COUNT)){
 					for(int j=0;j<denes.length();j++){
 						dene = denes.getJSONObject(j);
-						
+
 					}
 
 				}
 			}
-			
+
 
 			LocalDateTime currentTime = LocalDateTime.now();
 			LocalDate currentDate = LocalDate.now();
-			
+
 			int currentHour = currentTime.getHour();
 			int today = currentTime.getDayOfMonth();
-			
+
 			LocalDate todayLocalDate = LocalDate.now();
 			LocalDate yesterdayLocalDate = todayLocalDate.minusDays(1);
 			TemporalField woy = WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear(); 
 			int currentWeekNumber = currentTime.get(woy);
 			int deneWeekNumber;
-			
+
 			int currentMonth = currentTime.getMonthValue();
 			int currentYear = currentTime.getYear();
 			int deneMonth, deneYear;
-			
+
 			int currentQuarter = Utils.getQuarter(currentDate);
 			int deneQuarter=0;
 			String mnemosynePrunningStrategy="";
-			
-			
-			
+
+
+
 			boolean keepGoing=false;
 			for(int i=0;i<mnemosyneDeneChains.length();i++){
 				mnemosyneDeneChain=mnemosyneDeneChains.getJSONObject(i);
@@ -584,76 +1032,25 @@ public class MnemosyneManager {
 				denes = mnemosyneDeneChain.getJSONArray("Denes");
 				logger.info("for prunning looking at mnemosyneDeneChainName=" + mnemosyneDeneChainName);
 				if(mnemosyneDeneChainName.equals(TeleonomeConstants.MNEMOSYNE_DENECHAIN_CURRENT_HOUR)){
-					
-					keepGoing=false;
-					do{
-						keepGoing=false;
-						start_again:
-						for(int j=0;j<denes.length();j++){
-							dene = denes.getJSONObject(j);
-							deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
-							deneLocalDateTime =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDateTime();
-							currentDeneHour = deneLocalDateTime.getHour();
-							logger.info("from hourly, currentDeneHour=" + currentDeneHour + " currentHour=" + currentHour);
-							if(currentDeneHour!=currentHour){
-								//
-								// now check if there is a Dene attribute called MNEMOSYNE_PRUNNING_STRATEGY
-								// if there is not, then just delete it
-								if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
-									mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
-									if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
-										logger.info("removing dene from hourly, deneLocalDateTime=" + deneLocalDateTime);
-										denes.remove(j);
-										keepGoing=true;
-										break start_again;
-									}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
-										//
-										// get this dene's denewords and loop over every one  and set its value to default
-										//
-										deneWords = dene.getJSONArray("DeneWords");
-										for(int k=0;k<deneWords.length();k++){
-											deneWord = deneWords.getJSONObject(k);
-											if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
-												deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
-											}
-										}
-									}
-								}else {
-									logger.info("removing dene from hourly, deneLocalDateTime=" + deneLocalDateTime);
-									denes.remove(j);
-									keepGoing=true;
-									break start_again;
-								}
-							}
-						}
-					}while(keepGoing);
-					
 
-				}else if(mnemosyneDeneChainName.equals(TeleonomeConstants.MNEMOSYNE_DENECHAIN_CURRENT_DAY)){
-//					
-					
-					String deneName="";
 					keepGoing=false;
 					do{
 						keepGoing=false;
 						start_again:
-						for(int j=0;j<denes.length();j++){
-							dene = denes.getJSONObject(j);
-							deneName=dene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
-							//
-							// check to see if there is a timestamp, if there is not, delete it
-							//
-							
-							if(dene.has("Timestamp Milliseconds")) {
+							for(int j=0;j<denes.length();j++){
+								dene = denes.getJSONObject(j);
 								deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
-								deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
-								
-								logger.info("from todday, deneName=" + deneName + " currentDate=" + currentDate + " deneLocalDate=" + deneLocalDate);
-								if(!currentDate.equals(deneLocalDate)){
+								deneLocalDateTime =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDateTime();
+								currentDeneHour = deneLocalDateTime.getHour();
+								logger.info("from hourly, currentDeneHour=" + currentDeneHour + " currentHour=" + currentHour);
+								if(currentDeneHour!=currentHour){
+									//
+									// now check if there is a Dene attribute called MNEMOSYNE_PRUNNING_STRATEGY
+									// if there is not, then just delete it
 									if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
 										mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
 										if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
-											logger.info("removing dene "+ deneName + " from daily,with prunning strategy remove deneLocalDate=" + deneLocalDate);
+											logger.info("removing dene from hourly, deneLocalDateTime=" + deneLocalDateTime);
 											denes.remove(j);
 											keepGoing=true;
 											break start_again;
@@ -661,274 +1058,325 @@ public class MnemosyneManager {
 											//
 											// get this dene's denewords and loop over every one  and set its value to default
 											//
-											logger.info("resetting dene "+deneName +" from daily,with prunning strategy reset deneLocalDate=" + deneLocalDate);
-											
 											deneWords = dene.getJSONArray("DeneWords");
 											for(int k=0;k<deneWords.length();k++){
 												deneWord = deneWords.getJSONObject(k);
 												if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
-													logger.info("resetting dene "+deneName +" from daily,with prunning strategy reset reset value=" + deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
-													
 													deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
 												}
 											}
 										}
 									}else {
-										logger.info("removing dene from daily,no prunning strategy deneLocalDate=" + deneLocalDate);
+										logger.info("removing dene from hourly, deneLocalDateTime=" + deneLocalDateTime);
 										denes.remove(j);
 										keepGoing=true;
 										break start_again;
 									}
 								}
-							}else {
-								//
-								// it does not have a timestamp, therefore delete it
-								logger.info("removing dene from dailybecause there is no timesmps=");
-								denes.remove(j);
-								keepGoing=true;
-								break start_again;
 							}
-							
-						}
 					}while(keepGoing);
-					
-					
+
+
+				}else if(mnemosyneDeneChainName.equals(TeleonomeConstants.MNEMOSYNE_DENECHAIN_CURRENT_DAY)){
+					//					
+
+					String deneName="";
+					keepGoing=false;
+					do{
+						keepGoing=false;
+						start_again:
+							for(int j=0;j<denes.length();j++){
+								dene = denes.getJSONObject(j);
+								deneName=dene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+								//
+								// check to see if there is a timestamp, if there is not, delete it
+								//
+
+								if(dene.has("Timestamp Milliseconds")) {
+									deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
+									deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
+
+									logger.info("from todday, deneName=" + deneName + " currentDate=" + currentDate + " deneLocalDate=" + deneLocalDate);
+									if(!currentDate.equals(deneLocalDate)){
+										if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
+											mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
+											if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
+												logger.info("removing dene "+ deneName + " from daily,with prunning strategy remove deneLocalDate=" + deneLocalDate);
+												denes.remove(j);
+												keepGoing=true;
+												break start_again;
+											}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
+												//
+												// get this dene's denewords and loop over every one  and set its value to default
+												//
+												logger.info("resetting dene "+deneName +" from daily,with prunning strategy reset deneLocalDate=" + deneLocalDate);
+
+												deneWords = dene.getJSONArray("DeneWords");
+												for(int k=0;k<deneWords.length();k++){
+													deneWord = deneWords.getJSONObject(k);
+													if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
+														logger.info("resetting dene "+deneName +" from daily,with prunning strategy reset reset value=" + deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
+
+														deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
+													}
+												}
+											}
+										}else {
+											logger.info("removing dene from daily,no prunning strategy deneLocalDate=" + deneLocalDate);
+											denes.remove(j);
+											keepGoing=true;
+											break start_again;
+										}
+									}
+								}else {
+									//
+									// it does not have a timestamp, therefore delete it
+									logger.info("removing dene from dailybecause there is no timesmps=");
+									denes.remove(j);
+									keepGoing=true;
+									break start_again;
+								}
+
+							}
+					}while(keepGoing);
+
+
 				}else if(mnemosyneDeneChainName.equals(TeleonomeConstants.MNEMOSYNE_DENECHAIN_YESTERDAY)){
 					start_again:
-					for(int j=0;j<denes.length();j++){
-						dene = denes.getJSONObject(j);
-						deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
-						deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
-						if(!yesterdayLocalDate.equals(deneLocalDate)){
-							if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
-								mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
-								if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
+						for(int j=0;j<denes.length();j++){
+							dene = denes.getJSONObject(j);
+							deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
+							deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
+							if(!yesterdayLocalDate.equals(deneLocalDate)){
+								if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
+									mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
+									if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
+										logger.info("removing dene from yesterday, deneLocalDate=" + deneLocalDate);
+										denes.remove(j);
+										keepGoing=true;
+										break start_again;
+									}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
+										//
+										// get this dene's denewords and loop over every one  and set its value to default
+										//
+										deneWords = dene.getJSONArray("DeneWords");
+										for(int k=0;k<deneWords.length();k++){
+											deneWord = deneWords.getJSONObject(k);
+											if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
+												deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
+											}
+										}
+									}
+								}else {
 									logger.info("removing dene from yesterday, deneLocalDate=" + deneLocalDate);
 									denes.remove(j);
 									keepGoing=true;
 									break start_again;
-								}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
-									//
-									// get this dene's denewords and loop over every one  and set its value to default
-									//
-									deneWords = dene.getJSONArray("DeneWords");
-									for(int k=0;k<deneWords.length();k++){
-										deneWord = deneWords.getJSONObject(k);
-										if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
-											deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
-										}
-									}
 								}
-							}else {
-								logger.info("removing dene from yesterday, deneLocalDate=" + deneLocalDate);
-								denes.remove(j);
-								keepGoing=true;
-								break start_again;
 							}
 						}
-					}
 				}else if(mnemosyneDeneChainName.equals(TeleonomeConstants.MNEMOSYNE_DENECHAIN_CURRENT_WEEK)){
-					
+
 					keepGoing=false;
 					do{
 						keepGoing=false;
 						start_again:
-						for(int j=0;j<denes.length();j++){
-							dene = denes.getJSONObject(j);
-							deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
-							deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
-							deneWeekNumber = deneLocalDate.get(woy);
-							logger.info("from currentweek, deneWeekNumber=" + deneWeekNumber + " currentWeekNumber=" + currentWeekNumber);
-							if(deneWeekNumber!=currentWeekNumber){
-								if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
-									mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
-									if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
-										logger.info("removing dene from currentweek, deneLocalDate=" + deneLocalDate);
+							for(int j=0;j<denes.length();j++){
+								dene = denes.getJSONObject(j);
+								deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
+								deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
+								deneWeekNumber = deneLocalDate.get(woy);
+								logger.info("from currentweek, deneWeekNumber=" + deneWeekNumber + " currentWeekNumber=" + currentWeekNumber);
+								if(deneWeekNumber!=currentWeekNumber){
+									if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
+										mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
+										if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
+											logger.info("removing dene from currentweek, deneLocalDate=" + deneLocalDate);
+											denes.remove(j);
+											keepGoing=true;
+											break start_again;
+										}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
+											//
+											// get this dene's denewords and loop over every one  and set its value to default
+											//
+											deneWords = dene.getJSONArray("DeneWords");
+											for(int k=0;k<deneWords.length();k++){
+												deneWord = deneWords.getJSONObject(k);
+												if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
+													deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
+												}
+											}
+										}
+									}else {
+										logger.info("removing dene from curentweek, deneLocalDate=" + deneLocalDate);
 										denes.remove(j);
 										keepGoing=true;
 										break start_again;
-									}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
-										//
-										// get this dene's denewords and loop over every one  and set its value to default
-										//
-										deneWords = dene.getJSONArray("DeneWords");
-										for(int k=0;k<deneWords.length();k++){
-											deneWord = deneWords.getJSONObject(k);
-											if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
-												deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
-											}
-										}
 									}
-								}else {
-									logger.info("removing dene from curentweek, deneLocalDate=" + deneLocalDate);
-									denes.remove(j);
-									keepGoing=true;
-									break start_again;
 								}
 							}
-						}
 					}while(keepGoing);
-					
+
 				}else if(mnemosyneDeneChainName.equals(TeleonomeConstants.MNEMOSYNE_DENECHAIN_CURRENT_MONTH)){
-//					for(int j=0;j<denes.length();j++){
-//						dene = denes.getJSONObject(j);
-//						deneTimestamp = dene.getString("Timestamp");
-//						deneLocalDate = LocalDate.parse(deneTimestamp, formatter);
-//						deneMonth = deneLocalDate.getMonthValue();
-//						deneYear = deneLocalDate.getYear();
-//						if(deneMonth!=currentMonth || deneYear!=currentYear){
-//							denes.remove(j);
-//						}
-//					}
-//					
+					//					for(int j=0;j<denes.length();j++){
+					//						dene = denes.getJSONObject(j);
+					//						deneTimestamp = dene.getString("Timestamp");
+					//						deneLocalDate = LocalDate.parse(deneTimestamp, formatter);
+					//						deneMonth = deneLocalDate.getMonthValue();
+					//						deneYear = deneLocalDate.getYear();
+					//						if(deneMonth!=currentMonth || deneYear!=currentYear){
+					//							denes.remove(j);
+					//						}
+					//					}
+					//					
 					keepGoing=false;
 					do{
 						keepGoing=false;
 						start_again:
-						for(int j=0;j<denes.length();j++){
-							dene = denes.getJSONObject(j);
-							deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
-							deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
-							deneMonth = deneLocalDate.getMonthValue();
-							deneYear = deneLocalDate.getYear();
-							
-							logger.info("from currentmonth, deneMonth=" + deneMonth + " currentMonth=" + currentMonth + " deneYear=" + deneYear + " currentYear=" + currentYear);
-							if(deneMonth!=currentMonth || deneYear!=currentYear){
-								if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
-									mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
-									if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
+							for(int j=0;j<denes.length();j++){
+								dene = denes.getJSONObject(j);
+								deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
+								deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
+								deneMonth = deneLocalDate.getMonthValue();
+								deneYear = deneLocalDate.getYear();
+
+								logger.info("from currentmonth, deneMonth=" + deneMonth + " currentMonth=" + currentMonth + " deneYear=" + deneYear + " currentYear=" + currentYear);
+								if(deneMonth!=currentMonth || deneYear!=currentYear){
+									if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
+										mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
+										if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
+											logger.info("removing dene from currentmonth, deneLocalDate=" + deneLocalDate);
+											denes.remove(j);
+											keepGoing=true;
+											break start_again;
+										}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
+											//
+											// get this dene's denewords and loop over every one  and set its value to default
+											//
+											deneWords = dene.getJSONArray("DeneWords");
+											for(int k=0;k<deneWords.length();k++){
+												deneWord = deneWords.getJSONObject(k);
+												if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
+													deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
+												}
+											}
+										}
+									}else {
 										logger.info("removing dene from currentmonth, deneLocalDate=" + deneLocalDate);
 										denes.remove(j);
 										keepGoing=true;
 										break start_again;
-									}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
-										//
-										// get this dene's denewords and loop over every one  and set its value to default
-										//
-										deneWords = dene.getJSONArray("DeneWords");
-										for(int k=0;k<deneWords.length();k++){
-											deneWord = deneWords.getJSONObject(k);
-											if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
-												deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
-											}
-										}
 									}
-								}else {
-									logger.info("removing dene from currentmonth, deneLocalDate=" + deneLocalDate);
-									denes.remove(j);
-									keepGoing=true;
-									break start_again;
 								}
 							}
-						}
 					}while(keepGoing);
-					
-					
+
+
 				}else if(mnemosyneDeneChainName.equals(TeleonomeConstants.MNEMOSYNE_DENECHAIN_CURRENT_QUARTER)){
-//					for(int j=0;j<denes.length();j++){
-//						dene = denes.getJSONObject(j);
-//						deneTimestamp = dene.getString("Timestamp");
-//						deneLocalDate = LocalDate.parse(deneTimestamp, formatter);
-//						deneQuarter = Utils.getQuarter(deneLocalDate);
-//						deneYear = deneLocalDate.getYear();
-//						if(deneQuarter!=deneQuarter || deneYear!=currentYear){
-//							denes.remove(j);
-//						}
-//					}
-					
+					//					for(int j=0;j<denes.length();j++){
+					//						dene = denes.getJSONObject(j);
+					//						deneTimestamp = dene.getString("Timestamp");
+					//						deneLocalDate = LocalDate.parse(deneTimestamp, formatter);
+					//						deneQuarter = Utils.getQuarter(deneLocalDate);
+					//						deneYear = deneLocalDate.getYear();
+					//						if(deneQuarter!=deneQuarter || deneYear!=currentYear){
+					//							denes.remove(j);
+					//						}
+					//					}
+
 					keepGoing=false;
 					do{
 						keepGoing=false;
 						start_again:
-						for(int j=0;j<denes.length();j++){
-							dene = denes.getJSONObject(j);
-							deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
-							deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
-							deneQuarter = Utils.getQuarter(deneLocalDate);
-							deneYear = deneLocalDate.getYear();
-							logger.info("from currenquarter, deneQuarter=" + deneQuarter + " deneYear=" + deneYear + " currentQuarter=" + currentQuarter + " currentYear=" + currentYear);
-							
-							if(deneQuarter!=currentQuarter || deneYear!=currentYear){	
-								if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
-									mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
-									if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
+							for(int j=0;j<denes.length();j++){
+								dene = denes.getJSONObject(j);
+								deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
+								deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
+								deneQuarter = Utils.getQuarter(deneLocalDate);
+								deneYear = deneLocalDate.getYear();
+								logger.info("from currenquarter, deneQuarter=" + deneQuarter + " deneYear=" + deneYear + " currentQuarter=" + currentQuarter + " currentYear=" + currentYear);
+
+								if(deneQuarter!=currentQuarter || deneYear!=currentYear){	
+									if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
+										mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
+										if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
+											logger.info("removing dene from currentquarter, deneLocalDate=" + deneLocalDate);
+											denes.remove(j);
+											keepGoing=true;
+											break start_again;
+										}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
+											//
+											// get this dene's denewords and loop over every one  and set its value to default
+											//
+											deneWords = dene.getJSONArray("DeneWords");
+											for(int k=0;k<deneWords.length();k++){
+												deneWord = deneWords.getJSONObject(k);
+												if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
+													deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
+												}
+											}
+										}
+									}else {
 										logger.info("removing dene from currentquarter, deneLocalDate=" + deneLocalDate);
 										denes.remove(j);
 										keepGoing=true;
 										break start_again;
-									}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
-										//
-										// get this dene's denewords and loop over every one  and set its value to default
-										//
-										deneWords = dene.getJSONArray("DeneWords");
-										for(int k=0;k<deneWords.length();k++){
-											deneWord = deneWords.getJSONObject(k);
-											if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
-												deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
-											}
-										}
 									}
-								}else {
-									logger.info("removing dene from currentquarter, deneLocalDate=" + deneLocalDate);
-									denes.remove(j);
-									keepGoing=true;
-									break start_again;
 								}
 							}
-						}
 					}while(keepGoing);
-					
-					
+
+
 				}else if(mnemosyneDeneChainName.equals(TeleonomeConstants.MNEMOSYNE_DENECHAIN_CURRENT_YEAR)){
-					
+
 					keepGoing=false;
 					do{
 						keepGoing=false;
 						start_again:
-						for(int j=0;j<denes.length();j++){
-							dene = denes.getJSONObject(j);
-							deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
-							deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
-							deneYear = deneLocalDate.getYear();
-							logger.info("from currenyear, deneYear=" + deneYear + " currentYear=" + currentYear);
-							
-							if( deneYear!=currentYear){	
-								if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
-									mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
-									if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
+							for(int j=0;j<denes.length();j++){
+								dene = denes.getJSONObject(j);
+								deneTimestampMillis = dene.getLong("Timestamp Milliseconds");
+								deneLocalDate =  Instant.ofEpochMilli(deneTimestampMillis).atZone(ZoneId.systemDefault()).toLocalDate();
+								deneYear = deneLocalDate.getYear();
+								logger.info("from currenyear, deneYear=" + deneYear + " currentYear=" + currentYear);
+
+								if( deneYear!=currentYear){	
+									if(dene.has(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY)) {
+										mnemosynePrunningStrategy =dene.getString(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY);
+										if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_ERASE)) {
+											logger.info("removing dene from currentyear, deneLocalDate=" + deneLocalDate);
+											denes.remove(j);
+											keepGoing=true;
+											break start_again;
+										}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
+											//
+											// get this dene's denewords and loop over every one  and set its value to default
+											//
+											deneWords = dene.getJSONArray("DeneWords");
+											for(int k=0;k<deneWords.length();k++){
+												deneWord = deneWords.getJSONObject(k);
+												if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
+													deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
+												}
+											}
+										}
+									}else {
 										logger.info("removing dene from currentyear, deneLocalDate=" + deneLocalDate);
 										denes.remove(j);
 										keepGoing=true;
 										break start_again;
-									}else if(mnemosynePrunningStrategy.equals(TeleonomeConstants.MNEMOSYNE_PRUNNING_STRATEGY_RESET)) {
-										//
-										// get this dene's denewords and loop over every one  and set its value to default
-										//
-										deneWords = dene.getJSONArray("DeneWords");
-										for(int k=0;k<deneWords.length();k++){
-											deneWord = deneWords.getJSONObject(k);
-											if(deneWord.has(TeleonomeConstants.DENEWORD_DEFAULT_VALUE)) {
-												deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.get(TeleonomeConstants.DENEWORD_DEFAULT_VALUE));
-											}
-										}
 									}
-								}else {
-									logger.info("removing dene from currentyear, deneLocalDate=" + deneLocalDate);
-									denes.remove(j);
-									keepGoing=true;
-									break start_again;
 								}
 							}
-						}
 					}while(keepGoing);
-					
+
 				}
-				
+
 			}
-		
-		
-			
-			
+
+
+
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
@@ -953,23 +1401,23 @@ public class MnemosyneManager {
 		}
 	}
 
-//	public int myHistoryRecordsReceivedSince(JSONObject mnemosyconProfileDene) {
-//		
-//		//long importedOnMillis=;
-//	//	String destination=;
-//		String learnOtherHistoryTeleonomeName="";
-//		
-//		//int numberRecordsReceived = aDBManager.getNumberRecordsRemembered( importedOnMillis,  destination,  learnOtherHistoryTeleonomeName);
-//		//logger.info("creating addMnemosyconProcessingDene," + codon +" " +  processingStartMillis +" " +  processingEndMillis +" " +    numberOfPulsesToRetrieveDuringThisPulse +" " +  estimatedTimeForFinishingCycleString  +" " +  numberOfRecordsLeftBeforeCompletingCycle );
-//	//	aDenomeManager.addMnemosyconProcessingDene( codon,  processingStartMillis,  processingEndMillis,  numberOfPulsesToRetrieveDuringThisPulse, "sharePulseBatch", TeleonomeConstants.TELEONOME_IDENTITY_SELF,estimatedTimeForFinishingCycleString, numberOfRecordsLeftBeforeCompletingCycle, firstPulseInBatchMilliseconds, lastPulseInBatchMilliseconds, updatedNumberOfPulsesToRetrieveDuringThisPulse,neededUpdatedNumberOfPulsesToRetrieveDuringThisPulse);
-//		 
-//	}
-	
+	//	public int myHistoryRecordsReceivedSince(JSONObject mnemosyconProfileDene) {
+	//		
+	//		//long importedOnMillis=;
+	//	//	String destination=;
+	//		String learnOtherHistoryTeleonomeName="";
+	//		
+	//		//int numberRecordsReceived = aDBManager.getNumberRecordsRemembered( importedOnMillis,  destination,  learnOtherHistoryTeleonomeName);
+	//		//logger.info("creating addMnemosyconProcessingDene," + codon +" " +  processingStartMillis +" " +  processingEndMillis +" " +    numberOfPulsesToRetrieveDuringThisPulse +" " +  estimatedTimeForFinishingCycleString  +" " +  numberOfRecordsLeftBeforeCompletingCycle );
+	//	//	aDenomeManager.addMnemosyconProcessingDene( codon,  processingStartMillis,  processingEndMillis,  numberOfPulsesToRetrieveDuringThisPulse, "sharePulseBatch", TeleonomeConstants.TELEONOME_IDENTITY_SELF,estimatedTimeForFinishingCycleString, numberOfRecordsLeftBeforeCompletingCycle, firstPulseInBatchMilliseconds, lastPulseInBatchMilliseconds, updatedNumberOfPulsesToRetrieveDuringThisPulse,neededUpdatedNumberOfPulsesToRetrieveDuringThisPulse);
+	//		 
+	//	}
+
 	public void sharePulseBatch(JSONObject mnemosyconProfileDene) {
 		long processingStartMillis = System.currentTimeMillis();
 		String codon="";
 		long millisStartingPoint;
-		
+
 		try {
 			millisStartingPoint = (long) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_NEXT_BATCH_MILLIS_STARTING_POINT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			JSONObject cycleStartMillisDeneWord = (JSONObject) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_CYCLE_START_MILLISECONDS, TeleonomeConstants.COMPLETE);
@@ -978,14 +1426,14 @@ public class MnemosyneManager {
 				// if we are here is because we are starting the cycle
 				// so mark the denewords
 				cycleStartMillisDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, processingStartMillis);
-				
+
 				JSONObject deneWord = (JSONObject) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_CYCLE_START_TIMESTAMP, TeleonomeConstants.COMPLETE);
 				deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dateFormat.format(processingStartMillis));
 			}
-			
+
 			long cycleStartedOnMillis = cycleStartMillisDeneWord.getLong(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			int maximumNumberRecordPerBatch = (int) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_MAXIMUM_NUMBER_OF_RECORDS_PER_BATCH, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-			
+
 			int numberOfPulsesToRetrieveDuringThisPulse =  (int) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_NUMBER_OF_PULSES_TO_RETRIEVE_PER_BATCH, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			String pointerToActionSuccessTasks =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconProfileDene, TeleonomeConstants.DENEWORD_TYPE_ACTION_SUCCESS_TASK_TRUE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			codon =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconProfileDene, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
@@ -1025,14 +1473,14 @@ public class MnemosyneManager {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			
+
+
 			JSONArray batchOfPulses =  null;
 			if(updatedNumberOfPulsesToRetrieveDuringThisPulse>-1) {
 				batchOfPulses = aDBManager.getPulsesFromTime(millisStartingPoint, updatedNumberOfPulsesToRetrieveDuringThisPulse);
 			}else {
 				batchOfPulses = aDBManager.getPulsesFromTime(millisStartingPoint, numberOfPulsesToRetrieveDuringThisPulse);
-						
+
 			}
 			String pulse, pulseTimestamp="";
 			JSONObject pulseJSONObject;
@@ -1054,23 +1502,23 @@ public class MnemosyneManager {
 					} catch (SocketException | UnknownHostException e2) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e2));
-						
+
 					}
 					logger.info("binding zeromq to " + ipToBindToZeroMQ);
 					exoZeroPublisher.bind("tcp://" + ipToBindToZeroMQ + ":" + TeleonomeConstants.EXOZERO_MNEMOSYNE_MANAGER_PORT);
-					
+
 					exoZeroPublisher.sendMore("Remember_" + aDenomeManager.getDenomeName());
 					exoZeroPublisher.send(pulse); 
 					exoZeroPublisher.close();
 					exozeroContext.close();
-					    
+
 					logger.debug("published  pulse to zeromq");
-					
+
 					//
 					// End of Publish the pulse to the ExoZero Network
 					//
-					
-				
+
+
 					pulseTimestampMillis = pulseJSONObject.getLong(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS);
 					pulseTimestamp = pulseJSONObject.getString(TeleonomeConstants.PULSE_TIMESTAMP);
 					if(i==0) {
@@ -1083,28 +1531,28 @@ public class MnemosyneManager {
 				// start again from the beginning
 				pulseTimestampMillis=0;
 				pulseTimestamp="";
-				
+
 			}
 			long lastPulseInBatchMilliseconds=pulseTimestampMillis;
-			
+
 			JSONObject deneWordMillis = (JSONObject) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_NEXT_BATCH_MILLIS_STARTING_POINT, TeleonomeConstants.COMPLETE);
 			deneWordMillis.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, pulseTimestampMillis);
-			
-			
+
+
 			if(updatedNumberOfPulsesToRetrieveDuringThisPulse>-1) {
 				logger.info("Updating " + TeleonomeConstants.MNEMOSYCON_NUMBER_OF_PULSES_TO_RETRIEVE_PER_BATCH + " to " + updatedNumberOfPulsesToRetrieveDuringThisPulse);
 				JSONObject deneWordNumPulses = (JSONObject) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_NUMBER_OF_PULSES_TO_RETRIEVE_PER_BATCH, TeleonomeConstants.COMPLETE);
 				deneWordNumPulses.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, updatedNumberOfPulsesToRetrieveDuringThisPulse);	
 			}
-			
+
 			long processingEndMillis = System.currentTimeMillis();
 			//
 			// create the processing name
 			//
 			logger.info("creating addMnemosyconProcessingDene," + codon +" " +  processingStartMillis +" " +  processingEndMillis +" " +    numberOfPulsesToRetrieveDuringThisPulse +" " +  estimatedTimeForFinishingCycleString  +" " +  numberOfRecordsLeftBeforeCompletingCycle );
 			aDenomeManager.addMnemosyconProcessingDene( codon,  processingStartMillis,  processingEndMillis,  numberOfPulsesToRetrieveDuringThisPulse, "sharePulseBatch", TeleonomeConstants.TELEONOME_IDENTITY_SELF,estimatedTimeForFinishingCycleString, numberOfRecordsLeftBeforeCompletingCycle, firstPulseInBatchMilliseconds, lastPulseInBatchMilliseconds, updatedNumberOfPulsesToRetrieveDuringThisPulse,neededUpdatedNumberOfPulsesToRetrieveDuringThisPulse);
-			
-			
+
+
 		}catch (JSONException | SQLException e) {
 			// TODO Auto-generated catch block
 			String error = Utils.getStringException(e);
@@ -1117,7 +1565,7 @@ public class MnemosyneManager {
 				pathologyCause = TeleonomeConstants.PATHOLOGY_JSON_EXCEPTION;
 			}
 			String pathologyName = TeleonomeConstants.PATHOLOGY_DENE_MNEMSYCON_PROCESSING_ERROR;
-			
+
 			String pathologyLocation = new Identity(aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_MNEMOSYCONS,codon).toString();
 			Vector extraDeneWords = new Vector();
 
@@ -1131,9 +1579,9 @@ public class MnemosyneManager {
 				e1.printStackTrace();
 			}
 		}
-		
+
 	}
-	
+
 	public void shareOrganismPulseBatch(JSONObject mnemosyconProfileDene) {
 		long processingStartMillis = System.currentTimeMillis();
 		String codon="";
@@ -1142,42 +1590,42 @@ public class MnemosyneManager {
 			logger.info("mnemosyconProfileDene=" + mnemosyconProfileDene);
 			try{
 				millisStartingPoint = (long) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_NEXT_BATCH_MILLIS_STARTING_POINT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-			
+
 			}catch(ClassCastException e) {
 				millisStartingPoint = (int) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_NEXT_BATCH_MILLIS_STARTING_POINT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				
+
 			}
-			
-			
+
+
 			JSONObject cycleStartMillisDeneWord = (JSONObject) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_CYCLE_START_MILLISECONDS, TeleonomeConstants.COMPLETE);
 			if(millisStartingPoint==0) {
 				//
 				// if we are here is because we are starting the cycle
 				// so mark the denewords
 				cycleStartMillisDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, processingStartMillis);
-				
+
 				JSONObject deneWord = (JSONObject) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_CYCLE_START_TIMESTAMP, TeleonomeConstants.COMPLETE);
 				deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dateFormat.format(processingStartMillis));
 			}
-			
+
 			long cycleStartedOnMillis = cycleStartMillisDeneWord.getLong(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-			
+
 			Integer I = (Integer) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_MAXIMUM_NUMBER_OF_RECORDS_PER_BATCH, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE); 
 			int maximumNumberRecordPerBatch = -1;
 			if(I!=null)maximumNumberRecordPerBatch=I.intValue();
-			
-			 I = (Integer) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_MINIMUM_NUMBER_OF_RECORDS_PER_BATCH, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE); 
+
+			I = (Integer) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_MINIMUM_NUMBER_OF_RECORDS_PER_BATCH, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE); 
 			int minmumNumberRecordPerBatch = -1;
 			if(I!=null)minmumNumberRecordPerBatch=I.intValue();
-			
-			
+
+
 			int numberOfPulsesToRetrieveDuringThisPulse =  (int) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_NUMBER_OF_PULSES_TO_RETRIEVE_PER_BATCH, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			String pointerToActionSuccessTasks =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconProfileDene, TeleonomeConstants.DENEWORD_TYPE_ACTION_SUCCESS_TASK_TRUE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			String teleonomeName =  (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_ORGANISM_TELEONOME_TO_PUBLISH, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			codon =  (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			int numberOfPulseRecordsLeftBeforeCycleCompletion = aDBManager.getNumberOrganismPulsesFromTime(teleonomeName, millisStartingPoint, numberOfPulsesToRetrieveDuringThisPulse);
 			JSONArray batchOfPulses =  aDBManager.getOrganismPulsesFromTime(teleonomeName, millisStartingPoint, numberOfPulsesToRetrieveDuringThisPulse);
-			
+
 			int secondsToCompleteCycle=-1;
 			long millisecondsRemaining=-1;
 			Object o = aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene,TeleonomeConstants.MNEMOSYCON_NUMBER_OF_SECONDS_TO_COMPLETE_CYCLE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
@@ -1230,9 +1678,9 @@ public class MnemosyneManager {
 				for(int i=0;i<batchOfPulses.length();i++) {
 					pulseJSONObject = batchOfPulses.getJSONObject(i);
 					pulse = pulseJSONObject.toString();
-					
-					
-					
+
+
+
 					//
 					// Publish the pulse to the ExoZero Network
 					//
@@ -1245,24 +1693,24 @@ public class MnemosyneManager {
 					} catch (SocketException | UnknownHostException e2) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e2));
-						
+
 					}
 					logger.info("binding zeromq to " + ipToBindToZeroMQ);
 					exoZeroPublisher.bind("tcp://" + ipToBindToZeroMQ + ":5563");
-					
+
 					exoZeroPublisher.sendMore("Remember_" + teleonomeName);
 					exoZeroPublisher.send(pulse); 
 					exoZeroPublisher.close();
 					exozeroContext.close();
-					    
+
 					logger.debug("published  pulse to zeromq");
-					
+
 					//
 					// End of Publish the pulse to the ExoZero Network
 					//
-					
-					
-					
+
+
+
 					pulseTimestampMillis = pulseJSONObject.getLong(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS);
 					if(i==0) {
 						firstPulseInBatchMilliseconds=	pulseTimestampMillis;
@@ -1275,14 +1723,14 @@ public class MnemosyneManager {
 				// start again from the beginning
 				pulseTimestampMillis=0;
 				pulseTimestamp="";
-				
+
 			}
 			long lastPulseInBatchMilliseconds=pulseTimestampMillis;
 			long processingEndMillis = System.currentTimeMillis();
-			
+
 			JSONObject deneWordMillis = (JSONObject) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_NEXT_BATCH_MILLIS_STARTING_POINT, TeleonomeConstants.COMPLETE);
 			deneWordMillis.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, pulseTimestampMillis);
-			
+
 			if(updatedNumberOfPulsesToRetrieveDuringThisPulse>-1) {
 				logger.info("Updating " + TeleonomeConstants.MNEMOSYCON_NUMBER_OF_PULSES_TO_RETRIEVE_PER_BATCH + " to " + updatedNumberOfPulsesToRetrieveDuringThisPulse);
 				JSONObject deneWordNumPulses = (JSONObject) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconProfileDene, TeleonomeConstants.MNEMOSYCON_NUMBER_OF_PULSES_TO_RETRIEVE_PER_BATCH, TeleonomeConstants.COMPLETE);
@@ -1292,9 +1740,9 @@ public class MnemosyneManager {
 			// create the processing name
 			//
 			logger.info("creating addMnemosyconProcessingDene,batchOfPulses="+ batchOfPulses.length()+ " "  + codon +" " +  processingStartMillis +" " +  processingEndMillis +" " +    numberOfPulsesToRetrieveDuringThisPulse +" " +  estimatedTimeForFinishingCycleString  +" " +  numberOfPulsesLeftBeforeCompletingCycle );
-			
+
 			aDenomeManager.addMnemosyconProcessingDene( codon,  processingStartMillis,  processingEndMillis,  numberOfPulsesToRetrieveDuringThisPulse, "shareOrganismPulseBatch", teleonomeName, estimatedTimeForFinishingCycleString, numberOfPulseRecordsLeftBeforeCycleCompletion, firstPulseInBatchMilliseconds, lastPulseInBatchMilliseconds, updatedNumberOfPulsesToRetrieveDuringThisPulse, neededUpdatedNumberOfPulsesToRetrieveDuringThisPulse);
-			
+
 		} catch (JSONException | SQLException e) {
 			// TODO Auto-generated catch block
 			String error = Utils.getStringException(e);
@@ -1307,7 +1755,7 @@ public class MnemosyneManager {
 				pathologyCause = TeleonomeConstants.PATHOLOGY_JSON_EXCEPTION;
 			}
 			String pathologyName = TeleonomeConstants.PATHOLOGY_DENE_MNEMSYCON_PROCESSING_ERROR;
-			
+
 			String pathologyLocation = new Identity(aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_MNEMOSYCONS,codon).toString();
 			Vector extraDeneWords = new Vector();
 
@@ -1321,10 +1769,10 @@ public class MnemosyneManager {
 				e1.printStackTrace();
 			}
 		}
-		
+
 	}
-	
-	
+
+
 	//
 	// Denome embedded functions
 	// this is for the value TeleonomeConstants.MNEMOSYNE_PROCESSING_FUNCTION_RANGE_EVALUATION
@@ -1355,15 +1803,15 @@ public class MnemosyneManager {
 
 			Object intervalStart=  aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(analysisProfileDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL_START, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			Object intervalEnd =  aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(analysisProfileDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL_END, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-			
+
 			try {
 				timeZoneName = (String) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_INTERNAL,  TeleonomeConstants.DENECHAIN_DESCRIPTIVE,TeleonomeConstants.DENE_VITAL, "Timezone"  ), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			} catch (InvalidDenomeException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			
-			
+
+
 			GregorianCalendar calendar = new GregorianCalendar(TimeZone.getTimeZone(timeZoneName));
 
 
@@ -1412,7 +1860,7 @@ public class MnemosyneManager {
 							// we would get 48.  numberOfIterations is int because we always want an integer
 							// because its a negative we substract add it to the currentime to get the currentrangestart
 							numberOfIterations=(-1*startValue)/sampleFrequency;
-							
+
 							currentRangeStart=Calendar.getInstance(TimeZone.getTimeZone(timeZoneName)).getTimeInMillis()+startValue*1000;
 							currentRangeEnd=currentRangeStart + sampleFrequency*1000;
 
@@ -1461,7 +1909,7 @@ public class MnemosyneManager {
 					String startDate = dateFormat.format(calendar.getTime());
 					calendar.setTimeInMillis(currentRangeEnd);
 					String endDate = dateFormat.format(calendar.getTime());
-					
+
 					rs = preparedStatement.executeQuery();
 					returnedValue=-1;
 					valueTimestamp=-1;
@@ -1483,8 +1931,8 @@ public class MnemosyneManager {
 					logger.info(messageText);
 					messageText= timeFormat.format(new Date()) + "-" + messageText;
 					MqttMessage message = new MqttMessage(messageText.getBytes());
-				    message.setQos(TeleonomeConstants.HEART_QUALITY_OF_SERVICE);
-				    message.setRetained(true);
+					message.setQos(TeleonomeConstants.HEART_QUALITY_OF_SERVICE);
+					message.setRetained(true);
 					try {
 						anMqttClient.publish(TeleonomeConstants.HEART_TOPIC_PULSE_STATUS_INFO_SECUNDARY, message);
 					} catch (MqttException e1) {
@@ -1553,15 +2001,15 @@ public class MnemosyneManager {
 
 			Object intervalStart=  aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(analysisProfileDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL_START, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			Object intervalEnd =  aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(analysisProfileDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_PROCESSING_INTERVAL_END, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-			
+
 			try {
 				timeZoneName = (String) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_INTERNAL,  TeleonomeConstants.DENECHAIN_DESCRIPTIVE,TeleonomeConstants.DENE_VITAL, "Timezone"  ), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			} catch (InvalidDenomeException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			
-			
+
+
 			GregorianCalendar calendar = new GregorianCalendar(TimeZone.getTimeZone(timeZoneName));
 
 
@@ -1610,7 +2058,7 @@ public class MnemosyneManager {
 							// we would get 48.  numberOfIterations is int because we always want an integer
 							// because its a negative we substract add it to the currentime to get the currentrangestart
 							numberOfIterations=(-1*startValue)/sampleFrequency;
-							
+
 							currentRangeStart=Calendar.getInstance(TimeZone.getTimeZone(timeZoneName)).getTimeInMillis()+startValue*1000;
 							currentRangeEnd=currentRangeStart + sampleFrequency*1000;
 
@@ -1641,13 +2089,13 @@ public class MnemosyneManager {
 					//currentRangeEnd=0;
 
 					sql="select DeneWord -> 'Value' As CurrentPulse from pulse p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  " +
-					"jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene," +
-					"jsonb_array_elements(Dene->'DeneWords') as DeneWord where createdon in (select createdon from pulse" +
-					"order by createdon desc limit 1) and Nucleus->>'Name'='Purpose' and DeneChain->>'Name'='Mnemosycon Processing' " +
-					"and Dene->>'Name'='Share Teleonome From Organism History Processing' and DeneWord->>'Name'='Batch Execution Took Milliseconds'" +
-					"and cast((p.data->>'Pulse Timestamp in Milliseconds') as bigint) > 0 and cast((p.data->>'Pulse Timestamp in Milliseconds') as bigint) < 1493614731570 order by createdon";
-					
-					
+							"jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene," +
+							"jsonb_array_elements(Dene->'DeneWords') as DeneWord where createdon in (select createdon from pulse" +
+							"order by createdon desc limit 1) and Nucleus->>'Name'='Purpose' and DeneChain->>'Name'='Mnemosycon Processing' " +
+							"and Dene->>'Name'='Share Teleonome From Organism History Processing' and DeneWord->>'Name'='Batch Execution Took Milliseconds'" +
+							"and cast((p.data->>'Pulse Timestamp in Milliseconds') as bigint) > 0 and cast((p.data->>'Pulse Timestamp in Milliseconds') as bigint) < 1493614731570 order by createdon";
+
+
 					sql="select p.data->>'Pulse Timestamp in Milliseconds' As Timestamp, DeneWord -> 'Value' As CurrentLoad from organismpulse p, "
 							+ "jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , "
 							+ "jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where  "
@@ -1666,7 +2114,7 @@ public class MnemosyneManager {
 					String startDate = dateFormat.format(calendar.getTime());
 					calendar.setTimeInMillis(currentRangeEnd);
 					String endDate = dateFormat.format(calendar.getTime());
-					
+
 					logger.info("about to execute i=" + i + " currentRangeStart=" + currentRangeStart + " currentRangeEnd=" + currentRangeEnd + " start:" + startDate + " end:" + endDate);
 					rs = preparedStatement.executeQuery();
 					while(rs.next()){
@@ -1705,7 +2153,7 @@ public class MnemosyneManager {
 
 		return arrayToReturn;
 	}
-	
+
 
 	//
 	// end of Denome embedded functions
