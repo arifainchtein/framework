@@ -354,9 +354,8 @@ logger.debug("about to enter loop " + mnemosyneRulesExecutionPositionIndex.size(
 							try {
 								attr = Files.readAttributes(path, BasicFileAttributes.class);
 								creationTime = attr.creationTime();
+								logger.debug(files[i].getAbsolutePath() + "     creationTime=" + creationTime.toMillis() + " millisToDeleteFrom=" + millisToDeleteFrom);
 								if(millisToDeleteFrom>creationTime.toMillis()) {
-
-
 									if(oldestFileNameDeleted==null) {
 										oldestFileNameDeleted=files[i].getAbsoluteFile();
 										oldestCeationTime = creationTime;
@@ -376,7 +375,7 @@ logger.debug("about to enter loop " + mnemosyneRulesExecutionPositionIndex.size(
 											newestFileNameDeleted= files[i].getAbsoluteFile();
 										}
 									}	
-
+									logger.debug("About to delete " + files[i].getAbsolutePath());
 									FileUtils.deleteQuietly(files[i]);
 									deletedFileCounter++;
 								}
