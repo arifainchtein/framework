@@ -159,6 +159,8 @@ public class MnemosyneManager {
 
 
 		String mnemosyconRulesPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_RULES_LIST_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		logger.debug("mnemosyconRulesPointer=" + mnemosyconRulesPointer);
+		
 		JSONObject mnemosyconRulesListDeneJSONObject=null;
 		try {
 			mnemosyconRulesListDeneJSONObject = aDenomeManager.getDeneByIdentity(new Identity(mnemosyconRulesPointer));
@@ -166,9 +168,11 @@ public class MnemosyneManager {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		logger.debug("mnemosyconRulesListDeneJSONObject=" + mnemosyconRulesListDeneJSONObject.toString(4));
+		
 		JSONArray mnemosyconRulesPointersJSONArray = aDenomeManager.getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRulesListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_RULE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 		JSONArray mnemosyconRulesJSONArray = aDenomeManager.renderDeneWordsFromPointers(mnemosyconRulesPointersJSONArray);
-
+		logger.debug("mnemosyconRulesPointersJSONArray=" + mnemosyconRulesPointersJSONArray + " mnemosyconRulesJSONArray=" + mnemosyconRulesJSONArray.toString(4));
 		JSONObject mnemosyconRuleJSONObject;
 		int executionPosition;
 		ArrayList<Map.Entry<JSONObject, Integer>> mnemosyneRulesExecutionPositionIndex = new ArrayList();
