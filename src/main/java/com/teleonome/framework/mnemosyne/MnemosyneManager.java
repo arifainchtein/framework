@@ -180,6 +180,8 @@ public class MnemosyneManager {
 		for(int i=0;i<mnemosyconRulesJSONArray.length();i++){
 			mnemosyconRuleJSONObject = mnemosyconRulesJSONArray.getJSONObject(i);
 			executionPosition = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconRuleJSONObject,TeleonomeConstants.DENEWORD_EXECUTION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			logger.debug("mnemosyconRuleJSONObject=" + mnemosyconRuleJSONObject.getString("Name") + " executionPosition=" + executionPosition);
+			
 			mnemosyneRulesExecutionPositionIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(mnemosyconRuleJSONObject, new Integer(executionPosition)));
 		}
 		Collections.sort(mnemosyneRulesExecutionPositionIndex, new IntegerCompare());
@@ -215,17 +217,21 @@ public class MnemosyneManager {
 			//
 			// get the next rule
 			startRuleMillis =  System.currentTimeMillis();
-
+			
 			mnemosyconRuleTeamParameter=null;
 			Map.Entry<JSONObject, Integer> entry = (Map.Entry<JSONObject, Integer>)mnemosyneRulesExecutionPositionIndex.get(j);
 			mnemosyconRuleJSONObject = entry.getKey();
+			logger.debug("processing mnemosyconRuleJSONObject=" + mnemosyconRuleJSONObject.getString("Name") );
+			
+			
 			mnemosyconRuleSource = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			mnemosyconRuleLocation = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_LOCATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			mnemosyconRuleTimeUnit= (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			mnemosyconRuleTimeUnitValue= (int) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			now=System.currentTimeMillis();
 			millisToDeleteFrom=0;
-
+			logger.debug("processing mnemosyconRuleSource=" + mnemosyconRuleSource  + " mnemosyconRuleLocation=" + mnemosyconRuleLocation);
+			
 			//
 			// now create a dene for this rule 
 			// also create a deneword for the parent dene
@@ -260,6 +266,8 @@ public class MnemosyneManager {
 			//
 			// excute the delete
 			//
+			logger.debug("processing millisToDeleteFrom=" + millisToDeleteFrom);
+			
 			if(mnemosyconRuleSource.equals(TeleonomeConstants.MNEMOSYCON_DATA_SOURCE_DATABASE)) {
 				if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_PULSE)) {
 					rowsDeleted = aDBManager.deleteByPeriodFromPulse(millisToDeleteFrom);
@@ -322,8 +330,9 @@ public class MnemosyneManager {
 				// in this case mnemosyconRuleLocation contains the fully qualified path
 				// check to see if there is a prefix
 				mnemosyconRuleFilePrefix = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_FILE_PREFIX, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
+				logger.debug("mnemosyconRuleFilePrefix=" +mnemosyconRuleFilePrefix);
 				File pathToDelete = new File(mnemosyconRuleLocation);
+				logger.debug("pathToDelete.isDirectory()=" +pathToDelete.isDirectory());
 				if(pathToDelete.isDirectory()) {
 					File[] files = pathToDelete.listFiles();
 					int deletedFileCounter=0;
