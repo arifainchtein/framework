@@ -340,6 +340,7 @@ logger.debug("about to enter loop " + mnemosyneRulesExecutionPositionIndex.size(
 					int deletedFileCounter=0;
 					File oldestFileNameDeleted=null, newestFileNameDeleted=null;
 					FileTime oldestCeationTime=null, newestCeationTime=null;
+					SimpleDateFormat sdf = new SimpleDateFormat();
 					for(int i=0;i<files.length;i++) {
 						if(files[i]!=null) {
 							if(mnemosyconRuleFilePrefix!=null && 
@@ -354,7 +355,7 @@ logger.debug("about to enter loop " + mnemosyneRulesExecutionPositionIndex.size(
 							try {
 								attr = Files.readAttributes(path, BasicFileAttributes.class);
 								creationTime = attr.creationTime();
-								logger.debug(files[i].getAbsolutePath() + "     creationTime=" + creationTime.toMillis() + " millisToDeleteFrom=" + millisToDeleteFrom);
+								logger.debug(files[i].getAbsolutePath() + "     creationTime=" + sdf.format(new Timestamp(creationTime.toMillis())) + " millisToDeleteFrom=" + sdf.format(new Timestamp(millisToDeleteFrom)));
 								if(millisToDeleteFrom>creationTime.toMillis()) {
 									if(oldestFileNameDeleted==null) {
 										oldestFileNameDeleted=files[i].getAbsoluteFile();
