@@ -112,7 +112,7 @@ public class DenomeManager {
 	ArrayList<Map.Entry<JSONObject, Integer>> actuatorExecutionPositionDeneIndex = new ArrayList();
 	JSONArray analyticonDenesJSONArray = new JSONArray();
 	JSONArray mnemosyconDenesJSONArray = new JSONArray();
-
+	JSONArray rememeberedDeneWordsMnemosyconDenesJSONArray = new JSONArray();
 	Hashtable pointerToMicroControllerSensorsDeneWordsForInitialBySensorRequestQueuePositionIndex = new Hashtable();
 	Hashtable pointerToMicroControllerActuatorExecutionPositionForInitialDeneIndex  = new Hashtable();
 
@@ -920,9 +920,10 @@ public class DenomeManager {
 				JSONObject anMnemosyconsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_MNEMOSYCONS);
 				logger.debug("in denomemagager anMnemosyconsDeneChainJSONObject= " + anMnemosyconsDeneChainJSONObject);
 				if(anMnemosyconsDeneChainJSONObject!=null){
-					mnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER);
-					for(int i=0;i<mnemosyconDenesJSONArray.length();i++) {
-						rememberedWordsMnemosyconJSONObject = mnemosyconDenesJSONArray.getJSONObject(i);
+					mnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON);
+					rememeberedDeneWordsMnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER);
+					for(int i=0;i<rememeberedDeneWordsMnemosyconDenesJSONArray.length();i++) {
+						rememberedWordsMnemosyconJSONObject = rememeberedDeneWordsMnemosyconDenesJSONArray.getJSONObject(i);
 						active = (boolean) this.getDeneWordAttributeByDeneWordNameFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						if(active) {
 							//
@@ -955,8 +956,6 @@ public class DenomeManager {
 									
 								}
 							}
-							
-						
 							//
 							// the denestoremember
 							//
@@ -1188,6 +1187,9 @@ public class DenomeManager {
 		initialIdentityMode=i;
 	}
 
+	public JSONArray getRememeberedDeneWordsMnemosyconDenesJSONArray() {
+		return rememeberedDeneWordsMnemosyconDenesJSONArray;
+	}
 	public JSONArray getMnemsyconDenesJSONArray(){
 		return mnemosyconDenesJSONArray;
 	}
