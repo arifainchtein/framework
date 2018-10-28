@@ -216,6 +216,13 @@ public class MnemosyneManager {
 		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 		
+	
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Pulse Timestamp Millis", aDenomeManager.getcurrentlyCreatingPulseTimestampMillis(),null,"long",true);
+		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Pulse Timestamp", aDenomeManager.getcurrentlyCreatingPulseTimestamp(),null,"String",true);
+		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+
+		
 		long freeSpaceBeforeMnemosycon = directoryForFreeSapce.getFreeSpace()/1024000;
 		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Free Space Before Mnemosycon", freeSpaceBeforeMnemosycon,"Mb","long",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
@@ -434,11 +441,7 @@ public class MnemosyneManager {
 
 
 
-			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Pulse Timestamp Millis ", aDenomeManager.getcurrentlyCreatingPulseTimestampMillis(),null,"long",true);
-			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Pulse Timestamp ", aDenomeManager.getcurrentlyCreatingPulseTimestamp(),null,"String",true);
-			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-
+			
 			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Delete Older than ", formattedToDeleteFromTimestamp,null,"String",true);
 			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 			
