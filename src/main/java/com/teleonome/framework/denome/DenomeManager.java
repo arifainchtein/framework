@@ -3237,7 +3237,7 @@ public class DenomeManager {
 				logger.info("line 3237 copySourceDeneIdentityPointer =" + copySourceDeneIdentityPointer);
 				copySourceDene = getDenomicElementByIdentity(new Identity(copySourceDeneIdentityPointer));
 				clonedSourceDene  = new JSONObject(copySourceDene, JSONObject.getNames(copySourceDene));
-				clonedSourceDene.put("Timestamp", formatedCurrentTime);
+				clonedSourceDene.put("Timestamp", formatedCurrentTimestamp);
 				clonedSourceDene.put("Timestamp Milliseconds", currentTimeMillis);
 
 				String targetMnemosyneDeneChainIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
