@@ -3172,7 +3172,7 @@ public class DenomeManager {
 		JSONObject mnemosyneDene;
 		int executionPosition;
 		ArrayList<Map.Entry<JSONObject, Integer>> mnemosyneOperationsExecutionPositionIndex = new ArrayList();
-		logger.debug("line 2439 mnemosyneDenes size=" + mnemosyneDenes.length());
+		logger.info("line 2439 mnemosyneDenes size=" + mnemosyneDenes.length());
 
 		for(int i=0;i<mnemosyneDenes.length();i++){
 			mnemosyneDene = mnemosyneDenes.getJSONObject(i);
@@ -3221,19 +3221,20 @@ public class DenomeManager {
 		String formatedCurrentTime = currentTime.format(timeformatter);
 
 
-		logger.debug("line 2479 mnemosyneOperationsExecutionPositionIndex size=" + mnemosyneOperationsExecutionPositionIndex.size());
+		logger.info("line 2479 mnemosyneOperationsExecutionPositionIndex size=" + mnemosyneOperationsExecutionPositionIndex.size());
 		JSONObject copySourceDene, clonedSourceDene, targetMnemosyneDeneChain;
 		JSONArray targetMnemosyneDeneChainDenesJSONArray;
 		
 		for (Map.Entry<JSONObject, Integer> entry : mnemosyneOperationsExecutionPositionIndex) {
 			mnemosyneDene = entry.getKey();
 			deneType = mnemosyneDene.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
-			logger.debug("line 3231 deneType =" + deneType);
+			logger.info("line 3231 deneType =" + deneType);
 			if(deneType.equals(TeleonomeConstants.MNEMOSYNE_COPY_DENE_OPERATION)){
 				//
 				// get the source dene
 				//
 				String copySourceDeneIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_DENE_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				logger.info("line 3237 copySourceDeneIdentityPointer =" + copySourceDeneIdentityPointer);
 				copySourceDene = getDenomicElementByIdentity(new Identity(copySourceDeneIdentityPointer));
 				clonedSourceDene  = new JSONObject(copySourceDene, JSONObject.getNames(copySourceDene));
 				clonedSourceDene.put("Timestamp", formatedCurrentTime);
@@ -3251,6 +3252,7 @@ public class DenomeManager {
 				}
 				
 				newDenePosition = getNextPostionForDeneInMnemosyneChain(targetMnemosyneDeneChain, clonedSourceDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
+				logger.info("line 3255 newDenePosition =" + newDenePosition);
 				clonedSourceDene.put("Position", newDenePosition);
 				targetMnemosyneDeneChainDenesJSONArray.put(clonedSourceDene);
 				

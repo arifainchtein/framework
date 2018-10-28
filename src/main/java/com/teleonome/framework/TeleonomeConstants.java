@@ -734,7 +734,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_MNEMOSYCON_FAILURE_TASKS_POINTER="Mnemosycon Failure Tasks Pointer";
 	public static final String DENEWORD_TYPE_MNEMOSYCON_SUCCESS_MNEMOSYNE_OPERATIONS_POINTER="Mnemosycon Success Mnemosyne Operations Pointer";
 	public static final String DENEWORD_TYPE_MNEMOSYCON_FAILURE_MNEMOSYNE_OPERATIONS_POINTER="Mnemosycon Failure Mnemosyne Operations Pointer";
-	public static final String MNEMOSYNE_DENE_WORD_TYPE_DENE_SOURCE="Mnemosyne Dene Copy Dene Source";
+	public static final String MNEMOSYNE_DENE_WORD_TYPE_DENE_SOURCE="Dene Copy Dene Source";
 	public static final String MNEMOSYNE_HOURLY_MUTATION="Hourly";
 	public static final String MNEMOSYNE_DAILY_MUTATION="Daily";
 	public static final String MNEMOSYNE_WEEKLY_MUTATION="Weekly";

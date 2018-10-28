@@ -484,6 +484,7 @@ public class MnemosyneManager {
 		//
 		String pointerToTasks = null;
 		String pointerToMnemosyneOperations = null;
+		logger.debug("executed Succesfully=" + executedSuccesfully);
 		if(executedSuccesfully) {
 			pointerToTasks =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_SUCCESS_TASKS_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			pointerToMnemosyneOperations =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_SUCCESS_MNEMOSYNE_OPERATIONS_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
@@ -492,7 +493,7 @@ public class MnemosyneManager {
 			pointerToMnemosyneOperations =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FAILURE_MNEMOSYNE_OPERATIONS_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			
 		}
-
+		logger.debug(" pointerToTasks=" + pointerToTasks + " pointerToMnemosyneOperations=" + pointerToMnemosyneOperations);
 		if(pointerToTasks!=null && !pointerToTasks.equals("")) {
 			aDenomeManager.executeActionSuccessTasks(pointerToTasks);
 		}
@@ -501,6 +502,8 @@ public class MnemosyneManager {
 			JSONObject mnemosyneOperationsDene;
 			try {
 				mnemosyneOperationsDene = aDenomeManager.getDeneByIdentity(new Identity(pointerToMnemosyneOperations));
+				logger.debug("mnemosyneOperationsDene=" + mnemosyneOperationsDene.toString(4));
+				
 				if(mnemosyneOperationsDene!=null ) {
 					JSONArray mnemosyneOperationPointers = DenomeUtils.getAllDeneWordsFromDeneByDeneWordType(mnemosyneOperationsDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_OPERATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					logger.debug("mnemosyneOperationPointers=" + mnemosyneOperationPointers);
@@ -513,6 +516,7 @@ public class MnemosyneManager {
 						mnemosyneOperationDene = aDenomeManager.getDeneByIdentity(new Identity(mnemosyneOperationPointer));
 						mnemosyneDenes.put(mnemosyneOperationDene);
 					}
+					logger.debug("mnemosyneDenes.length()=" + mnemosyneDenes.length());
 					if(mnemosyneDenes.length()>0) {
 						aDenomeManager.executeMnemosyneOperations( mnemosyneDenes);
 					}
