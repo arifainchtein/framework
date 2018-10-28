@@ -3226,7 +3226,20 @@ public class DenomeManager {
 			mnemosyneDene = entry.getKey();
 			deneType = mnemosyneDene.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
 			logger.debug("line 2504 deneType =" + deneType);
-			if(deneType.equals(TeleonomeConstants.MNEMOSYNE_CREATE_DENE_OPERATION)){
+			if(deneType.equals(TeleonomeConstants.MNEMOSYNE_COPY_DENE_OPERATION)){
+				//
+				// get the source dene
+				//
+				String copySourceDeneIdentityPointer = getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_DENE_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				copySourceDene = getDenomicElementByIdentity(new Identity(copySourceDeneIdentityPointer));
+				clonedSourceDene  = new JSONObject(copySourceDene, JSONObject.getNames(copySourceDene));
+				
+				String targetMnemosyneDeneChainIdentityPointer = getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_DENECHAIN_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				targetMnemosyneDeneChain = getDenomicElementByIdentity(new Identity(targetMnemosyneDeneChainIdentityPointer));
+				targetMnemosyneDeneChainDenesJSONArray = targetMnemosyneDeneChain.targetsJSONArray("Denes");
+				targetMnemosyneDeneChainDenesJSONArray.put(clonedSourceDene);
+				
+			}else if(deneType.equals(TeleonomeConstants.MNEMOSYNE_CREATE_DENE_OPERATION)){
 				//
 				// list the files and create a dene for each one
 				// there can be multiple targets, ie you can add a dene to 

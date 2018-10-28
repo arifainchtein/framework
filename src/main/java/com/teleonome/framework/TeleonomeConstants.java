@@ -692,6 +692,10 @@ public class TeleonomeConstants {
 	
 	public static final String MNEMOSYNE_DENE_WORD_TYPE_TARGET="Mnemosyne Target";
 	public static final String MNEMOSYNE_DENE_WORD_TYPE_COPY_DENEWORD="Copy DeneWord";
+	public static final String MNEMOSYNE_DENE_WORD_TYPE_COPY_DENE="Copy Dene";
+	
+	public static final String MNEMOSYNE_DENE_TYPE_COPY_DENEWORD="Copy Dene";
+	
 	public static final String MNEMOSYNE_DENE_WORD_TYPE_CREATE_DENEWORD_SOURCE="Create DeneWord Source";
 	public static final String MNEMOSYNE_DENEWORD_FILE_LIST_PATH="File List Path";
 	public static final String MNEMOSYNE_DENEWORD_NEW_DENE_NAME="New Dene Name";
