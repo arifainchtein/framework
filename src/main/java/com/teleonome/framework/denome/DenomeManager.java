@@ -3222,22 +3222,38 @@ public class DenomeManager {
 
 
 		logger.debug("line 2479 mnemosyneOperationsExecutionPositionIndex size=" + mnemosyneOperationsExecutionPositionIndex.size());
+		JSONObject copySourceDene, clonedSourceDene, targetMnemosyneDeneChain;
+		JSONArray targetMnemosyneDeneChainDenesJSONArray;
+		
 		for (Map.Entry<JSONObject, Integer> entry : mnemosyneOperationsExecutionPositionIndex) {
 			mnemosyneDene = entry.getKey();
 			deneType = mnemosyneDene.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
-			logger.debug("line 2504 deneType =" + deneType);
+			logger.debug("line 3231 deneType =" + deneType);
 			if(deneType.equals(TeleonomeConstants.MNEMOSYNE_COPY_DENE_OPERATION)){
 				//
 				// get the source dene
 				//
-				String copySourceDeneIdentityPointer = getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_DENE_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				String copySourceDeneIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_DENE_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 				copySourceDene = getDenomicElementByIdentity(new Identity(copySourceDeneIdentityPointer));
 				clonedSourceDene  = new JSONObject(copySourceDene, JSONObject.getNames(copySourceDene));
-				
-				String targetMnemosyneDeneChainIdentityPointer = getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_DENECHAIN_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				clonedSourceDene.put("Timestamp", formatedCurrentTime);
+				clonedSourceDene.put("Timestamp Milliseconds", currentTimeMillis);
+
+				String targetMnemosyneDeneChainIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 				targetMnemosyneDeneChain = getDenomicElementByIdentity(new Identity(targetMnemosyneDeneChainIdentityPointer));
-				targetMnemosyneDeneChainDenesJSONArray = targetMnemosyneDeneChain.targetsJSONArray("Denes");
+				targetMnemosyneDeneChainDenesJSONArray = targetMnemosyneDeneChain.getJSONArray("Denes");
+				
+				newDenePosition=0;
+				if(targetMnemosyneDeneChainDenesJSONArray==null){
+					targetMnemosyneDeneChainDenesJSONArray=new JSONArray();
+					targetMnemosyneDeneChain.put("Denes", targetMnemosyneDeneChainDenesJSONArray);
+					newDenePosition=1;
+				}
+				
+				newDenePosition = getNextPostionForDeneInMnemosyneChain(targetMnemosyneDeneChain, clonedSourceDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
+				clonedSourceDene.put("Position", newDenePosition);
 				targetMnemosyneDeneChainDenesJSONArray.put(clonedSourceDene);
+				
 				
 			}else if(deneType.equals(TeleonomeConstants.MNEMOSYNE_CREATE_DENE_OPERATION)){
 				//
@@ -3294,9 +3310,7 @@ public class DenomeManager {
 					newDene.put("Timestamp", formatedCurrentTime);
 					newDene.put("Timestamp Milliseconds", currentTimeMillis);
 
-					//
-					// now get the directory where the files are located:
-					//
+					
 
 					// Now add denewords to this new dene, you can either copy an existing deneword or create a new one from scratch
 					copyDeneWordPointersJSONArray = getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_COPY_DENEWORD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
