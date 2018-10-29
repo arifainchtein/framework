@@ -291,8 +291,9 @@ public class TeleonomeConstants {
 	public static final String DENECHAIN_DENEWORD_DELETION ="DeneWord Deletion";
 	
 	public static final String DENECHAIN_ACTIONS_TO_EXECUTE="Actions To Execute";
+	public static final String DENECHAIN_MNEMOSYCONS_TO_EXECUTE="Mnemosycons To Execute";
 	public static final String DENECHAIN_MNEMOSYNE_OPERATIONS="Mnemosyne Operations";
-	
+	public static final String DENE_TYPE_MNEMOSYCON_LIST="Mnemosycon List";
 	
 	public static final String DENE_TYPE_ON_FINISH_MUTATION = "On Finish";
 	public static final String DENE_TYPE_DENEWORD_CARRIER= "DeneWord Carrier";
@@ -363,6 +364,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_MICROCONTROLLER_FAULT_PATHOLOGY_MNEMOSYNE_LOCATION="'Fault Pathology Mnemosyne Location";
 	
 	public static final String DENEWORD_TYPE_COMPONENT_POINTER = "Component Pointer";
+	public static final String DENEWORD_TYPE_MNEMOSYCON_POINTER = "Mnemosycon Pointer";
 	public static final String DENEWORD_TYPE_ACTUATOR_CONDITION_POINTER = "Actuator Condition Pointer";
 	public static final String DENEWORD_TYPE_CONDITION_VARIABLE_POINTER = "Condition Variable Pointer";
 	public static final String DENEWORD_TYPE_SENSOR_VALUE = "Sensor Value";

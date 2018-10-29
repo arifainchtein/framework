@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -64,6 +66,7 @@ import com.teleonome.framework.exception.PersistenceException;
 import com.teleonome.framework.hypothalamus.CommandRequest;
 import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
+import com.teleonome.framework.mnemosyne.MnemosyneManager;
 import com.teleonome.framework.network.NetworkUtilities;
 import com.teleonome.framework.persistence.PostgresqlPersistenceManager;
 import com.teleonome.framework.utils.Utils;
@@ -153,7 +156,9 @@ public class DenomeManager {
 	//
 	// a hashmap that contains as key the name of the foreign teleonome and as value an ArrayList with the identity pointers of all data items needed from that teleonome/
 	HashMap externalDataLocationHashMap = new HashMap();
-	
+	//
+	// a reference to the MnemosyneManager
+	MnemosyneManager aMnemosyneManager;
 	static {
 		jexl.setCache(512);
 		jexl.setLenient(false);
@@ -198,6 +203,10 @@ public class DenomeManager {
 		return aDenomeManager;
 	}
 
+	public void setMnemosyneManager(MnemosyneManager s) {
+		aMnemosyneManager=s;
+	}
+	
 	public String getSelectedDenomeFileName(){
 		return selectedDenomeFileName;
 	}
@@ -638,20 +647,20 @@ public class DenomeManager {
 
 
 					onStartActionJSONObject = (JSONObject) onStartActionsDenesJSONArray.getJSONObject(j);
-					logger.info("onStartActionJSONObject=" + onStartActionJSONObject);
+					logger.debug("onStartActionJSONObject=" + onStartActionJSONObject);
 					actionCodonName = (String)getDeneWordAttributeByDeneWordNameFromDene(onStartActionJSONObject,TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					//
 					// the codonName is also the name of the actuator that contains this action, so get the actuator
 					actuatorDeneJSONObject = getDeneFromDeneChainByDeneName(anActuatorsDeneChainJSONObject,actionCodonName);
-					logger.info("line 628 actuatorDeneJSONObject=" + actuatorDeneJSONObject);
+					logger.debug("line 628 actuatorDeneJSONObject=" + actuatorDeneJSONObject);
 
 					pointerToMicroController =  (String) getDeneWordAttributeByDeneWordTypeFromDene(actuatorDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_MICROCONTROLLER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.info("line 631 pointerToMicroController=" + pointerToMicroController);
+					logger.debug("line 631 pointerToMicroController=" + pointerToMicroController);
 					v = (Vector)pointerToMicroControllerActuatorDenesVectorForInitialIndex.get(pointerToMicroController);
 					if(v==null)v = new Vector();
 					if(!v.contains(actuatorDeneJSONObject)) {
 						v.addElement(actuatorDeneJSONObject);
-						logger.info("line 634 adding actuator dene to vector, size =" + v.size());
+						logger.debug("line 634 adding actuator dene to vector, size =" + v.size());
 					}
 					pointerToMicroControllerActuatorDenesVectorForInitialIndex.put(pointerToMicroController,v);
 				}
@@ -667,7 +676,7 @@ public class DenomeManager {
 						actuatorDeneJSONObject = (JSONObject) v.elementAt(j);
 						actuatorDeneName = actuatorDeneJSONObject.getString("Name");
 						executionPosition = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDeneJSONObject,"Execution Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						logger.info("line 652 actuatorDeneName=" + actuatorDeneName + " executionPosition=" + executionPosition);
+						logger.debug("line 652 actuatorDeneName=" + actuatorDeneName + " executionPosition=" + executionPosition);
 						if(executionPosition!=null && executionPosition>-1){
 							//
 							// The Dene that contains the executive position deneword also has a dene of type Action list,
@@ -676,7 +685,7 @@ public class DenomeManager {
 							//
 							// now use the pointer to get to the denes that contain the actions
 							// th  pointer could be null
-							logger.info(" line 657, actionListPointer=" + actionListPointer);
+							logger.debug(" line 657, actionListPointer=" + actionListPointer);
 
 							if(actionListPointer!=null){
 								try {
@@ -685,7 +694,7 @@ public class DenomeManager {
 									// TODO Auto-generated catch block
 									logger.warn(Utils.getStringException(e));
 								}
-								logger.info(" line 581, actionListDene=" + actionListDene+ " executionPosition=" + executionPosition);
+								logger.debug(" line 581, actionListDene=" + actionListDene+ " executionPosition=" + executionPosition);
 								actuatorExecutionPositionDeneForInitialIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(actionListDene, new Integer(executionPosition)));
 							}
 						}
@@ -702,11 +711,11 @@ public class DenomeManager {
 					// next for every actuatordene sort its actions according to their evaluation position
 					// so evaluate wheter or not to execute an action
 
-					logger.info("actuatorExecutionPositionDeneForInitialIndex=" + actuatorExecutionPositionDeneForInitialIndex.size());;
+					logger.debug("actuatorExecutionPositionDeneForInitialIndex=" + actuatorExecutionPositionDeneForInitialIndex.size());;
 					for (Map.Entry<JSONObject, Integer> entry : actuatorExecutionPositionDeneForInitialIndex) {
 						actionListDene = entry.getKey();
 						actionListDeneName = actionListDene.getString("Name");
-						logger.info(" line 689 actionListDeneName=" + actionListDeneName);
+						logger.debug(" line 689 actionListDeneName=" + actionListDeneName);
 						//
 						// the actionListDene contains denewords of type Dene Pointer which we need to resolve
 						// the value of the evaluation pointer
@@ -714,9 +723,9 @@ public class DenomeManager {
 						// so first get the denewords of typeDene Pointer which will point to the dene that contains the evaluation position
 						// the method returns a JSONArray of JSONObjects
 						//
-						//logger.info("actionListDene=" + actionListDene);
+						//logger.debug("actionListDene=" + actionListDene);
 						JSONArray actionDeneWordPointers = (JSONArray) DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(actionListDene, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE,TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						logger.info(" line 689 actionDeneWordPointers=" + actionDeneWordPointers.length());
+						logger.debug(" line 689 actionDeneWordPointers=" + actionDeneWordPointers.length());
 
 
 						//
@@ -752,7 +761,7 @@ public class DenomeManager {
 						// actuatorActionEvaluationPositionActionIndex contains the action denes
 						// in the correct order, so create a list that contains the actuatorName and the actions to be executed
 						///
-						logger.info("line 737, actionListDeneName=" + actionListDeneName + " actuatorActionEvaluationPositionActionIndex=" + actuatorActionEvaluationPositionActionIndex);
+						logger.debug("line 737, actionListDeneName=" + actionListDeneName + " actuatorActionEvaluationPositionActionIndex=" + actuatorActionEvaluationPositionActionIndex);
 						actuatorDeneNameActuatorActionEvaluationPositionActionForInitialIndex.put(actionListDeneName, actuatorActionEvaluationPositionActionIndex);
 					}
 				}
@@ -776,14 +785,14 @@ public class DenomeManager {
 
 				for(Enumeration<String> en = pointerToMicroControllerActuatorDenesVectorIndex.keys();en.hasMoreElements();){
 					pointerToMicroController = en.nextElement();
-					logger.info("line 779 pointerToMicroController=" + pointerToMicroController);
+					logger.debug("line 779 pointerToMicroController=" + pointerToMicroController);
 					v = (Vector)pointerToMicroControllerActuatorDenesVectorIndex.get(pointerToMicroController);
 					actuatorExecutionPositionDeneIndex = new ArrayList();
 					for(int j=0;j<v.size();j++){
 						aDeneJSONObject = (JSONObject) v.elementAt(j);
 						actuatorDeneName = aDeneJSONObject.getString("Name");
 						executionPosition = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneJSONObject,"Execution Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						logger.info(" line 786 actuatorDeneName=" + actuatorDeneName+ " executionPosition=" + executionPosition);
+						logger.debug(" line 786 actuatorDeneName=" + actuatorDeneName+ " executionPosition=" + executionPosition);
 						if(executionPosition!=null && executionPosition>-1){
 							//
 							// The Dene that contains the executive position deneword also has a dene of type Action list,
@@ -792,13 +801,13 @@ public class DenomeManager {
 							//
 							// now use the pointer to get to the denes that contain the actions
 							//
-							logger.info("actionListPointer=" + actionListPointer);
+							logger.debug("actionListPointer=" + actionListPointer);
 							//
 							// if the actuators are only for startup this could be null
 							if(actionListPointer!=null){
 								try {
 									actionListDene = getDeneByIdentity(new Identity(actionListPointer));
-									logger.info("line 801 actionListDene=" + actionListDene.toString(4));
+									logger.debug("line 801 actionListDene=" + actionListDene.toString(4));
 								} catch (InvalidDenomeException e) {
 									// TODO Auto-generated catch block
 									logger.warn(Utils.getStringException(e));
@@ -810,7 +819,7 @@ public class DenomeManager {
 
 					Collections.sort(actuatorExecutionPositionDeneIndex, new IntegerCompare());
 					pointerToMicroControllerActuatorExecutionPositionDeneIndex.put(pointerToMicroController, actuatorExecutionPositionDeneIndex);
-					logger.info("line 813 , pointerToMicroController=" + pointerToMicroController +" actuatorExecutionPositionDeneIndex size="+ actuatorExecutionPositionDeneIndex.size());
+					logger.debug("line 813 , pointerToMicroController=" + pointerToMicroController +" actuatorExecutionPositionDeneIndex size="+ actuatorExecutionPositionDeneIndex.size());
 					// 
 					//
 					// at this point actuatorExecutionPositionDeneWordIndex contains the actuators sorted according to the execution position
@@ -820,7 +829,7 @@ public class DenomeManager {
 
 						actionListDene = entry.getKey();
 						actionListDeneName = actionListDene.getString("Name");
-						logger.info("line 823 , actionListDeneName=" + actionListDeneName);
+						logger.debug("line 823 , actionListDeneName=" + actionListDeneName);
 						
 						//
 						// the actionListDene contains denewords of type Dene Pointer which we need to resolve
@@ -829,7 +838,7 @@ public class DenomeManager {
 						// so first get the denewords of typeDene Pointer which will point to the dene that contains the evaluation position
 						// the method returns a JSONArray of JSONObjects
 						//
-						//logger.info("actionListDene=" + actionListDene);
+						//logger.debug("actionListDene=" + actionListDene);
 						JSONArray actionDeneWordPointers = (JSONArray) DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(actionListDene, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE,TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 
@@ -866,7 +875,7 @@ public class DenomeManager {
 						// actuatorActionEvaluationPositionActionIndex contains the action denes
 						// in the correct order, so create a list that contains the actuatorName and the actions to be executed
 						///
-						logger.info("line 869 , actionListDeneName=" + actionListDeneName + " actuatorActionEvaluationPositionActionIndex.size()=" + actuatorActionEvaluationPositionActionIndex.size());
+						logger.debug("line 869 , actionListDeneName=" + actionListDeneName + " actuatorActionEvaluationPositionActionIndex.size()=" + actuatorActionEvaluationPositionActionIndex.size());
 						actuatorDeneNameActuatorActionEvaluationPositionActionIndex.put(actionListDeneName, actuatorActionEvaluationPositionActionIndex);
 					}
 				}
@@ -3172,7 +3181,7 @@ public class DenomeManager {
 		JSONObject mnemosyneDene;
 		int executionPosition;
 		ArrayList<Map.Entry<JSONObject, Integer>> mnemosyneOperationsExecutionPositionIndex = new ArrayList();
-		logger.info("line 2439 mnemosyneDenes size=" + mnemosyneDenes.length());
+		logger.debug("line 2439 mnemosyneDenes size=" + mnemosyneDenes.length());
 
 		for(int i=0;i<mnemosyneDenes.length();i++){
 			mnemosyneDene = mnemosyneDenes.getJSONObject(i);
@@ -3221,7 +3230,7 @@ public class DenomeManager {
 		String formatedCurrentTime = currentTime.format(timeformatter);
 
 
-		logger.info("line 2479 mnemosyneOperationsExecutionPositionIndex size=" + mnemosyneOperationsExecutionPositionIndex.size());
+		logger.debug("line 2479 mnemosyneOperationsExecutionPositionIndex size=" + mnemosyneOperationsExecutionPositionIndex.size());
 		JSONObject copySourceDene, clonedSourceDene, targetMnemosyneDeneChain;
 		JSONArray targetMnemosyneDeneChainDenesJSONArray;
 		
@@ -4531,6 +4540,85 @@ public class DenomeManager {
 				}
 			}
 			//
+			// next check to see if there are any mnemosycons that need to be executed
+			//
+			logger.info("about to do mnemosycons to execute");
+			JSONObject mnemosyconsToExecute=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_MNEMOSYCONS_TO_EXECUTE);
+			JSONObject mutationMnemosyconDeneJSONObject;
+			if(mnemosyconsToExecute!=null){
+				denes = DenomeUtils.getDenesByDeneType(mnemosyconsToExecute, TeleonomeConstants.DENE_TYPE_MNEMOSYCON_LIST);
+				ArrayList arrayList;
+				JSONArray mnemsyconDeneWordPointers;
+				JSONArray actuatorDeneWordPointers, microControllerPointersJSONArray;
+				String actuatorDeneWordPointer;
+				JSONObject actuatorJSONObject=null;
+
+				//
+				// actionDeneWordPointers cntains an array of string which are pointers to the denes that contain the evaluation postion
+				String denePointer;
+				JSONObject mnemosyconDene = null;
+				Integer evaluationPosition;
+				
+				for(int i=0;i<denes.length();i++){
+					mutationMnemosyconDeneJSONObject = (JSONObject) denes.get(i);
+					mnemsyconDeneWordPointers = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(mutationMnemosyconDeneJSONObject, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					for(int j=0;j<mnemsyconDeneWordPointers.length(); j++) {
+						mnemosyconDene = mnemsyconDeneWordPointers.getJSONObject(j);
+						
+						
+						
+						logger.debug("mnemosyconsDene=" + mnemosyconDene);
+						if(!(boolean) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)) {
+							String name = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							logger.debug("skiping mnemosycon " + name + " because is not Active");
+							continue;
+						}
+						//
+						// check to see if there is a profile, if there is not then skip it
+						// it means this mnemosycon is a remembered deneword type
+						//
+						String mnemosyconProfileIdentityPointer = (String)this.aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_PROFILE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						if(mnemosyconProfileIdentityPointer==null) {
+							String name = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							logger.debug("skiping mnemosycon " + name + " because it does not have a profile");
+							continue;
+						}
+						String mnemosyconType = (String)getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_TYPE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("mnemosyconType=" + mnemosyconType);
+						
+						Identity mnemosyconProfileIdentity = new Identity(mnemosyconProfileIdentityPointer);
+						logger.debug("mnemosyconProfileIdentity=" + mnemosyconProfileIdentity);
+						JSONObject mnemosyconProfileDene = this.aDenomeManager.getDeneByIdentity(mnemosyconProfileIdentity);
+						String functionName = (String) this.aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconProfileDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_PROCESSING_FUNCTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("functionName=" + functionName);
+						
+						
+						Object[] parameters =  {mnemosyconProfileDene, mnemosyconType};
+						logger.debug("parameters=" + parameters);
+						
+						Method mnemomsyneMethod;
+						try {
+							mnemomsyneMethod = MnemosyneManager.class.getMethod(functionName, JSONObject.class, String.class);
+							logger.debug("mnemomsyneMethod=" + mnemomsyneMethod);
+							Object result = mnemomsyneMethod.invoke(aMnemosyneManager,parameters);
+						} catch (NoSuchMethodException | SecurityException e) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e));
+						} catch (IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e));
+						} catch (IllegalArgumentException e) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e));
+						} catch (InvocationTargetException e) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e));
+						}
+					}
+				}
+			}
+			
+			//
 			// finally do the On Finish
 			// The On Finish does the same sort of things as the On Load, update denewords, update dene etc, 
 			// it is usefull to update values of denomic structures created in the mutation
@@ -4639,6 +4727,7 @@ public class DenomeManager {
 			return commandToExecute;
 		}
 	}
+
 
 	private void loadMutations() throws IOException{
 		//

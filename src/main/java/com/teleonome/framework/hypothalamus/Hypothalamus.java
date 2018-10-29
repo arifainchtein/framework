@@ -150,6 +150,7 @@ public abstract class Hypothalamus {
 			aDBManager = PostgresqlPersistenceManager.instance();
 			aDenomeManager = DenomeManager.instance();
 			aMnemosyneManager = MnemosyneManager.instance(aDenomeManager, anMqttClient);
+			aDenomeManager.setMnemosyneManager(aMnemosyneManager);
 			try {
 				localIpAddress = Utils.getIpAddress();
 				hostName = InetAddress.getLocalHost().getCanonicalHostName();
@@ -934,7 +935,6 @@ public abstract class Hypothalamus {
 				}
 				
 				if(pointerToMnemosyneTasks!=null) {
-					//aDenomeManager.executeMnemosyneOperations(mnemosyneDenes);(pointerToMnemosyneTasks);
 					String mnemosyneOperationPointer;
 					JSONObject mnemosyneOperationDene;
 					try {
