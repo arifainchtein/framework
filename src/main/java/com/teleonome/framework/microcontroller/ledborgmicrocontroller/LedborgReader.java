@@ -16,6 +16,6 @@ public class LedborgReader  extends BufferedReader{
 		
 		
 		public String readLine(){
-			return "";
+			return "Ok";
 		}
 }

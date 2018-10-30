@@ -106,6 +106,8 @@ public class DigitalGeppettoPublisherWriter extends BufferedWriter implements Sf
 				if(publishToDG)publishingResults="ok-publishing dg";
 				session.disconnect();
 			}
+		}else {
+			publishingResults="Ok";
 		}
 	}
 

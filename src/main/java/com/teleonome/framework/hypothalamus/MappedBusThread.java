@@ -99,6 +99,17 @@ class MappedBusThread extends Thread{
 				logger.warn(Utils.getStringException(e2));
 			}
 			boolean commandCodeVerified;
+			//
+			// this while loop runs for the duration of the asynccycle
+			// and it consists of three parts which are repeated for every 
+			// micrcontroller
+			// First it checks for mutation generating events coming from the microcontroller like faults and timers
+			//  these mutations then create commands
+			// Second it processes all the commands in the database waiting to be executed
+			// Third it get AsyncData
+			//
+			//
+			
 			
 			while(keepRunning){
 				
@@ -106,91 +117,29 @@ class MappedBusThread extends Thread{
 				command=null;
 				commandCode="";
 				goodCommandCode=false;
+				
+				clientIp="127.0.0.1";				
 				//
-				// get the command from the database
+				// check for faults
 				//
-				aCommandRequest = hypothalamus.aDenomeManager.getNextCommandToExecute();
-				dataPayloadJSONObject = null;
-				clientIp="127.0.0.1";
-				if(aCommandRequest!=null){
-					command = aCommandRequest.getCommand();
-					commandCode = aCommandRequest.getCommandCode();
-					logger.info("commandCode=" + commandCode);
-					clientIp = aCommandRequest.getClientIp();
-					commandCodeVerified=false;
-					try {
-						commandCodeVerified = hypothalamus.motherMicroController.verifyUserCommandCode(commandCode);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						logger.warn(Utils.getStringException(e1));
-					}
-					 
-					if(commandCodeVerified) {
-						dataPayload = aCommandRequest.getDataPayload();
-						logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
-						goodCommandCode=true;
-						if(dataPayload!=null && !dataPayload.equals("")){
-							try {
-								dataPayloadJSONObject = new JSONObject(dataPayload);
-							} catch (JSONException e) {
-								// TODO Auto-generated catch block
-								logger.warn(Utils.getStringException(e));
-							}
-						}
-					}else {
-						//
-						// if we are here, the user code was wron
-						// from the mother, or an invalid code from the originator
-						//
-						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId(), TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE);
-						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
-						logger.debug("COMMANDS CODE DO NOT MATCH commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
-						commandCode=null;
-					}
-					//
-					// execute the command in case is an internal action, so that you dont have to wait
-					// for all the micro controllers to do a loop
-					// this is specially important if a microcontroller takes a long time to do an asyncdata
-					// and could take long enough that the code expires waiting to be excuted
-					
-					
-					if(aCommandRequest!=null && command!=null && !command.equals("")  && goodCommandCode){
-						logger.debug("line 674about to execute aCommandRequest=" + aCommandRequest + " command " + command + " dataPayloadJSONObject=" + dataPayloadJSONObject);
-							//executeCommand( aMicroController, input,  output,  command,  aCommandRequest,  dataPayloadJSONObject );
-						executeCommand(  command,  aCommandRequest,  dataPayloadJSONObject );
-						//
-						// now that the command has been executed, set the to null
-						aCommandRequest=null;
-						command=null;
-						hypothalamus.mutationIsInEffect=false;
-					}
-					
-					
-					
-					
-				}
-				
-				
-				
-				String asyncData="AsyncData";
-				logger.debug("line 105 microControllerPointerMicroControllerIndex=" + hypothalamus.microControllerPointerMicroControllerIndex);
-				long asyncRequestDelayMillis=0;
+				String faultDataMessage="FaultData";
+				String[] mutationCommands= {"FaultData","TimerStatus", "UserCommands"};
 				for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
 					microControllerPointer = (String)en.nextElement();
 					aMicroController = (MicroController)hypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
-					asyncRequestDelayMillis = aMicroController.getAsyncRequestMillisecondsDelay();
-					logger.debug("AsyncCycle is processing " + aMicroController.getName());
-					if(aMicroController.isEnableAsyncUpdate()) {
+					
+					logger.debug("Checking for faults coming from  " + aMicroController.getName());
+					
 						try {
 							output = aMicroController.getWriter();
-							logger.debug("requesting asyncdata");
-							output.write(asyncData,0,asyncData.length());
+							logger.debug("requesting faultData");
+							output.write(faultDataMessage,0,faultDataMessage.length());
 							output.flush();
 
 							input = aMicroController.getReader();
 							//String inputLine=getInputLine( input);
 							boolean ready = input.ready();
-							logger.debug("line 114 input.ready()=" + ready);
+							logger.debug("line 136 input.ready()=" + ready);
 
 							if(ready){
 								//   logger.debug("about to call readline");
@@ -204,179 +153,13 @@ class MappedBusThread extends Thread{
 										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
-								}while(!inputLine.startsWith("Ok") 
-										&& !inputLine.startsWith("Command") 
-										&& !inputLine.startsWith("Fault")
-										&& !inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE)
-										&& !inputLine.startsWith(TeleonomeConstants.COMMAND_SHUTDOWN)
-										&& !inputLine.startsWith(TeleonomeConstants.COMMAND_REBOOT)
-										);
+								}while(!inputLine.startsWith("Ok")  && !inputLine.startsWith("Fault") );
 
 								input.close();
 								output.close();
 
 								//if(!inputLine.equals("")){
-								if(inputLine.equals(TeleonomeConstants.COMMAND_REBOOT)){
-									//if(waitingForConfirmReboot){
-										output = aMicroController.getWriter();
-										output.write(TeleonomeConstants.COMMAND_REBOOTING);
-										output.flush();
-										logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
-										Runtime.getRuntime().exec("sudo reboot");
-	
-										waitingForConfirmReboot=false;
-									//}else{
-//									logger.debug("not waitingForConfirmReboot =" + inputLine);
-//
-//									output = aMicroController.getWriter();
-//									output.write(TeleonomeConstants.COMMAND_CONFIRM_REBOOT);
-//									output.flush();
-//									waitingForConfirmReboot=true;
-//									waitingForConfirmShutdown=false;
-//									waitingForConfirmKillPulse=false;
-									//								}
-								}else if(inputLine.equals(TeleonomeConstants.COMMAND_SHUTDOWN)){
-									//								if(waitingForConfirmShutdown){
-									output = aMicroController.getWriter();
-									output.write(TeleonomeConstants.COMMAND_SHUTINGDOWN);
-									output.flush();
-									logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
-									Runtime.getRuntime().exec("sudo shutdown -h now");
-
-									waitingForConfirmShutdown=false;
-									//								}else{
-									//									output = aMicroController.getWriter();
-									//									output.write(TeleonomeConstants.COMMAND_CONFIRM_SHUTDOWN);
-									//									output.flush();
-									//									waitingForConfirmShutdown=true;
-									//									waitingForConfirmReboot=false;
-									//									waitingForConfirmKillPulse=false;
-									//								}
-								}else if(inputLine.equals(TeleonomeConstants.COMMAND_SHUTDOWN_ENABLE_HOST)){
-									output = aMicroController.getWriter();
-									output.write(TeleonomeConstants.COMMAND_SHUTINGDOWN);
-									output.flush();
-									logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
-									try {
-										Utils.executeCommand("sudo sh hostmode.sh");
-										Utils.executeCommand("sudo shutdown -h now");
-										//Runtime.getRuntime().exec("sudo shutdown -h now");
-
-										waitingForConfirmShutdown=false;
-									} catch (InterruptedException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-
-
-								}else if(inputLine.equals(TeleonomeConstants.COMMAND_SHUTDOWN_ENABLE_NETWORK)){
-									output = aMicroController.getWriter();
-									output.write(TeleonomeConstants.COMMAND_SHUTINGDOWN);
-									output.flush();
-									logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
-									try {
-										Utils.executeCommand("sudo sh networkmode.sh");
-										Utils.executeCommand("sudo shutdown -h now");
-										//Runtime.getRuntime().exec("sudo shutdown -h now");
-
-										waitingForConfirmShutdown=false;
-									} catch (InterruptedException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-
-
-								}else if(inputLine.equals(TeleonomeConstants.COMMAND_REBOOT_ENABLE_NETWORK)){
-									//								output = aMicroController.getWriter();
-									//								output.write(TeleonomeConstants.COMMAND_REBOOTING);
-									//								output.flush();
-									//								
-									logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
-									try {
-										Utils.executeCommand("sudo sh networkmode.sh");
-										Utils.executeCommand("sudo rebooot");
-
-										waitingForConfirmShutdown=false;
-									} catch (InterruptedException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-
-
-								}else if(inputLine.equals(TeleonomeConstants.COMMAND_REBOOT_ENABLE_HOST)){
-									//								output = aMicroController.getWriter();
-									//								output.write(TeleonomeConstants.COMMAND_REBOOTING);
-									//								output.flush();
-									logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
-									try {
-										Utils.executeCommand("sudo sh hostmode.sh");
-										Utils.executeCommand("sudo rebooot");
-
-										waitingForConfirmShutdown=false;
-									} catch (InterruptedException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-
-
-								}else if(inputLine.equals(TeleonomeConstants.COMMAND_KILL_PULSE)){
-									//	if(waitingForConfirmKillPulse){
-									//									output = aMicroController.getWriter();
-									//									output.write(TeleonomeConstants.COMMAND_STOPPING_PULSE);
-									//									output.flush();
-									logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
-									System.exit(0);
-
-									waitingForConfirmKillPulse=false;
-									//								}else{
-									//									output = aMicroController.getWriter();
-									//									output.write(TeleonomeConstants.COMMAND_CONFIRM_STOP_PULSE);
-									//									output.flush();
-									//									waitingForConfirmShutdown=false;
-									//									waitingForConfirmReboot=false;
-									//									waitingForConfirmKillPulse=true;
-									//								}
-								}else if(inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE)){
-									logger.info("receive AsynC Update  from " + microControllerPointer + " inputLine="+ inputLine);
-									ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex = hypothalamus.aDenomeManager.getSensorsDeneWordsBySensorRequestQueuePositionByMicroControllerPointer( microControllerPointer);
-									JSONObject currentlyProcessingSensorValueDeneJSONObject;
-									int adjustedIndex;
-									String sensorValueString="";
-									logger.debug("inputLine.substring(17)=" + inputLine.substring(17));
-									String[] sensorDataTokens = inputLine.substring(17).split("#");
-									String reportingAddress;
-									JSONObject dataToPublishJSONObject = new JSONObject();
-									if(sensorRequestQueuePositionDeneWordIndex!=null && sensorDataTokens!=null && sensorDataTokens.length>0) {
-										for (Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
-											currentlyProcessingSensorValueDeneJSONObject = entry2.getKey();
-											logger.debug("currentlyProcessingSensorValueDeneJSONObject=" + currentlyProcessingSensorValueDeneJSONObject);
-
-											adjustedIndex = ((Integer)entry2.getValue()).intValue()-1;
-											logger.debug("processing sensor token:" + adjustedIndex );   
-											sensorValueString = sensorDataTokens[adjustedIndex];
-											logger.debug("processing sensor token:" + adjustedIndex + " resutled in " + sensorValueString);   
-											//
-											// the sensorRequestQueuePosition starts at 1 but the sensorDataTokens start at 0 so
-											// 
-											// logger.debug("inputLIne=" + inputLine);
-											if(sensorValueString!=null && !sensorValueString.equals("")){
-												reportingAddress = (String)  hypothalamus.aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDeneJSONObject,"Reporting Address");
-												try{
-													Double parseValue = Double.parseDouble(sensorValueString.trim());
-													dataToPublishJSONObject.put(reportingAddress, parseValue);
-												}catch(NumberFormatException e){
-													logger.debug(inputLine + " is not numeric");
-												}
-											}
-											//}
-										}
-									}
-									logger.debug("about to send asyn update to the herarrt " + dataToPublishJSONObject.toString());   
-									hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, dataToPublishJSONObject.toString());
-
-
-
-								}else if(inputLine.startsWith(TeleonomeConstants.COMMAND_FAULT)){
+								if(inputLine.startsWith(TeleonomeConstants.COMMAND_FAULT)){
 									//
 									// a fault is a tokenized string separated with #
 									// token 0 is the word fault
@@ -391,7 +174,7 @@ class MappedBusThread extends Thread{
 									command=tokens[2];
 									//password = tokens[3];
 									commandCode = tokens[3];
-									clientIp="127.0.0.1";
+									
 									String faultDataTarget = tokens[4];
 									String faultData = "";
 									if(tokens.length>5)faultData=tokens[5];
@@ -416,27 +199,18 @@ class MappedBusThread extends Thread{
 										// TODO Auto-generated catch block
 										logger.warn(Utils.getStringException(e));
 									}
-
 									logger.debug("Created pathology dene");
-
 									dataPayloadJSONObject = new JSONObject();
-
 									JSONObject payLoadJSONObject = new JSONObject();
 									try {
 										dataPayloadJSONObject.put("Mutation Name",command);
-
 										dataPayloadJSONObject.put("Payload", payLoadJSONObject);
 										JSONArray updatesArray = new JSONArray();
 										payLoadJSONObject.put("Updates"	, updatesArray);
-
 										JSONObject updateJSONObject =  new JSONObject();
 										updateJSONObject.put("Target",faultDataTarget);
 										updateJSONObject.put("Value" ,mutationType + ":" + faultData);
 										updatesArray.put(updateJSONObject);
-
-
-
-
 									} catch (JSONException e) {
 										// TODO Auto-generated catch block
 										logger.warn(Utils.getStringException(e));
@@ -514,6 +288,287 @@ class MappedBusThread extends Thread{
 									boolean restarRequired=false;
 									JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString(), clientIp, restarRequired);	
 									logger.debug("line 650 Received Timer Ended,  command:" + command + " commandRquestId=" + commandRequestJSONObject.getInt("id"));
+								}if(inputLine.equals(TeleonomeConstants.COMMAND_REBOOT)){
+									//if(waitingForConfirmReboot){
+									output = aMicroController.getWriter();
+									output.write(TeleonomeConstants.COMMAND_REBOOTING);
+									output.flush();
+									logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
+									Runtime.getRuntime().exec("sudo reboot");
+
+									waitingForConfirmReboot=false;
+								//}else{
+//								logger.debug("not waitingForConfirmReboot =" + inputLine);
+//
+//								output = aMicroController.getWriter();
+//								output.write(TeleonomeConstants.COMMAND_CONFIRM_REBOOT);
+//								output.flush();
+//								waitingForConfirmReboot=true;
+//								waitingForConfirmShutdown=false;
+//								waitingForConfirmKillPulse=false;
+								//								}
+							}else if(inputLine.equals(TeleonomeConstants.COMMAND_SHUTDOWN)){
+								//								if(waitingForConfirmShutdown){
+								output = aMicroController.getWriter();
+								output.write(TeleonomeConstants.COMMAND_SHUTINGDOWN);
+								output.flush();
+								logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
+								Runtime.getRuntime().exec("sudo shutdown -h now");
+
+								waitingForConfirmShutdown=false;
+								//								}else{
+								//									output = aMicroController.getWriter();
+								//									output.write(TeleonomeConstants.COMMAND_CONFIRM_SHUTDOWN);
+								//									output.flush();
+								//									waitingForConfirmShutdown=true;
+								//									waitingForConfirmReboot=false;
+								//									waitingForConfirmKillPulse=false;
+								//								}
+							}else if(inputLine.equals(TeleonomeConstants.COMMAND_SHUTDOWN_ENABLE_HOST)){
+								output = aMicroController.getWriter();
+								output.write(TeleonomeConstants.COMMAND_SHUTINGDOWN);
+								output.flush();
+								logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
+								try {
+									Utils.executeCommand("sudo sh hostmode.sh");
+									Utils.executeCommand("sudo shutdown -h now");
+									//Runtime.getRuntime().exec("sudo shutdown -h now");
+
+									waitingForConfirmShutdown=false;
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+
+
+							}else if(inputLine.equals(TeleonomeConstants.COMMAND_SHUTDOWN_ENABLE_NETWORK)){
+								output = aMicroController.getWriter();
+								output.write(TeleonomeConstants.COMMAND_SHUTINGDOWN);
+								output.flush();
+								logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
+								try {
+									Utils.executeCommand("sudo sh networkmode.sh");
+									Utils.executeCommand("sudo shutdown -h now");
+									//Runtime.getRuntime().exec("sudo shutdown -h now");
+
+									waitingForConfirmShutdown=false;
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+
+
+							}else if(inputLine.equals(TeleonomeConstants.COMMAND_REBOOT_ENABLE_NETWORK)){
+								//								output = aMicroController.getWriter();
+								//								output.write(TeleonomeConstants.COMMAND_REBOOTING);
+								//								output.flush();
+								//								
+								logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
+								try {
+									Utils.executeCommand("sudo sh networkmode.sh");
+									Utils.executeCommand("sudo rebooot");
+
+									waitingForConfirmShutdown=false;
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+
+
+							}else if(inputLine.equals(TeleonomeConstants.COMMAND_REBOOT_ENABLE_HOST)){
+								//								output = aMicroController.getWriter();
+								//								output.write(TeleonomeConstants.COMMAND_REBOOTING);
+								//								output.flush();
+								logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
+								try {
+									Utils.executeCommand("sudo sh hostmode.sh");
+									Utils.executeCommand("sudo rebooot");
+
+									waitingForConfirmShutdown=false;
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+
+
+							}else if(inputLine.equals(TeleonomeConstants.COMMAND_KILL_PULSE)){
+								//	if(waitingForConfirmKillPulse){
+								//									output = aMicroController.getWriter();
+								//									output.write(TeleonomeConstants.COMMAND_STOPPING_PULSE);
+								//									output.flush();
+								logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
+								System.exit(0);
+
+								waitingForConfirmKillPulse=false;
+								//								}else{
+								//									output = aMicroController.getWriter();
+								//									output.write(TeleonomeConstants.COMMAND_CONFIRM_STOP_PULSE);
+								//									output.flush();
+								//									waitingForConfirmShutdown=false;
+								//									waitingForConfirmReboot=false;
+								//									waitingForConfirmKillPulse=true;
+								//								}
+							}else {
+									logger.debug("input line not recognized");
+							}
+								if(input!=null)input.close();
+								if(output!=null)output.close();
+
+
+						}else {
+							logger.debug("Closing input because is not ready");
+							if(input!=null)input.close();
+							if(output!=null)output.close();
+						}
+							
+					} catch (IOException e) {
+						logger.warn("IOException processing " + aMicroController.getName());	
+					}
+				}
+				
+				
+				
+				
+				//
+				//
+				// SECOND - execute all commands stored in the databse that need to be executed;
+				//
+				do {
+					aCommandRequest = hypothalamus.aDenomeManager.getNextCommandToExecute();
+					dataPayloadJSONObject = null;
+					if(aCommandRequest!=null){
+						command = aCommandRequest.getCommand();
+						commandCode = aCommandRequest.getCommandCode();
+						logger.info("commandCode=" + commandCode);
+						clientIp = aCommandRequest.getClientIp();
+						commandCodeVerified=false;
+						try {
+							commandCodeVerified = hypothalamus.motherMicroController.verifyUserCommandCode(commandCode);
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e1));
+						}
+						 
+						if(commandCodeVerified) {
+							dataPayload = aCommandRequest.getDataPayload();
+							logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
+							goodCommandCode=true;
+							if(dataPayload!=null && !dataPayload.equals("")){
+								try {
+									dataPayloadJSONObject = new JSONObject(dataPayload);
+								} catch (JSONException e) {
+									// TODO Auto-generated catch block
+									logger.warn(Utils.getStringException(e));
+								}
+							}
+						}else {
+							//
+							// if we are here, the user code was wron
+							// from the mother, or an invalid code from the originator
+							//
+							JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId(), TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE);
+							hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
+							logger.debug("COMMANDS CODE DO NOT MATCH commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
+							commandCode=null;
+						}
+						
+						
+						if(aCommandRequest!=null && command!=null && !command.equals("")  && goodCommandCode){
+							logger.debug("line 674about to execute aCommandRequest=" + aCommandRequest + " command " + command + " dataPayloadJSONObject=" + dataPayloadJSONObject);
+								//executeCommand( aMicroController, input,  output,  command,  aCommandRequest,  dataPayloadJSONObject );
+							executeCommand(  command,  aCommandRequest,  dataPayloadJSONObject );
+							//
+							// now that the command has been executed, set the to null
+							aCommandRequest=null;
+							command=null;
+							hypothalamus.mutationIsInEffect=false;
+						}
+					}
+				}while(aCommandRequest!=null);
+				
+				
+				
+				
+						
+			
+				String asyncData="AsyncData";
+				logger.debug("line 105 microControllerPointerMicroControllerIndex=" + hypothalamus.microControllerPointerMicroControllerIndex);
+				long asyncRequestDelayMillis=0;
+				for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
+					microControllerPointer = (String)en.nextElement();
+					aMicroController = (MicroController)hypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
+					asyncRequestDelayMillis = aMicroController.getAsyncRequestMillisecondsDelay();
+					logger.debug("AsyncCycle is processing " + aMicroController.getName());
+					if(aMicroController.isEnableAsyncUpdate()) {
+						try {
+							output = aMicroController.getWriter();
+							logger.debug("requesting asyncdata");
+							output.write(asyncData,0,asyncData.length());
+							output.flush();
+
+							input = aMicroController.getReader();
+							//String inputLine=getInputLine( input);
+							boolean ready = input.ready();
+							logger.debug("line 114 input.ready()=" + ready);
+
+							if(ready){
+								//   logger.debug("about to call readline");
+								String inputLine = "";
+								do {
+									inputLine = input.readLine();
+									logger.info("received inputLine=" + inputLine);
+									try {
+										Thread.sleep(500);
+									} catch (InterruptedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}while(!inputLine.startsWith("Ok") && !inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE));
+
+								input.close();
+								output.close();
+
+								//if(!inputLine.equals("")){
+								if(inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE)){
+									logger.info("receive AsynC Update  from " + microControllerPointer + " inputLine="+ inputLine);
+									ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex = hypothalamus.aDenomeManager.getSensorsDeneWordsBySensorRequestQueuePositionByMicroControllerPointer( microControllerPointer);
+									JSONObject currentlyProcessingSensorValueDeneJSONObject;
+									int adjustedIndex;
+									String sensorValueString="";
+									logger.debug("inputLine.substring(17)=" + inputLine.substring(17));
+									String[] sensorDataTokens = inputLine.substring(17).split("#");
+									String reportingAddress;
+									JSONObject dataToPublishJSONObject = new JSONObject();
+									if(sensorRequestQueuePositionDeneWordIndex!=null && sensorDataTokens!=null && sensorDataTokens.length>0) {
+										for (Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
+											currentlyProcessingSensorValueDeneJSONObject = entry2.getKey();
+											logger.debug("currentlyProcessingSensorValueDeneJSONObject=" + currentlyProcessingSensorValueDeneJSONObject);
+
+											adjustedIndex = ((Integer)entry2.getValue()).intValue()-1;
+											logger.debug("processing sensor token:" + adjustedIndex );   
+											sensorValueString = sensorDataTokens[adjustedIndex];
+											logger.debug("processing sensor token:" + adjustedIndex + " resutled in " + sensorValueString);   
+											//
+											// the sensorRequestQueuePosition starts at 1 but the sensorDataTokens start at 0 so
+											// 
+											// logger.debug("inputLIne=" + inputLine);
+											if(sensorValueString!=null && !sensorValueString.equals("")){
+												reportingAddress = (String)  hypothalamus.aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDeneJSONObject,"Reporting Address");
+												try{
+													Double parseValue = Double.parseDouble(sensorValueString.trim());
+													dataToPublishJSONObject.put(reportingAddress, parseValue);
+												}catch(NumberFormatException e){
+													logger.debug(inputLine + " is not numeric");
+												}
+											}
+											//}
+										}
+									}
+									logger.debug("about to send asyn update to the herarrt " + dataToPublishJSONObject.toString());   
+									hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, dataToPublishJSONObject.toString());
+
+
+
 								}else {
 									logger.debug("input line not recognized");
 								}
@@ -546,21 +601,12 @@ class MappedBusThread extends Thread{
 				//}
 				//
 				
-				if(aCommandRequest!=null && command!=null && !command.equals("")  && goodCommandCode){
-					logger.debug("line 674about to execute aCommandRequest=" + aCommandRequest + " command " + command + " dataPayloadJSONObject=" + dataPayloadJSONObject);
-						//executeCommand( aMicroController, input,  output,  command,  aCommandRequest,  dataPayloadJSONObject );
-					executeCommand(  command,  aCommandRequest,  dataPayloadJSONObject );
-				
-					hypothalamus.mutationIsInEffect=false;
-				}
-				
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.warn(Utils.getStringException(e));
 				}
-
 			}
 			
 			logger.debug("existing run method of mapbusthread");

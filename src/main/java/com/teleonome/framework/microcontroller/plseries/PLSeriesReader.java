@@ -78,131 +78,147 @@ public class PLSeriesReader extends BufferedReader {
 		if(currentCommand.startsWith("PulseStart")) {
 			asyncMode=false;
 			return "Ok-PulseStart";
-		}
-		else if(currentCommand.startsWith("PulseFinished")) {
+		}else if(currentCommand.startsWith("PulseFinished")) {
 			currentCommand="";
 			return "Ok-PulseFinished";
-		}
-		
-		int currentRetries=0;
-		double currentLoad=0;
-		boolean keepGoing=true;
-		while(keepGoing) {
-			logger.debug("Ra- about to read currentLoad, currentRetries=" + currentRetries );
-			 currentLoad = getNewCurrentLoad();
-			logger.debug("Ra- currentLoad" + currentLoad);
-			if(currentLoad!=-99) {
-				keepGoing=false;
-			}else {
-				//
-				// bad data try again
-				currentRetries++;
-				if(currentRetries<NUMBER_OF_RETRIES) {
-					keepGoing=true;
-				}else {
+		}else if(currentCommand.startsWith("GetSensorData") || currentCommand.startsWith("AsyncData")) {
+			int currentRetries=0;
+			double currentLoad=0;
+			boolean keepGoing=true;
+			while(keepGoing) {
+				logger.debug("Ra- about to read currentLoad, currentRetries=" + currentRetries );
+				 currentLoad = getNewCurrentLoad();
+				logger.debug("Ra- currentLoad" + currentLoad);
+				if(currentLoad!=-99) {
 					keepGoing=false;
-					currentLoad=-1;
+				}else {
+					//
+					// bad data try again
+					currentRetries++;
+					if(currentRetries<NUMBER_OF_RETRIES) {
+						keepGoing=true;
+					}else {
+						keepGoing=false;
+						currentLoad=-1;
+					}
+				}
+				try {
+					Thread.sleep(PAUSE_BETWEEN_DATA);
+				} catch (InterruptedException e3) {
+					// TODO Auto-generated catch block
+					logger.info(Utils.getStringException(e3));
+				}
+				
+			}
+				
+			
+			 currentRetries=0;
+			 keepGoing=true;
+			double batteryVoltage=0;
+			while(keepGoing) {
+				logger.debug("Ra-" + "about to read voltage, currentRetries=" + currentRetries);
+				batteryVoltage  = getNewCurrentVoltage();
+				logger.debug("Ra- batteryVoltage" + batteryVoltage);
+				
+				if(batteryVoltage!=-99) {
+					keepGoing=false;
+				}else {
+					//
+					// bad data try again
+					currentRetries++;
+					if(currentRetries<NUMBER_OF_RETRIES) {
+						keepGoing=true;
+					}else {
+						keepGoing=false;
+						batteryVoltage=-1;
+					}
+				}
+				try {
+					Thread.sleep(PAUSE_BETWEEN_DATA);
+				} catch (InterruptedException e3) {
+					// TODO Auto-generated catch block
+					logger.info(Utils.getStringException(e3));
 				}
 			}
-			try {
-				Thread.sleep(PAUSE_BETWEEN_DATA);
-			} catch (InterruptedException e3) {
-				// TODO Auto-generated catch block
-				logger.info(Utils.getStringException(e3));
-			}
 			
-		}
+				
 			
-		
-		 currentRetries=0;
-		 keepGoing=true;
-		double batteryVoltage=0;
-		while(keepGoing) {
-			logger.debug("Ra-" + "about to read voltage, currentRetries=" + currentRetries);
-			batteryVoltage  = getNewCurrentVoltage();
-			logger.debug("Ra- batteryVoltage" + batteryVoltage);
-			
-			if(batteryVoltage!=-99) {
-				keepGoing=false;
-			}else {
-				//
-				// bad data try again
-				currentRetries++;
-				if(currentRetries<NUMBER_OF_RETRIES) {
-					keepGoing=true;
-				}else {
+			 currentRetries=0;
+			 keepGoing=true;
+			 String batteryState = "NA";
+			while(keepGoing) {
+				 batteryState = getNewBatteryState();
+				logger.debug("Ra-" + "battery state=" +  batteryState);
+				
+				if(!batteryState.equals("NA")) {
 					keepGoing=false;
-					batteryVoltage=-1;
+				}else {
+					//
+					// bad data try again
+					currentRetries++;
+					if(currentRetries<NUMBER_OF_RETRIES) {
+						keepGoing=true;
+					}else {
+						keepGoing=false;
+						batteryState="NA";
+					}
+				}
+				try {
+					Thread.sleep(PAUSE_BETWEEN_DATA);
+				} catch (InterruptedException e3) {
+					// TODO Auto-generated catch block
+					logger.info(Utils.getStringException(e3));
 				}
 			}
-			try {
-				Thread.sleep(PAUSE_BETWEEN_DATA);
-			} catch (InterruptedException e3) {
-				// TODO Auto-generated catch block
-				logger.info(Utils.getStringException(e3));
-			}
-		}
-		
+			
 			
 		
-		 currentRetries=0;
-		 keepGoing=true;
-		 String batteryState = "NA";
-		while(keepGoing) {
-			 batteryState = getNewBatteryState();
-			logger.debug("Ra-" + "battery state=" +  batteryState);
-			
-			if(!batteryState.equals("NA")) {
-				keepGoing=false;
-			}else {
-				//
-				// bad data try again
-				currentRetries++;
-				if(currentRetries<NUMBER_OF_RETRIES) {
-					keepGoing=true;
-				}else {
-					keepGoing=false;
-					batteryState="NA";
-				}
-			}
-			try {
-				Thread.sleep(PAUSE_BETWEEN_DATA);
-			} catch (InterruptedException e3) {
-				// TODO Auto-generated catch block
-				logger.info(Utils.getStringException(e3));
-			}
-		}
-		
-		
-	
-		 currentRetries=0;
-		 keepGoing=true;
-		 double currentCharge=0;
-		while(keepGoing) {
-			logger.debug("Ra-" + "about to read newcurrentCharge, currentRetries=" + currentRetries);
-			 currentCharge  = getNewCurrentCharge();
-			logger.debug("Ra- currentCharge" + currentCharge);
+			 currentRetries=0;
+			 keepGoing=true;
+			 double currentCharge=0;
+			while(keepGoing) {
+				logger.debug("Ra-" + "about to read newcurrentCharge, currentRetries=" + currentRetries);
+				 currentCharge  = getNewCurrentCharge();
+				logger.debug("Ra- currentCharge" + currentCharge);
 
-			if(currentCharge!=-99) {
-				keepGoing=false;
-			}else {
-				//
-				// bad data try again
-				currentRetries++;
-				if(currentRetries<NUMBER_OF_RETRIES) {
-					keepGoing=true;
-				}else {
+				if(currentCharge!=-99) {
 					keepGoing=false;
-					currentCharge=-1;
+				}else {
+					//
+					// bad data try again
+					currentRetries++;
+					if(currentRetries<NUMBER_OF_RETRIES) {
+						keepGoing=true;
+					}else {
+						keepGoing=false;
+						currentCharge=-1;
+					}
+				}
+				try {
+					Thread.sleep(PAUSE_BETWEEN_DATA);
+				} catch (InterruptedException e3) {
+					// TODO Auto-generated catch block
+					logger.info(Utils.getStringException(e3));
 				}
 			}
-			try {
-				Thread.sleep(PAUSE_BETWEEN_DATA);
-			} catch (InterruptedException e3) {
-				// TODO Auto-generated catch block
-				logger.info(Utils.getStringException(e3));
-			}
+			double maxBatVoltageToday = 55;//getMaxBatVoltageToday();
+			double minBatVoltageToday  = 46;//getMinBatVoltageToday();
+			double totalChargeAmpHoursForToday = 10;//getTotalChargeAmpHoursForToday();
+			double currentStateOfCharge = getNewCurrentStateOfCharge();
+			double totalLoadAmpHoursForToday = 100;//getTotalLoadAmpHoursForToday();
+			String prefix="";
+			logger.info("about to return ");
+			if(currentCommand.equals("AsyncData"))prefix =  "AsyncCycleUpdate#";
+			dataLine =prefix + batteryVoltage+ "#"+ currentCharge + "#"+ currentLoad+ "#" + currentStateOfCharge + "#"+ batteryState + "#"+ totalLoadAmpHoursForToday+ "#"+ totalChargeAmpHoursForToday + "#"+ minBatVoltageToday +"#" + maxBatVoltageToday;
+			
+			logger.info("plseries returning " + dataLine);
+			currentCommand="";
+			return dataLine;
+		}else {
+			currentCommand="";
+			return "Ok";
 		}
+		
 		
 		
 //		
@@ -261,19 +277,7 @@ public class PLSeriesReader extends BufferedReader {
 		
 		
 		
-		double maxBatVoltageToday = 55;//getMaxBatVoltageToday();
-		double minBatVoltageToday  = 46;//getMinBatVoltageToday();
-		double totalChargeAmpHoursForToday = 10;//getTotalChargeAmpHoursForToday();
-		double currentStateOfCharge = getNewCurrentStateOfCharge();
-		double totalLoadAmpHoursForToday = 100;//getTotalLoadAmpHoursForToday();
-		String prefix="";
-		logger.info("about to return ");
-		if(currentCommand.equals("AsyncData"))prefix =  "AsyncCycleUpdate#";
-		dataLine =prefix + batteryVoltage+ "#"+ currentCharge + "#"+ currentLoad+ "#" + currentStateOfCharge + "#"+ batteryState + "#"+ totalLoadAmpHoursForToday+ "#"+ totalChargeAmpHoursForToday + "#"+ minBatVoltageToday +"#" + maxBatVoltageToday;
 		
-		logger.info("plseries returning " + dataLine);
-		currentCommand="";
-		return dataLine;
 	}
 	
 	public double getCurrentCharge() {

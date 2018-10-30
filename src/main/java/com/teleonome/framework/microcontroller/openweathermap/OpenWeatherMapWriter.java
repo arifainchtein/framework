@@ -18,8 +18,8 @@ public class OpenWeatherMapWriter extends BufferedWriter{
 	
 public void write(String command, int off, int len) throws IOException {
 		
-		if(command.equals("GetSensorData")) {
+		//if(command.equals("GetSensorData")) {
 			anOpenWeatherMapReader.setCurrentCommand(command);
-		}
+		//}
 	}
 }

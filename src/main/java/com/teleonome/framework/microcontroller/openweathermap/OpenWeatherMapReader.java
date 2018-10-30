@@ -46,7 +46,7 @@ public class OpenWeatherMapReader extends BufferedReader{
 	}
 
 	public String readLine(){
-		if(!currentCommand.equals("GetSensorData"))return "";
+		if(!currentCommand.equals("GetSensorData"))return "Ok";
 		
 		StringBuffer buffer = new StringBuffer();
 		
