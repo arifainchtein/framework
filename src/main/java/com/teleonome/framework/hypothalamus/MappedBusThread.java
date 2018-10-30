@@ -428,10 +428,10 @@ class MappedBusThread extends Thread{
 						logger.warn("IOException processing " + aMicroController.getName());	
 					}
 				}
-				}
+			}
 				
 				
-				hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "Starting Commands  ");
+			hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "Starting Commands  ");
 
 				
 				//
@@ -489,8 +489,8 @@ class MappedBusThread extends Thread{
 							executeCommand(  command,  aCommandRequest,  dataPayloadJSONObject );
 							//
 							// now that the command has been executed, set the to null
-							aCommandRequest=null;
-							command=null;
+							//aCommandRequest=null;
+							//command=null;
 							hypothalamus.mutationIsInEffect=false;
 						}
 					}
