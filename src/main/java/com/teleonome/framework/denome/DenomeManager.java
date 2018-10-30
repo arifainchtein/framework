@@ -3285,7 +3285,7 @@ public class DenomeManager {
 
 				for(int j=0;j<targetsJSONArray.length();j++){
 					destinationIdentityPointer = targetsJSONArray.getString(j);
-					logger.debug("destinationIdentityPointer=" + destinationIdentityPointer);
+					logger.info("destinationIdentityPointer=" + destinationIdentityPointer);
 					destinationDeneChain = getDenomicElementByIdentity(new Identity(destinationIdentityPointer));
 					destinationDenes = destinationDeneChain.getJSONArray("Denes");
 					newDenePosition=0;
@@ -3343,6 +3343,7 @@ public class DenomeManager {
 
 					//
 					// finally add the new dene to the chain
+					logger.info("adding new dene =" + newDene.getString("Name"));
 					destinationDenes.put(newDene);
 				}
 
@@ -8433,7 +8434,7 @@ public class DenomeManager {
 		//from anActuatorDeneJSONObject give me the DeneWord Type Action
 		try {
 			JSONObject actionSuccessTask = this.getDeneByIdentity(new Identity(pointerToActionSuccessTasks));
-			logger.debug("line 5307pointerToActionSuccessTasks=" + pointerToActionSuccessTasks + " actionSuccessTask=" + actionSuccessTask);
+			logger.info("line 5307pointerToActionSuccessTasks=" + pointerToActionSuccessTasks + " actionSuccessTask=" + actionSuccessTask);
 			//
 			//  first do the update, which will replace the value
 			//
@@ -8446,7 +8447,7 @@ public class DenomeManager {
 			for(int i=0;i<actionSuccessTaskUpdateDeneWords.length();i++){
 				try {
 					toDoDeneWordJSONObject = actionSuccessTaskUpdateDeneWords.getJSONObject(i);
-					logger.debug("toDoDeneWordJSONObject=" + toDoDeneWordJSONObject);
+					logger.info("toDoDeneWordJSONObject=" + toDoDeneWordJSONObject);
 
 					//
 					//the target is what variable and the value is what to set it at
@@ -8459,11 +8460,11 @@ public class DenomeManager {
 					// check to see if the value is a command, like $Current_Time
 					if(value.equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP_MILLIS)){
 						renderedValue = System.currentTimeMillis()/1000;
-						logger.debug("rendering currentimemillis for an action=" + renderedValue);
+						logger.info("rendering currentimemillis for an action=" + renderedValue);
 					}else if(value.equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP)){
 						DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TeleonomeConstants.MNEMOSYNE_TIMESTAMP_FORMAT);
 						renderedValue = formatter.format(LocalDateTime.now());
-						logger.debug("rendering currentimemillis for an action=" + renderedValue);
+						logger.info("rendering currentimemillis for an action=" + renderedValue);
 					}else if(valueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER) && (value instanceof java.lang.String) &&  ((String)value).startsWith("@") ){
 						//
 						// if we are here then we have a situation where the value
@@ -8476,7 +8477,7 @@ public class DenomeManager {
 						// because if its does, the value would be a long since it would have been 
 						// converted to long when storing it
 						JSONObject sourceDataJSONObject = getDeneWordByIdentity(new Identity((String)value));
-						logger.debug("value=" + value + " sourceDataJSONObject=" + sourceDataJSONObject);
+						logger.info("value=" + value + " sourceDataJSONObject=" + sourceDataJSONObject);
 						if(valueType.equals(TeleonomeConstants.DENEWORD_TIMESTRING_VALUE)){
 							renderedValue ="" +  (Long)sourceDataJSONObject.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						}else{
@@ -8492,9 +8493,9 @@ public class DenomeManager {
 					//
 					// this will set it in the denome
 					//
-					logger.debug("target=" + target + " valueType=" + valueType + " value=" + value + " renderedValue=" + renderedValue);
+					logger.info("target=" + target + " valueType=" + valueType + " value=" + value + " renderedValue=" + renderedValue);
 					targetDeneWord = getDeneWordByIdentity(new Identity(target));
-					logger.debug("targetDeneWord=" + targetDeneWord);
+					logger.info("targetDeneWord=" + targetDeneWord);
 					targetDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, renderedValue);
 					//
 					// this will set it in the currentPulse
@@ -8513,7 +8514,7 @@ public class DenomeManager {
 				for(int i=0;i<actionSuccessTaskAppendDeneWords.length();i++){
 					try {
 						toDoDeneWordJSONObject = actionSuccessTaskAppendDeneWords.getJSONObject(i);
-						logger.debug("actionSuccessTaskAppendDeneWords ,toDoDeneWordJSONObject=" + toDoDeneWordJSONObject);
+						logger.info("actionSuccessTaskAppendDeneWords ,toDoDeneWordJSONObject=" + toDoDeneWordJSONObject);
 	
 						//
 						//the target is what variable and the value is what to set it at
@@ -8526,11 +8527,11 @@ public class DenomeManager {
 						// check to see if the value is a command, like $Current_Time
 						if(value.equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP_MILLIS)){
 							renderedValue = System.currentTimeMillis()/1000;
-							logger.debug("rendering currentimemillis for an action=" + renderedValue);
+							logger.info("rendering currentimemillis for an action=" + renderedValue);
 						}else if(value.equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP)){
 							DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TeleonomeConstants.MNEMOSYNE_TIMESTAMP_FORMAT);
 							renderedValue = formatter.format(LocalDateTime.now());
-							logger.debug("rendering currentimemillis for an action=" + renderedValue);
+							logger.info("rendering currentimemillis for an action=" + renderedValue);
 						}else if(valueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER) && (value instanceof java.lang.String) &&  ((String)value).startsWith("@") ){
 							//
 							// if we are here then we have a situation where the value
@@ -8543,7 +8544,7 @@ public class DenomeManager {
 							// because if its does, the value would be a long since it would have been 
 							// converted to long when storing it
 							JSONObject sourceDataJSONObject = getDeneWordByIdentity(new Identity((String)value));
-							logger.debug("value=" + value + " sourceDataJSONObject=" + sourceDataJSONObject);
+							logger.info("value=" + value + " sourceDataJSONObject=" + sourceDataJSONObject);
 							if(valueType.equals(TeleonomeConstants.DENEWORD_TIMESTRING_VALUE)){
 								renderedValue ="" +  (Long)sourceDataJSONObject.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							}else{
@@ -8559,9 +8560,9 @@ public class DenomeManager {
 						//
 						// this will set it in the denome
 						//
-						logger.debug("target=" + target + " valueType=" + valueType + " value=" + value + " renderedValue=" + renderedValue);
+						logger.info("target=" + target + " valueType=" + valueType + " value=" + value + " renderedValue=" + renderedValue);
 						targetDeneWord = getDeneWordByIdentity(new Identity(target));
-						logger.debug("targetDeneWord=" + targetDeneWord);
+						logger.info("targetDeneWord=" + targetDeneWord);
 						targetDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, renderedValue);
 						//
 						// this will set it in the currentPulse

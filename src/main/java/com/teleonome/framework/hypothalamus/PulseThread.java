@@ -980,6 +980,8 @@ public class PulseThread extends Thread{
 										// apply the Action Success Task
 										
 										if(pointerToActionSuccessTasks!=null){
+											
+											logger.debug("line 983 action succests pointer=" + pointerToActionSuccessTasks);
 											aDenomeManager.executeActionSuccessTasks(pointerToActionSuccessTasks);
 										}
 										//
