@@ -123,17 +123,20 @@ class MappedBusThread extends Thread{
 				// check for faults
 				//
 				String faultDataMessage="FaultData";
+				String messageToSend;
 				String[] mutationCommands= {"FaultData","TimerStatus", "UserCommands"};
 				for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
 					microControllerPointer = (String)en.nextElement();
 					aMicroController = (MicroController)hypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
 					
 					logger.debug("Checking for faults coming from  " + aMicroController.getName());
-					
+					hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "Checking for faults coming from  " + aMicroController.getName());
+					for(int k=0;k<mutationCommands.length;k++) {
 						try {
+							messageToSend = mutationCommands[k];
 							output = aMicroController.getWriter();
-							logger.debug("requesting faultData");
-							output.write(faultDataMessage,0,faultDataMessage.length());
+							logger.debug("requesting " + messageToSend);
+							output.write(messageToSend,0,messageToSend.length());
 							output.flush();
 
 							input = aMicroController.getReader();
@@ -425,9 +428,11 @@ class MappedBusThread extends Thread{
 						logger.warn("IOException processing " + aMicroController.getName());	
 					}
 				}
+				}
 				
 				
-				
+				hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "Starting Commands  ");
+
 				
 				//
 				//
@@ -440,6 +445,7 @@ class MappedBusThread extends Thread{
 						command = aCommandRequest.getCommand();
 						commandCode = aCommandRequest.getCommandCode();
 						logger.info("commandCode=" + commandCode);
+						
 						clientIp = aCommandRequest.getClientIp();
 						commandCodeVerified=false;
 						try {
@@ -452,6 +458,8 @@ class MappedBusThread extends Thread{
 						if(commandCodeVerified) {
 							dataPayload = aCommandRequest.getDataPayload();
 							logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
+							hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "Executing command " + command);
+
 							goodCommandCode=true;
 							if(dataPayload!=null && !dataPayload.equals("")){
 								try {
@@ -469,6 +477,8 @@ class MappedBusThread extends Thread{
 							JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId(), TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE);
 							hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
 							logger.debug("COMMANDS CODE DO NOT MATCH commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
+							hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "COMMANDS CODE DO NOT MATCH");
+
 							commandCode=null;
 						}
 						
