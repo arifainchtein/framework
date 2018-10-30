@@ -488,7 +488,8 @@ class MappedBusThread extends Thread{
 				
 				
 				
-				
+				//
+				// Third get AsyncData
 						
 			
 				String asyncData="AsyncData";
@@ -511,7 +512,7 @@ class MappedBusThread extends Thread{
 							boolean ready = input.ready();
 							logger.debug("line 114 input.ready()=" + ready);
 
-							if(ready){
+							//if(ready){
 								//   logger.debug("about to call readline");
 								String inputLine = "";
 								do {
@@ -576,11 +577,11 @@ class MappedBusThread extends Thread{
 								if(output!=null)output.close();
 
 
-							}else {
-								logger.debug("Closing input because is not ready");
-								if(input!=null)input.close();
-								if(output!=null)output.close();
-							}
+							//}else {
+//								logger.debug("Closing input because is not ready");
+//								if(input!=null)input.close();
+//								if(output!=null)output.close();
+							//}
 							if(asyncRequestDelayMillis>0) {
 								try {
 									Thread.sleep(asyncRequestDelayMillis);
