@@ -43,7 +43,7 @@ public class PlainReader extends BufferedReader{
 				else value=0;
 			}
 			//System.out.println("counter="+ counter + " value" + value);
-			return value + "#";
+			return "ok";//value + "#";
 		}
 	}
 }
