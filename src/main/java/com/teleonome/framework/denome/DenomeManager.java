@@ -2959,13 +2959,14 @@ public class DenomeManager {
 	public JSONObject injectPayloadIntoStateMutation(JSONObject payload) throws IOException, InvalidMutation{
 		//
 		// this is the read from the menome way
-		//
+		//logger.info("line 1950 of inject, mutationName=" + mutationName);
+		logger.info("line 2963 of inject, payload=" + payload);
 		JSONArray mutationsJSONArray;
 		JSONObject selectedMutationJSONObject=null;
 		try {
 			JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
 			String mutationName = payload.getString("Mutation Name");
-			logger.info("line 1950 of inject, mutationName=" + mutationName);
+			logger.info("line 2969 of inject, mutationName=" + mutationName);
 
 			JSONArray updatesJSONArray;
 			mutationsJSONArray = denomeObject.getJSONArray("Mutations");
@@ -2976,7 +2977,7 @@ public class DenomeManager {
 			String targetDeneChain,targetDene,targetDeneWord;
 			for(int i=0;i<mutationsJSONArray.length();i++){
 				mutationJSONObject = (JSONObject) mutationsJSONArray.getJSONObject(i);
-				logger.info("line 1965 of inject, mutationJSONObject=" + mutationJSONObject.getString("Name") + " " + mutationJSONObject.getString("Mutation Type"));
+				logger.info("line 2980 of inject, mutationJSONObject=" + mutationJSONObject.getString("Name") + " " + mutationJSONObject.getString("Mutation Type"));
 
 				if(mutationJSONObject.getString("Name").equals(mutationName) && mutationJSONObject.getString(TeleonomeConstants.MUTATION_TYPE_ATTRIBUTE).equals(TeleonomeConstants.MUTATION_TYPE_STATE)){
 
