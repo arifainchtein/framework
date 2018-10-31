@@ -534,7 +534,10 @@ class MappedBusThread extends Thread{
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-						}while(!inputLine.startsWith("Ok") && !inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE));
+						}while(!inputLine.startsWith("Ok") && 
+								!inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE) &&
+								!inputLine.startsWith("Command Not Found") 
+								);
 
 						input.close();
 						output.close();
@@ -722,6 +725,9 @@ class MappedBusThread extends Thread{
 						logger.debug("line 725 mutationJSONObject=" + mutationJSONObject);
 
 					} catch (InvalidMutation e) {
+						// TODO Auto-generated catch block
+						logger.warn(Utils.getStringException(e));
+					}catch (IOException e) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e));
 					}
