@@ -478,8 +478,9 @@ class MappedBusThread extends Thread{
 						//hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
 						logger.debug("COMMANDS CODE DO NOT MATCH commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
 						//hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "COMMANDS CODE DO NOT MATCH");
-
+						goodCommandCode=false;
 						commandCode=null;
+						command=null;
 					}
 
 
