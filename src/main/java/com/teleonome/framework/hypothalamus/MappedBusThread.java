@@ -212,7 +212,7 @@ class MappedBusThread extends Thread{
 									payLoadJSONObject.put("Updates"	, updatesArray);
 									JSONObject updateJSONObject =  new JSONObject();
 									updateJSONObject.put(TeleonomeConstants.MUTATION_PAYLOAD_UPDATE_TARGET,faultDataTarget);
-									updateJSONObject.put("Value" ,mutationType + ":" + faultData);
+									updateJSONObject.put(TeleonomeConstants.MUTATION_PAYLOAD_VALUE ,mutationType + ":" + faultData);
 									updatesArray.put(updateJSONObject);
 								} catch (JSONException e) {
 									// TODO Auto-generated catch block
