@@ -2965,7 +2965,7 @@ public class DenomeManager {
 		try {
 			JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
 			String mutationName = payload.getString("Mutation Name");
-			logger.debug("line 1950 of inject, mutationName=" + mutationName);
+			logger.info("line 1950 of inject, mutationName=" + mutationName);
 
 			JSONArray updatesJSONArray;
 			mutationsJSONArray = denomeObject.getJSONArray("Mutations");
@@ -2976,7 +2976,7 @@ public class DenomeManager {
 			String targetDeneChain,targetDene,targetDeneWord;
 			for(int i=0;i<mutationsJSONArray.length();i++){
 				mutationJSONObject = (JSONObject) mutationsJSONArray.getJSONObject(i);
-				logger.debug("line 1965 of inject, mutationJSONObject=" + mutationJSONObject.getString("Name") + " " + mutationJSONObject.getString("Mutation Type"));
+				logger.info("line 1965 of inject, mutationJSONObject=" + mutationJSONObject.getString("Name") + " " + mutationJSONObject.getString("Mutation Type"));
 
 				if(mutationJSONObject.getString("Name").equals(mutationName) && mutationJSONObject.getString(TeleonomeConstants.MUTATION_TYPE_ATTRIBUTE).equals(TeleonomeConstants.MUTATION_TYPE_STATE)){
 
@@ -2987,7 +2987,7 @@ public class DenomeManager {
 					// the payload 
 					payloadJSONObject = payload.getJSONObject("Payload");
 					updatesJSONArray = payloadJSONObject.getJSONArray("Updates");
-					logger.debug("line 1965 of inject, payloadJSONObject=" + payloadJSONObject);
+					logger.info("line 1965 of inject, payloadJSONObject=" + payloadJSONObject);
 					String mutationTarget, injectionTarget,deletionTarget, valueAttribute;
 					
 					JSONObject updateJSNObject;
@@ -3009,7 +3009,7 @@ public class DenomeManager {
 						if(targetDeneChain.startsWith("@"))targetDeneChain = targetDeneChain.substring(1);
 						targetDene = tokens[1];
 						targetDeneWord = tokens[2];
-						logger.debug("line 1993 demomemanager targetDeneChain:" + targetDeneChain + " targetDene:" + targetDene + " targetDeneWord:" + targetDeneWord);
+						logger.info("line 1993 demomemanager targetDeneChain:" + targetDeneChain + " targetDene:" + targetDene + " targetDeneWord:" + targetDeneWord);
 
 						//
 						// now loop over all the object of the target mutation
@@ -3017,19 +3017,19 @@ public class DenomeManager {
 						JSONObject mutationDeneChain, mutationDene, mutationDeneWord;
 
 						mutationDeneChains = mutationJSONObject.getJSONArray("DeneChains");
-						//logger.debug("line 1560 demomemanager mutationDeneChains:" + mutationDeneChains.length());
+						//logger.info("line 1560 demomemanager mutationDeneChains:" + mutationDeneChains.length());
 
 						for(int k=0;k<mutationDeneChains.length();k++){
 							//
 							
 							mutationDeneChain=mutationDeneChains.getJSONObject(k);
-							logger.debug("line 2034 demomemanager mutationDeneChain.getString(Name):" + mutationDeneChain.getString("Name"));
+							logger.info("line 2034 demomemanager mutationDeneChain.getString(Name):" + mutationDeneChain.getString("Name"));
 
 							if(mutationDeneChain.getString("Name").equals(targetDeneChain)){
 								mutationDenes = mutationDeneChain.getJSONArray("Denes");
 								for(int l=0;l<mutationDenes.length();l++){
 									mutationDene = mutationDenes.getJSONObject(l);
-									logger.debug("line 1566 demomemanager mutationDene:" + mutationDene.getString("Name"));
+									logger.info("line 1566 demomemanager mutationDene:" + mutationDene.getString("Name"));
 
 									if(mutationDene.getString("Name").equals(targetDene)){
 										//
@@ -3037,7 +3037,7 @@ public class DenomeManager {
 										mutationDeneWords=mutationDene.getJSONArray("DeneWords");
 										for(int m=0;m<mutationDeneWords.length();m++){
 											mutationDeneWord = mutationDeneWords.getJSONObject(m);
-											logger.debug("line 2946 demomemanager mutationDeneWord:" + mutationDeneWord.getString("Name"));
+											logger.info("line 2946 demomemanager mutationDeneWord:" + mutationDeneWord.getString("Name"));
 											if(mutationDeneWord.getString("Name").equals(targetDeneWord)){
 												
 												
@@ -3046,19 +3046,19 @@ public class DenomeManager {
 												//
 												if(updateJSNObject.has(TeleonomeConstants.MUTATION_TARGET)) {
 													mutationDeneWord.put(TeleonomeConstants.MUTATION_TARGET,updateJSNObject.getString(TeleonomeConstants.MUTATION_TARGET));
-													logger.debug("line 3029 updating :" + TeleonomeConstants.MUTATION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_TARGET));
+													logger.info("line 3029 updating :" + TeleonomeConstants.MUTATION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_TARGET));
 													
 												}
 												
 												if(updateJSNObject.has(TeleonomeConstants.MUTATION_INJECTION_TARGET)) {
 													mutationDeneWord.put(TeleonomeConstants.MUTATION_INJECTION_TARGET,updateJSNObject.getString(TeleonomeConstants.MUTATION_INJECTION_TARGET));
-													logger.debug("line 3029 updating :" + TeleonomeConstants.MUTATION_INJECTION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_INJECTION_TARGET));
+													logger.info("line 3029 updating :" + TeleonomeConstants.MUTATION_INJECTION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_INJECTION_TARGET));
 													
 												}
 												
 												if(updateJSNObject.has(TeleonomeConstants.MUTATION_DELETION_TARGET)) {
 													mutationDeneWord.put(TeleonomeConstants.MUTATION_DELETION_TARGET,updateJSNObject.getString(TeleonomeConstants.MUTATION_DELETION_TARGET));
-													logger.debug("line 3029 updating :" + TeleonomeConstants.MUTATION_DELETION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_DELETION_TARGET));
+													logger.info("line 3029 updating :" + TeleonomeConstants.MUTATION_DELETION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_DELETION_TARGET));
 													
 												}
 												
@@ -3071,23 +3071,23 @@ public class DenomeManager {
 													if(updateJSNObject.has(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE)) {
 														if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_INTEGER)) {
 															mutationDeneWord.put("Value",updateJSNObject.getInt(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
-															logger.debug("line 3052 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getInt(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.info("line 3052 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getInt(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 															
 														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
 															mutationDeneWord.put("Value",updateJSNObject.getDouble(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
-															logger.debug("line 3056 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getDouble(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.info("line 3056 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getDouble(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 														
 														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_LONG)) {
 															mutationDeneWord.put("Value",updateJSNObject.getLong(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
-															logger.debug("line 3061 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getLong(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.info("line 3061 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getLong(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 														
 														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_DENE_POINTER)) {
 															mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
-															logger.debug("line 3065 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getString(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.info("line 3065 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getString(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 														
 														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_STRING)) {
 															mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
-															logger.debug("line 3069 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getString(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.info("line 3069 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getString(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 														
 														}
 													}else {
@@ -3096,7 +3096,7 @@ public class DenomeManager {
 														// asume is string
 														//
 														mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
-														logger.debug("line 3029 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+														logger.info("line 3029 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 														
 													}
 													
@@ -3117,7 +3117,7 @@ public class DenomeManager {
 			logger.warn(Utils.getStringException(e));
 		}
 
-		//	logger.debug("Finished injecting payload, exiting for now");
+		//	logger.info("Finished injecting payload, exiting for now");
 		//	System.exit(0);
 		return selectedMutationJSONObject;
 
