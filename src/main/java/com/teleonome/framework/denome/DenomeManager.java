@@ -6086,16 +6086,39 @@ public class DenomeManager {
 												// now check to see what type of value it is
 												//
 												if(valueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
-													int v = Integer.parseInt(inputLine);
+													int v = 0;
+													
 													logger.debug("storing into value inte ger =" + v);
+													try {
+														v =Integer.parseInt(inputLine);
+														logger.debug("storing into value int=" + v);
+													}catch(java.lang.NumberFormatException e) {
+														logger.warn(Utils.getStringException(e));
+													}
+													
 													jsonObjectDeneWord.put("Value", v);
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
-													double v = Double.parseDouble(inputLine);
-													logger.debug("storing into value double=" + v);
+													double v = 00.0;
+													try {
+														v = Double.parseDouble(inputLine);
+														logger.debug("storing into value double=" + v);
+													}catch(java.lang.NumberFormatException e) {
+														logger.warn(Utils.getStringException(e));
+													}
+													
 													jsonObjectDeneWord.put("Value", v);
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_LONG)) {
-													long v = Long.parseLong(inputLine);
-													logger.debug("storing into value long=" + v);
+													long v = 0;
+													try {
+														Long.parseLong(inputLine);
+														logger.debug("storing into value long=" + v);
+														
+													}catch(java.lang.NumberFormatException e) {
+														logger.warn(Utils.getStringException(e));
+													}
+													
+													
+													
 													jsonObjectDeneWord.put("Value", v);
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_STRING) || 
 														valueType.equals(TeleonomeConstants.DATATYPE_IMAGE_FILE) || 
