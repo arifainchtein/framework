@@ -2629,7 +2629,7 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 		JSONArray toReturn = new JSONArray();
 		try {
 			String command = "SELECT time, value from RememberedDeneWords where time>=? and time<=? and  identityString=? order by time asc";
-			
+			logger.info("command=" + command);
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
 			java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(startTimeMillis);
