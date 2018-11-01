@@ -706,25 +706,34 @@ public class PulseThread extends Thread{
 					String commandToSend="";
 					Calendar cal = Calendar.getInstance();//TimeZone.getTimeZone("GMT+10:00"));
 					logger.info("telling mama pulse is done");
-					try {
-						motherOutputStream = anHypothalamus.motherMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
-						
+					
 						//String inputLine = motherInputStream.readLine();
 						//logger.info("received inputLine=" + inputLine);
 						String inputLine="";
-						do {
-							commandToSend = "PulseFinished#"+anHypothalamus.timeFormatter.format(cal.getTime());
-							motherOutputStream.write(commandToSend,0,commandToSend.length());
-							motherOutputStream.flush();
-							motherInputStream = anHypothalamus.motherMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
-							inputLine = motherInputStream.readLine();
-							logger.info("received inputLine=" + inputLine);
-							Thread.sleep(500);
-						}while(!inputLine.equals("Ok-PulseFinished"));
+					do {
+						commandToSend = "PulseFinished#"+anHypothalamus.timeFormatter.format(cal.getTime());
+						motherOutputStream.write(commandToSend,0,commandToSend.length());
+						motherOutputStream.flush();
+						motherInputStream = anHypothalamus.motherMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
+						try {
+							if(motherInputStream.ready()) {
+								inputLine = motherInputStream.readLine();
+								logger.info("received inputLine=" + inputLine);
+							}
+							
+						}catch(IOException e) {
+							logger.warn(Utils.getStringException(e));
+							logger.info("After erro talking to mama wait 2 sec and try again");
+							try {
+								Thread.sleep(2000);
+							} catch (InterruptedException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
+					}while(!inputLine.equals("Ok-PulseFinished"));
 						
-					}catch(Exception e){
-						logger.warn(Utils.getStringException(e));
-					}
+					
 					
 					if(motherInputStream!=null) {
 						logger.info("about to close motherInputStream,="+ motherInputStream);	

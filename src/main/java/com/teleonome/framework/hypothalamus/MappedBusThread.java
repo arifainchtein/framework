@@ -510,7 +510,7 @@ class MappedBusThread extends Thread{
 				microControllerPointer = (String)en.nextElement();
 				aMicroController = (MicroController)hypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
 				asyncRequestDelayMillis = aMicroController.getAsyncRequestMillisecondsDelay();
-				logger.debug("AsyncCycle is processing " + aMicroController.getName());
+				logger.debug("AsyncCycle is processing " + aMicroController.getName()  + " asyncRequestDelayMillis=" + asyncRequestDelayMillis);
 				if(aMicroController.isEnableAsyncUpdate()) {
 					try {
 						output = aMicroController.getWriter();
@@ -522,18 +522,26 @@ class MappedBusThread extends Thread{
 						//String inputLine=getInputLine( input);
 						boolean ready = input.ready();
 						logger.debug("line 114 input.ready()=" + ready);
-
+						
 						//if(ready){
 						//   logger.debug("about to call readline");
 						String inputLine = "";
 						do {
-							inputLine = input.readLine();
-							logger.info("received inputLine=" + inputLine);
 							try {
-								Thread.sleep(500);
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								if(input.ready()) {
+									inputLine = input.readLine();
+									logger.info("received inputLine=" + inputLine);
+								}
+								
+							}catch(IOException e) {
+								logger.warn(Utils.getStringException(e));
+								logger.info("After erro talking to mama wait 2 sec and try again");
+								try {
+									Thread.sleep(2000);
+								} catch (InterruptedException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
 							}
 						}while(!inputLine.startsWith("Ok") && 
 								!inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE) &&
