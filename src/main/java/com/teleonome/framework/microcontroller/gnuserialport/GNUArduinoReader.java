@@ -37,15 +37,26 @@ public class GNUArduinoReader  extends BufferedReader{
 	public void setCurrentCommand(String s) {
 		command=s;
 	}
-	public String readLine() throws IOException{
+	public String readLine(){
 		logger.debug("about to send readline, command:" + command);
 		//if(command.equals(""))return "";
-		
-		    
-		   String line = reader.readLine();
-		    
-		    
-		
+		String line="";
+		int counter=0;
+		int maxTries=3;
+		boolean keepGoing=true;
+		while(keepGoing) {
+			try {
+				line = reader.readLine();
+				keepGoing=false;
+			}catch(IOException e) {
+				logger.warn("Exception reading line, counter=" + counter);
+				counter++;
+			}
+			if(counter>maxTries) {
+				keepGoing=false;
+			}
+		}
+		     
 		logger.debug("the response is:   " + line);
 		String cleaned="";
 		if(line.contains("Ok-")) {
