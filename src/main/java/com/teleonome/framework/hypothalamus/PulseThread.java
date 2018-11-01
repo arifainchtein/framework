@@ -702,6 +702,7 @@ public class PulseThread extends Thread{
 				//  if there is a mother,  let it know that the pulse is done
 				//
 				if(anHypothalamus.motherMicroController!=null) {
+					motherOutputStream = anHypothalamus.motherMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
 					
 					String commandToSend="";
 					Calendar cal = Calendar.getInstance();//TimeZone.getTimeZone("GMT+10:00"));
