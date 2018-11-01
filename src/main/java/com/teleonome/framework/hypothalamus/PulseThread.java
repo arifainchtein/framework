@@ -717,10 +717,11 @@ public class PulseThread extends Thread{
 						motherOutputStream.flush();
 						motherInputStream = anHypothalamus.motherMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
 						try {
-							if(motherInputStream.ready()) {
+							Thread.sleep(1000);
+							//if(motherInputStream.ready()) {
 								inputLine = motherInputStream.readLine();
 								logger.info("received inputLine=" + inputLine);
-							}
+							//}
 							
 						}catch(IOException e) {
 							logger.warn(Utils.getStringException(e));
