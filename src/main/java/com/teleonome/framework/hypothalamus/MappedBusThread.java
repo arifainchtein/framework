@@ -518,13 +518,16 @@ class MappedBusThread extends Thread{
 						//if(ready){
 						//   logger.debug("about to call readline");
 						String inputLine = "";
+						boolean keepGoing=true;
+						int counter=0;
+						int maxCounter=3;
 						do {
 							try {
 								output = aMicroController.getWriter();
 								logger.debug("requesting asyncdata");
 								output.write(asyncData,0,asyncData.length());
 								output.flush();
-
+								inputLine="";
 								input = aMicroController.getReader();
 								//String inputLine=getInputLine( input);
 								boolean ready = input.ready();
@@ -543,7 +546,17 @@ class MappedBusThread extends Thread{
 										e.printStackTrace();
 									}
 								}
-								
+								if(!inputLine.startsWith("Ok") || 
+								!inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE) ||
+								!inputLine.startsWith("Command Not Found") 
+								) {
+									keepGoing=false;
+								}else {
+									counter++;
+									if(counter>maxCounter) {
+										keepGoing=false;
+									}
+								}
 							}catch(IOException e) {
 								logger.warn(Utils.getStringException(e));
 								logger.info("After erro talking to mama wait 2 sec and try again");
@@ -554,10 +567,7 @@ class MappedBusThread extends Thread{
 									e1.printStackTrace();
 								}
 							}
-						}while(!inputLine.startsWith("Ok") && 
-								!inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE) &&
-								!inputLine.startsWith("Command Not Found") 
-								);
+						}while(keepGoing);
 
 						input.close();
 						output.close();
