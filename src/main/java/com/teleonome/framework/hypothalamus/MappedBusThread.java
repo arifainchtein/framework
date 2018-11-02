@@ -559,15 +559,18 @@ class MappedBusThread extends Thread{
 										e.printStackTrace();
 									}
 								}
-								if(!inputLine.startsWith("Ok") || 
-								!inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE) ||
-								!inputLine.startsWith("Command Not Found") 
+								if(inputLine.startsWith("Ok") || 
+								inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE) ||
+								inputLine.startsWith("Command Not Found") 
 								) {
 									keepGoing=false;
 								}else {
 									counter++;
 									if(counter>maxCounter) {
 										keepGoing=false;
+									}else {
+										keepGoing=true;
+										logger.info("counter=" + counter );
 									}
 								}
 							}catch(IOException e) {
