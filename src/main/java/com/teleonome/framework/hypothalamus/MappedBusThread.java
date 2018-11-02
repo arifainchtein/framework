@@ -110,7 +110,7 @@ class MappedBusThread extends Thread{
 		//
 		//
 
-
+		stop:
 		while(keepRunning){
 
 			motherCommandCode=null;
@@ -127,6 +127,9 @@ class MappedBusThread extends Thread{
 			int counter=0;
 			int maxCounter=3;
 			boolean keepGoing=true;
+			if(!keepRunning) {
+				break stop;
+			}
 			String[] mutationCommands= {"FaultData","TimerStatus", "UserCommands"};
 			for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
 				microControllerPointer = (String)en.nextElement();
@@ -445,7 +448,9 @@ class MappedBusThread extends Thread{
 
 
 			//hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "Starting Commands  ");
-
+			if(!keepRunning) {
+				break stop;
+			}
 
 			//
 			//
@@ -510,7 +515,9 @@ class MappedBusThread extends Thread{
 				}
 			}while(aCommandRequest!=null);
 
-
+			if(!keepRunning) {
+				break stop;
+			}
 
 			//
 			// Third get AsyncData
@@ -554,22 +561,27 @@ class MappedBusThread extends Thread{
 								inputLine="";
 								input = aMicroController.getReader();
 								//String inputLine=getInputLine( input);
-								boolean ready = input.ready();
+								boolean ready = false;
 								logger.debug("line 114 input.ready()=" + ready);
-								if(ready) {
-									inputLine = input.readLine();
-									logger.info("received inputLine=" + inputLine);
-								}else {
-									logger.info("not ready closing streams" );
-									if(input!=null)input.close();
-									if(output!=null)output.close();
-									try {
-										Thread.sleep(2000);
-									} catch (InterruptedException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
+								gotMessage:
+								for(int ii=0;ii<3;ii++) {
+									ready = input.ready();
+									if(ready) {
+										inputLine = input.readLine();
+										logger.info("received inputLine=" + inputLine);
+										break gotMessage;
+									}else {
+										
+										try {
+											Thread.sleep(2000);
+										} catch (InterruptedException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
 									}
 								}
+								
+								
 								if(inputLine.startsWith("Ok") || 
 								inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE) ||
 								inputLine.startsWith("Command Not Found") 
@@ -579,6 +591,10 @@ class MappedBusThread extends Thread{
 									counter++;
 									if(counter>maxCounter) {
 										keepGoing=false;
+										logger.info("not ready closing streams" );
+										if(input!=null)input.close();
+										if(output!=null)output.close();
+										
 									}else {
 										keepGoing=true;
 										logger.info("counter=" + counter );
