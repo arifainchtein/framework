@@ -236,7 +236,9 @@ public class PulseThread extends Thread{
 					//output.write("GetSensorData",0,"GetSensorData".length());
 					output.write(commandToSend,0,commandToSend.length());
 					output.flush();
-					logger.info("waiting for mama to respond2");
+					logger.info("waiting for mama to respond2 wait 5000");
+					Thread.sleep(5000);
+					
 					boolean waitingForMama=true;
 					while(waitingForMama) {
 						try {
@@ -715,9 +717,10 @@ public class PulseThread extends Thread{
 						commandToSend = "PulseFinished#"+anHypothalamus.timeFormatter.format(cal.getTime());
 						motherOutputStream.write(commandToSend,0,commandToSend.length());
 						motherOutputStream.flush();
+						Thread.sleep(3000);
 						motherInputStream = anHypothalamus.motherMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
 						try {
-							Thread.sleep(1000);
+							
 							//if(motherInputStream.ready()) {
 								inputLine = motherInputStream.readLine();
 								logger.info("received inputLine=" + inputLine);
