@@ -515,7 +515,12 @@ class MappedBusThread extends Thread{
 			//
 			// Third get AsyncData
 
-
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			String asyncData="AsyncData";
 			logger.debug("line 105 microControllerPointerMicroControllerIndex=" + hypothalamus.microControllerPointerMicroControllerIndex);
 			long asyncRequestDelayMillis=0;
@@ -541,7 +546,7 @@ class MappedBusThread extends Thread{
 								output.write(asyncData,0,asyncData.length());
 								output.flush();
 								try {
-									Thread.sleep(1000);
+									Thread.sleep(5000);
 								} catch (InterruptedException e1) {
 									// TODO Auto-generated catch block
 									e1.printStackTrace();
