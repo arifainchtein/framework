@@ -540,6 +540,12 @@ class MappedBusThread extends Thread{
 								logger.debug("requesting asyncdata");
 								output.write(asyncData,0,asyncData.length());
 								output.flush();
+								try {
+									Thread.sleep(1000);
+								} catch (InterruptedException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
 								inputLine="";
 								input = aMicroController.getReader();
 								//String inputLine=getInputLine( input);
