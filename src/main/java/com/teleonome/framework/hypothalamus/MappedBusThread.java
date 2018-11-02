@@ -533,7 +533,7 @@ class MappedBusThread extends Thread{
 						String inputLine = "";
 						 keepGoing=true;
 						 counter=0;
-						 maxCounter=3;
+						 maxCounter=2;
 						do {
 							try {
 								output = aMicroController.getWriter();
@@ -553,7 +553,7 @@ class MappedBusThread extends Thread{
 									if(input!=null)input.close();
 									if(output!=null)output.close();
 									try {
-										Thread.sleep(1000);
+										Thread.sleep(2000);
 									} catch (InterruptedException e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
