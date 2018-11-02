@@ -124,6 +124,9 @@ class MappedBusThread extends Thread{
 			//
 			String faultDataMessage="FaultData";
 			String messageToSend;
+			int counter=0;
+			int maxCounter=3;
+			boolean keepGoing=true;
 			String[] mutationCommands= {"FaultData","TimerStatus", "UserCommands"};
 			for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
 				microControllerPointer = (String)en.nextElement();
@@ -143,7 +146,7 @@ class MappedBusThread extends Thread{
 						//String inputLine=getInputLine( input);
 						boolean ready = true;//input.ready();
 						logger.debug("line 136 input.ready()=" + ready);
-
+						keepGoing=true;
 						if(ready){
 							//   logger.debug("about to call readline");
 							String inputLine = "";
@@ -156,7 +159,17 @@ class MappedBusThread extends Thread{
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
-							}while(!inputLine.startsWith("Ok")  && !inputLine.startsWith("Fault") );
+								if(inputLine.startsWith("Ok")  || inputLine.startsWith("Fault")) {
+									keepGoing=false;
+								}else {
+									keepGoing=true;
+									counter++;
+									if(counter>maxCounter) {
+										keepGoing=false;
+										inputLine="";
+									}
+								}
+							}while(keepGoing );
 
 							input.close();
 							output.close();
@@ -518,9 +531,9 @@ class MappedBusThread extends Thread{
 						//if(ready){
 						//   logger.debug("about to call readline");
 						String inputLine = "";
-						boolean keepGoing=true;
-						int counter=0;
-						int maxCounter=3;
+						 keepGoing=true;
+						 counter=0;
+						 maxCounter=3;
 						do {
 							try {
 								output = aMicroController.getWriter();
