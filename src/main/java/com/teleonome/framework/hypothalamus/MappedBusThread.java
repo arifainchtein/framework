@@ -513,24 +513,35 @@ class MappedBusThread extends Thread{
 				logger.debug("AsyncCycle is processing " + aMicroController.getName()  + " asyncRequestDelayMillis=" + asyncRequestDelayMillis);
 				if(aMicroController.isEnableAsyncUpdate()) {
 					try {
-						output = aMicroController.getWriter();
-						logger.debug("requesting asyncdata");
-						output.write(asyncData,0,asyncData.length());
-						output.flush();
-
-						input = aMicroController.getReader();
-						//String inputLine=getInputLine( input);
-						boolean ready = input.ready();
-						logger.debug("line 114 input.ready()=" + ready);
+						
 						
 						//if(ready){
 						//   logger.debug("about to call readline");
 						String inputLine = "";
 						do {
 							try {
-								if(input.ready()) {
+								output = aMicroController.getWriter();
+								logger.debug("requesting asyncdata");
+								output.write(asyncData,0,asyncData.length());
+								output.flush();
+
+								input = aMicroController.getReader();
+								//String inputLine=getInputLine( input);
+								boolean ready = input.ready();
+								logger.debug("line 114 input.ready()=" + ready);
+								if(ready) {
 									inputLine = input.readLine();
 									logger.info("received inputLine=" + inputLine);
+								}else {
+									logger.info("not ready closing streams" );
+									if(input!=null)input.close();
+									if(output!=null)output.close();
+									try {
+										Thread.sleep(1000);
+									} catch (InterruptedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
 								}
 								
 							}catch(IOException e) {
