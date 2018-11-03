@@ -4548,7 +4548,7 @@ public class DenomeManager {
 			logger.info("about to do mnemosycons to execute");
 			JSONObject mnemosyconsToExecute=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_MNEMOSYCONS_TO_EXECUTE);
 			JSONObject mutationMnemosyconDeneJSONObject;
-			logger.info("mnemosyconsToExecute=" + mnemosyconsToExecute.toString(4));
+			logger.info("mnemosyconsToExecute=" + mnemosyconsToExecute);
 			if(mnemosyconsToExecute!=null){
 				denes = DenomeUtils.getDenesByDeneType(mnemosyconsToExecute, TeleonomeConstants.DENE_TYPE_MNEMOSYCON_LIST);
 				ArrayList arrayList;
