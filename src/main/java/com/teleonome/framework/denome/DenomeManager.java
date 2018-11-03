@@ -4548,6 +4548,7 @@ public class DenomeManager {
 			logger.info("about to do mnemosycons to execute");
 			JSONObject mnemosyconsToExecute=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_MNEMOSYCONS_TO_EXECUTE);
 			JSONObject mutationMnemosyconDeneJSONObject;
+			logger.info("mnemosyconsToExecute=" + mnemosyconsToExecute.toString(4));
 			if(mnemosyconsToExecute!=null){
 				denes = DenomeUtils.getDenesByDeneType(mnemosyconsToExecute, TeleonomeConstants.DENE_TYPE_MNEMOSYCON_LIST);
 				ArrayList arrayList;
@@ -4561,10 +4562,12 @@ public class DenomeManager {
 				String denePointer;
 				JSONObject mnemosyconDene = null;
 				Integer evaluationPosition;
+				logger.info("denes.length()=" + denes.length());
 				
 				for(int i=0;i<denes.length();i++){
 					mutationMnemosyconDeneJSONObject = (JSONObject) denes.get(i);
 					mnemsyconDeneWordPointers = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(mutationMnemosyconDeneJSONObject, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.info("mnemsyconDeneWordPointers=" + mnemsyconDeneWordPointers);
 					for(int j=0;j<mnemsyconDeneWordPointers.length(); j++) {
 						mnemosyconDene = mnemsyconDeneWordPointers.getJSONObject(j);
 						
