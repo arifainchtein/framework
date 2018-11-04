@@ -21,6 +21,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 
@@ -107,10 +108,10 @@ public class SimpleMicroController extends MotherMicroController {
 	@Override
 	public String getCommandCode()  throws IOException {
 		String code="";
-		String unEncodedKey = FileUtils.readFileToString(new File("SecretKey"), "UTF-8");
+		String unEncodedKey = FileUtils.readFileToString(new File("SecretKey"), "UTF-8").trim();
 		TOTP totp = new TOTP();
 		try {
-			code = totp.generateCurrentNumberFromUnencodedString(unEncodedKey);
+			code = totp.generateCurrentNumberFromUnencodedString(StringUtils.chomp(unEncodedKey));
 
 		} catch (GeneralSecurityException e) {
 			// TODO Auto-generated catch block
