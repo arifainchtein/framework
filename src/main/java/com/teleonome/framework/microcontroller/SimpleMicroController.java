@@ -111,18 +111,27 @@ public class SimpleMicroController extends MotherMicroController {
 			e.printStackTrace();
 		}
 		logger.debug("returning code = " + code);
+		boolean inHistory=false;
 		
-		
-		
-		if(currentCommandCodeHistoryPos<numberOfCommandCodesInHistory){
-		      commandCodeHistory[currentCommandCodeHistoryPos]=code;
-		      currentCommandCodeHistoryPos++;
-	    }else{
-	      for(int i=0;i<numberOfCommandCodesInHistory-1;i++){
-	        commandCodeHistory[i]=commandCodeHistory[i+1];
+		for(int i=0;i<numberOfCommandCodesInHistory;i++){
+	        if( commandCodeHistory[i]!=null && !commandCodeHistory[i].equals("") && code.equals( commandCodeHistory[i])) {
+	        	inHistory=true;
+	        	logger.debug("found in Code History=" + commandCodeHistory[i]);
+	        }
 	      }
-	      commandCodeHistory[numberOfCommandCodesInHistory-1]=code;
-	    }
+		
+		if(!inHistory) {
+			if(currentCommandCodeHistoryPos<numberOfCommandCodesInHistory){
+			      commandCodeHistory[currentCommandCodeHistoryPos]=code;
+			      currentCommandCodeHistoryPos++;
+		    }else{
+		      for(int i=0;i<numberOfCommandCodesInHistory-1;i++){
+		        commandCodeHistory[i]=commandCodeHistory[i+1];
+		      }
+		      commandCodeHistory[numberOfCommandCodesInHistory-1]=code;
+		    }
+			
+		}
 		
 		
 		for(int i=0;i<numberOfCommandCodesInHistory-1;i++){
