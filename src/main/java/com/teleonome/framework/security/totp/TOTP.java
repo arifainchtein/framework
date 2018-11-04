@@ -48,7 +48,7 @@ public class TOTP {
 		String base32Secret = b.encodeAsString(unencodedString.getBytes());
 		long now = System.currentTimeMillis();
 		System.out.println("unencodedString=" + unencodedString + " base32=" + base32Secret + " now " + now);
-		return generateCurrentNumber(base32Secret, nw);
+		return generateCurrentNumber(base32Secret, now);
 	}
 	
 	/**
