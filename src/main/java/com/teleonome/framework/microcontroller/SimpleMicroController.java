@@ -38,8 +38,8 @@ public class SimpleMicroController extends MotherMicroController {
 	Logger logger = Logger.getLogger(getClass());
 	String[] previousCodes= new String[3];
 	int currentCommandCodeHistoryPos;
-	int numberOfCommandCodesInHistory=0;
-	String[] commandCodeHistory = new String[3];
+	int numberOfCommandCodesInHistory=5;
+	String[] commandCodeHistory = new String[5];
 	
 	public SimpleMicroController(DenomeManager d, String n) {
 		super(d, n);
@@ -115,19 +115,15 @@ public class SimpleMicroController extends MotherMicroController {
 		
 		
 		if(currentCommandCodeHistoryPos<numberOfCommandCodesInHistory){
-			commandCodeHistory[currentCommandCodeHistoryPos]=code;
-			currentCommandCodeHistoryPos++;
-		}else{
-			if(numberOfCommandCodesInHistory>0) {
-				for(int i=0;i<numberOfCommandCodesInHistory-1;i++){
-					commandCodeHistory[i]=commandCodeHistory[i+1];
-				}
-				commandCodeHistory[numberOfCommandCodesInHistory-1]=code;
-			}else {
-				commandCodeHistory[numberOfCommandCodesInHistory]=code;
-			}
-			
-		}
+		      commandCodeHistory[currentCommandCodeHistoryPos]=code;
+		      currentCommandCodeHistoryPos++;
+	    }else{
+	      for(int i=0;i<numberOfCommandCodesInHistory-1;i++){
+	        commandCodeHistory[i]=commandCodeHistory[i+1];
+	      }
+	      commandCodeHistory[numberOfCommandCodesInHistory-1]=code;
+	    }
+		
 		
 		for(int i=0;i<numberOfCommandCodesInHistory-1;i++){
 			logger.debug("Code History=" + commandCodeHistory[i]);
