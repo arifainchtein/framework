@@ -62,6 +62,12 @@ public class SimpleMicroController extends MotherMicroController {
 	@Override
 	public BufferedWriter getWriter() throws IOException {
 		// TODO Auto-generated method stub
+		//
+		// force a generation of the code so that the codehistory is always
+		// populated with valid codes.
+		String code = getCommandCode();
+		logger.debug("generated code " + code);
+		
 		plainReader = new PlainReader(new StringReader(dataString), sw);
 		 plainWriter = new PlainWriter(sw, plainReader);
 		return plainWriter;
