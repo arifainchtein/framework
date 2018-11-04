@@ -126,6 +126,11 @@ public class SimpleMicroController extends MotherMicroController {
 			}
 			
 		}
+		
+		for(int i=0;i<numberOfCommandCodesInHistory-1;i++){
+			System.out.println("Code History=" + commandCodeHistory[i]);
+		}
+		
 		return code;
 	}
 
