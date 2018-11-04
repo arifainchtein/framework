@@ -71,10 +71,12 @@ public class SimpleMicroController extends MotherMicroController {
 		boolean toReturn=false;
 		
 		String code = getCommandCode();
+		logger.debug("userCode=" + userCode + " code=" + code);
 		if(userCode.equals(code)) {
 			return true;
 		}else {
 			for(int i=0;i<numberOfCommandCodesInHistory;i++){
+				logger.debug("commandCodeHistory[i]=" + commandCodeHistory[i]);
 				if(userCode.equals(commandCodeHistory[i])) {
 					return true;
 				}
@@ -108,7 +110,7 @@ public class SimpleMicroController extends MotherMicroController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("returning code = " + code);
+		logger.debug("returning code = " + code);
 		
 		
 		
@@ -128,7 +130,7 @@ public class SimpleMicroController extends MotherMicroController {
 		}
 		
 		for(int i=0;i<numberOfCommandCodesInHistory-1;i++){
-			System.out.println("Code History=" + commandCodeHistory[i]);
+			logger.debug("Code History=" + commandCodeHistory[i]);
 		}
 		
 		return code;
