@@ -1070,12 +1070,21 @@ public class PulseThread extends Thread{
 									//
 									// we need to create a Command that will be executed
 									// after the pulse, during the CommandRequests
+									//
+									
+									String commandCodeType = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorActionJSONObject,TeleonomeConstants.DENEWORD_CODE_TYPE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE );
+									String commandCode="";
+									if(commandCodeType.equals(TeleonomeConstants.TELEONOME_SECURITY_CODE)) {
+										commandCode = anHypothalamus.motherMicroController.getCommandCode();
+									}else if(commandCodeType.equals(TeleonomeConstants.DIGITAL_GEPPETTO_SECURITY_CODE)) {
+										commandCode = anHypothalamus.motherMicroController.getDigitalGeppettoCommandCode();
+									}
 									commandToExecute = entry.getKey();
-									String commandCode = anHypothalamus.motherMicroController.getCommandCode();
+									
 									
 									payload="";
 									boolean restartRequired=false;
-									JSONObject responseJSON = anHypothalamus.aDBManager.requestCommandToExecute(commandToExecute,commandCode, payload, "127.0.0.1", restartRequired);
+									JSONObject responseJSON = anHypothalamus.aDBManager.requestCommandToExecute(commandToExecute,commandCode, commandCodeType, payload, "127.0.0.1", restartRequired);
 									logger.info("line 2442, stored post pulse,commandToExecute=" + commandToExecute + " commandCode=" + commandCode + " id=" + responseJSON.getInt("id") );
 								}{
 

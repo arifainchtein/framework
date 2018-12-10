@@ -12,6 +12,7 @@ public abstract class MotherMicroController extends MicroController {
 	}
 
 	public abstract String getCommandCode() throws IOException ;
+	public abstract String getDigitalGeppettoCommandCode() throws IOException ;
 	public abstract boolean verifyUserCommandCode(String userCode) throws IOException ;
 	public abstract boolean rebootingHypothalamus() throws IOException ;
 	public abstract boolean shuttingDownHypothalamus() throws IOException ;

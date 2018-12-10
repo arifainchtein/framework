@@ -6,6 +6,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.sql.Connection;
@@ -355,48 +356,50 @@ public class MnemosyneManager {
 				
 				if(pathToDelete.isDirectory()) {
 					long freeSpaceBeforeRule = directoryForFreeSapce.getFreeSpace()/1024000;
-					File[] files = pathToDelete.listFiles();
+					//File[] files = pathToDelete.listFiles();
+					String[] fileNames = pathToDelete.list();
+					
 					int deletedFileCounter=0;
-					File oldestFileNameDeleted=null, newestFileNameDeleted=null;
+					String oldestFileNameDeleted=null, newestFileNameDeleted=null;
 					FileTime oldestCeationTime=null, newestCeationTime=null;
 					SimpleDateFormat sdf = new SimpleDateFormat();
-					for(int i=0;i<files.length;i++) {
-						if(files[i]!=null) {
+					for(int i=0;i<fileNames.length;i++) {
+						if(fileNames[i]!=null && !fileNames[i].contentEquals("")) {
 							if(mnemosyconRuleFilePrefix!=null && 
 									!mnemosyconRuleFilePrefix.equals(TeleonomeConstants.MNEMOSYCON_RULE_ALL_FILES) &&
-									!files[i].getAbsolutePath().contains(mnemosyconRuleFilePrefix)
+									!fileNames[i].contains(mnemosyconRuleFilePrefix)
 									) {
-								logger.debug("mnemosyconRuleFilePrefix=" + mnemosyconRuleFilePrefix + " skipping file " + files[i].getAbsolutePath());
+								logger.debug("mnemosyconRuleFilePrefix=" + mnemosyconRuleFilePrefix + " skipping file " + fileNames[i]);
 								continue;
 							}
-							path = files[i].toPath();
+							path = Paths.get(fileNames[i]);//files[i].toPath();
 
 							try {
 								attr = Files.readAttributes(path, BasicFileAttributes.class);
 								creationTime = attr.creationTime();
-								logger.debug(files[i].getAbsolutePath() + "     creationTime=" + sdf.format(new Timestamp(creationTime.toMillis())) + " millisToDeleteFrom=" + sdf.format(new Timestamp(millisToDeleteFrom)));
+								logger.debug(fileNames[i] + "     creationTime=" + sdf.format(new Timestamp(creationTime.toMillis())) + " millisToDeleteFrom=" + sdf.format(new Timestamp(millisToDeleteFrom)));
 								if(millisToDeleteFrom>creationTime.toMillis()) {
 									if(oldestFileNameDeleted==null) {
-										oldestFileNameDeleted=files[i].getAbsoluteFile();
+										oldestFileNameDeleted=fileNames[i];//files[i].getAbsoluteFile();
 										oldestCeationTime = creationTime;
 									}else {
 										if(oldestCeationTime.toMillis()>creationTime.toMillis()) {
 											oldestCeationTime=creationTime;
-											oldestFileNameDeleted= files[i].getAbsoluteFile();
+											oldestFileNameDeleted= fileNames[i];//files[i].getAbsoluteFile();
 										}
 									}
 
 									if(newestFileNameDeleted==null) {
-										newestFileNameDeleted=files[i].getAbsoluteFile();
+										newestFileNameDeleted=fileNames[i];//files[i].getAbsoluteFile();
 										newestCeationTime = creationTime;
 									}else {
 										if(newestCeationTime.toMillis()<creationTime.toMillis()) {
 											newestCeationTime=creationTime;
-											newestFileNameDeleted= files[i].getAbsoluteFile();
+											newestFileNameDeleted= fileNames[i];//files[i].getAbsoluteFile();
 										}
 									}	
-									logger.debug("About to delete " + files[i].getAbsolutePath());
-									FileUtils.deleteQuietly(files[i]);
+									logger.debug("About to delete " + fileNames[i]);//files[i].getAbsolutePath());
+									FileUtils.deleteQuietly(new File(fileNames[i]));//files[i]);
 									deletedFileCounter++;
 								}
 							} catch (IOException e) {

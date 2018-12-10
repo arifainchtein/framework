@@ -1428,7 +1428,7 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 		return toReturn;
 	}	
 
-	public JSONObject requestCommandToExecute(String command, String commandCode, String payLoad, String clientIp, boolean restartRequired){
+	public JSONObject requestCommandToExecute(String command, String commandCode,String commandCodeType,  String payLoad, String clientIp, boolean restartRequired){
 		//System.out.println(Utils.generateMethodTrace());
 		int id=-1;
 		Connection connection = null;
@@ -1438,7 +1438,7 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 		long createdOn = System.currentTimeMillis();
 		try {
 			connection = connectionPool.getConnection();
-			String sql = "insert into CommandRequests (createdOn,command, status, payLoad, commandCode, clientIp, restartRequired) values (?,?,?,?,?,?,?) returning id";
+			String sql = "insert into CommandRequests (createdOn,command, status, payLoad, commandCode,commandCodeType, clientIp, restartRequired) values (?,?,?,?,?,?,?,?) returning id";
 			
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setLong(1, createdOn);
@@ -1446,8 +1446,9 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 			preparedStatement.setString(3, TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION);
 			preparedStatement.setString(4, payLoad);
 			preparedStatement.setString(5, commandCode);
-			preparedStatement.setString(6, clientIp);
-			preparedStatement.setBoolean(7, restartRequired);
+			preparedStatement.setString(6,commandCodeType);
+			preparedStatement.setString(7, clientIp);
+			preparedStatement.setBoolean(8, restartRequired);
 			
 			
 			rs = preparedStatement.executeQuery();
@@ -1530,7 +1531,7 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 
 		Connection connection = null;
 		Statement statement = null;
-		String sql = "select id,command,commandCode, payload from CommandRequests where status='"+ TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION +"'  order by createdOn asc limit 1";
+		String sql = "select id,command,commandCode,commandCodeType, payload from CommandRequests where status='"+ TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION +"'  order by createdOn asc limit 1";
 		ResultSet rs = null;
 		CommandRequest aCommandRequest = new CommandRequest();
 
@@ -1546,7 +1547,8 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 				aCommandRequest.setId(rs.getInt(1));
 				aCommandRequest.setCommand(rs.getString(2));
 				aCommandRequest.setCommandCode(rs.getString(3));
-				aCommandRequest.setDataPayload(rs.getString(4));
+				aCommandRequest.setCommandCodeType(rs.getString(4));
+				aCommandRequest.setDataPayload(rs.getString(5));
 				found=true;
 			}
 			if(!found){
@@ -1587,7 +1589,7 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 			whereClause = " where clientIp = '127.0.0.1'";
 		}
 		
-		String sql = "select id,createdon, executedon,command, status,payload, clientIp from CommandRequests " +  whereClause + "  order by createdOn desc limit " + limit + " offset " + offset;
+		String sql = "select id,createdon, executedon,command,status,payload, clientIp from CommandRequests " +  whereClause + "  order by createdOn desc limit " + limit + " offset " + offset;
 		ResultSet rs = null;
 		ResultSet rs2 = null;
 		CommandRequest aCommandRequest = new CommandRequest();
@@ -1611,6 +1613,7 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 				long createdon = rs.getLong(2);
 				long executedon = rs.getLong(3);
 				String command = rs.getString(4);
+				
 				String status = rs.getString(5);
 				String payload = rs.getString(6);
 				String clientIp = rs.getString(7);
@@ -1620,6 +1623,7 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 				o.put("Createdon", createdon);
 				o.put("Executedon", executedon);
 				o.put("Command", command);
+				
 				o.put("Status", status);
 				o.put("Payload", payload);
 				o.put("ClientIp", clientIp);
@@ -1672,7 +1676,7 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 	public JSONObject markCommandAsBadCommandCode(int id, String reason){
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
-		String sql = "update CommandRequests set executedOn=?, status=?   where id=? returning  createdon, executedon, command, status, commandcode, restartRequired";
+		String sql = "update CommandRequests set executedOn=?, status=?   where id=? returning  createdon, executedon, command, commandCodeType, status, commandcode, restartRequired";
 		ResultSet rs=null;
 		JSONObject toReturn=new JSONObject();
 		toReturn.put("id", id);
@@ -1691,13 +1695,15 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 				String command = rs.getString(3);
 				String status = rs.getString(4);
 				String commandcode = rs.getString(5);
-				boolean restartRequired = rs.getBoolean(6);
+				String commandcodeType = rs.getString(6);
+				boolean restartRequired = rs.getBoolean(7);
 				
 				toReturn.put("Createdon", createdon);
 				toReturn.put("Executedon", executedon);
 				toReturn.put("Command", command);
 				toReturn.put("Status", status);
 				toReturn.put("CommandCode", commandcode);
+				toReturn.put("CommandCodeType", commandcodeType);
 				toReturn.put("RestartRequired", restartRequired);
 			}
 			

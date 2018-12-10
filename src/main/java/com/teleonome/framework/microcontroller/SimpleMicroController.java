@@ -148,4 +148,21 @@ public class SimpleMicroController extends MotherMicroController {
 		return code;
 	}
 
+
+	@Override
+	public String getDigitalGeppettoCommandCode() throws IOException {
+		// TODO Auto-generated method stub
+		String code="";
+		String unEncodedKey = FileUtils.readFileToString(new File("DigitalGeppettoSecretKey"), "UTF-8").trim();
+		TOTP totp = new TOTP();
+		try {
+			code = totp.generateCurrentNumberFromUnencodedString(StringUtils.chomp(unEncodedKey));
+		} catch (GeneralSecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		logger.debug("returning code = " + code);
+		return code;
+	}
+
 }

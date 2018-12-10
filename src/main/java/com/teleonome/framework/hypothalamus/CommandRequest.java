@@ -10,6 +10,8 @@ public class CommandRequest {
 	private String status;
 	private String dataPayload="";
 	private String commandCode;
+	private String commandCodeType;
+	
 	private String clientIp;
 	
 	
@@ -61,7 +63,15 @@ public class CommandRequest {
 	public void setClientIp(String clientIp) {
 		this.clientIp = clientIp;
 	}
+	public void setCommandCodeType(String s) {
+		// TODO Auto-generated method stub
+		commandCodeType=s;
+	}
 
+	public String getCommandCodeType( ) {
+		// TODO Auto-generated method stub
+		return commandCodeType;
+	}
 
 
 

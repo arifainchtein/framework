@@ -326,6 +326,40 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 	}
 	
 	@Override
+	public String getDigitalGeppettoCommandCode() throws IOException {
+		// TODO Auto-generated method stub
+		output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
+		String actuatorCommand = "GetDigitalGeppettoCommandCode";
+		boolean keepGoing=true;
+		String commandCode="";
+		int maxTries=5;
+		int counter=0;
+		while(keepGoing) {
+			commandCode = sendCommand(actuatorCommand);
+			if(commandCode!=null && commandCode.length()==6) {
+				keepGoing=false;
+			}else {
+				counter++;
+				logger.debug("bad command code=" + commandCode + " asking again,counter=" + counter + " maxTries=" + maxTries);
+				
+				if(counter>=maxTries) {
+					commandCode="999999";
+					keepGoing=false;
+				}else {
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		return commandCode;
+		
+	}
+	
+	@Override
 	public  boolean rebootingHypothalamus() throws IOException{
 		
 		String result = "";

@@ -270,6 +270,13 @@ public class DigitalStablesMotherMicroController extends MotherMicroController {
 			return sendCommand( actuatorCommand);
 		}
 		
+		public String getDigitalGeppettoCommandCode() throws IOException {
+			// TODO Auto-generated method stub
+			output = getWriter();
+			String actuatorCommand = "GetDigitalGeppettoCommandCode";
+			return sendCommand( actuatorCommand);
+		}
+		
 		public boolean verifyUserCommandCode(String userCode) throws IOException{
 			String actuatorCommand = "VerifyUserCode#" + userCode;
 			String result = sendCommand(actuatorCommand);

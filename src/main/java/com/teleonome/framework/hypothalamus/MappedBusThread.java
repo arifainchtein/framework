@@ -79,6 +79,8 @@ class MappedBusThread extends Thread{
 		 */
 		String command=null;
 		String commandCode="";
+		String commandCodeType="";
+		
 		String message=null;
 		byte[] buffer = new byte[512];
 		String[] tokens;
@@ -116,6 +118,7 @@ class MappedBusThread extends Thread{
 			motherCommandCode=null;
 			command=null;
 			commandCode="";
+			commandCodeType="";
 			goodCommandCode=false;
 
 			clientIp="127.0.0.1";				
@@ -241,7 +244,7 @@ class MappedBusThread extends Thread{
 								// for now assume that you will not need to restart
 								// that might change latter
 								boolean restarRequired=false;
-								JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString(), clientIp, restarRequired);	
+								JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode,TeleonomeConstants.TELEONOME_SECURITY_CODE, dataPayloadJSONObject.toString(), clientIp, restarRequired);	
 								logger.debug("Received Fault, mutationType:" + mutationType + " command:" + command + " commandRquestId=" + commandRequestJSONObject.getInt("id"));;
 
 
@@ -305,7 +308,7 @@ class MappedBusThread extends Thread{
 								// for now assume that you will not need to restart
 								// that might change latter
 								boolean restarRequired=false;
-								JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode, dataPayloadJSONObject.toString(), clientIp, restarRequired);	
+								JSONObject commandRequestJSONObject = hypothalamus.aDBManager.requestCommandToExecute(command,commandCode,TeleonomeConstants.TELEONOME_SECURITY_CODE, dataPayloadJSONObject.toString(), clientIp, restarRequired);	
 								logger.debug("line 650 Received Timer Ended,  command:" + command + " commandRquestId=" + commandRequestJSONObject.getInt("id"));
 							}else if(inputLine.equals(TeleonomeConstants.COMMAND_REBOOT)){
 								//if(waitingForConfirmReboot){
@@ -462,45 +465,46 @@ class MappedBusThread extends Thread{
 				if(aCommandRequest!=null){
 					command = aCommandRequest.getCommand();
 					commandCode = aCommandRequest.getCommandCode();
-					logger.info("commandCode=" + commandCode);
-
-					clientIp = aCommandRequest.getClientIp();
-					commandCodeVerified=false;
-					try {
-						commandCodeVerified = hypothalamus.motherMicroController.verifyUserCommandCode(commandCode);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						logger.warn(Utils.getStringException(e1));
-					}
-
-					if(commandCodeVerified) {
-						dataPayload = aCommandRequest.getDataPayload();
-						logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
-						//hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "Executing command " + command);
-
-						goodCommandCode=true;
-						if(dataPayload!=null && !dataPayload.equals("")){
-							try {
-								dataPayloadJSONObject = new JSONObject(dataPayload);
-							} catch (JSONException e) {
-								// TODO Auto-generated catch block
-								logger.warn(Utils.getStringException(e));
-							}
+					commandCodeType = aCommandRequest.getCommandCodeType();
+					logger.info("commandCode=" + commandCode + " commandCodeType=" + commandCodeType);
+					if(commandCodeType.equals(TeleonomeConstants.TELEONOME_SECURITY_CODE)) {
+						clientIp = aCommandRequest.getClientIp();
+						commandCodeVerified=false;
+						try {
+							commandCodeVerified = hypothalamus.motherMicroController.verifyUserCommandCode(commandCode);
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e1));
 						}
-					}else {
-						//
-						// if we are here, the user code was wron
-						// from the mother, or an invalid code from the originator
-						//
-						JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId(), TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE);
-						//hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
-						logger.debug("COMMANDS CODE DO NOT MATCH commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
-						//hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "COMMANDS CODE DO NOT MATCH");
-						goodCommandCode=false;
-						commandCode=null;
-						command=null;
-					}
 
+						if(commandCodeVerified) {
+							dataPayload = aCommandRequest.getDataPayload();
+							logger.info("Executing command " + command  + " with dataPayload=" + dataPayload);
+							//hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "Executing command " + command);
+
+							goodCommandCode=true;
+							if(dataPayload!=null && !dataPayload.equals("")){
+								try {
+									dataPayloadJSONObject = new JSONObject(dataPayload);
+								} catch (JSONException e) {
+									// TODO Auto-generated catch block
+									logger.warn(Utils.getStringException(e));
+								}
+							}
+						}else {
+							//
+							// if we are here, the user code was wron
+							// from the mother, or an invalid code from the originator
+							//
+							JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId(), TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE);
+							//hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
+							logger.debug("COMMANDS CODE DO NOT MATCH commandResponseJSONObject=" + commandResponseJSONObject.toString(4));
+							//hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "COMMANDS CODE DO NOT MATCH");
+							goodCommandCode=false;
+							commandCode=null;
+							command=null;
+						}
+					}
 
 					if(aCommandRequest!=null && command!=null && !command.equals("")  && goodCommandCode){
 						logger.debug("line 674about to execute aCommandRequest=" + aCommandRequest + " command " + command + " dataPayloadJSONObject=" + dataPayloadJSONObject);

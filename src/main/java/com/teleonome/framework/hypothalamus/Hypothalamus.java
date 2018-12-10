@@ -802,7 +802,10 @@ public abstract class Hypothalamus {
 						deneWordOperationPointer = actuatorCommand;
 						actuatorCommandIsOperation=true;
 					}else if(actuatorCommand.startsWith("$")){
-						if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_IP_ADDRESS_FOR_LCD)){
+						if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_GENERATE_DIGITAL_GEPPETTO_CODE)){
+							String digitalGeppettoCode = this.motherMicroController.getDigitalGeppettoCommandCode();
+							
+						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_IP_ADDRESS_FOR_LCD)){
 							actuatorCommand="IPAddr#" + localIpAddress;
 						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_DO_NOTHING)){
 							actuatorCommand=TeleonomeConstants.COMMANDS_DO_NOTHING;

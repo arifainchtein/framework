@@ -435,6 +435,10 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_ACTION_EXECUTION_POINT= "Execution Point";
 	public static final String DENEWORD_ACTION_EXECUTION_POINT_IMMEDIATE= "Execution Point Immediate";
 	public static final String DENEWORD_ACTION_EXECUTION_POINT_POST_PULSE= "Execution Point Post Pulse";
+	public static final String TELEONOME_SECURITY_CODE="Teleonome Code";	
+	public static final String DIGITAL_GEPPETTO_SECURITY_CODE="Digital Geppetto Code";	
+	public static final String DENEWORD_CODE_TYPE="Code Type";
+	
 	public static final String DENEWORD_TYPE_DENEWORD_EXPORT_POINTER="Export DeneWord Pointer";
 	public static final String DENEWORD_TYPE_DENEWORD_EXPORT_COLUMN_POSITION="Export DeneWord Column Position";
 	public static final String EXPORT_OPERATION_CREATE="Export Create";
@@ -1047,7 +1051,9 @@ public class TeleonomeConstants {
 	//
 	// the topics for the heart
 	//'
-	public static int HEART_QUALITY_OF_SERVICE=1;	
+	public static int HEART_QUALITY_OF_SERVICE=1;
+
+	
 	public static final String HEART_TOPIC_STATUS="Status";
 	public static final String HEART_TOPIC_PULSE_STATUS_INFO="PulseStatusInfo";
 	public static final String HEART_TOPIC_PULSE_STATUS_INFO_SECUNDARY="PulseStatusInfoSecundary";
