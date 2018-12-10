@@ -228,7 +228,7 @@ public class TeleonomeConstants {
 	public static final String COMMANDS_CURRENT_HOUR_IN_DAY = "$Current_Hour_In_Day";
 	public static final String COMMANDS_CURRENT_DAY_IN_WEEK = "$Current_Day_In_Week";
 	public static final String COMMANDS_CURRENT_DAY_IN_MONTH = "$Current_Day_In_Month";
-	
+	public static final String COMMANDS_GENERATE_DIGITAL_GEPPETTO_CODE = "$Generate_Digital_Geppetto_Code";
 	public static final String CURRENT_TIMESTAMP_VARIABLE_NAME = "CurrentTime";
 	
 	

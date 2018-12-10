@@ -798,7 +798,7 @@ public abstract class Hypothalamus {
 					if(actuatorCommand.startsWith("@")){
 						//
 						// if the actuatorCommand is a pointer,it means this action is an evaluation
-						//
+						// 
 						deneWordOperationPointer = actuatorCommand;
 						actuatorCommandIsOperation=true;
 					}else if(actuatorCommand.startsWith("$")){
