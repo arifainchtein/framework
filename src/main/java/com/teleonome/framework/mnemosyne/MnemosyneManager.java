@@ -214,8 +214,8 @@ public class MnemosyneManager {
 		//mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Total Space", totalSpace,null,"double",true);
 		//mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 		
-		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
-		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+//		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
+//		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 		
 	
 		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Pulse Timestamp Millis", aDenomeManager.getcurrentlyCreatingPulseTimestampMillis(),null,"long",true);

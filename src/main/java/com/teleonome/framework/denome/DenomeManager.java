@@ -4202,7 +4202,7 @@ public class DenomeManager {
 		ArrayList<Map.Entry<String, MutationActionsExecutionResult>>  microControllerPointerMutationActionsExecutionResultArrayList = new ArrayList(); 
 
 		try {
-			logger.debug("load immediate mutation  starting " );
+			logger.debug("load immediate mutation  starting " + mutationObject.toString(4) );
 
 			//
 			// now parse them
