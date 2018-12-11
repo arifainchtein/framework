@@ -399,7 +399,7 @@ public class MnemosyneManager {
 										}
 									}	
 									logger.debug("About to delete " + fileNames[i]);//files[i].getAbsolutePath());
-									FileUtils.deleteQuietly(new File(fileNames[i]));//files[i]);
+									FileUtils.deleteQuietly(new File(mnemosyconRuleLocation + "/" +fileNames[i]));//files[i]);
 									deletedFileCounter++;
 								}
 							} catch (IOException e) {
