@@ -372,7 +372,7 @@ public class MnemosyneManager {
 								logger.debug("mnemosyconRuleFilePrefix=" + mnemosyconRuleFilePrefix + " skipping file " + fileNames[i]);
 								continue;
 							}
-							path = Paths.get(fileNames[i]);//files[i].toPath();
+							path = Paths.get(mnemosyconRuleLocation + "/" + fileNames[i]);//files[i].toPath();
 
 							try {
 								attr = Files.readAttributes(path, BasicFileAttributes.class);
