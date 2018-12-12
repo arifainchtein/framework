@@ -4202,7 +4202,7 @@ public class DenomeManager {
 		ArrayList<Map.Entry<String, MutationActionsExecutionResult>>  microControllerPointerMutationActionsExecutionResultArrayList = new ArrayList(); 
 
 		try {
-			logger.debug("load immediate mutation  starting " + mutationObject.toString(4) );
+			logger.debug("load immediate mutation " + mutationObject.getString("Name") );
 
 			//
 			// now parse them
@@ -4559,7 +4559,7 @@ public class DenomeManager {
 
 				//
 				// actionDeneWordPointers cntains an array of string which are pointers to the denes that contain the evaluation postion
-				String denePointer;
+				String denePointer, mnemosyconDenePointer;
 				JSONObject mnemosyconDene = null;
 				Integer evaluationPosition;
 				logger.info("denes.length()=" + denes.length());
@@ -4569,10 +4569,8 @@ public class DenomeManager {
 					mnemsyconDeneWordPointers = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(mutationMnemosyconDeneJSONObject, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					logger.info("mnemsyconDeneWordPointers=" + mnemsyconDeneWordPointers);
 					for(int j=0;j<mnemsyconDeneWordPointers.length(); j++) {
-						mnemosyconDene = mnemsyconDeneWordPointers.getJSONObject(j);
-						
-						
-						
+						mnemosyconDenePointer=mnemsyconDeneWordPointers.getString(j);
+						mnemosyconDene = getDeneByIdentity(new Identity(mnemosyconDenePointer));
 						logger.debug("mnemosyconsDene=" + mnemosyconDene);
 						if(!(boolean) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)) {
 							String name = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
