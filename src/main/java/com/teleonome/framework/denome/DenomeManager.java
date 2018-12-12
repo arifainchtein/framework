@@ -4294,6 +4294,8 @@ public class DenomeManager {
 							
 							}else if(targetDeneWordValueType.equals(TeleonomeConstants.DATATYPE_STRING)) {
 								injectionTarget.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+							}else if(targetDeneWordValueType.equals(TeleonomeConstants.DATATYPE_BOOLEAN)) {
+								injectionTarget.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,deneWord.getBoolean(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
 							}
 							
 							
@@ -4563,7 +4565,7 @@ public class DenomeManager {
 				JSONObject mnemosyconDene = null;
 				Integer evaluationPosition;
 				logger.info("denes.length()=" + denes.length());
-				
+				boolean mnemosyconActive=false;
 				for(int i=0;i<denes.length();i++){
 					mutationMnemosyconDeneJSONObject = (JSONObject) denes.get(i);
 					mnemsyconDeneWordPointers = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(mutationMnemosyconDeneJSONObject, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
@@ -4571,9 +4573,12 @@ public class DenomeManager {
 					for(int j=0;j<mnemsyconDeneWordPointers.length(); j++) {
 						mnemosyconDenePointer=mnemsyconDeneWordPointers.getString(j);
 						mnemosyconDene = getDeneByIdentity(new Identity(mnemosyconDenePointer));
+						String name = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						
 						logger.debug("mnemosyconsDene=" + mnemosyconDene);
-						if(!(boolean) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)) {
-							String name = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						mnemosyconActive = (boolean) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("mnemosyconActive=" + mnemosyconActive);
+						if(!mnemosyconActive) {
 							logger.debug("skiping mnemosycon " + name + " because is not Active");
 							continue;
 						}
@@ -4583,7 +4588,6 @@ public class DenomeManager {
 						//
 						String mnemosyconProfileIdentityPointer = (String)this.aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_PROFILE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						if(mnemosyconProfileIdentityPointer==null) {
-							String name = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							logger.debug("skiping mnemosycon " + name + " because it does not have a profile");
 							continue;
 						}
@@ -6466,12 +6470,12 @@ public class DenomeManager {
 
 
 	public Object getDeneWordAttributeByDeneWordNameFromDene(JSONObject deneJSONObject , String name, String whatToBring) throws JSONException{
-		logger.debug("getDeneWordAttributeByDeneWordNameFromDene, name=" + name + " deneJSONObject=" + deneJSONObject);
+		//logger.debug("getDeneWordAttributeByDeneWordNameFromDene, name=" + name + " deneJSONObject=" + deneJSONObject);
 		JSONArray deneWords = deneJSONObject.getJSONArray("DeneWords");
 		for(int i=0;i<deneWords.length();i++){
 			JSONObject deneWord = deneWords.getJSONObject(i); 
 			String deneWordName = deneWord.getString("Name");
-			logger.debug("getByName, deneWordName=" + deneWordName );
+			//logger.debug("getByName, deneWordName=" + deneWordName );
 
 			if(deneWordName.equals(name)){
 				if(whatToBring.equals(TeleonomeConstants.COMPLETE)){

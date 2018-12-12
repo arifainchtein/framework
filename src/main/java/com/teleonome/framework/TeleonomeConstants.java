@@ -80,6 +80,8 @@ public class TeleonomeConstants {
 	// the data type for the values coming from Arduino
 	//
 	public static final String DATATYPE_DOUBLE = "double";
+	public static final String DATATYPE_BOOLEAN = "boolean";
+	
 	public static final String DATATYPE_STRING = "String";
 	public static final String DATATYPE_INTEGER = "int";
 	public static final String DATATYPE_DENE_POINTER = "Dene Pointer";
