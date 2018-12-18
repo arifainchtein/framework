@@ -171,6 +171,13 @@ public class TeleonomeConstants {
 	public static final String DENE_PROCESSOR_INFO="Processor Info";
 	public static final String DENE_COMPUTER_INFO="Computer Info";
 	public static final String DENE_OPERON_CONTROL="Operon Control";
+	public static final String DENE_POWER_STATUS="Power Status";
+	public static final String DENEWORD_MAIN_BATTERY_VOLTAGE="MainBatteryVoltage";
+	public static final String DENEWORD_MAIN_BATTERY_OUTPUT_CURRENT="MainBatteryOutputCurrent";
+	public static final String DENEWORD_MAIN_BATTERY_INPUT_CURRENT="MainBatteryInputCurrent";
+	public static final String DENEWORD_SOLAR_PANEL_INPUT_CURRENT="SolarPanelInputCurrent";
+	public static final String DENEWORD_MAIN_BATTERY_STATE_OF_CHARGE="InternalBatteryStateOfCharge";
+	
 	//
 	// the different types of DeneChain
 	//

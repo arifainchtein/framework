@@ -320,7 +320,8 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				String[] tokens = sizeString.split(" ");
 				size = Double.parseDouble(tokens[0]);
 				String units = tokens[1];
-				if(units.equalsIgnoreCase("KB"))size= size/1000;
+				if(units.equalsIgnoreCase("bytes"))size= size/1000000;
+				else if(units.equalsIgnoreCase("KB"))size= size/1000;
 				else if(units.equalsIgnoreCase("MB"))size= size;
 				else if(units.equalsIgnoreCase("GB"))size= size*1000;
 				else if(units.equalsIgnoreCase("TB"))size= size*1000000;
