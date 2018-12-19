@@ -5446,6 +5446,9 @@ public class DenomeManager {
 					double pulseSize = aDBManager.getTableSizeMB("pulse");
 					double organimsPulseSize = aDBManager.getTableSizeMB("organismpulse");
 					double rememberedDeneWordsSize = aDBManager.getTableSizeMB("remembereddenewords");
+					double mutationeventSize = aDBManager.getTableSizeMB("mutationevent");
+					double commandrequests = aDBManager.getTableSizeMB("commandrequests");
+					
 					JSONObject systemDataDene = new JSONObject();
 					operationalDataDenes.put(systemDataDene);
 					systemDataDene.put("Name", TeleonomeConstants.DENE_SYSTEM_DATA);
@@ -5464,6 +5467,12 @@ public class DenomeManager {
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Pulse Table Size",""+pulseSize,"MB","double",true);
 					systemDataDeneWords.put(deneWord);
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Organism Pulse Table Size",""+organimsPulseSize,"MB","double",true);
+					systemDataDeneWords.put(deneWord);
+					
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Mutation Event Table Size",""+mutationeventSize,"MB","double",true);
+					systemDataDeneWords.put(deneWord);
+					
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Command Requests Table Size",""+commandrequests,"MB","double",true);
 					systemDataDeneWords.put(deneWord);
 					
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Remembered DeneWords Table Size",""+rememberedDeneWordsSize,"MB","double",true);
