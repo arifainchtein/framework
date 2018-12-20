@@ -1010,6 +1010,14 @@ public class TeleonomeConstants {
 	public static final String MNEMOSYCON_DATA_LOCATION_REMEMBERED_DENEWORDS="RememberedDeneWords";
 	public static final String MNEMOSYCON_DATA_LOCATION_COMMAND_REQUESTS="CommandRequests";
 	public static final String MNEMOSYCON_DATA_LOCATION_MUTATION_EVENT="MutationEvent";
+	public static final String MNEMOSYCON_DELETE_OLDER_THAN="Delete Older Than";
+	public static final String MNEMOSYCON_ROWS_DELETED="Rows Deleted";
+	
+	public static final String DISK_SPACE_BEFORE_MNEMOSYCON_RULE="Disk Space Before Rule";
+	public static final String DISK_SPACE_AFTER_MNEMOSYCON_RULE="Disk Space After Rule";
+	public static final String MNEMOSYCON_RULE_FILES_DELETED="Files Deleted";
+	public static final String MNEMOSYCON_RULE_OLDEST_FILE_DELETED="Oldest File Deleted";
+	public static final String MNEMOSYCON_RULE_NEWEST_FILE_DELETED="Newest File Deleted";
 	
 	public static final String MNEMOSYCON_RULE_SOURCE="Mnemosycon Rule Source";
 	public static final String MNEMOSYCON_RULE_LOCATION="Mnemosycon Rule Location";

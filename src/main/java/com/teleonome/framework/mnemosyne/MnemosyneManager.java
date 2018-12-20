@@ -410,22 +410,21 @@ public class MnemosyneManager {
 					}
 					long freeSpaceAfterRule = directoryForFreeSapce.getFreeSpace()/1024000;
 
-					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Disk Space Before Rule ", freeSpaceBeforeRule,"mb","int",true);
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DISK_SPACE_BEFORE_MNEMOSYCON_RULE, freeSpaceBeforeRule,"mb","int",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Disk Space After Rule ", freeSpaceAfterRule,"mb","int",true);
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DISK_SPACE_AFTER_MNEMOSYCON_RULE, freeSpaceAfterRule,"mb","int",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-
 					
-					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Files Deleted", deletedFileCounter,null,"int",true);
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_FILES_DELETED, deletedFileCounter,null,"int",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 
-					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Oldest File Deleted", oldestFileNameDeleted,null,"String",true);
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_OLDEST_FILE_DELETED, oldestFileNameDeleted,null,"String",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Newest File Deleted", newestFileNameDeleted,null,"String",true);
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_NEWEST_FILE_DELETED, newestFileNameDeleted,null,"String",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 				}else if(pathToDelete.isFile()){
 					FileUtils.deleteQuietly(pathToDelete);
-					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Files Deleted", 1,null,"int",true);
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_FILES_DELETED, 1,null,"int",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 				}
 
@@ -445,7 +444,7 @@ public class MnemosyneManager {
 
 
 			
-			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Delete Older than ", formattedToDeleteFromTimestamp,null,"String",true);
+			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_DELETE_OLDER_THAN, formattedToDeleteFromTimestamp,null,"String",true);
 			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 			
 			//mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Total Space", totalSpace,null,"double",true);
@@ -768,7 +767,7 @@ public class MnemosyneManager {
 
 					aDBManager.vacuum();
 
-					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Rows Deleted", rowsDeleted,null,"int",true);
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_ROWS_DELETED, rowsDeleted,null,"int",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 
 				}else if(mnemosyconRuleSource.equals(TeleonomeConstants.MNEMOSYCON_DATA_SOURCE_FILE_SYSTEM)) {
