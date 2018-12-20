@@ -456,6 +456,65 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 		return toReturn;
 	}
 	
+public JSONObject getPulseByTimestamp( long timemillis) {
+	
+	String sql = "select data from pulse where pulsetimemillis="+ timemillis + " limit 1";
+	logger.debug("getPulseByTimestamp,sql=" + sql);
+	Connection connection = null;
+	Statement statement = null;
+	JSONObject toReturn = new JSONObject();
+	ResultSet rs=null;	
+
+	try {
+		connection = connectionPool.getConnection();
+		statement = connection.createStatement();
+		rs = statement.executeQuery(sql);
+		
+		JSONObject data=null;
+		Long L;
+		while(rs.next()){
+			//
+			// only one record comeback
+			//
+			String pulse = rs.getString(1);
+			//
+			// it comes with "" so remove them, also remove the first and last characrets because they are 
+			// also ""
+			
+			
+			
+			try {
+				logger.debug("point 1");
+				toReturn = new JSONObject(pulse);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+			toReturn = new JSONObject(pulse);
+		}
+
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		logger.debug(Utils.getStringException(e));
+	} catch (JSONException e) {
+		// TODO Auto-generated catch block
+		logger.debug(Utils.getStringException(e));
+	}finally{
+		if(connection!=null){
+			try {
+				if(rs!=null)rs.close();
+				if(statement!=null)statement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+	}
+	return toReturn;
+}
+
 	public JSONObject getOrganismPulseByTeleonomeNameAndTimestamp(String teleonomeName, long timemillis) {
 		
 		String sql = "select data AS Pulse from organismpulse where pulsetimemillis="+ timemillis +" and teleonomeName='"+ teleonomeName +"' limit 1";
