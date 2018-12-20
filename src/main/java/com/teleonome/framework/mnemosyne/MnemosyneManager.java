@@ -218,14 +218,14 @@ public class MnemosyneManager {
 //		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 		
 	
-		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Pulse Timestamp Millis", aDenomeManager.getcurrentlyCreatingPulseTimestampMillis(),null,"long",true);
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, aDenomeManager.getcurrentlyCreatingPulseTimestampMillis(),null,"long",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Pulse Timestamp", aDenomeManager.getcurrentlyCreatingPulseTimestamp(),null,"String",true);
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PULSE_TIMESTAMP, aDenomeManager.getcurrentlyCreatingPulseTimestamp(),null,"String",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 
 		
 		long freeSpaceBeforeMnemosycon = directoryForFreeSapce.getFreeSpace()/1024000;
-		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Free Space Before Mnemosycon", freeSpaceBeforeMnemosycon,"Mb","long",true);
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_FREE_SPACE_BEFORE_MNEMOSYCON, freeSpaceBeforeMnemosycon,"Mb","long",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 		
 		logger.debug("about to enter loop " + mnemosyneRulesExecutionPositionIndex.size());
@@ -477,12 +477,12 @@ public class MnemosyneManager {
 
 
 		long totalExecutionDuration = System.currentTimeMillis()-mnemosyconProcessingStartingTime;
-		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Total Execution Duration Milliseconds", totalExecutionDuration,"milliseconds","long",true);
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_MNEMOSYCON_EXECUTION_TIME, totalExecutionDuration,"milliseconds","long",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Number Rules Processed", counter,"","int",true);
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_MNEMOSYCON_RULES_PROCESSED, counter,"","int",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 		long freeSpaceAfterMnemosycon = directoryForFreeSapce.getFreeSpace()/1024000;
-		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Free Space After Mnemosycon", freeSpaceAfterMnemosycon,"Mb","long",true);
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_FREE_SPACE_AFTER_MNEMOSYCON, freeSpaceAfterMnemosycon,"Mb","long",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 		//
 		// now check to see if the mnemosycon executed succesfully if so return the tasks and mnemosyneoperations for success, if not return the taskand mnemosyneoperations for failure
