@@ -965,6 +965,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_RECORD_TIMESTAMP="Record Timestamp";
 	public static final String DENEWORD_TYPE_RESTART_NEEDED="Restart Needed";
 	
+	public static final String PANEL_VISUALIZATION_STYLE_MNEMOSYCON_EVALUATION_REPORT="Mnemosycon Evaluation Report";
 	public static final String PANEL_VISUALIZATION_STYLE_ACTION_EVALUATION_REPORT="Action Evaluation Report";
 	public static final String PANEL_VISUALIZATION_STYLE_NETWORK_MODE_SELECTOR="Network Mode Selector";
 	public static final String PANEL_VISUALIZATION_STYLE_SETTINGS_INFO="Settings Info";
