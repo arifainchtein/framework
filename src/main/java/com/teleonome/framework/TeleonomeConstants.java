@@ -1025,7 +1025,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_PULSE_SIZE_TO_DISK_SIZE="Percentage Pulse To Disk";
 	
 	public static final String  DENEWORD_FREE_SPACE_BEFORE_MNEMOSYCON = "Free Space Before Mnemosycon";
-	public static final String  DENEWORD_FREE_SPACE_AFTER_MNEMOSYCON = "Free Space AFTER Mnemosycon";
+	public static final String  DENEWORD_FREE_SPACE_AFTER_MNEMOSYCON = "Free Space After Mnemosycon";
 	public static final String  DENEWORD_MNEMOSYCON_EXECUTION_TIME = "Total Execution Duration Milliseconds";
 	public static final String  DENEWORD_MNEMOSYCON_RULES_PROCESSED = "Number Rules Processed";
 	public static final String  DENEWORD_MNEMOSYCON_NUMBER_RULES = "Number Rules";
