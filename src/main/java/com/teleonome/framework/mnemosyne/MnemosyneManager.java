@@ -208,7 +208,7 @@ public class MnemosyneManager {
 		FileTime creationTime;
 		Path path;
 		File directoryForFreeSapce = new File("/");
-		String mnemosyconRuleDatabaseField;
+		JSONObject mnemosyconRuleDatabaseFieldJSON;
 		
 
 		//mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Total Space", totalSpace,null,"double",true);
@@ -290,10 +290,18 @@ public class MnemosyneManager {
 				if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_PULSE)) {
 					rowsDeleted = aDBManager.deleteByPeriodFromPulse(millisToDeleteFrom);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_REMEMBERED_DENEWORDS)) {
-					mnemosyconRuleDatabaseField = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, mnemosyconRuleDatabaseField,null,"String",true);
+					mnemosyconRuleDatabaseFieldJSON = (JSONObject) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, TeleonomeConstants.COMPLETE);
+					//
+					// in this case the name and value are used for a where clause
+					// the name attribute is the name of the column
+					// the value attribute is the value the coolumn must have to be part of the delete
+					String columnName = mnemosyconRuleDatabaseFieldJSON.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+					String columnValue = mnemosyconRuleDatabaseFieldJSON.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					
+					
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, columnName + "="  + columnValue,null,"String",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-					rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(mnemosyconRuleDatabaseField, millisToDeleteFrom);
+					rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(columnName, columnValue, millisToDeleteFrom);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_COMMAND_REQUESTS)) {
 					rowsDeleted = aDBManager.deleteByPeriodFromCommandRequests(millisToDeleteFrom);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_MUTATION_EVENT)) {
@@ -640,7 +648,7 @@ public class MnemosyneManager {
 		boolean executedSuccesfully=true;
 		BasicFileAttributes attr;
 		FileTime creationTime;
-		String mnemosyconRuleDatabaseField;
+		JSONObject mnemosyconRuleDatabaseFieldJSON;
 		Path path;
 		do {
 			if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_DATABASE_SIZE_TO_DISK_SIZE)){
@@ -725,11 +733,20 @@ public class MnemosyneManager {
 					if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_PULSE)) {
 						rowsDeleted = aDBManager.deleteByPeriodFromPulse(millisToDeleteFrom);
 					}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_REMEMBERED_DENEWORDS)) {
-						mnemosyconRuleDatabaseField = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, mnemosyconRuleDatabaseField,null,"String",true);
-						mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+						mnemosyconRuleDatabaseFieldJSON = (JSONObject) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, TeleonomeConstants.COMPLETE);
+						//
+						// in this case the name and value are used for a where clause
+						// the name attribute is the name of the column
+						// the value attribute is the value the coolumn must have to be part of the delete
+						String columnName = mnemosyconRuleDatabaseFieldJSON.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+						String columnValue = mnemosyconRuleDatabaseFieldJSON.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						
-						rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(mnemosyconRuleDatabaseField, millisToDeleteFrom);
+						
+						mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, columnName + "="  + columnValue,null,"String",true);
+						mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+						rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(columnName, columnValue, millisToDeleteFrom);
+						
+
 					}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_COMMAND_REQUESTS)) {
 						rowsDeleted = aDBManager.deleteByPeriodFromCommandRequests(millisToDeleteFrom);
 					}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_MUTATION_EVENT)) {

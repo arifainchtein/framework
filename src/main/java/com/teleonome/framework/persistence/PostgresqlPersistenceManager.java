@@ -198,8 +198,8 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return deleteByPeriod( command);
 	}
 	
-	public int deleteByPeriodFromRememberedDeneWords(String teleonomeName, long millisToDeleteFrom) {
-		String command = "delete from remembereddenewords where teleonomeName='" +teleonomeName + "' and timeMillis  < " +  millisToDeleteFrom+ " RETURNING *";
+	public int deleteByPeriodFromRememberedDeneWords(String columnName, String columnValue, long millisToDeleteFrom) {
+		String command = "delete from remembereddenewords where "+ columnName + "='" +columnValue + "' and timeMillis  < " +  millisToDeleteFrom+ " RETURNING *";
 		return deleteByPeriod( command);
 	}
 	
