@@ -919,7 +919,9 @@ public class DenomeUtils {
 		for(int i=0;i<deneWords.length();i++){
 			deneWord = (JSONObject)deneWords.getJSONObject(i);
 			try{
-				if(deneWord.getString(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE).equals(deneWordType)){
+				if(	deneWord.has(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE) && 
+					deneWord.getString(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE).equals(deneWordType)){
+					
 					if(whatToReturn.equals(TeleonomeConstants.COMPLETE)){
 						toReturn.put(deneWord);
 					}else{

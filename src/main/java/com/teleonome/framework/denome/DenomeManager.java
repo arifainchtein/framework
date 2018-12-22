@@ -2603,7 +2603,7 @@ public class DenomeManager {
 
 	public JSONObject getDeneByPointer(String nucleusName,String deneChainName, String deneName) throws InvalidDenomeException{
 		JSONArray deneChainsArray=null;
-		logger.debug("getdenebyidentity, nucleusName=" + nucleusName + " deneChainName=" + deneChainName + " deneName=" + deneName);
+		//logger.debug("getdenebyidentity, nucleusName=" + nucleusName + " deneChainName=" + deneChainName + " deneName=" + deneName);
 		try {
 			if(nucleusName.equals(TeleonomeConstants.NUCLEI_INTERNAL)){
 				deneChainsArray = internalNucleus.getJSONArray("DeneChains");
@@ -4550,7 +4550,7 @@ public class DenomeManager {
 			logger.info("about to do mnemosycons to execute");
 			JSONObject mnemosyconsToExecute=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_MNEMOSYCONS_TO_EXECUTE);
 			JSONObject mutationMnemosyconDeneJSONObject;
-			logger.info("mnemosyconsToExecute=" + mnemosyconsToExecute);
+			logger.info("mnemosyconsToExecute=" + mnemosyconsToExecute.toString(4));
 			if(mnemosyconsToExecute!=null){
 				denes = DenomeUtils.getDenesByDeneType(mnemosyconsToExecute, TeleonomeConstants.DENE_TYPE_MNEMOSYCON_LIST);
 				ArrayList arrayList;
@@ -4568,12 +4568,13 @@ public class DenomeManager {
 				boolean mnemosyconActive=false;
 				for(int i=0;i<denes.length();i++){
 					mutationMnemosyconDeneJSONObject = (JSONObject) denes.get(i);
-					mnemsyconDeneWordPointers = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(mutationMnemosyconDeneJSONObject, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					mnemsyconDeneWordPointers =  DenomeUtils.getAllDeneWordsFromDeneByDeneWordType(mutationMnemosyconDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					logger.info("mnemsyconDeneWordPointers=" + mnemsyconDeneWordPointers);
 					for(int j=0;j<mnemsyconDeneWordPointers.length(); j++) {
 						mnemosyconDenePointer=mnemsyconDeneWordPointers.getString(j);
 						mnemosyconDene = getDeneByIdentity(new Identity(mnemosyconDenePointer));
-						String name = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("mnemosyconDenePointer=" + mnemosyconDenePointer);
+						String name = mnemosyconDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
 						
 						logger.debug("mnemosyconsDene=" + mnemosyconDene);
 						mnemosyconActive = (boolean) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
