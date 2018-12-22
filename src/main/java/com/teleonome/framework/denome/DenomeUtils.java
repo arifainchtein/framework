@@ -27,6 +27,7 @@ import com.teleonome.framework.denome.DenomeManager.MutationActionsExecutionResu
 import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.InvalidMutation;
 import com.teleonome.framework.utils.Utils;
+
 public class DenomeUtils {
 
 	private static Logger logger = Logger.getLogger(com.teleonome.framework.denome.DenomeUtils.class);
@@ -918,6 +919,7 @@ public class DenomeUtils {
 		JSONArray toReturn = new JSONArray();
 		for(int i=0;i<deneWords.length();i++){
 			deneWord = (JSONObject)deneWords.getJSONObject(i);
+			logger.debug("deneWord=" + deneWord.toString(4));
 			try{
 				if(	deneWord.has(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE) && 
 					deneWord.getString(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE).equals(deneWordType)){
@@ -929,7 +931,7 @@ public class DenomeUtils {
 					}
 				}
 			}catch(JSONException e){
-
+				logger.warn(Utils.getStringException(e));
 			}
 		}
 		return toReturn;

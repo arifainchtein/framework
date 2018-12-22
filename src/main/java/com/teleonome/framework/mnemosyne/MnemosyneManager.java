@@ -208,7 +208,7 @@ public class MnemosyneManager {
 		FileTime creationTime;
 		Path path;
 		File directoryForFreeSapce = new File("/");
-		
+		String mnemosyconRuleDatabaseField;
 		
 
 		//mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Total Space", totalSpace,null,"double",true);
@@ -290,7 +290,10 @@ public class MnemosyneManager {
 				if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_PULSE)) {
 					rowsDeleted = aDBManager.deleteByPeriodFromPulse(millisToDeleteFrom);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_REMEMBERED_DENEWORDS)) {
-					rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(millisToDeleteFrom);
+					mnemosyconRuleDatabaseField = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, mnemosyconRuleDatabaseField,null,"String",true);
+					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+					rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(mnemosyconRuleDatabaseField, millisToDeleteFrom);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_COMMAND_REQUESTS)) {
 					rowsDeleted = aDBManager.deleteByPeriodFromCommandRequests(millisToDeleteFrom);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_MUTATION_EVENT)) {
@@ -637,6 +640,7 @@ public class MnemosyneManager {
 		boolean executedSuccesfully=true;
 		BasicFileAttributes attr;
 		FileTime creationTime;
+		String mnemosyconRuleDatabaseField;
 		Path path;
 		do {
 			if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_DATABASE_SIZE_TO_DISK_SIZE)){
@@ -693,6 +697,9 @@ public class MnemosyneManager {
 				mnemosyconRuleProcessingDeneDeneWords = new JSONArray();
 				mnemosyconRuleProcessingDene.put("DeneWords", mnemosyconRuleProcessingDeneDeneWords);
 
+				
+				
+				
 
 				if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_DAY)) {
 
@@ -718,7 +725,11 @@ public class MnemosyneManager {
 					if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_PULSE)) {
 						rowsDeleted = aDBManager.deleteByPeriodFromPulse(millisToDeleteFrom);
 					}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_REMEMBERED_DENEWORDS)) {
-						rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(millisToDeleteFrom);
+						mnemosyconRuleDatabaseField = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, mnemosyconRuleDatabaseField,null,"String",true);
+						mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+						
+						rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(mnemosyconRuleDatabaseField, millisToDeleteFrom);
 					}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_COMMAND_REQUESTS)) {
 						rowsDeleted = aDBManager.deleteByPeriodFromCommandRequests(millisToDeleteFrom);
 					}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_MUTATION_EVENT)) {

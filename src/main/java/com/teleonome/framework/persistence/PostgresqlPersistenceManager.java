@@ -198,8 +198,8 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return deleteByPeriod( command);
 	}
 	
-	public int deleteByPeriodFromRememberedDeneWords(long millisToDeleteFrom) {
-		String command = "delete from remembereddenewords where timeMillis  < " +  millisToDeleteFrom+ " RETURNING *";
+	public int deleteByPeriodFromRememberedDeneWords(String teleonomeName, long millisToDeleteFrom) {
+		String command = "delete from remembereddenewords where teleonomeName='" +teleonomeName + "' and timeMillis  < " +  millisToDeleteFrom+ " RETURNING *";
 		return deleteByPeriod( command);
 	}
 	
@@ -222,7 +222,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
 
-
+			logger.debug(command);
 			rs = statement.executeQuery(command);
 			String sizeString="";
 			while(rs.next()){
