@@ -2688,6 +2688,124 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		return v.toString();
 	}
 
+	public JSONArray getRemeberedDeneWordMaxValue(TimeZone timeZone, String identityPointer,  long startTimeMillis, long  endTimeMillis){
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		try {
+			String command = "SELECT time, value from RememberedDeneWords where time>=? and time<=? and  identityString=? order by time asc";
+			logger.info("command=" + command);
+			connection = connectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(command);
+			java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(startTimeMillis);
+			java.sql.Timestamp untilTimeValue = new java.sql.Timestamp(endTimeMillis);
+			
+			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
+			preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
+			preparedStatement.setTimestamp(2, untilTimeValue, calendarTimeZone);
+			preparedStatement.setString(3, identityPointer);
+			
+			rs = preparedStatement.executeQuery();
+			Timestamp time=null;
+			JSONObject j;
+			double value;
+			while(rs.next()){
+				time=rs.getTimestamp(1);
+				value = rs.getDouble(2);
+				j = new JSONObject();
+				j.put("Pulse Timestamp in Milliseconds", time.getTime());
+				j.put("Value", value);
+				toReturn.put(j);
+			}
+
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+
+		return toReturn;
+
+	}
+	
+	public JSONObject getStatsInfoForRemeberedDeneWord(TimeZone timeZone, String identityPointer,  long startTimeMillis, long  endTimeMillis, String stat){
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONObject toReturn = new JSONObject();
+		try {
+			String command = "";
+			if(stat.equals(TeleonomeConstants.DENEWORD_MAXIMUM_ATTRIBUTE)) {
+				command = "SELECT time, value from RememberedDeneWords where time>=? and time<=? and  identityString=? order by value, time desc limit 1";
+			}else if(stat.equals(TeleonomeConstants.DENEWORD_MINIMUM_ATTRIBUTE)) {
+				command = "SELECT time, value from RememberedDeneWords where time>=? and time<=? and  identityString=? order by value, time asc limit 1";
+			}else if(stat.equals(TeleonomeConstants.DENEWORD_AVERAGE_ATTRIBUTE)) {
+				command = "SELECT avg(value) from RememberedDeneWords where time>=? and time<=? and  identityString=?";
+			}
+			logger.info("command=" + command);
+			connection = connectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(command);
+			java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(startTimeMillis);
+			java.sql.Timestamp untilTimeValue = new java.sql.Timestamp(endTimeMillis);
+			
+			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
+			preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
+			preparedStatement.setTimestamp(2, untilTimeValue, calendarTimeZone);
+			preparedStatement.setString(3, identityPointer);
+			
+			rs = preparedStatement.executeQuery();
+			Timestamp time=null;
+			JSONObject j;
+			double value;
+			while(rs.next()){
+				if(!stat.equals(TeleonomeConstants.DENEWORD_AVERAGE_ATTRIBUTE)) {
+					time=rs.getTimestamp(1);
+					value = rs.getDouble(2);
+					
+					toReturn.put("Pulse Timestamp in Milliseconds", time.getTime());
+					toReturn.put("Value", value);
+				}else {
+					value = rs.getDouble(1);
+					toReturn.put("Value", value);
+				}
+				
+			}
+
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+
+		return toReturn;
+
+	}
+	
 	public JSONArray getRemeberedDeneWord(TimeZone timeZone, String identityPointer,  long startTimeMillis, long  endTimeMillis){
 		Connection connection=null;
 		PreparedStatement preparedStatement = null; 

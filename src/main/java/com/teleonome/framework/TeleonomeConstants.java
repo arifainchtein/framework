@@ -569,6 +569,8 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_NAME_ATTRIBUTE = "Name";
 	public static final String DENEWORD_MAXIMUM_ATTRIBUTE = "Maximum";
 	public static final String DENEWORD_MINIMUM_ATTRIBUTE = "Minimum";
+	public static final String DENEWORD_AVERAGE_ATTRIBUTE = "Average";
+	
 	
 	public static final String DENEWORD_REQUIRED_ATTRIBUTE = "Required";
 	public static final String DENEWORD_DENEWORD_TYPE_ATTRIBUTE = "DeneWord Type";

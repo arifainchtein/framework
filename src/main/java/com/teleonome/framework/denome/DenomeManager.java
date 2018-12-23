@@ -2233,7 +2233,7 @@ public class DenomeManager {
 	public JSONObject getDeneWordByPointer(String nucleusName,String deneChainName, String deneName, String deneWordName) throws InvalidDenomeException{
 		JSONArray deneChainsArray=null;
 		try {
-			logger.debug("getDeneWordByPointer, nucleusName="  + nucleusName +" deneChainName=" + deneChainName + " deneName=" + deneName  + " deneWordName="  + deneWordName);
+			//logger.debug("getDeneWordByPointer, nucleusName="  + nucleusName +" deneChainName=" + deneChainName + " deneName=" + deneName  + " deneWordName="  + deneWordName);
 			//
 			// now parse them
 			JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
