@@ -2749,21 +2749,23 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		try {
 			String command = "";
 			if(stat.equals(TeleonomeConstants.DENEWORD_MAXIMUM_ATTRIBUTE)) {
-				command = "SELECT time, value from RememberedDeneWords where time>=? and time<=? and  identityString=? order by value, time desc limit 1";
+				command = "SELECT time, value from RememberedDeneWords where timeMillis>=? and timeMillis<=? and  identityString=? order by value, time desc limit 1";
 			}else if(stat.equals(TeleonomeConstants.DENEWORD_MINIMUM_ATTRIBUTE)) {
-				command = "SELECT time, value from RememberedDeneWords where time>=? and time<=? and  identityString=? order by value, time asc limit 1";
+				command = "SELECT time, value from RememberedDeneWords where timeMillis>=? and timeMillis<=? and  identityString=? order by value, time asc limit 1";
 			}else if(stat.equals(TeleonomeConstants.DENEWORD_AVERAGE_ATTRIBUTE)) {
-				command = "SELECT avg(value) from RememberedDeneWords where time>=? and time<=? and  identityString=?";
+				command = "SELECT avg(value) from RememberedDeneWords where timeMillis>=? and timeMillis<=? and  identityString=?";
 			}
 			logger.info("command=" + command);
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
-			java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(startTimeMillis);
-			java.sql.Timestamp untilTimeValue = new java.sql.Timestamp(endTimeMillis);
+			//java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(startTimeMillis);
+			//java.sql.Timestamp untilTimeValue = new java.sql.Timestamp(endTimeMillis);
 			
-			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
-			preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
-			preparedStatement.setTimestamp(2, untilTimeValue, calendarTimeZone);
+			//Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
+			//preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
+			//preparedStatement.setTimestamp(2, untilTimeValue, calendarTimeZone);
+			preparedStatement.setLong(1, startTimeMillis);
+			preparedStatement.setLong(2, endTimeMillis);
 			preparedStatement.setString(3, identityPointer);
 			
 			rs = preparedStatement.executeQuery();
@@ -2812,16 +2814,18 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		ResultSet rs=null;
 		JSONArray toReturn = new JSONArray();
 		try {
-			String command = "SELECT time, value from RememberedDeneWords where time>=? and time<=? and  identityString=? order by time asc";
+			String command = "SELECT time, value from RememberedDeneWords where timeMillis>=? and timeMillis<=? and  identityString=? order by time asc";
 			logger.info("command=" + command);
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
-			java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(startTimeMillis);
-			java.sql.Timestamp untilTimeValue = new java.sql.Timestamp(endTimeMillis);
-			
-			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
-			preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
-			preparedStatement.setTimestamp(2, untilTimeValue, calendarTimeZone);
+//			java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(startTimeMillis);
+//			java.sql.Timestamp untilTimeValue = new java.sql.Timestamp(endTimeMillis);
+//			
+//			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
+//			preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
+//			preparedStatement.setTimestamp(2, untilTimeValue, calendarTimeZone);
+			preparedStatement.setLong(1, startTimeMillis);
+			preparedStatement.setLong(2, endTimeMillis);
 			preparedStatement.setString(3, identityPointer);
 			
 			rs = preparedStatement.executeQuery();
