@@ -2801,7 +2801,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				}
 			if(connection!=null)closeConnection(connection);
 		}
-
+		logger.debug("returning " + toReturn.toString(4));
 		return toReturn;
 
 	}
