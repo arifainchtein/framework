@@ -2749,12 +2749,14 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		try {
 			String command = "";
 			if(stat.equals(TeleonomeConstants.DENEWORD_MAXIMUM_ATTRIBUTE)) {
-				command = "SELECT time, value from RememberedDeneWords where timeMillis>=? and timeMillis<=? and  identityString=? order by value, time desc limit 1";
+				command = "SELECT distinct on(value) time, value from RememberedDeneWords where timeMillis>=? and timeMillis<=? and  identityString=? order by value desc, time desc limit 1";
 			}else if(stat.equals(TeleonomeConstants.DENEWORD_MINIMUM_ATTRIBUTE)) {
-				command = "SELECT time, value from RememberedDeneWords where timeMillis>=? and timeMillis<=? and  identityString=? order by value, time asc limit 1";
+				command = "SELECT distinct on(value) time, value from RememberedDeneWords where timeMillis>=? and timeMillis<=? and  identityString=? order by value asc, time asc limit 1";
 			}else if(stat.equals(TeleonomeConstants.DENEWORD_AVERAGE_ATTRIBUTE)) {
 				command = "SELECT avg(value) from RememberedDeneWords where timeMillis>=? and timeMillis<=? and  identityString=?";
 			}
+			
+			
 			logger.info("command=" + command);
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
