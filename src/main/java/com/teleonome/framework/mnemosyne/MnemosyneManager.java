@@ -167,11 +167,11 @@ public class MnemosyneManager {
 			JSONObject dataSourceDeneWord;
 
 			dataSourceDeneWord = (JSONObject) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(identityPointer), TeleonomeConstants.COMPLETE);
-
+			logger.debug("dataSourceDeneWord:" + dataSourceDeneWord.toString(4));
 			String units = dataSourceDeneWord.getString(TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE);
 			String seriesType = dataSourceDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
-			String maximumAttributeValue = dataSourceDeneWord.getString(TeleonomeConstants.DENEWORD_MAXIMUM_ATTRIBUTE);
-			String minimumAttributeValue = dataSourceDeneWord.getString(TeleonomeConstants.DENEWORD_MINIMUM_ATTRIBUTE);
+			double maximumAttributeValue = dataSourceDeneWord.getDouble(TeleonomeConstants.DENEWORD_MAXIMUM_ATTRIBUTE);
+			double minimumAttributeValue = dataSourceDeneWord.getDouble(TeleonomeConstants.DENEWORD_MINIMUM_ATTRIBUTE);
 			//
 			// now create the dene and put the data in
 			//
