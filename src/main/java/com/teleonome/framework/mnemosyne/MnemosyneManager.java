@@ -125,7 +125,7 @@ public class MnemosyneManager {
 		//
 		try {
 			String aMnemosyconName = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(aMnemosyconForgetParameters, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-			String identityPointerLocation = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			String identityPointerLocation = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_ANALYSIS_IDENTITY, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			String identityPointer = (String) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(identityPointerLocation), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 			String kind = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_ANALYSIS_KIND, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
