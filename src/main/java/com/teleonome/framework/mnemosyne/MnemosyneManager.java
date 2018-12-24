@@ -118,7 +118,7 @@ public class MnemosyneManager {
 
 	}
 
-	private void rememberedDeneWordAnalysis(JSONObject aMnemosyconForgetParameters) {
+	private void rememberedDeneWordAnalysis(JSONObject aMnemosyconForgetParameters, String mnemosyconType) {
 		long mnemosyconProcessingStartingTime = System.currentTimeMillis();
 		//
 		// the Codon has the Mnemosycon Name

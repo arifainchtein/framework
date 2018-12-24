@@ -1003,6 +1003,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_MNEMOSYCON_TYPE="Mnemosycon Type";
 	public static final String MNEMOSYCON_TYPE_STATIC="Static";
 	public static final String MNEMOSYCON_TYPE_DYNAMIC="Dynamic";
+	public static final String MNEMOSYCON_TYPE_REMEMBERED_DENEWORD_ANALYSIS="Remembered DeneWord Analysis";
 	public static final String DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD="Mnemosycon Rule Database Field";
 	
 	public static final String MNEMOSYCON_DATA_SOURCE_FILE_SYSTEM="File System";
