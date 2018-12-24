@@ -133,7 +133,7 @@ public class MnemosyneManager {
 			String pathologyLocation = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_PATHOLOGY_MNEMOSYNE_LOCATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			String timeUnit = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_ANALYSIS_PERIOD_TIME_UNIT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			int timeUnitValue = (int) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_ANALYSIS_PERIOD_TIME_UNIT_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
+			logger.debug("kind=" + kind + " target=" + target + " pathologyLocation=" + pathologyLocation + " timeUnit=" + timeUnit + " timeUnitValue=" + timeUnitValue);
 			long endTimeMillis = System.currentTimeMillis();
 			long startTimeMillis=0;
 
@@ -152,32 +152,10 @@ public class MnemosyneManager {
 				startTimeMillis = calendar.getTimeInMillis();
 			}
 
-			//
-			// create the dene for the processing
-			//
-			JSONObject mnemosyconLogicProcessingDeneChain=null;
-			JSONArray mnemosyconLogicProcessingDenes=null;
-
-			mnemosyconLogicProcessingDeneChain = aDenomeManager.getDeneChainByPointer(TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_MNEMOSYCON_PROCESSING);
-			logger.debug("mnemosyconLogicProcessingDeneChain=" + mnemosyconLogicProcessingDeneChain);
-			mnemosyconLogicProcessingDenes = mnemosyconLogicProcessingDeneChain.getJSONArray("Denes");
-
-
-
-			JSONObject mnemosyconProcessingDene = new JSONObject();
-			mnemosyconLogicProcessingDenes.put(mnemosyconProcessingDene);
-			String mnemosyconLogicProcessingDeneName = aMnemosyconName + " "  + "Processing";
-
-			mnemosyconProcessingDene.put("Name",mnemosyconLogicProcessingDeneName);
-			mnemosyconProcessingDene.put("Dene Type", TeleonomeConstants.DENE_TYPE_MNEMOSYCON_PROCESSING);
-
-			JSONArray mnemosyconProcessingDeneDeneWords = new JSONArray();
-			mnemosyconProcessingDene.put("DeneWords", mnemosyconProcessingDeneDeneWords);
-			mnemosyconLogicProcessingDeneName = aMnemosyconName + " Processing";
-
+			
 
 			JSONArray values = aDBManager.getRemeberedDeneWordStatByPeriod( identityPointer,   startTimeMillis,   endTimeMillis,  kind);
-
+			logger.debug("returning values:" + values.toString());
 			//
 			// Create the new dene
 			//
@@ -213,7 +191,9 @@ public class MnemosyneManager {
 			//
 			// get the target denechain
 			JSONObject targetDeneChain = aDenomeManager.getDeneChainByIdentity(new Identity(target));
+			logger.debug("targetdenechain=" + targetDeneChain.getString("Name"));
 			JSONArray targetDenes = targetDeneChain.getJSONArray("Denes");;
+			logger.debug("newAnalysisDene=" + newAnalysisDene.toString(4));
 			targetDenes.put(newAnalysisDene);
 		} catch (InvalidDenomeException e) {
 			// TODO Auto-generated catch block
