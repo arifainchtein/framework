@@ -153,7 +153,7 @@ public class MnemosyneManager {
 			}
 
 			
-
+			logger.debug("rstartTimeMillis:" + startTimeMillis + " endTimeMillis=" + endTimeMillis);
 			JSONArray values = aDBManager.getRemeberedDeneWordStatByPeriod( identityPointer,   startTimeMillis,   endTimeMillis,  kind);
 			logger.debug("returning values:" + values.toString());
 			//
