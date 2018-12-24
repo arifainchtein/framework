@@ -2825,7 +2825,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			String command = "SELECT timemillis, value FROM (" +
 					  "SELECT *, "+
 					   " ROW_NUMBER() OVER (PARTITION BY date_trunc('day', time) "+
-					      "  ORDER BY value "+direction +") AS _rn"+
+					      "  ORDER BY value "+direction +") AS _rn "+
 					  "FROM remembereddenewords"+
 					 " where identitystring=? "+
 					 "and timeMillis>=? and timeMillis<=?"+
