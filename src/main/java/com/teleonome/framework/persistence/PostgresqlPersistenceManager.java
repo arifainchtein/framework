@@ -2826,11 +2826,11 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					  "SELECT *, "+
 					   " ROW_NUMBER() OVER (PARTITION BY date_trunc('day', time) "+
 					      "  ORDER BY value "+direction +") AS _rn "+
-					  "FROM remembereddenewords"+
+					  "FROM remembereddenewords "+
 					 " where identitystring=? "+
-					 "and timeMillis>=? and timeMillis<=?"+
-					") AS _max"+
-					"WHERE _rn = 1"+
+					 " and timeMillis>=? and timeMillis<=? "+
+					") AS _max "+
+					"WHERE _rn = 1 "+
 					"ORDER BY time;";
 			
 			
