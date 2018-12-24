@@ -2848,9 +2848,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			double value;
 			long timeMillis;
 			while(rs.next()){
-				time=rs.getTimestamp(1);
-				timeMillis=rs.getLong(2);
-				value = rs.getDouble(3);
+				timeMillis=rs.getLong(1);
+				value = rs.getDouble(2);
 				j = new JSONObject();
 				j.put("Pulse Timestamp in Milliseconds", timeMillis);
 				j.put("Value", value);
