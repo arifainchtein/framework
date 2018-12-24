@@ -2809,6 +2809,130 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		return toReturn;
 
 	}
+	public JSONArray getRemeberedDeneWordStatByPeriod( String identityPointer,  long startTimeMillis, long  endTimeMillis, String kind ){
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		String direction="desc";
+		if(kind.equals(TeleonomeConstants.DENEWORD_MAXIMUM_ATTRIBUTE)) {
+			direction="desc";
+		}else if(kind.equals(TeleonomeConstants.DENEWORD_MINIMUM_ATTRIBUTE)) {
+			direction="asc";
+		}
+		
+		JSONArray toReturn = new JSONArray();
+		try {
+			String command = "SELECT timemillis, value FROM (" +
+					  "SELECT *, "+
+					   " ROW_NUMBER() OVER (PARTITION BY date_trunc('day', time) "+
+					      "  ORDER BY value "+direction +") AS _rn"+
+					  "FROM remembereddenewords"+
+					 " where identitystring=? "+
+					 "and timeMillis>=? and timeMillis<=?"+
+					") AS _max"+
+					"WHERE _rn = 1"+
+					"ORDER BY time;";
+			
+			
+			logger.info("command=" + command);
+			connection = connectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(command);
+			preparedStatement.setString(1, identityPointer);
+			preparedStatement.setLong(2, startTimeMillis);
+			preparedStatement.setLong(3, endTimeMillis);
+			
+			
+			rs = preparedStatement.executeQuery();
+			Timestamp time=null;
+			JSONObject j;
+			double value;
+			long timeMillis;
+			while(rs.next()){
+				time=rs.getTimestamp(1);
+				timeMillis=rs.getLong(2);
+				value = rs.getDouble(3);
+				j = new JSONObject();
+				j.put("Pulse Timestamp in Milliseconds", timeMillis);
+				j.put("Value", value);
+				toReturn.put(j);
+			}
+
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+
+		return toReturn;
+
+	}
+	
+	public JSONArray getRemeberedDeneWordStart( String identityPointer,  long startTimeMillis, long  endTimeMillis){
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		try {
+			String command = "SELECT time, value from RememberedDeneWords where timeMillis>=? and timeMillis<=? and  identityString=? order by time asc";
+			logger.info("command=" + command);
+			connection = connectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(command);
+//			java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(startTimeMillis);
+//			java.sql.Timestamp untilTimeValue = new java.sql.Timestamp(endTimeMillis);
+//			
+//			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
+//			preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
+//			preparedStatement.setTimestamp(2, untilTimeValue, calendarTimeZone);
+			preparedStatement.setLong(1, startTimeMillis);
+			preparedStatement.setLong(2, endTimeMillis);
+			preparedStatement.setString(3, identityPointer);
+			
+			rs = preparedStatement.executeQuery();
+			Timestamp time=null;
+			JSONObject j;
+			double value;
+			while(rs.next()){
+				time=rs.getTimestamp(1);
+				value = rs.getDouble(2);
+				j = new JSONObject();
+				j.put("Pulse Timestamp in Milliseconds", time.getTime());
+				j.put("Value", value);
+				toReturn.put(j);
+			}
+
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+
+		return toReturn;
+
+	}
 	
 	public JSONArray getRemeberedDeneWord(TimeZone timeZone, String identityPointer,  long startTimeMillis, long  endTimeMillis){
 		Connection connection=null;

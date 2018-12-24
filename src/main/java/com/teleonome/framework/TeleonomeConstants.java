@@ -1040,7 +1040,12 @@ public class TeleonomeConstants {
 	public static final String  DENEWORD_MNEMOSYCON_RULES_PROCESSED = "Number Rules Processed";
 	public static final String  DENEWORD_MNEMOSYCON_NUMBER_RULES = "Number Rules";
 	
+	
 	public static final String MNEMOSYCON_PATHOLOGY_MNEMOSYNE_LOCATION="Mnemosycon Pathology Mnemosyne Location";
+	public static final String MNEMOSYCON_ANALYSIS_IDENTITY = "Mnemosycon Analysis Identity";
+	public static final String MNEMOSYCON_ANALYSIS_KIND = "Mnemosycon Analysis Kind";
+	public static final String MNEMOSYCON_ANALYSIS_PERIOD_TIME_UNIT= "Mnemosycon Analysis Period Time Unit";
+	public static final String MNEMOSYCON_ANALYSIS_PERIOD_TIME_UNIT_VALUE= "Mnemosycon Analysis Period Time Unit Value";
 	
 	public static final String MNEMOSYCON_RULE_TIME_UNIT="Mnemosycon Rule Until Time Unit";
 	public static final String MNEMOSYCON_RULE_TIME_UNIT_VALUE="Mnemosycon Rule Until Time Value";

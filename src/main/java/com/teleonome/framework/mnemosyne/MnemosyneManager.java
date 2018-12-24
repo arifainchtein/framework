@@ -118,6 +118,110 @@ public class MnemosyneManager {
 
 	}
 
+	private void rememberedDeneWordAnalysis(JSONObject aMnemosyconForgetParameters) {
+		long mnemosyconProcessingStartingTime = System.currentTimeMillis();
+		//
+		// the Codon has the Mnemosycon Name
+		//
+		try {
+			String aMnemosyconName = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(aMnemosyconForgetParameters, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			String identityPointerLocation = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			String identityPointer = (String) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(identityPointerLocation), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+			String kind = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_ANALYSIS_KIND, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			String target = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters,TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			String pathologyLocation = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_PATHOLOGY_MNEMOSYNE_LOCATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			String timeUnit = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_ANALYSIS_PERIOD_TIME_UNIT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			int timeUnitValue = (int) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_ANALYSIS_PERIOD_TIME_UNIT_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+			long endTimeMillis = System.currentTimeMillis();
+			long startTimeMillis=0;
+
+			Calendar calendar = Calendar.getInstance();
+			if(timeUnit.equals(TeleonomeConstants.TIME_UNIT_DAY)){
+				calendar.add(Calendar.DATE, -1 * timeUnitValue );
+				startTimeMillis = calendar.getTimeInMillis();
+			}else if(timeUnit.equals(TeleonomeConstants.TIME_UNIT_WEEK)){
+				calendar.add(Calendar.DATE, -7 * timeUnitValue );
+				startTimeMillis = calendar.getTimeInMillis();
+			}else if(timeUnit.equals(TeleonomeConstants.TIME_UNIT_MONTH)){
+				calendar.add(Calendar.MONTH, -1 * timeUnitValue );
+				startTimeMillis = calendar.getTimeInMillis();
+			}else if(timeUnit.equals(TeleonomeConstants.TIME_UNIT_YEAR)){
+				calendar.add(Calendar.YEAR, -1 * timeUnitValue );
+				startTimeMillis = calendar.getTimeInMillis();
+			}
+
+			//
+			// create the dene for the processing
+			//
+			JSONObject mnemosyconLogicProcessingDeneChain=null;
+			JSONArray mnemosyconLogicProcessingDenes=null;
+
+			mnemosyconLogicProcessingDeneChain = aDenomeManager.getDeneChainByPointer(TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_MNEMOSYCON_PROCESSING);
+			logger.debug("mnemosyconLogicProcessingDeneChain=" + mnemosyconLogicProcessingDeneChain);
+			mnemosyconLogicProcessingDenes = mnemosyconLogicProcessingDeneChain.getJSONArray("Denes");
+
+
+
+			JSONObject mnemosyconProcessingDene = new JSONObject();
+			mnemosyconLogicProcessingDenes.put(mnemosyconProcessingDene);
+			String mnemosyconLogicProcessingDeneName = aMnemosyconName + " "  + "Processing";
+
+			mnemosyconProcessingDene.put("Name",mnemosyconLogicProcessingDeneName);
+			mnemosyconProcessingDene.put("Dene Type", TeleonomeConstants.DENE_TYPE_MNEMOSYCON_PROCESSING);
+
+			JSONArray mnemosyconProcessingDeneDeneWords = new JSONArray();
+			mnemosyconProcessingDene.put("DeneWords", mnemosyconProcessingDeneDeneWords);
+			mnemosyconLogicProcessingDeneName = aMnemosyconName + " Processing";
+
+
+			JSONArray values = aDBManager.getRemeberedDeneWordStatByPeriod( identityPointer,   startTimeMillis,   endTimeMillis,  kind);
+
+			//
+			// Create the new dene
+			//
+
+			//
+			// first get the actual JSONObejct, ie the nucleus:purpose:operational data:Power Status:MainBatteryVoltage
+			// to get the units, series type (which will be the value type, maximum and minium
+
+			JSONObject dataSourceDeneWord;
+
+			dataSourceDeneWord = (JSONObject) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(identityPointer), TeleonomeConstants.COMPLETE);
+
+			String units = dataSourceDeneWord.getString(TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE);
+			String seriesType = dataSourceDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+			String maximumAttributeValue = dataSourceDeneWord.getString(TeleonomeConstants.DENEWORD_MAXIMUM_ATTRIBUTE);
+			String minimumAttributeValue = dataSourceDeneWord.getString(TeleonomeConstants.DENEWORD_MINIMUM_ATTRIBUTE);
+			//
+			// now create the dene and put the data in
+			//
+			JSONObject newAnalysisDene = new JSONObject();
+			String newAnalysisDeneName = aMnemosyconName + " Analysis";
+
+			newAnalysisDene.put("Name",newAnalysisDeneName);
+
+			JSONArray newAnalysisDeneDeneWords = new JSONArray();
+			newAnalysisDene.put("DeneWords", newAnalysisDeneDeneWords);
+			JSONObject newAnalysisDeneDeneDeneWord = Utils.createDeneWordJSONObject(aMnemosyconName, values,units,TeleonomeConstants.DATATYPE_TIME_SERIES,true);
+			newAnalysisDeneDeneDeneWord.put(TeleonomeConstants.DENEWORD_SERIESTYPE_ATTRIBUTE,seriesType);
+			newAnalysisDeneDeneDeneWord.put(TeleonomeConstants.DENEWORD_MAXIMUM_ATTRIBUTE,maximumAttributeValue);
+			newAnalysisDeneDeneDeneWord.put(TeleonomeConstants.DENEWORD_MINIMUM_ATTRIBUTE,minimumAttributeValue);
+			newAnalysisDeneDeneWords.put(newAnalysisDeneDeneDeneWord);
+
+			//
+			// get the target denechain
+			JSONObject targetDeneChain = aDenomeManager.getDeneChainByIdentity(new Identity(target));
+			JSONArray targetDenes = targetDeneChain.getJSONArray("Denes");;
+			targetDenes.put(newAnalysisDene);
+		} catch (InvalidDenomeException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}
+
+	}
+
 	private void forgetStatic(JSONObject aMnemosyconForgetParameters) {
 		long mnemosyconProcessingStartingTime = System.currentTimeMillis();
 
@@ -161,7 +265,7 @@ public class MnemosyneManager {
 
 		String mnemosyconRulesPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_RULES_LIST_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 		logger.debug("mnemosyconRulesPointer=" + mnemosyconRulesPointer);
-		
+
 		JSONObject mnemosyconRulesListDeneJSONObject=null;
 		try {
 			mnemosyconRulesListDeneJSONObject = aDenomeManager.getDeneByIdentity(new Identity(mnemosyconRulesPointer));
@@ -170,7 +274,7 @@ public class MnemosyneManager {
 			e1.printStackTrace();
 		}
 		logger.debug("mnemosyconRulesListDeneJSONObject=" + mnemosyconRulesListDeneJSONObject.toString(4));
-		
+
 		JSONArray mnemosyconRulesPointersJSONArray = aDenomeManager.getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRulesListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_RULE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 		JSONArray mnemosyconRulesJSONArray = aDenomeManager.renderDenesFromPointers(mnemosyconRulesPointersJSONArray);
 		logger.debug("mnemosyconRulesPointersJSONArray=" + mnemosyconRulesPointersJSONArray + " mnemosyconRulesJSONArray=" + mnemosyconRulesJSONArray.toString(4));
@@ -182,12 +286,12 @@ public class MnemosyneManager {
 			mnemosyconRuleJSONObject = mnemosyconRulesJSONArray.getJSONObject(i);
 			executionPosition = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(mnemosyconRuleJSONObject,TeleonomeConstants.DENEWORD_EXECUTION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			logger.debug("mnemosyconRuleJSONObject=" + mnemosyconRuleJSONObject.getString("Name") + " executionPosition=" + executionPosition);
-			
+
 			mnemosyneRulesExecutionPositionIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(mnemosyconRuleJSONObject, new Integer(executionPosition)));
 		}
 		Collections.sort(mnemosyneRulesExecutionPositionIndex, new IntegerCompare());
 		logger.debug("after sorting ther are=" + mnemosyneRulesExecutionPositionIndex.size());
-		
+
 		int counter=0;
 		String mnemosyconRuleSource,mnemosyconRuleFilePrefix,mnemosyconRuleLocation,mnemosyconRuleTimeUnit, mnemosyconRuleTeamParameter=null;
 		int mnemosyconRuleTimeUnitValue;
@@ -209,38 +313,38 @@ public class MnemosyneManager {
 		Path path;
 		File directoryForFreeSapce = new File("/");
 		JSONObject mnemosyconRuleDatabaseFieldJSON;
-		
+
 
 		//mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Total Space", totalSpace,null,"double",true);
 		//mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-		
-//		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
-//		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-		
-	
+
+		//		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
+		//		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+
+
 		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, aDenomeManager.getcurrentlyCreatingPulseTimestampMillis(),null,"long",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PULSE_TIMESTAMP, aDenomeManager.getcurrentlyCreatingPulseTimestamp(),null,"String",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 
-		
+
 		long freeSpaceBeforeMnemosycon = directoryForFreeSapce.getFreeSpace()/1024000;
 		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_FREE_SPACE_BEFORE_MNEMOSYCON, freeSpaceBeforeMnemosycon,"Mb","long",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-		
+
 		logger.debug("about to enter loop " + mnemosyneRulesExecutionPositionIndex.size());
-		
+
 		for(int j=0;j<mnemosyneRulesExecutionPositionIndex.size();j++) {
 			//
 			// get the next rule
 			startRuleMillis =  System.currentTimeMillis();
-			
+
 			mnemosyconRuleTeamParameter=null;
 			Map.Entry<JSONObject, Integer> entry = (Map.Entry<JSONObject, Integer>)mnemosyneRulesExecutionPositionIndex.get(j);
 			mnemosyconRuleJSONObject = entry.getKey();
 			logger.debug("processing mnemosyconRuleJSONObject=" + mnemosyconRuleJSONObject.getString("Name") );
-			
-			
+
+
 			mnemosyconRuleSource = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			mnemosyconRuleLocation = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_LOCATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			mnemosyconRuleTimeUnit= (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
@@ -248,7 +352,7 @@ public class MnemosyneManager {
 			now=System.currentTimeMillis();
 			millisToDeleteFrom=0;
 			logger.debug("processing mnemosyconRuleSource=" + mnemosyconRuleSource  + " mnemosyconRuleLocation=" + mnemosyconRuleLocation);
-			
+
 			//
 			// now create a dene for this rule 
 			// also create a deneword for the parent dene
@@ -284,9 +388,9 @@ public class MnemosyneManager {
 			// excute the delete
 			//
 			logger.debug("processing millisToDeleteFrom=" + millisToDeleteFrom);
-			
+
 			if(mnemosyconRuleSource.equals(TeleonomeConstants.MNEMOSYCON_DATA_SOURCE_DATABASE)) {
-				
+
 				if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_PULSE)) {
 					rowsDeleted = aDBManager.deleteByPeriodFromPulse(millisToDeleteFrom);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_REMEMBERED_DENEWORDS)) {
@@ -297,8 +401,8 @@ public class MnemosyneManager {
 					// the value attribute is the value the coolumn must have to be part of the delete
 					String columnName = mnemosyconRuleDatabaseFieldJSON.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
 					String columnValue = mnemosyconRuleDatabaseFieldJSON.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					
-					
+
+
 					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, columnName + "="  + columnValue,null,"String",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 					rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(columnName, columnValue, millisToDeleteFrom);
@@ -362,14 +466,14 @@ public class MnemosyneManager {
 				logger.debug("mnemosyconRuleFilePrefix=" +mnemosyconRuleFilePrefix);
 				File pathToDelete = new File(mnemosyconRuleLocation);
 				logger.debug("pathToDelete.isDirectory()=" +pathToDelete.isDirectory());
-				
-				
-				
+
+
+
 				if(pathToDelete.isDirectory()) {
 					long freeSpaceBeforeRule = directoryForFreeSapce.getFreeSpace()/1024000;
 					//File[] files = pathToDelete.listFiles();
 					String[] fileNames = pathToDelete.list();
-					
+
 					int deletedFileCounter=0;
 					String oldestFileNameDeleted=null, newestFileNameDeleted=null;
 					FileTime oldestCeationTime=null, newestCeationTime=null;
@@ -425,7 +529,7 @@ public class MnemosyneManager {
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DISK_SPACE_AFTER_MNEMOSYCON_RULE, freeSpaceAfterRule,"mb","int",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-					
+
 					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_FILES_DELETED, deletedFileCounter,null,"int",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 
@@ -442,7 +546,7 @@ public class MnemosyneManager {
 			}
 
 
-			
+
 
 
 			formattedToDeleteFromTimestamp = mnemosyneTimeFormat.format(millisToDeleteFrom);
@@ -454,12 +558,12 @@ public class MnemosyneManager {
 
 
 
-			
+
 			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_DELETE_OLDER_THAN, formattedToDeleteFromTimestamp,null,"String",true);
 			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
-			
+
 			//mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Total Space", totalSpace,null,"double",true);
-		//	mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
+			//	mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 
 			mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_RULE_SOURCE, mnemosyconRuleSource,null,"String",true);
 			mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
@@ -507,23 +611,23 @@ public class MnemosyneManager {
 		}else {
 			pointerToTasks =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FAILURE_TASKS_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			pointerToMnemosyneOperations =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FAILURE_MNEMOSYNE_OPERATIONS_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-			
+
 		}
 		logger.debug(" pointerToTasks=" + pointerToTasks + " pointerToMnemosyneOperations=" + pointerToMnemosyneOperations);
 		if(pointerToTasks!=null && !pointerToTasks.equals("")) {
 			aDenomeManager.executeActionSuccessTasks(pointerToTasks);
 		}
-		
+
 		if(pointerToMnemosyneOperations!=null && !pointerToMnemosyneOperations.equals("")) {
 			JSONObject mnemosyneOperationsDene;
 			try {
 				mnemosyneOperationsDene = aDenomeManager.getDeneByIdentity(new Identity(pointerToMnemosyneOperations));
 				logger.debug("mnemosyneOperationsDene=" + mnemosyneOperationsDene.toString(4));
-				
+
 				if(mnemosyneOperationsDene!=null ) {
 					JSONArray mnemosyneOperationPointers = DenomeUtils.getAllDeneWordsFromDeneByDeneWordType(mnemosyneOperationsDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_OPERATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					logger.debug("mnemosyneOperationPointers=" + mnemosyneOperationPointers);
-					
+
 					JSONArray mnemosyneDenes = new JSONArray();
 					String mnemosyneOperationPointer;
 					JSONObject mnemosyneOperationDene;
@@ -550,9 +654,9 @@ public class MnemosyneManager {
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e));
 			}
-			
-			
-			
+
+
+
 			aDenomeManager.executeActionSuccessTasks(pointerToMnemosyneOperations);
 		}
 
@@ -705,9 +809,9 @@ public class MnemosyneManager {
 				mnemosyconRuleProcessingDeneDeneWords = new JSONArray();
 				mnemosyconRuleProcessingDene.put("DeneWords", mnemosyconRuleProcessingDeneDeneWords);
 
-				
-				
-				
+
+
+
 
 				if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_DAY)) {
 
@@ -740,12 +844,12 @@ public class MnemosyneManager {
 						// the value attribute is the value the coolumn must have to be part of the delete
 						String columnName = mnemosyconRuleDatabaseFieldJSON.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
 						String columnValue = mnemosyconRuleDatabaseFieldJSON.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						
-						
+
+
 						mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, columnName + "="  + columnValue,null,"String",true);
 						mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 						rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(columnName, columnValue, millisToDeleteFrom);
-						
+
 
 					}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_COMMAND_REQUESTS)) {
 						rowsDeleted = aDBManager.deleteByPeriodFromCommandRequests(millisToDeleteFrom);
@@ -1057,6 +1161,11 @@ public class MnemosyneManager {
 		public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
 			return o1.getValue().compareTo(o2.getValue());
 		}
+	}
+
+
+	public JSONArray getRemeberedDeneWordStatByPeriod( String identityPointer,  long startTimeMillis, long  endTimeMillis, String kind ){
+		return aDBManager.getRemeberedDeneWordStatByPeriod( identityPointer,   startTimeMillis,   endTimeMillis,  kind);
 	}
 
 
