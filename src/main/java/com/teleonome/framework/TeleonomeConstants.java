@@ -927,7 +927,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_PANEL_VISUALIZATION_STYLE="Panel Visualization Style";
 	public static final String DENEWORD_TYPE_PANEL_DATA_SOURCE_POINTER="Panel Data Source Pointer";
 	public static final String DENEWORD_TYPE_DISPLAY_TABLE_DENEWORD_POINTER="Display Table DeneWord Pointer";
-	
+	public static final String DENEWORD_TYPE_CHART_TIME_SCALE_STRING="Panel Time Scale String";
 	public static final String DENEWORD_TYPE_HUMAN_INTERFACE_WEB_PAGE_GLYPH_ICON="Lower Nav Glyphicon";
 	//
 	// the different styles to present data
@@ -954,11 +954,10 @@ public class TeleonomeConstants {
 	
 	public static final String PANEL_VISUALIZATION_STYLE_PATHOLOGY="Pathology Panel";
 	public static final String PANEL_VISUALIZATION_STYLE_LINE_CHART="Line Chart Panel";
+	public static final String PANEL_VISUALIZATION_STYLE_BAR_CHART="Bar Chart Panel";
+	
 	public static final String PANEL_VISUALIZATION_STYLE_CSV_MULTI_LINE_CHART="CSV File MultiLine Chart Panel";
 	public static final String PANEL_VISUALIZATION_STYLE_PIE_CHART="Pie Chart Panel";
-
-	
-	public static final String PANEL_VISUALIZATION_STYLE_BAR_CHART="Bar Chart Panel";
 	public static final String PANEL_VISUALIZATION_ORGANISM_VIEW="Organism View Panel";
 	public static final String PANEL_VISUALIZATION_STYLE_MNEMOSYNE_TABLE="Mnemosyne Table Panel";
 	public static final String PANEL_VISUALIZATION_STYLE_IMAGE="Image Panel";
