@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -39,7 +40,9 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	private final String DATABASE_URL = "postgres://postgres:sazirac@localhost:5432/teleonome";
 	private TeleonomeConnectionPool connectionPool;
 	private Logger logger;  
-
+	private static DecimalFormat twoDecimalsFormat = new DecimalFormat(".##");
+	
+	
 	private PostgresqlPersistenceManager(){
 		logger = Logger.getLogger(getClass());
 		logger.debug("Initiating DBManager");
@@ -2783,7 +2786,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					toReturn.put("Value", value);
 				}else {
 					value = rs.getDouble(1);
-					toReturn.put("Value", value);
+					
+					toReturn.put("Value", twoDecimalsFormat.format(value));
 				}
 				
 			}
