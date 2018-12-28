@@ -295,12 +295,6 @@ public class MnemosyneManager {
 		JSONObject mnemosyconRuleDatabaseFieldJSON;
 
 
-		//mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Total Space", totalSpace,null,"double",true);
-		//mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-
-		//		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
-		//		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
-
 
 		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, aDenomeManager.getcurrentlyCreatingPulseTimestampMillis(),null,"long",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
