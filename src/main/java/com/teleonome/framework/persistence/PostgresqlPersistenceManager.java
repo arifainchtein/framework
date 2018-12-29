@@ -219,18 +219,15 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	private int deleteByPeriod(String command) {
 		Connection connection=null;
 		Statement statement=null;
-		ResultSet rs=null;
+		
 		int numberDeleted=0;
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
 
 			logger.debug(command);
-			rs = statement.executeQuery(command);
-			String sizeString="";
-			while(rs.next()){
-				numberDeleted=rs.getInt(1);
-			}
+			numberDeleted = statement.executeUpdate(command);
+			
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -243,7 +240,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 			if(statement!=null)
 				try {
-					if(rs!=null)rs.close();
+					
 					statement.close();
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
