@@ -433,7 +433,7 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 		output.write(actuatorCommand,0,actuatorCommand.length());
 		//serialPortOutputStream.write( actuatorCommand.getBytes() );
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(3000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
