@@ -51,7 +51,7 @@ class MappedBusThread extends Thread{
 		logger = logger.getLogger(getClass());
 	}
 
-	public void setKeepRunning(boolean b){
+	public synchronized void setKeepRunning(boolean b){
 		if(b)logger.info("Async Cycle requested to start");
 		else logger.info("Async Cycle requested to stop");
 		keepRunning=b;

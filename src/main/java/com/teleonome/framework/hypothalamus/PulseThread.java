@@ -208,7 +208,7 @@ public class PulseThread extends Thread{
 					anHypothalamus.aMappedBusThread.setKeepRunning(false);
 					while( anHypothalamus.aMappedBusThread.isAlive()){
 						logger.debug("waiting for mapped bus to finish");
-						Thread.sleep(100);
+						Thread.sleep(500);
 					}
 				}
 
