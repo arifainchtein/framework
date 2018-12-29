@@ -146,6 +146,12 @@ class MappedBusThread extends Thread{
 						output = aMicroController.getWriter();
 						logger.debug("requesting " + messageToSend);
 						output.write(messageToSend,0,messageToSend.length());
+						try {
+							Thread.sleep(3000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						output.flush();
 
 						input = aMicroController.getReader();
