@@ -189,7 +189,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 	public int deleteByPeriodFromOrganismPulse( long millisToDeleteFrom, String teamInfo) {
 
-		String command = "delete from organismpulse where pulsetimemillis < " +  millisToDeleteFrom + " RETURNING *";
+		String command = "with deleted as (delete from organismpulse where pulsetimemillis < " +  millisToDeleteFrom + " RETURNING *) SELECT count(*) FROM deleted";
 		if(!teamInfo.equals("")) {
 			command +=command + " " + teamInfo;
 		}
@@ -197,38 +197,39 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	}
 
 	public int deleteByPeriodFromPulse(long millisToDeleteFrom) {
-		String command = "delete from pulse where pulsetimemillis < " +  millisToDeleteFrom+ " RETURNING *";
+		String command = "with deleted as (delete from pulse where pulsetimemillis < " +  millisToDeleteFrom+ " RETURNING *) SELECT count(*) FROM deleted";
 		return deleteByPeriod( command);
 	}
 	
 	public int deleteByPeriodFromRememberedDeneWords(String columnName, String columnValue, long millisToDeleteFrom) {
-		String command = "delete from remembereddenewords where "+ columnName + "='" +columnValue + "' and timeMillis  < " +  millisToDeleteFrom+ " RETURNING *";
+		String command = "with deleted as (delete from remembereddenewords where "+ columnName + "='" +columnValue + "' and timeMillis  < " +  millisToDeleteFrom+ " RETURNING *) SELECT count(*) FROM deleted";
 		return deleteByPeriod( command);
 	}
 	
 	public int deleteByPeriodFromCommandRequests(long millisToDeleteFrom) {
-		String command = "delete from CommandRequests where createdon  < " +  millisToDeleteFrom+ " RETURNING *";
+		String command = "with deleted as (delete from CommandRequests where createdon  < " +  millisToDeleteFrom+ " RETURNING *) SELECT count(*) FROM deleted";
 		return deleteByPeriod( command);
 	}
 
 	public int deleteByPeriodFromMutationEvent(long millisToDeleteFrom) {
-		String command = "delete from MutationEvent where createdonMillis  < " +  millisToDeleteFrom+ " RETURNING *";
+		String command = "with deleted as (delete from MutationEvent where createdonMillis  < " +  millisToDeleteFrom+ " RETURNING *) SELECT count(*) FROM deleted";
 		return deleteByPeriod( command);
 	}
 	
 	private int deleteByPeriod(String command) {
 		Connection connection=null;
 		Statement statement=null;
-		
+		ResultSet rs=null;
 		int numberDeleted=0;
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
 
 			logger.debug(command);
-			numberDeleted = statement.executeUpdate(command);
-			
-
+			rs = statement.executeQuery(command);
+			while(rs.next()) {
+				numberDeleted = rs.getInt(1);
+			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
@@ -237,11 +238,10 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			logger.debug(s);
 
 		}finally{
-
-			if(statement!=null)
+			
 				try {
-					
-					statement.close();
+					if(rs!=null)rs.close();
+					if(statement!=null)statement.close();
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					logger.debug(Utils.getStringException(e));
