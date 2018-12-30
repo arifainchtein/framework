@@ -1204,8 +1204,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			//System.out.println("bad sql:" + sql);
-			Utils.getStringException(e);
-			logger.debug(Utils.getStringException(e));
+			
+			logger.warn(Utils.getStringException(e));
 		}finally{
 			if(connection!=null){
 				try {
