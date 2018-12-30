@@ -708,6 +708,7 @@ public class MnemosyneManager {
 			mnemosyneRulesExecutionPositionIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(mnemosyconRuleJSONObject, new Integer(executionPosition)));
 		}
 		Collections.sort(mnemosyneRulesExecutionPositionIndex, new IntegerCompare());
+		logger.debug("after sorting");
 		int counter=0;
 		String mnemosyconRuleSource,mnemosyconRuleFilePrefix,mnemosyconRuleLocation,mnemosyconRuleTimeUnit, mnemosyconRuleTeamParameter=null;
 		int mnemosyconRuleTimeUnitValue;
@@ -722,7 +723,9 @@ public class MnemosyneManager {
 		long startRuleMillis;
 		long ruleDurationMillis;
 		long totalSpace = new File("/").getTotalSpace()/1024000;
+		logger.debug("totalSpace=" + totalSpace );
 		int maximumPercentageDatabase = (int) DenomeUtils.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.MNEMOSYCON_MAXIMUM_PERCENTAGE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		logger.debug("maximumPercentageDatabase=" + maximumPercentageDatabase );
 		double sizeToCompare=0;
 		boolean executedSuccesfully=true;
 		BasicFileAttributes attr;
@@ -731,7 +734,7 @@ public class MnemosyneManager {
 		Path path;
 		
 		do {
-			logger.debug("totalSpace=" + totalSpace + " mnemosyconForgetApproach=" + mnemosyconForgetApproach + " maximumPercentageDatabase=" + maximumPercentageDatabase);
+			logger.debug( " mnemosyconForgetApproach=" + mnemosyconForgetApproach);
 			if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_DATABASE_SIZE_TO_DISK_SIZE)){
 				sizeToCompare = aDBManager.getDatabaseSizeInMB();
 
