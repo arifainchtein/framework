@@ -759,6 +759,15 @@ public class MnemosyneManager {
 			mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 			mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
 			mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+			
+			mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, aDenomeManager.getcurrentlyCreatingPulseTimestampMillis(),null,"long",true);
+			mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+			mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PULSE_TIMESTAMP, aDenomeManager.getcurrentlyCreatingPulseTimestamp(),null,"String",true);
+			mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+
+			
+			mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_FREE_SPACE_BEFORE_MNEMOSYCON, totalSpace,"Mb","long",true);
+			mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 
 			logger.debug("keep going=" + keepGoing + " sizeToCompare=" + sizeToCompare + " maximumPercentageDatabase=" + maximumPercentageDatabase);
 			if(keepGoing) {
@@ -1123,6 +1132,10 @@ public class MnemosyneManager {
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Number Rules Processed", counter,"","int",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+		long freeSpaceAfter = new File("/").getTotalSpace()/1024000;
+		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_FREE_SPACE_AFTER_MNEMOSYCON, freeSpaceAfter,"Mb","long",true);
+		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+
 		logger.debug("totalExecutionDuration=" + totalExecutionDuration);
 		//
 		// now check to see if the mnemosycon executed succesfully if so return the tasks for success, if not return the task for failure
