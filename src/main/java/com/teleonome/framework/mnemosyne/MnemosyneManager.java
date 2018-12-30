@@ -755,7 +755,7 @@ public class MnemosyneManager {
 			mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Codon", aMnemosyconName,null,"String",true);
 			mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 
-
+			logger.debug("keep going=" + keepGoing + " sizeToCompare=" + sizeToCompare + " maximumPercentageDatabase=" + maximumPercentageDatabase);
 			if(keepGoing) {
 				//
 				// get the next rule
@@ -808,6 +808,7 @@ public class MnemosyneManager {
 				//
 				// excute the delete
 				//
+				logger.debug("mnemosyconRuleSource=" + mnemosyconRuleSource + " mnemosyconRuleLocation=" + mnemosyconRuleLocation);
 				if(mnemosyconRuleSource.equals(TeleonomeConstants.MNEMOSYCON_DATA_SOURCE_DATABASE)) {
 					if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_PULSE)) {
 						rowsDeleted = aDBManager.deleteByPeriodFromPulse(millisToDeleteFrom);
@@ -837,6 +838,7 @@ public class MnemosyneManager {
 						// there are three potential values
 						teamParam="";
 						mnemosyconRuleTeamParameter= (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TEAM_PARAMETER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("mnemosyconRuleTeamParameter=" + mnemosyconRuleTeamParameter);
 						if(mnemosyconRuleTeamParameter!=null && !mnemosyconRuleTeamParameter.equals(TeleonomeConstants.MNEMOSYCON_RULE_TEAM_PARAMETER_ALL)) {
 
 							StringBuffer teamsList = new StringBuffer();
@@ -871,9 +873,10 @@ public class MnemosyneManager {
 
 						rowsDeleted = aDBManager.deleteByPeriodFromOrganismPulse(millisToDeleteFrom, teamParam);
 					}	
-
+					logger.debug(" about to vacuum");
+					 now=System.currentTimeMillis();
 					aDBManager.vacuum();
-
+					logger.debug("vacuum took " + ( now-System.currentTimeMillis()) );
 					mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.MNEMOSYCON_ROWS_DELETED, rowsDeleted,null,"int",true);
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 
