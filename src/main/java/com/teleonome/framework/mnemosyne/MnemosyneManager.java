@@ -732,9 +732,9 @@ public class MnemosyneManager {
 		FileTime creationTime;
 		JSONObject mnemosyconRuleDatabaseFieldJSON;
 		Path path;
-		
+		logger.debug( "mnemosyconForgetApproach=" + mnemosyconForgetApproach);
 		do {
-			logger.debug( " mnemosyconForgetApproach=" + mnemosyconForgetApproach);
+			logger.debug( " 2-mnemosyconForgetApproach=" + mnemosyconForgetApproach);
 			if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_DATABASE_SIZE_TO_DISK_SIZE)){
 				sizeToCompare = aDBManager.getDatabaseSizeInMB();
 
