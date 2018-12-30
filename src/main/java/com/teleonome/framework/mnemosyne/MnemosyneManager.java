@@ -1123,18 +1123,66 @@ public class MnemosyneManager {
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
 		mnemosyconLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Number Rules Processed", counter,"","int",true);
 		mnemosyconProcessingDeneDeneWords.put(mnemosyconLogicProcessingCodonDeneDeneWord);
+		logger.debug("totalExecutionDuration=" + totalExecutionDuration);
 		//
 		// now check to see if the mnemosycon executed succesfully if so return the tasks for success, if not return the task for failure
 		//
 		String pointerToTasks = null;
+		String pointerToMnemosyneOperations = null;
+		logger.debug("executed Succesfully=" + executedSuccesfully);
 		if(executedSuccesfully) {
 			pointerToTasks =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_SUCCESS_TASKS_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			pointerToMnemosyneOperations =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_SUCCESS_MNEMOSYNE_OPERATIONS_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 		}else {
 			pointerToTasks =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FAILURE_TASKS_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-		}
+			pointerToMnemosyneOperations =  (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(aMnemosyconForgetParameters, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FAILURE_MNEMOSYNE_OPERATIONS_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
+		}
+		logger.debug(" pointerToTasks=" + pointerToTasks + " pointerToMnemosyneOperations=" + pointerToMnemosyneOperations);
 		if(pointerToTasks!=null && !pointerToTasks.equals("")) {
 			aDenomeManager.executeActionSuccessTasks(pointerToTasks);
+		}
+
+		if(pointerToMnemosyneOperations!=null && !pointerToMnemosyneOperations.equals("")) {
+			JSONObject mnemosyneOperationsDene;
+			try {
+				mnemosyneOperationsDene = aDenomeManager.getDeneByIdentity(new Identity(pointerToMnemosyneOperations));
+				logger.debug("mnemosyneOperationsDene=" + mnemosyneOperationsDene.toString(4));
+
+				if(mnemosyneOperationsDene!=null ) {
+					JSONArray mnemosyneOperationPointers = DenomeUtils.getAllDeneWordsFromDeneByDeneWordType(mnemosyneOperationsDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_OPERATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("mnemosyneOperationPointers=" + mnemosyneOperationPointers);
+
+					JSONArray mnemosyneDenes = new JSONArray();
+					String mnemosyneOperationPointer;
+					JSONObject mnemosyneOperationDene;
+					for(int i=0;i<mnemosyneOperationPointers.length();i++) {
+						mnemosyneOperationPointer = mnemosyneOperationPointers.getString(i);
+						mnemosyneOperationDene = aDenomeManager.getDeneByIdentity(new Identity(mnemosyneOperationPointer));
+						mnemosyneDenes.put(mnemosyneOperationDene);
+					}
+					logger.debug("mnemosyneDenes.length()=" + mnemosyneDenes.length());
+					if(mnemosyneDenes.length()>0) {
+						aDenomeManager.executeMnemosyneOperations( mnemosyneDenes);
+					}
+				}
+			} catch (InvalidDenomeException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (InvalidMutation e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+
+
+
+			aDenomeManager.executeActionSuccessTasks(pointerToMnemosyneOperations);
 		}
 
 	}
