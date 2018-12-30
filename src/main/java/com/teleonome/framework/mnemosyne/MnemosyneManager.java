@@ -729,7 +729,9 @@ public class MnemosyneManager {
 		FileTime creationTime;
 		JSONObject mnemosyconRuleDatabaseFieldJSON;
 		Path path;
+		
 		do {
+			logger.debug("totalSpace=" + totalSpace = " mnemosyconForgetApproach=" + mnemosyconForgetApproach + " maximumPercentageDatabase=" + maximumPercentageDatabase);
 			if(mnemosyconForgetApproach.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_FORGET_APPROACH_DATABASE_SIZE_TO_DISK_SIZE)){
 				sizeToCompare = aDBManager.getDatabaseSizeInMB();
 
