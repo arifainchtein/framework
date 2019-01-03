@@ -130,9 +130,11 @@ public class NetworkUtilities {
 	public static JSONObject getAvailableAdapters(){
 		ArrayList result=new ArrayList();;
 		JSONObject toReturn = new JSONObject();
+		logger.debug("inside of getAvailableAdapters");
 		try {
 			//if(debug)//System.out.println("in getSSID, About to execute command");
 			result = Utils.executeCommand( " netstat -i");
+			logger.debug("result=" + result.toString());
 			//
 			// the return format is:
 			
@@ -146,7 +148,6 @@ public class NetworkUtilities {
 			// so ignore the first two rows and get the element of the first row
 			// ignoring lo
 			String line;
-			StringTokenizer st = new StringTokenizer(" ");
 			String ipAddress,adapter;
 			for(int j=2;j<result.size();j++){
 				line = (String) result.get(j);
