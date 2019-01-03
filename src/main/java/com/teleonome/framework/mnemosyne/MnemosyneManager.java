@@ -381,6 +381,8 @@ public class MnemosyneManager {
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 					rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(columnName, columnValue, millisToDeleteFrom);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_COMMAND_REQUESTS)) {
+					
+					
 					rowsDeleted = aDBManager.deleteByPeriodFromCommandRequests(millisToDeleteFrom);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_MUTATION_EVENT)) {
 					rowsDeleted = aDBManager.deleteByPeriodFromMutationEvent(millisToDeleteFrom);
