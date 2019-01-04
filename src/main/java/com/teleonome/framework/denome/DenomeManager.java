@@ -81,7 +81,8 @@ public class DenomeManager {
 	private int interSensorReadTimeoutMilliseconds=0;
 	private String timeZone="";
 	int pacemakerPid=-1;
-	String localIpAddress="", hostName="";
+	JSONObject networkAdapterInfoJSONObject;
+	String hostName="";
 	String selectedDenomeFileName="";
 
 	SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -1190,8 +1191,8 @@ public class DenomeManager {
 		pacemakerPid=p;
 	}
 
-	public void setNetworkInfo(String l, String h, String i){
-		localIpAddress=l;
+	public void setNetworkInfo(JSONObject no, String h, String i){
+		networkAdapterInfoJSONObject=no;
 		hostName=h;
 		initialIdentityMode=i;
 	}
@@ -5410,11 +5411,23 @@ public class DenomeManager {
 
 
 					//
-					// now remove the Wifi Info dene from 
+					// now remove the netwrking  Info denes from 
+					// there will be up to 4 denes, one for each wlan0, wlan1 and eth0 and one for the available ssids
 
 					try {
 						deneRemoved = DenomeUtils.removeDeneFromChain(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA, TeleonomeConstants.DENE_WIFI_INFO);
 						logger.debug("removing the Wifi Info data dene from operational, result:" + deneRemoved);
+						
+						deneRemoved = DenomeUtils.removeDeneFromChain(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA, TeleonomeConstants.DENE_WLAN0);
+						logger.debug("removing the wlan0 Info data dene from operational, result:" + deneRemoved);
+						
+						deneRemoved = DenomeUtils.removeDeneFromChain(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA, TeleonomeConstants.DENE_WLAN1);
+						logger.debug("removing the wlan1 Info data dene from operational, result:" + deneRemoved);
+						
+						deneRemoved = DenomeUtils.removeDeneFromChain(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA, TeleonomeConstants.DENE_ETH0);
+						logger.debug("removing the eth0 Info data dene from operational, result:" + deneRemoved);
+						
+						
 					} catch (InvalidDenomeException e) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e));
@@ -5521,70 +5534,104 @@ public class DenomeManager {
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Heart Build Number",""+heartBuildNumber,null,"String",true);	
 					systemDataDeneWords.put(deneWord);
 
-					//'
-					/// system info
-					///
+					
+					// Networking Information
+					//
+					// there can be up to 4 denes, one each for wlan0,wlan1 and eth0 as well as a general wifi
+					//
+					//	networkAdapterInfoJSONObject can contain the following info
+					//
+					//  wlan0, ipaddress for wlan0
+					//  wlan1, ipaddress for wlan1
+					//  eth0, ipaddress for eth0
 
-
-
-
-					logger.debug("about to get wifi info");
-					JSONObject wifiDataDene = new JSONObject();
-					wifiDataDene.put("Name", TeleonomeConstants.DENE_WIFI_INFO);
-					JSONArray wifiDataDeneWords = new JSONArray();
-					wifiDataDene.put("DeneWords", wifiDataDeneWords);
-					deneWord = DenomeUtils.buildDeneWordJSONObject("Host IP Address",localIpAddress,null,"String",true);
-					wifiDataDeneWords.put(deneWord);
-
-					operationalDataDenes.put(wifiDataDene);
-					try {
-
-
-						String command="iwconfig wlan0";
-						ArrayList commandResults = Utils.executeCommand(command);
-						//logger.debug("commandResults=" + commandResults.size() + commandResults);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Interface","wlan0",null,"String",true);
+					Iterator networkInfoIterator = networkAdapterInfoJSONObject.keys();
+					String interfaceName, interfaceIpAddress;
+					JSONObject wifiDataDene = null;
+					JSONArray wifiDataDeneWords;
+					
+					while(networkInfoIterator.hasNext()) {
+						interfaceName = (String) networkInfoIterator.next();
+						interfaceIpAddress = networkAdapterInfoJSONObject.getString(interfaceName);
+						wifiDataDene = new JSONObject();
+						operationalDataDenes.put(wifiDataDene);
+						logger.debug("about to get wifi info for " + interfaceName);
+						if(interfaceName.equals(TeleonomeConstants.ETH0)) {
+							wifiDataDene.put("Name", TeleonomeConstants.DENE_ETH0);
+						}else if(interfaceName.equals(TeleonomeConstants.WLAN0)) {
+							wifiDataDene.put("Name", TeleonomeConstants.DENE_WLAN0);
+						}else if(interfaceName.equals(TeleonomeConstants.WLAN1)) {
+							wifiDataDene.put("Name", TeleonomeConstants.DENE_WLAN1);
+						}else  {
+							wifiDataDene.put("Name", interfaceName);
+						}
+						wifiDataDeneWords = new JSONArray();
+						wifiDataDene.put("DeneWords", wifiDataDeneWords);
+						deneWord = DenomeUtils.buildDeneWordJSONObject("IP Address",interfaceIpAddress,null,"String",true);
 						wifiDataDeneWords.put(deneWord);
-						String line;
-						if(commandResults.size()>0){
-							for(int k=0;k<commandResults.size();k++){
-								line = ((String)commandResults.get(k)).trim();
-								String[] tokens = line.split("  ");
-								for(int j=0;j<tokens.length;j++){
-									logger.debug("tokens[j]=" + tokens[j]);
-									//
-									// there is one token without = which contains
-									// the interface, ie wlan0
-									if(tokens[j].indexOf("=")>-1){
-										String[] tokens2 = tokens[j].trim().split("=");		
-										logger.debug(tokens2[0] + ":" + tokens2[1]);
-										deneWord = DenomeUtils.buildDeneWordJSONObject(tokens2[0],tokens2[1],null,"String",true);
-										wifiDataDeneWords.put(deneWord);
-									}else if(tokens[j].indexOf(":")>-1){
-										String[] tokens2 = tokens[j].trim().split(":");		
-										logger.debug(tokens2[0] + ":" + tokens2[1]);
-										deneWord = DenomeUtils.buildDeneWordJSONObject(tokens2[0],tokens2[1],null,"String",true);
-										wifiDataDeneWords.put(deneWord);
-									}else{
-										if(!tokens[j].contains("wlan") && tokens[j].length()>0){
-											deneWord = DenomeUtils.buildDeneWordJSONObject("Support",tokens[j],null,"String",true);
-											wifiDataDeneWords.put(deneWord);
-										}
-									}
+						//
+						// only do this part for the wireless adapters
+						if(!interfaceName.equals(TeleonomeConstants.ETH0)) {
+							try {
+								String command="iwconfig " + interfaceName;
+								ArrayList commandResults = Utils.executeCommand(command);
+								//logger.debug("commandResults=" + commandResults.size() + commandResults);
+								//deneWord = DenomeUtils.buildDeneWordJSONObject("Interface",interfaceName,null,"String",true);
+								//wifiDataDeneWords.put(deneWord);
+								String line;
+								if(commandResults.size()>0){
+									for(int k=0;k<commandResults.size();k++){
+										line = ((String)commandResults.get(k)).trim();
+										logger.debug("line 5577 line=" +line);
+										String[] tokens = line.split("  ");
+										for(int j=0;j<tokens.length;j++){
+											logger.debug("tokens[j]=" + tokens[j]);
+											//
+											// there is one token without = which contains
+											// the interface, ie wlan0
+											if(tokens[j].indexOf("=")>-1){
+												String[] tokens2 = tokens[j].trim().split("=");		
+												logger.debug(tokens2[0] + ":" + tokens2[1]);
+												deneWord = DenomeUtils.buildDeneWordJSONObject(tokens2[0],tokens2[1],null,"String",true);
+												wifiDataDeneWords.put(deneWord);
+											}else if(tokens[j].indexOf(":")>-1){
+												String[] tokens2 = tokens[j].trim().split(":");		
+												logger.debug(tokens2[0] + ":" + tokens2[1]);
+												deneWord = DenomeUtils.buildDeneWordJSONObject(tokens2[0],tokens2[1],null,"String",true);
+												wifiDataDeneWords.put(deneWord);
+											}else{
+												if(!tokens[j].contains("wlan") && tokens[j].length()>0){
+													deneWord = DenomeUtils.buildDeneWordJSONObject("Support",tokens[j],null,"String",true);
+													wifiDataDeneWords.put(deneWord);
+												}
+											}
 
+										}
+
+									}
 								}
 
+
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								logger.warn(Utils.getStringException(e));
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								logger.warn(Utils.getStringException(e));
 							}
 						}
-
-
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						logger.warn(Utils.getStringException(e));
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						logger.warn(Utils.getStringException(e));
+						
 					}
+				
+					
+					
+					wifiDataDene = new JSONObject();
+					operationalDataDenes.put(wifiDataDene);
+					logger.debug("about to get SSID info ");
+					wifiDataDene.put("Name", TeleonomeConstants.DENE_WIFI_INFO);
+					wifiDataDeneWords = new JSONArray();
+					wifiDataDene.put("DeneWords", wifiDataDeneWords);
+					
 					logger.debug("looking for ssids");
 					//
 					// add the available SSIDs
@@ -5600,10 +5647,9 @@ public class DenomeManager {
 						logger.debug("ssid="+ ssid + " signal=" + signal + " ssidName=" + ssidName);
 						deneWord = DenomeUtils.buildDeneWordJSONObject("SSID:" + ssidName,signal,null,"String",true);
 						wifiDataDeneWords.put(deneWord);
-
-
 					}
-
+					
+					
 					logger.debug("End of System Data Dene");
 
 					//

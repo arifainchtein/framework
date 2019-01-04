@@ -64,6 +64,7 @@ import com.teleonome.framework.denome.DenomeUtils;
 import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.InvalidMutation;
 import com.teleonome.framework.exception.MissingDenomeException;
+import com.teleonome.framework.network.NetworkUtilities;
 import com.teleonome.framework.persistence.PostgresqlPersistenceManager;
 import com.teleonome.framework.utils.Utils;
 
@@ -1776,7 +1777,7 @@ public class MnemosyneManager {
 					exoZeroPublisher.setHWM(2);
 					String ipToBindToZeroMQ="";
 					try {
-						ipToBindToZeroMQ = Utils.getExoZeroNetworkAddress().getHostAddress();
+						ipToBindToZeroMQ = NetworkUtilities.getExoZeroNetworkAddress().getHostAddress();
 					} catch (SocketException | UnknownHostException e2) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e2));
@@ -1967,7 +1968,7 @@ public class MnemosyneManager {
 					exoZeroPublisher.setHWM(2);
 					String ipToBindToZeroMQ="";
 					try {
-						ipToBindToZeroMQ = Utils.getExoZeroNetworkAddress().getHostAddress();
+						ipToBindToZeroMQ = NetworkUtilities.getExoZeroNetworkAddress().getHostAddress();
 					} catch (SocketException | UnknownHostException e2) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e2));

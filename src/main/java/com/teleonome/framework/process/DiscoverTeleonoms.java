@@ -17,6 +17,7 @@ import javax.jmdns.ServiceListener;
 import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
 
+import com.teleonome.framework.network.NetworkUtilities;
 import com.teleonome.framework.utils.Utils;
 
 
@@ -61,7 +62,7 @@ public class DiscoverTeleonoms extends Thread {
 		while(true){
 					
 			try {
-				InetAddress ipToBindToZeroMQ = Utils.getExoZeroNetworkAddress();
+				InetAddress ipToBindToZeroMQ = NetworkUtilities.getExoZeroNetworkAddress();
 				InetAddress addr = InetAddress.getLocalHost();
 				  
 				String hostname = InetAddress.getByName(ipToBindToZeroMQ.getHostName()).toString();

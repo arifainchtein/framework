@@ -842,7 +842,12 @@ public class TeleonomeConstants {
 	public static final String DENE_ALERT_MESSAGES="Alert Messages";
 	public static final String DENE_MEMORY_STATUS="Memory Status";
 	public static final String DENE_WIFI_INFO="Wifi Info";
-	
+	public static final String WLAN0="wlan0";
+	public static final String WLAN1="wlan1";
+	public static final String ETH0="eth0";
+	public static final String DENE_WLAN0="wlan0 Info";
+	public static final String DENE_WLAN1="wlan1 Info";
+	public static final String DENE_ETH0="eth0 Info";
 	
 	//
 	// the values to use for the status message in case the application calling 

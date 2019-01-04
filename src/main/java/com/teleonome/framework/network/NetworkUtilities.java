@@ -7,7 +7,9 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.StringTokenizer;
 
@@ -17,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.utils.Utils;
 
 public class NetworkUtilities {
@@ -107,6 +110,124 @@ public class NetworkUtilities {
 	}
 	
 	
+//	public static JSONObject getNetworkInfo() throws SocketException, UnknownHostException{
+//		NetworkInterface networkInterface;
+//		InetAddress inetAddr, potential=null;
+//		
+//		//
+//		// pay attention to the fact that if a teleonome has 2 network cards, 
+//		// one as a host and one as part of a network, the inetAddress needs to belong
+//		// to the network interface connected to the organism network, otherwise the exozero network
+//		// will not receive the pulse
+//		int numberOfNetworkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces()).size();
+//		boolean hasEth0=false;
+//		boolean hasWlan0=false;
+//		boolean hasWlan1=false;
+//		Hashtable interfacesNameIndex = new Hashtable();
+//		
+//		logger.info("numberOfNetworkInterfaces=" + numberOfNetworkInterfaces);
+//		for(Enumeration <NetworkInterface> enu = NetworkInterface.getNetworkInterfaces();enu.hasMoreElements();){
+//			networkInterface  = enu.nextElement();
+//			if(networkInterface.getDisplayName().equals("eth0")) {
+//				hasEth0=true;
+//				interfacesNameIndex.put("eth0", networkInterface);
+//			}
+//			else if(networkInterface.getDisplayName().equals("wlan0")) {
+//				hasWlan0=true;
+//				interfacesNameIndex.put("wlan0", networkInterface);
+//			}
+//			else if(networkInterface.getDisplayName().equals("wlan1")) {
+//				hasWlan1=true;
+//				interfacesNameIndex.put("wlan1", networkInterface);
+//			}
+//		}
+//		//
+//		// if eth0 is available return that
+//		//
+//		if(hasEth0) {
+//			networkInterface = (NetworkInterface) interfacesNameIndex.get("eth0");
+//			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
+//				inetAddr = (InetAddress)ifaces.nextElement();
+//				logger.info("inetAddr=" + inetAddr.getHostAddress());
+//				if(!inetAddr.isLoopbackAddress() && !inetAddr.getHostAddress().equals("172.16.1.1")){
+//					if(inetAddr.isSiteLocalAddress()){
+//						return inetAddr.getHostAddress();
+//					}
+//				}
+//			} 
+//		}
+//		//
+//		// now check to see if we have one or two wifis,
+//		// if so then wlan0 is the external facing
+//		// and wlan1 is the internal wifi,
+//		// therefore either way return wlan0
+//		//
+//		if(hasWlan0) {
+//			networkInterface = (NetworkInterface) interfacesNameIndex.get("wlan0");
+//			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
+//				inetAddr = (InetAddress)ifaces.nextElement();
+//				logger.info("inetAddr=" + inetAddr.getHostAddress());
+//				if(!inetAddr.isLoopbackAddress() ){
+//					if(inetAddr.isSiteLocalAddress()){
+//						return inetAddr.getHostAddress();
+//					}
+//				}
+//			}
+//		}
+//		return null;
+//	}
+
+	/**
+	 * the address 172.16.1.1 (TeleonomeConstants.ADA_INTERNAL_HOST_IPADDRESS) is hardwired as the address that the adas are going to connect to
+	 * so make sure that you do not return this address, because this method is called to
+	 * identify which network card will be bound to ZeroMQ network
+	 */
+	public static InetAddress getExoZeroNetworkAddress() throws SocketException, UnknownHostException{
+		NetworkInterface networkInterface;
+		InetAddress inetAddr, potential=null;
+		for(Enumeration <NetworkInterface> enu = NetworkInterface.getNetworkInterfaces();enu.hasMoreElements();){
+			networkInterface  = enu.nextElement();
+			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
+				inetAddr = (InetAddress)ifaces.nextElement();
+				if(!inetAddr.getHostAddress().equals(TeleonomeConstants.ADA_INTERNAL_HOST_IPADDRESS)) {
+					if(!inetAddr.isLoopbackAddress()){
+						if(inetAddr.isSiteLocalAddress()){
+							return inetAddr;
+						}else{
+							potential=inetAddr;
+						}
+					}
+				}
+			}
+		}
+		return potential;
+	}
+
+	/**
+	 * the address 172.16.1.1 (TeleonomeConstants.ADA_INTERNAL_HOST_IPADDRESS) is hardwired as the address that the adas are going to connect to
+	 * so make sure that you do not return this address, because this method is called to
+	 * identify which network card will be bound to ZeroMQ network
+	 */
+	public static InetAddress getEndoZeroNetworkAddress() throws SocketException, UnknownHostException{
+		NetworkInterface networkInterface;
+		InetAddress inetAddr, potential=null;
+		for(Enumeration <NetworkInterface> enu = NetworkInterface.getNetworkInterfaces();enu.hasMoreElements();){
+			networkInterface  = enu.nextElement();
+			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
+				inetAddr = (InetAddress)ifaces.nextElement();
+				if(inetAddr.getHostAddress().equals(TeleonomeConstants.ADA_INTERNAL_HOST_IPADDRESS)) {
+					if(!inetAddr.isLoopbackAddress()){
+						if(inetAddr.isSiteLocalAddress()){
+							return inetAddr;
+						}else{
+							potential=inetAddr;
+						}
+					}
+				}
+			}
+		}
+		return potential;
+	}
 	
 	
 	
@@ -153,8 +274,11 @@ public class NetworkUtilities {
 				line = (String) result.get(j);
 				logger.debug("line=" + line);
 				adapter = line.split(" ")[0];
-				ipAddress=getIpAddressByInterfaceName(adapter);
-				toReturn.put(adapter, ipAddress);
+				if(!adapter.equals("lo")) {
+					ipAddress=getIpAddressByInterfaceName(adapter);
+					toReturn.put(adapter, ipAddress);
+				}
+				
 			}
 			
 		} catch (IOException | InterruptedException e) {

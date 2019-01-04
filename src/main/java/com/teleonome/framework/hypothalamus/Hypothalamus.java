@@ -53,6 +53,7 @@ import com.teleonome.framework.exception.MissingDenomeException;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.MotherMicroController;
 import com.teleonome.framework.mnemosyne.MnemosyneManager;
+import com.teleonome.framework.network.NetworkUtilities;
 import com.teleonome.framework.persistence.PostgresqlPersistenceManager;
 import com.teleonome.framework.process.DiscoverTeleonoms;
 import com.teleonome.framework.utils.Utils;
@@ -62,7 +63,17 @@ public abstract class Hypothalamus {
 	public DenomeManager aDenomeManager=null;
 	public Logger logger=null;
 	MqttClient anMqttClient ;
-	public String localIpAddress="";
+	//
+	// primaryIpAddress represents the variable that will be sent to
+	// the mother to be displayed in an lcd
+	// depending on the available hardware, it will give preference
+	// to network values.
+	// therefore, it will first check to see if wlan0 has a value, if not
+	// it will check eth0 and if there is no value it will use
+	// the value for wlan1 (which will be of the type 176.16.1.1)
+	//
+	public String primaryIpAddress="";
+	private JSONObject networkAdapterInfoJSONObject;
 	public Hashtable microControllerPointerMicroControllerIndex;
 	public String hostName;
 	String initOperationalMode;
@@ -152,10 +163,21 @@ public abstract class Hypothalamus {
 			aMnemosyneManager = MnemosyneManager.instance(aDenomeManager, anMqttClient);
 			aDenomeManager.setMnemosyneManager(aMnemosyneManager);
 			try {
-				localIpAddress = Utils.getIpAddress();
+				networkAdapterInfoJSONObject = NetworkUtilities.getNetworkInterfaces();
+				//
+				//
+				if(networkAdapterInfoJSONObject.has(TeleonomeConstants.WLAN0) && !networkAdapterInfoJSONObject.getString(TeleonomeConstants.WLAN0).equals("")) {
+					primaryIpAddress=networkAdapterInfoJSONObject.getString(TeleonomeConstants.WLAN0);
+				}else if(networkAdapterInfoJSONObject.has(TeleonomeConstants.ETH0) && !networkAdapterInfoJSONObject.getString(TeleonomeConstants.ETH0).equals("")) {
+					primaryIpAddress=networkAdapterInfoJSONObject.getString(TeleonomeConstants.ETH0);
+				}else if(networkAdapterInfoJSONObject.has(TeleonomeConstants.WLAN1) && !networkAdapterInfoJSONObject.getString(TeleonomeConstants.WLAN1).equals("")) {
+					primaryIpAddress=networkAdapterInfoJSONObject.getString(TeleonomeConstants.WLAN1);
+				}
+				
+				
 				hostName = InetAddress.getLocalHost().getCanonicalHostName();
 				initOperationalMode = FileUtils.readFileToString(new File("InitOperationalMode"));
-				aDenomeManager.setNetworkInfo(localIpAddress, hostName, initOperationalMode);
+				aDenomeManager.setNetworkInfo(networkAdapterInfoJSONObject, hostName, initOperationalMode);
 				aDenomeManager.setProcessInfo(pacemakerPid);
 				/*
 				Calendar officialSunset, officialSunrise;
@@ -192,7 +214,7 @@ public abstract class Hypothalamus {
 			// if we are in host mode, dont start it
 			InetAddress exoZeroInetAddress=null;
 			try {
-				exoZeroInetAddress = Utils.getExoZeroNetworkAddress();
+				exoZeroInetAddress = NetworkUtilities.getExoZeroNetworkAddress();
 			} catch (SocketException | UnknownHostException e) {
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e));
@@ -458,7 +480,7 @@ public abstract class Hypothalamus {
 	protected void startExoZeroPublisher() {
 		// TODO Auto-generated method stub
 		try {
-			InetAddress exoZeroInetAddress = Utils.getExoZeroNetworkAddress();
+			InetAddress exoZeroInetAddress = NetworkUtilities.getExoZeroNetworkAddress();
 			//
 			// if the teleonome has only one network card and it is set 
 			// to host, then exoZeroInetAddress will be null
@@ -479,7 +501,7 @@ public abstract class Hypothalamus {
 	protected void startEndoZeroPublisher() {
 		// TODO Auto-generated method stub
 		try {
-			InetAddress endoZeroInetAddress = Utils.getEndoZeroNetworkAddress();
+			InetAddress endoZeroInetAddress = NetworkUtilities.getEndoZeroNetworkAddress();
 			//
 			// if the teleonome has only one network card and it is set 
 			// to network, then endooZeroInetAddress will be null
@@ -806,7 +828,7 @@ public abstract class Hypothalamus {
 							String digitalGeppettoCode = this.motherMicroController.getDigitalGeppettoCommandCode();
 							
 						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_IP_ADDRESS_FOR_LCD)){
-							actuatorCommand="IPAddr#" + localIpAddress;
+							actuatorCommand="IPAddr#" + primaryIpAddress;
 						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_DO_NOTHING)){
 							actuatorCommand=TeleonomeConstants.COMMANDS_DO_NOTHING;
 						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_SET_MICROCONTROLLER_RTC)){

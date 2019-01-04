@@ -938,7 +938,7 @@ public class PulseThread extends Thread{
 									}else if(actuatorCommand.startsWith("$")){
 
 										if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_IP_ADDRESS_FOR_LCD)){
-											actuatorCommand="IPAddr#" + anHypothalamus.localIpAddress;
+											actuatorCommand="IPAddr#" + anHypothalamus.primaryIpAddress;
 										}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_SSID_FOR_LCD)){
 											
 											actuatorCommand="SSID#" + NetworkUtilities.getCurrentConnectedSSiD();
