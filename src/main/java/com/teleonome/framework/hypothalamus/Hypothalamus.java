@@ -163,7 +163,7 @@ public abstract class Hypothalamus {
 			aMnemosyneManager = MnemosyneManager.instance(aDenomeManager, anMqttClient);
 			aDenomeManager.setMnemosyneManager(aMnemosyneManager);
 			try {
-				networkAdapterInfoJSONObject = NetworkUtilities.getNetworkInterfaces();
+				networkAdapterInfoJSONObject = NetworkUtilities.getAvailableAdapters();
 				//
 				//
 				if(networkAdapterInfoJSONObject.has(TeleonomeConstants.WLAN0) && !networkAdapterInfoJSONObject.getString(TeleonomeConstants.WLAN0).equals("")) {
