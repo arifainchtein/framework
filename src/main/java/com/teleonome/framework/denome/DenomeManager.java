@@ -5555,7 +5555,7 @@ public class DenomeManager {
 						interfaceIpAddress = networkAdapterInfoJSONObject.getString(interfaceName);
 						wifiDataDene = new JSONObject();
 						operationalDataDenes.put(wifiDataDene);
-						logger.debug("about to get wifi info for " + interfaceName);
+						logger.info("about to get wifi info for " + interfaceName);
 						if(interfaceName.equals(TeleonomeConstants.ETH0)) {
 							wifiDataDene.put("Name", TeleonomeConstants.DENE_ETH0);
 						}else if(interfaceName.equals(TeleonomeConstants.WLAN0)) {
@@ -5575,28 +5575,28 @@ public class DenomeManager {
 							try {
 								String command="iwconfig " + interfaceName;
 								ArrayList commandResults = Utils.executeCommand(command);
-								//logger.debug("commandResults=" + commandResults.size() + commandResults);
+								logger.info("commandResults=" + commandResults.size() + commandResults);
 								//deneWord = DenomeUtils.buildDeneWordJSONObject("Interface",interfaceName,null,"String",true);
 								//wifiDataDeneWords.put(deneWord);
 								String line;
 								if(commandResults.size()>0){
 									for(int k=0;k<commandResults.size();k++){
 										line = ((String)commandResults.get(k)).trim();
-										logger.debug("line 5577 line=" +line);
+										logger.info("line 5577 line=" +line);
 										String[] tokens = line.split("  ");
 										for(int j=0;j<tokens.length;j++){
-											logger.debug("tokens[j]=" + tokens[j]);
+											logger.info("tokens[j]=" + tokens[j]);
 											//
 											// there is one token without = which contains
 											// the interface, ie wlan0
 											if(tokens[j].indexOf("=")>-1){
 												String[] tokens2 = tokens[j].trim().split("=");		
-												logger.debug(tokens2[0] + ":" + tokens2[1]);
+												logger.info(tokens2[0] + ":" + tokens2[1]);
 												deneWord = DenomeUtils.buildDeneWordJSONObject(tokens2[0],tokens2[1],null,"String",true);
 												wifiDataDeneWords.put(deneWord);
 											}else if(tokens[j].indexOf(":")>-1){
 												String[] tokens2 = tokens[j].trim().split(":");		
-												logger.debug(tokens2[0] + ":" + tokens2[1]);
+												logger.info(tokens2[0] + ":" + tokens2[1]);
 												deneWord = DenomeUtils.buildDeneWordJSONObject(tokens2[0],tokens2[1],null,"String",true);
 												wifiDataDeneWords.put(deneWord);
 											}else{

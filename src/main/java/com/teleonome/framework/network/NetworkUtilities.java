@@ -237,11 +237,13 @@ public class NetworkUtilities {
 		InetAddress inetAddr, potential=null;
 		for(Enumeration <NetworkInterface> enu = NetworkInterface.getNetworkInterfaces();enu.hasMoreElements();){
 			networkInterface  = enu.nextElement();
-			toReturn.put(networkInterface.getName(), "");
-			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
-				inetAddr = (InetAddress)ifaces.nextElement();
-				if(!inetAddr.isLoopbackAddress()){
-					toReturn.put(networkInterface.getName(), inetAddr.getHostAddress());
+			if(!networkInterface.getName().equals("lo")) {
+				toReturn.put(networkInterface.getName(), "");
+				for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
+					inetAddr = (InetAddress)ifaces.nextElement();
+					if(!inetAddr.isLoopbackAddress()){
+						toReturn.put(networkInterface.getName(), inetAddr.getHostAddress());
+					}
 				}
 			}
 		}
