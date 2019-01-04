@@ -848,7 +848,10 @@ public class TeleonomeConstants {
 	public static final String DENE_WLAN0="wlan0 Info";
 	public static final String DENE_WLAN1="wlan1 Info";
 	public static final String DENE_ETH0="eth0 Info";
-	
+	public static final String DENEWORD_ACCESS_POINT="Access Point";
+	public static final String DENEWORD_IP_ADDRESS="IP Address";
+	public static final String LINK_QUALITY="Link Quality";
+	public static final String SIGNAL_LEVEL="Signal level";
 	//
 	// the values to use for the status message in case the application calling 
 	// the DenomeManager does not set one

@@ -5592,16 +5592,16 @@ public class DenomeManager {
 											if(tokens[j].indexOf("=")>-1){
 												String[] tokens2 = tokens[j].trim().split("=");		
 												logger.info(tokens2[0] + ":" + tokens2[1]);
-												deneWord = DenomeUtils.buildDeneWordJSONObject(tokens2[0],tokens2[1],null,"String",true);
+												deneWord = DenomeUtils.buildDeneWordJSONObject(tokens2[0],tokens2[1].trim(),null,"String",true);
 												wifiDataDeneWords.put(deneWord);
 											}else if(tokens[j].indexOf(":")>-1){
 												String[] tokens2 = tokens[j].trim().split(":");		
 												logger.info(tokens2[0] + ":" + tokens2[1]);
-												deneWord = DenomeUtils.buildDeneWordJSONObject(tokens2[0],tokens2[1],null,"String",true);
+												deneWord = DenomeUtils.buildDeneWordJSONObject(tokens2[0],tokens2[1].trim(),null,"String",true);
 												wifiDataDeneWords.put(deneWord);
 											}else{
 												if(!tokens[j].contains("wlan") && tokens[j].length()>0){
-													deneWord = DenomeUtils.buildDeneWordJSONObject("Support",tokens[j],null,"String",true);
+													deneWord = DenomeUtils.buildDeneWordJSONObject("Support",tokens[j].trim(),null,"String",true);
 													wifiDataDeneWords.put(deneWord);
 												}
 											}
@@ -5638,13 +5638,13 @@ public class DenomeManager {
 					JSONArray availableSSIDs = NetworkUtilities.getSSID(false);
 					logger.info("availableSSIDs=" + availableSSIDs.toString(4));
 					JSONObject ssid;
-					String ssidName, signal;
+					String ssidName, signal, authentication;
 					for(int j=0;j<availableSSIDs.length();j++){
 						ssid = availableSSIDs.getJSONObject(j);
-
+						
 						signal = ssid.getString("Signal");
 						ssidName = ssid.getString("SSID");
-						//ssid.getString("Authentication");
+						//authentication = ssid.getString("Authentication");
 						logger.info("ssid="+ ssid + " signal=" + signal + " ssidName=" + ssidName);
 						deneWord = DenomeUtils.buildDeneWordJSONObject("SSID:" + ssidName,signal,null,"String",true);
 						wifiDataDeneWords.put(deneWord);
