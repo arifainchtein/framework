@@ -5627,7 +5627,7 @@ public class DenomeManager {
 					
 					wifiDataDene = new JSONObject();
 					operationalDataDenes.put(wifiDataDene);
-					logger.debug("about to get SSID info ");
+					logger.info("about to get SSID info ");
 					wifiDataDene.put("Name", TeleonomeConstants.DENE_WIFI_INFO);
 					wifiDataDeneWords = new JSONArray();
 					wifiDataDene.put("DeneWords", wifiDataDeneWords);
@@ -5636,7 +5636,7 @@ public class DenomeManager {
 					//
 					// add the available SSIDs
 					JSONArray availableSSIDs = NetworkUtilities.getSSID(false);
-					logger.debug("availableSSIDs=" + availableSSIDs.toString(4));
+					logger.info("availableSSIDs=" + availableSSIDs.toString(4));
 					JSONObject ssid;
 					String ssidName, signal;
 					for(int j=0;j<availableSSIDs.length();j++){
