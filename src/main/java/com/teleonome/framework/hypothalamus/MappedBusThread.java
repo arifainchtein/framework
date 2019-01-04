@@ -375,7 +375,16 @@ class MappedBusThread extends Thread{
 								output.flush();
 								logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
 								try {
-									Utils.executeCommand("sudo sh networkmode.sh");
+									
+									int numberOfAvailableWifiAdapters = NetworkUtilities.getNumberOfAvailableWifiAdapters();
+									if(numberOfAvailableWifiAdapters==2) {
+										Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/network_with_internal_mode.sh " );
+									}else {
+										Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/networkmode.sh " );
+									}
+									
+									
+									
 									Utils.executeCommand("sudo shutdown -h now");
 									//Runtime.getRuntime().exec("sudo shutdown -h now");
 
@@ -393,7 +402,15 @@ class MappedBusThread extends Thread{
 								//								
 								logger.debug("receive from microcontrolle a pushbutton r =" + inputLine);
 								try {
-									Utils.executeCommand("sudo sh networkmode.sh");
+									
+									int numberOfAvailableWifiAdapters = NetworkUtilities.getNumberOfAvailableWifiAdapters();
+									if(numberOfAvailableWifiAdapters==2) {
+										Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/network_with_internal_mode.sh " );
+									}else {
+										Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/networkmode.sh " );
+									}
+									
+									
 									Utils.executeCommand("sudo rebooot");
 
 									waitingForConfirmShutdown=false;
@@ -953,8 +970,17 @@ class MappedBusThread extends Thread{
 						hypothalamus.aDenomeManager. offuscateWifiPasswordInCommand(aCommandRequest.getId(), payload.toString());
 
 						String logFileName="/home/pi/Teleonome/networkmode.log";
-
-						Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/networkmode.sh " );
+						//
+						// what to run will depend on wheter there is one or two cards
+						// if there is only one card then run
+						int numberOfAvailableWifiAdapters = NetworkUtilities.getNumberOfAvailableWifiAdapters();
+						if(numberOfAvailableWifiAdapters==2) {
+							Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/network_with_internal_mode.sh " );
+							logFileName="/home/pi/Teleonome/networkwithinternal.log";
+						}else {
+							Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/networkmode.sh " );
+							logFileName="/home/pi/Teleonome/networkmode.log";
+						}
 						File file = new File(logFileName);
 						while(!file.isFile()){
 
@@ -1014,8 +1040,20 @@ class MappedBusThread extends Thread{
 						}
 						hypothalamus.aDenomeManager. offuscateWifiPasswordInCommand(aCommandRequest.getId(), payload.toString());
 
+						//
+						// what to run will depend on wheter there is one or two cards
+						// if there is only one card then run
+						int numberOfAvailableWifiAdapters = NetworkUtilities.getNumberOfAvailableWifiAdapters();
+						if(numberOfAvailableWifiAdapters==2) {
+							Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/network_with_internal_mode.sh " );
+							logFileName="/home/pi/Teleonome/networkwithinternal.log";
+						}else {
+							Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/networkmode.sh " );
+							logFileName="/home/pi/Teleonome/networkmode.log";
+						}
+						
 
-						Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/networkmode.sh  " );
+						
 						File file = new File(logFileName);
 						while(!file.isFile()){
 

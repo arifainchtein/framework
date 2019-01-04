@@ -250,6 +250,47 @@ public class NetworkUtilities {
 		return toReturn;
 	}
 	
+	public static int getNumberOfAvailableWifiAdapters(){
+		ArrayList result=new ArrayList();;
+		int number=0;
+		logger.debug("inside of getNumberOfAvailableWifiAdapters");
+		try {
+			//if(debug)//System.out.println("in getSSID, About to execute command");
+			result = Utils.executeCommand( " netstat -i");
+			logger.debug("result=" + result.toString());
+			//
+			// the return format is:
+			
+//			Kernel Interface table
+//			Iface      MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg
+//			eth0      1500    53106      0      0 0         32538      0      0      0 BMRU
+//			lo       65536    24306      0      0 0         24306      0      0      0 LRU
+//			wlan0     1500        0      0   7024 0             0      0      0      0 BMU
+//			wlan1     1500    19209      0      5 0         14125      0      0      0 BMRU
+			
+			// so ignore the first two rows and get the element of the first row
+			// ignoring lo
+			String line;
+			String ipAddress,adapter;
+			for(int j=2;j<result.size();j++){
+				line = (String) result.get(j);
+				logger.debug("line=" + line);
+				adapter = line.split(" ")[0];
+				if(!adapter.equals("lo") && !adapter.equals("eth0")) {
+					number++;
+				}
+				
+			}
+			
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			//System.out.println(Utils.getStringException(e));
+		}
+		
+		return number;
+	}
+	
+	
 	public static JSONObject getAvailableAdapters(){
 		ArrayList result=new ArrayList();;
 		JSONObject toReturn = new JSONObject();
