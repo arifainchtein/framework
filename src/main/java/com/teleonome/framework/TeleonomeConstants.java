@@ -1004,9 +1004,40 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_COLUMN_IN_TABLE_POSITION="Column In Table Position";
 	public static final String DENEWORD_TYPE_COLUMN_HEADER="Column Header";
 	public static final String DENEWORD_TYPE_COLUMN_TD_CLASS_INFO="TDClassInfo";
+	
+	//
+	// life cycle events
+	//
+	public static final String LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE="Start Synchronous Cycle";
+	public static final String LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE="End Synchronous Cycle";
+	public static final String LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE="Start Asynchronous Cycle";
+	public static final String LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE="End Asynchronous Cycle";
+	public static final String LIFE_CYCLE_EVENT_START_WPS="Start WPS";
+	public static final String LIFE_CYCLE_EVENT_END_WPS="End WPS";
+	public static final String LIFE_CYCLE_EVENT_START_COMMA="Start Comma";
+	public static final String LIFE_CYCLE_EVENT_END_COMMA="End Comma";
+	public static final String LIFE_CYCLE_EVENT_START_AWAKE="Start Awake";
+	public static final String LIFE_CYCLE_EVENT_END_AWAKE="End Awake";
+	
+	public static final int LIFE_CYCLE_EVENT_SYNCHRONOUS_VALUE=5;
+	public static final int LIFE_CYCLE_EVENT_ASYNCHRONOUS_VALUE=4;
+	public static final int LIFE_CYCLE_EVENT_AWAKE_VALUE=3;
+	public static final int LIFE_CYCLE_EVENT_WPS_VALUE=2;
+	public static final int LIFE_CYCLE_EVENT_COMMA_VALUE=1;
+	
+	
+	
+	//
+	//
 	//
 	// everything related to the mnemotycons
 	//
+	
+	//
+	// the two different sources for a remembereddeneword, pulse or wps
+	public static final String REMEMBERED_DENEWORD_SOURCE_PULSE="Pulse";
+	public static final String REMEMBERED_DENEWORD_SOURCE_WPS="WPS";
+	
 	public static final String DENEWORD_TYPE_MNEMOSYCON_TYPE="Mnemosycon Type";
 	public static final String MNEMOSYCON_TYPE_STATIC="Static";
 	public static final String MNEMOSYCON_TYPE_DYNAMIC="Dynamic";
@@ -1018,6 +1049,7 @@ public class TeleonomeConstants {
 	public static final String MNEMOSYCON_DATA_LOCATION_PULSE="Pulse";
 	public static final String MNEMOSYCON_DATA_LOCATION_ORGANISM="OrganismPulse";
 	public static final String MNEMOSYCON_DATA_LOCATION_REMEMBERED_DENEWORDS="RememberedDeneWords";
+	
 	public static final String MNEMOSYCON_DATA_LOCATION_COMMAND_REQUESTS="CommandRequests";
 	public static final String MNEMOSYCON_DATA_LOCATION_MUTATION_EVENT="MutationEvent";
 	public static final String MNEMOSYCON_DELETE_OLDER_THAN="Delete Older Than";

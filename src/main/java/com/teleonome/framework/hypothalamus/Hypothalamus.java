@@ -81,6 +81,7 @@ public abstract class Hypothalamus {
 	SimpleDateFormat simpleFormatter = new SimpleDateFormat("dd/MM/yy HH:mm");
 	SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
 	MotherMicroController motherMicroController=null;
+	String aMotherMicroControllerPointer="";
 	String mqttBrokerAddress = "tcp://localhost:1883";
     String mqttClientId = TeleonomeConstants.PROCESS_HYPOTHALAMUS;
     MemoryPersistence persistence = new MemoryPersistence();
@@ -291,6 +292,7 @@ public abstract class Hypothalamus {
 					IsMother = aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(microcontrollerJSONObject, TeleonomeConstants.DENEWORD_MOTHER_MICROCONTROLER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					if(IsMother!=null && IsMother instanceof Boolean && ((Boolean)IsMother).booleanValue()) {
 						motherMicroController = (MotherMicroController) aMicroController;
+						aMotherMicroControllerPointer=aMicroControllerPointer;
 						logger.debug("Found Mother=" + aMicroControllerName );
 					}
 

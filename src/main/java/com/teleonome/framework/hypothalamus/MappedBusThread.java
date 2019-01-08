@@ -77,6 +77,10 @@ class MappedBusThread extends Thread{
 				e1.printStackTrace();
 			}
 		 */
+		
+		hypothalamus.aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE, System.currentTimeMillis(), TeleonomeConstants.LIFE_CYCLE_EVENT_ASYNCHRONOUS_VALUE);
+		
+		
 		String command=null;
 		String commandCode="";
 		String commandCodeType="";
@@ -732,6 +736,8 @@ class MappedBusThread extends Thread{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		hypothalamus.aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE, System.currentTimeMillis(),TeleonomeConstants.LIFE_CYCLE_EVENT_ASYNCHRONOUS_VALUE);
+		
 	}
 
 	public void executeCommand( String command, CommandRequest aCommandRequest, JSONObject dataPayloadJSONObject ){
@@ -1153,7 +1159,7 @@ class MappedBusThread extends Thread{
 						value = getDeneWordByIdentity(currentPulse,includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						valueType = (String) getDeneWordByIdentity(currentPulse, includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
 						logger.debug("about to unwrap " + includedRememberedIdentity.toString() + " with value:" + value  + " and valueType=" + valueType);
-						aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), valueType,value);			
+						aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), valueType,value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE);			
 					}
 				}
 			}
@@ -1186,7 +1192,7 @@ class MappedBusThread extends Thread{
 					value = getDeneWordByIdentity(currentPulse,includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					valueType = (String) getDeneWordByIdentity(currentPulse, includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
 					logger.debug("about to unwrap " + includedRememberedIdentity.toString() + " with value:" + value  + " and valueType=" + valueType);
-					aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), valueType,value);			
+					aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), valueType,value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE);			
 				}
 
 			}
@@ -1212,7 +1218,7 @@ class MappedBusThread extends Thread{
 				valueType = (String) getDeneWordByIdentity(currentPulse, new Identity(rememberedWordPointer), TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
 				logger.debug("about to unwrap " + rememberedWordPointer + " with value:" + value  + " and valueType=" + valueType);
 				if(value!=null && valueType!=null) {
-					aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, rememberedWordPointer, valueType,value);
+					aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, rememberedWordPointer, valueType,value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE);
 				}else {
 					logger.warn("Unwrap of " + rememberedWordPointer + " FAILED because value:" + value  + " and valueType=" + valueType);
 

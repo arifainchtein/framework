@@ -387,7 +387,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				pulseTimestampMillis =  rs.getLong(1);
 				valueType=rs.getString(2);
 				value = rs.getObject(3);
-				unwrap(organismTeleonomeName, pulseTimestampMillis, identityString, valueType, value);
+				unwrap(organismTeleonomeName, pulseTimestampMillis, identityString, valueType, value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE);
 			}
 
 		} catch (SQLException e) {
@@ -1060,6 +1060,51 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
+	
+	
+	public boolean storeLifeCycleEvent(String eventType, long eventTimeMillis, int eventValue){
+		//System.out.println(Utils.generateMethodTrace());
+		int id=-1;
+		Connection connection = null;
+		PreparedStatement preparedStatement=null;
+		ResultSet rs=null;
+		boolean status=false;
+		
+		try {
+			connection = connectionPool.getConnection();
+			
+			String createdOn = getPostgresDateString(new Timestamp(eventTimeMillis));
+			
+			String sql = "insert into LifeCycleEvent (eventTime,eventTimeMillis, eventType, eventValue) values (?,?,?,?)";
+					
+			preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1, createdOn);
+			preparedStatement.setLong(2, eventTimeMillis);
+			preparedStatement.setString(3, eventType);
+			preparedStatement.setInt(4, eventValue);
+			 status = preparedStatement.execute();
+			logger.debug("storeLifeCycleEvent, eventTime=" + eventTimeMillis + " eventValue=" + eventValue + " eventType=" + eventType);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			try {
+				if(rs!=null)rs.close();
+				if(preparedStatement!=null)preparedStatement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+
+		}
+		//System.out.println("erturnign from createcommand id=" + id + " command=" + command);
+
+		return status;
+
+	}
+	
+	
 
 	public boolean storeIndex(String indexName, String identityString, JSONArray todayIndex){
 		String sql="";
@@ -2990,7 +3035,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	}
 
 	
-	public boolean unwrap( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value) {
+	public boolean unwrap( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value, String source) {
 		String sql="";
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
@@ -3000,7 +3045,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			//statement = connection.createStatement();
 			java.sql.Timestamp dateTimeValue = new java.sql.Timestamp(pulseTimeMillis);
 			
-			sql = "insert into RememberedDeneWords (time,timeMillis, teleonomeName,identityString,value) values(?,?,?,?,?) ON CONFLICT(timeMillis, teleonomeName,identityString) DO NOTHING";
+			sql = "insert into RememberedDeneWords (time,timeMillis, teleonomeName,identityString,value, source) values(?,?,?,?,?,?) ON CONFLICT(timeMillis, teleonomeName,identityString) DO NOTHING";
 			logger.debug("unwrap=" + sql);
 			//Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
 
@@ -3010,6 +3055,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			
 			preparedStatement.setString(3, teleonomeName);
 			preparedStatement.setString(4, identityString);
+			preparedStatement.setString(5, source);
 			double d = 0;
 			if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
 
