@@ -2,6 +2,7 @@ package com.teleonome.framework.tools;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,7 +10,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
+
+import org.apache.commons.io.FileUtils;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
@@ -30,7 +34,7 @@ public class SendOneCommandToArduino {
 	InputStream serialPortInputStream = null;
 	OutputStream serialPortOutputStream = null;
 	boolean verbose=false;
-	public SendOneCommandToArduino(String command, boolean v) {
+	public SendOneCommandToArduino(String command, boolean v, File file) {
 		// TODO Auto-generated constructor stub
 		verbose=v;
 		init();
@@ -59,18 +63,28 @@ public class SendOneCommandToArduino {
 					}
 					oneCommandOutput.flush();
 					if(verbose)System.out.println("waiting for response ");
-					
-					String line = reader.readLine();
-					if(verbose)System.out.println("the response is:   " + line);
-					String cleaned="";
-					if(line.contains("Ok-")) {
-						cleaned=line.substring(line.indexOf("Ok-"));;
-					}else if(line.contains("Read fail") && line.contains("#")){
-						cleaned=line.substring(line.lastIndexOf("fail")+4);
+					String line;
+					if(command.equals("GetSensorData")) {
+						line = reader.readLine();
+						if(file!=null) {
+							FileUtils.writeStringToFile(file, line, Charset.defaultCharset(), true);
+						}else {
+							System.out.println(line);
+						}
 					}else {
-						cleaned=line;
+						do{
+							line = reader.readLine();
+							if(file!=null) {
+								FileUtils.writeStringToFile(file, line, Charset.defaultCharset(), true);
+							}else {
+								System.out.println(line);
+							}
+						}while(!line.startsWith("Ok") && !line.startsWith("Failure") );
+
 					}
-					System.out.println(cleaned);
+					
+					
+					
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
