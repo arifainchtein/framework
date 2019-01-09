@@ -67,7 +67,7 @@ public class SendOneCommandToArduino {
 					if(command.equals("GetSensorData")) {
 						line = reader.readLine();
 						if(file!=null) {
-							FileUtils.writeStringToFile(file, line, Charset.defaultCharset(), true);
+							FileUtils.writeStringToFile(file, line + System.lineSeparator(), Charset.defaultCharset(), true);
 						}else {
 							System.out.println(line);
 						}
@@ -75,7 +75,7 @@ public class SendOneCommandToArduino {
 						do{
 							line = reader.readLine();
 							if(file!=null) {
-								FileUtils.writeStringToFile(file, line, Charset.defaultCharset(), true);
+								FileUtils.writeStringToFile(file, line + System.lineSeparator(), Charset.defaultCharset(), true);
 							}else {
 								System.out.println(line);
 							}
