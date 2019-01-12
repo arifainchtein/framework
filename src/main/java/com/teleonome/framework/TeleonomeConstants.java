@@ -621,7 +621,7 @@ public class TeleonomeConstants {
 	public static final String COMMAND_EXECUTION_STATUS="Status";
 	public static final String COMMAND_CODE="CommandCode";
 	public static final String COMMAND_REQUEST_EXECUTION_OK="Command Request Succesfull";
-	public static final String COMMAND_REQUEST_INVALID_CODE="Invalid Code";
+	
 	public static final String MOTHER_COMMAND_REBOOT_HYPOTHALAMUS="RebootHypothalamus";
 	public static final String MOTHER_COMMAND_REBOOT_HYPOTHALAMUS_OK="RebootHypothalamusOK";
 	public static final String MOTHER_COMMAND_SHUTDOWN_HYPOTHALAMUS="ShutdownHypothalamus";
@@ -629,8 +629,8 @@ public class TeleonomeConstants {
 	public static final String MOTHER_INVALIDATED_REBOOT="Mother Invalidated Reboot";
 	public static final String MOTHER_INVALIDATED_SHUTDOWN="Mother Invalidated Shutdown";
 	
-	
-	public static final String COMMAND_REQUEST_VALID_CODE="Valid Code";
+	public static final String COMMAND_REQUEST_INVALID_CODE="Failure-Invalid Code";
+	public static final String COMMAND_REQUEST_VALID_CODE="Ok-Valid Code";
 	public static final String COMMAND_REQUEST_PENDING_EXECUTION="Pending Execution";
 	
 	//
@@ -1012,6 +1012,8 @@ public class TeleonomeConstants {
 	public static final String LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE="End Synchronous Cycle";
 	public static final String LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE="Start Asynchronous Cycle";
 	public static final String LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE="End Asynchronous Cycle";
+	public static final String LIFE_CYCLE_EVENT_MOTHER_ALERT_WPS="Mother Alert WPS";
+	
 	public static final String LIFE_CYCLE_EVENT_START_WPS="Start WPS";
 	public static final String LIFE_CYCLE_EVENT_END_WPS="End WPS";
 	public static final String LIFE_CYCLE_EVENT_START_COMMA="Start Comma";
@@ -1019,13 +1021,14 @@ public class TeleonomeConstants {
 	public static final String LIFE_CYCLE_EVENT_START_AWAKE="Start Awake";
 	public static final String LIFE_CYCLE_EVENT_END_AWAKE="End Awake";
 	
-	public static final int LIFE_CYCLE_EVENT_SYNCHRONOUS_VALUE=5;
-	public static final int LIFE_CYCLE_EVENT_ASYNCHRONOUS_VALUE=4;
-	public static final int LIFE_CYCLE_EVENT_AWAKE_VALUE=3;
+	public static final int LIFE_CYCLE_EVENT_SYNCHRONOUS_VALUE=6;
+	public static final int LIFE_CYCLE_EVENT_ASYNCHRONOUS_VALUE=5;
+	public static final int LIFE_CYCLE_EVENT_AWAKE_VALUE=4;
+	public static final int LIFE_CYCLE_EVENT_ALERT_WPS_VALUE=3;
 	public static final int LIFE_CYCLE_EVENT_WPS_VALUE=2;
 	public static final int LIFE_CYCLE_EVENT_COMMA_VALUE=1;
 	
-	
+	public static final String WPS_ALERT="WPS Alert";
 	
 	//
 	//

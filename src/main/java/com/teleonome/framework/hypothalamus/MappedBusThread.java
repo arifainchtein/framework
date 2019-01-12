@@ -199,7 +199,7 @@ class MappedBusThread extends Thread{
 								// token 2 is the name of the mutation to be executed
 								// token 3 is the commandCode for the command about the fault
 								// token 4 is the payload for the command about the fault
-
+								
 
 								tokens = inputLine.split("#");
 								String mutationType=tokens[1];
@@ -212,26 +212,34 @@ class MappedBusThread extends Thread{
 								if(tokens.length>5)faultData=tokens[5];
 								logger.info("line 546 faultDataTarget=" + faultDataTarget + " faultData="+ faultData);
 
-								//hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_PULSE_STATUS_INFO, inputLine);
+								if(mutationType.equals(TeleonomeConstants.WPS_ALERT)) {
+									hypothalamus.aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_MOTHER_ALERT_WPS, System.currentTimeMillis(), TeleonomeConstants.LIFE_CYCLE_EVENT_ALERT_WPS_VALUE);
+									hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_PULSE_STATUS_INFO, TeleonomeConstants.WPS_ALERT);
 
-								//
-								// now create a pathology dene
-								//
+								}else {
+									//
+									// now create a pathology dene
+									//
 
-								String pathologyCause = mutationType;
-								String pathologyName = TeleonomeConstants.PATHOLOGY_DENE_MICROCONTROLLER_FAULT;
-								String pathologyLocation = new Identity(hypothalamus.aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_SENSORS,TeleonomeConstants.PATHOLOGY_LOCATION_MICROCONTROLLER  ).toString();
-								Vector extraDeneWords = new Vector();
+									String pathologyCause = mutationType;
+									String pathologyName = TeleonomeConstants.PATHOLOGY_DENE_MICROCONTROLLER_FAULT;
+									String pathologyLocation = new Identity(hypothalamus.aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_SENSORS,TeleonomeConstants.PATHOLOGY_LOCATION_MICROCONTROLLER  ).toString();
+									Vector extraDeneWords = new Vector();
 
-								JSONObject pathologyDeneDeneWord;
-								try {
-									pathologyDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.SENSOR_VALUE_RANGE_MAXIMUM, ""+faultData ,null,"double",true);
-									extraDeneWords.addElement(pathologyDeneDeneWord);
-								} catch (JSONException e) {
-									// TODO Auto-generated catch block
-									logger.warn(Utils.getStringException(e));
+									JSONObject pathologyDeneDeneWord;
+									try {
+										pathologyDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.SENSOR_VALUE_RANGE_MAXIMUM, ""+faultData ,null,"double",true);
+										extraDeneWords.addElement(pathologyDeneDeneWord);
+										hypothalamus.aDenomeManager.addFaultPathologyDene(microControllerPointer,pathologyName,  pathologyCause,  pathologyLocation,  extraDeneWords);
+										
+									} catch (JSONException e) {
+										// TODO Auto-generated catch block
+										logger.warn(Utils.getStringException(e));
+									}
+									logger.debug("Created pathology dene");
 								}
-								logger.debug("Created pathology dene");
+								
+								
 								dataPayloadJSONObject = new JSONObject();
 								JSONObject payLoadJSONObject = new JSONObject();
 								try {
@@ -258,12 +266,7 @@ class MappedBusThread extends Thread{
 								logger.debug("Received Fault, mutationType:" + mutationType + " command:" + command + " commandRquestId=" + commandRequestJSONObject.getInt("id"));;
 
 
-								try {
-									hypothalamus.aDenomeManager.addFaultPathologyDene(microControllerPointer,pathologyName,  pathologyCause,  pathologyLocation,  extraDeneWords);
-								} catch (JSONException e) {
-									// TODO Auto-generated catch block
-									logger.warn(Utils.getStringException(e));
-								}
+								
 
 
 
