@@ -79,7 +79,7 @@ public class SendOneCommandToArduino {
 							}else {
 								System.out.println(line);
 							}
-						}while(!line.startsWith("Ok") && !line.startsWith("Failure") );
+						}while(!line.contains("Ok") && !line.contains("Failure") );
 
 					}
 					
