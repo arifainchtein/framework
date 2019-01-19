@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 import org.apache.commons.io.FileUtils;
@@ -34,6 +35,8 @@ public class SendOneCommandToArduino {
 	InputStream serialPortInputStream = null;
 	OutputStream serialPortOutputStream = null;
 	boolean verbose=false;
+	ArrayList<String> commandExecutionResults = new ArrayList();
+	
 	public SendOneCommandToArduino(String command, boolean v, File file) {
 		// TODO Auto-generated constructor stub
 		verbose=v;
@@ -66,6 +69,7 @@ public class SendOneCommandToArduino {
 					String line;
 					if(command.equals("GetSensorData")) {
 						line = reader.readLine();
+						commandExecutionResults.add(line);
 						if(file!=null) {
 							FileUtils.writeStringToFile(file, line + System.lineSeparator(), Charset.defaultCharset(), true);
 						}else {
@@ -91,7 +95,9 @@ public class SendOneCommandToArduino {
 				}
 	}
 	
-
+	public ArrayList<String> getCommandExecutionResults(){
+		return commandExecutionResults;
+	}
 public void init() {
 	// TODO Auto-generated method stub
 	Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();

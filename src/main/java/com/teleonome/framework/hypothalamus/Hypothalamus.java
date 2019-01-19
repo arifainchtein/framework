@@ -258,7 +258,7 @@ public abstract class Hypothalamus {
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e));
 			}
-
+			
 
 			JSONObject microcontrollerJSONObject;
 			String microcontrollerProcessingClassName = "";
