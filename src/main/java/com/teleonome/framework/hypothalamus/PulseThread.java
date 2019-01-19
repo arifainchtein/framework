@@ -86,7 +86,7 @@ public class PulseThread extends Thread{
 				output = anHypothalamus.motherMicroController.getWriter();
 				input = anHypothalamus.motherMicroController.getReader();
 				logger.info("asking mama for  GetLifeCycleData" );
-				 commandToSend = "GetLifeCycleData";
+				 commandToSend = "GetLifeCycleData#1";
 
 				output.write(commandToSend,0,commandToSend.length());
 				output.flush();
@@ -116,8 +116,9 @@ public class PulseThread extends Thread{
 							tokens = inputLine.split("#");
 							// find which remembereddenewords come the mother and 
 							// storem them using the REMEMBERED_DENEWORD_SOURCE_WPS
-							eventType = tokens[0];
-							eventTimeMillis = 1000*Long.parseLong(tokens[1]);
+							
+							eventTimeMillis = 1000*Long.parseLong(tokens[0]);
+							eventType = tokens[1];
 							eventValue = Integer.parseInt(tokens[2]);
 							aDenomeManager.storeLifeCycleEvent(eventType, eventTimeMillis,eventValue);
 
@@ -152,7 +153,7 @@ public class PulseThread extends Thread{
 			if(teleonomeRememberedWordsArrayList!=null && teleonomeRememberedWordsArrayList.size()>0) {
 				//
 				// these teleonome does have remembereddenewords
-				commandToSend = "GetWPSSensorData";
+				commandToSend = "GetWPSSensorData#1";
 				try {
 					output.write(commandToSend,0,commandToSend.length());
 					output.flush();
@@ -229,7 +230,70 @@ public class PulseThread extends Thread{
 				}
 			
 
-		} //if(teleonomeRememberedWordsA
+		} //if(teleonomeRememberedWordsA..
+			
+			
+		//
+		// Now the rememberedvalues
+		//
+			long recordMillis;
+			String label,   unit;
+			double value;
+			try {
+				
+				logger.info("asking mama for  GetLifeCycleData" );
+				commandToSend = "GetRememberedValueData#1";
+
+				output.write(commandToSend,0,commandToSend.length());
+				output.flush();
+				logger.info("waiting for mama to respond2 wait 5000");
+				Thread.sleep(5000);
+
+			} catch (IOException e2) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e2));
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+
+			long now = System.currentTimeMillis();
+			while(waitingForMama) {
+				try {
+					if(input.ready()) {
+						String inputLine = "";
+						do{
+							inputLine = input.readLine();
+							logger.info("GetRememberedValueData received inputLine=" + inputLine);
+							tokens = inputLine.split("#");
+							recordMillis = 1000*Long.parseLong(tokens[0]);
+							label = tokens[1];
+							value = Double.parseDouble(tokens[2]);
+							unit=tokens[3];
+							aDenomeManager.storeMotherRememberedValue( now,  recordMillis,  label,  value,  unit);
+						
+							//
+						}while(!inputLine.equals("Ok-GetRememberedValueData"));
+
+
+						waitingForMama=false;
+					}
+
+				}catch(IOException e) {
+					logger.warn(Utils.getStringException(e));
+					logger.info("After erro talking to mama wait 2 sec and try again");
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						logger.warn(Utils.getStringException(e1));
+					}
+				}
+
+			}	
+			
+			
+			
 			logger.info("abut to create an end awke");
 		aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_END_AWAKE, System.currentTimeMillis(),TeleonomeConstants.LIFE_CYCLE_EVENT_AWAKE_VALUE);
 	}

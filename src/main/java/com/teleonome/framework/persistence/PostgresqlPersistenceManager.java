@@ -3034,6 +3034,147 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 
 	}
 
+	public JSONArray getMotherRemeberedValuesByRecordTime(long recordTime){
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		try {
+			String command = "SELECT importedOnMillis,recordMillis,label, value,unit from MotherRememberedValues where recordMillis=? ";
+			logger.info("command=" + command);
+			connection = connectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(command);
+			preparedStatement.setLong(1, recordTime);
+			rs = preparedStatement.executeQuery();
+			long importedOnMillis=0;
+			long recordMillis=0L;
+			String label= null;
+			double value=0;
+		    String unit= null;
+		  
+			JSONObject j;
+			
+			while(rs.next()){
+				j = new JSONObject();
+				j.put("ImportedOnMillis", rs.getLong(1));
+				j.put("RecordMillis",rs.getLong(2));
+				j.put("Label", rs.getLong(3));
+				j.put("Value", rs.getLong(4));
+				j.put("Unit", rs.getLong(5));
+				logger.debug("getMotherRemeberedRecordsByRecordTime:" + j.toString(4));
+				toReturn.put(j);
+			}
+
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+
+		return toReturn;
+
+	}
+	
+
+	public JSONArray getMotherRemeberedValuesByRecordTimeInterval(long intervalStart,long intervalEnd){
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		try {
+			//
+			//  first get all distinct recordMillis in the period
+			String command = "SELECT recordMillis from MotherRememberedValues where recordMillis>=? &&   recordMillis<=?";
+			logger.info("command=" + command);
+			connection = connectionPool.getConnection();
+			preparedStatement = connection.prepareStatement(command);
+			rs = preparedStatement.executeQuery();
+			ArrayList<Long> recordsMillis = new ArrayList();
+			while(rs.next()){
+				recordsMillis.add(rs.getLong(1));
+			}
+			preparedStatement.close();
+			//
+			// now do it again, but every record,
+			JSONArray completeRecordSetArray;
+			for(int i=0;i<recordsMillis.size();i++) {
+				completeRecordSetArray= getMotherRemeberedValuesByRecordTime(recordsMillis.get(i));
+				toReturn.put(completeRecordSetArray);
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+
+		return toReturn;
+
+	}
+	
+	public boolean storeMotherRememberedValue( long importedOnMillis,long recordMillis,  String label,  Object value, String unit) {
+		String sql="";
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		boolean toReturn=false;
+		try {
+			connection = connectionPool.getConnection();
+			//statement = connection.createStatement();
+			
+			sql = "insert into MotherRememberedValues (importedOnMillis, recordMillis, label,value, unit) values(?,?,?,?,?,) ON CONFLICT(recordMillis, label) DO NOTHING";
+			logger.debug("storeMotherRememberedValue=" + sql);
+			//Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
+
+			preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setLong(1, importedOnMillis);
+			preparedStatement.setLong(2, recordMillis);
+			
+			preparedStatement.setString(3, label);
+			preparedStatement.setDouble(4, (double)value);
+			preparedStatement.setString(5, unit);
+			
+			int result = preparedStatement.executeUpdate();
+			preparedStatement.close();
+			connectionPool.closeConnection(connection);
+			toReturn= true;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			System.out.println("bad sql=" + sql);
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			try {
+				if(preparedStatement!=null)preparedStatement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+		}
+		return toReturn;
+	}
 	
 	public boolean unwrap( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value, String source) {
 		String sql="";

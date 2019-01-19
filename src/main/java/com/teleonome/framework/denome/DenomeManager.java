@@ -5156,9 +5156,12 @@ public class DenomeManager {
 	}
 
 
-
 	public boolean storeLifeCycleEvent(String eventType, long eventTimeMillis, int value) {
 		return aDBManager.storeLifeCycleEvent(eventType,eventTimeMillis, value);
+	}
+	
+	public boolean storeMotherRememberedValue(long importedOnMillis, long recordMillis, String label, double value, String unit) {
+		return aDBManager.storeMotherRememberedValue(importedOnMillis, recordMillis, label, value, unit);
 	}
 	
 	
