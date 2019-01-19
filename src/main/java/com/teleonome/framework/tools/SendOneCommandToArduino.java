@@ -78,6 +78,7 @@ public class SendOneCommandToArduino {
 					}else {
 						do{
 							line = reader.readLine();
+							commandExecutionResults.add(line);
 							if(file!=null) {
 								FileUtils.writeStringToFile(file, line + System.lineSeparator(), Charset.defaultCharset(), true);
 							}else {
