@@ -26,9 +26,8 @@ public class SendOneCommandToArduino {
 	String SerialPortID = "/dev/ttyUSB0";
 	private static final String PORT_NAMES[] = { "/dev/tty.usbmodem641", "/dev/ttyACM0", "/dev/ttyAMA0", "/dev/ttyACM1","/dev/ttyUSB0","/dev/cu.usbmodem1411" };
 	SerialPort serialPort;
-	private BufferedReader input;
-	
-	private BufferedWriter output;
+	private BufferedReader input=null;
+	private BufferedWriter output=null;
 
 	private static final int TIME_OUT = 20000;
 	private int DATA_RATE = 9600;
@@ -49,13 +48,7 @@ public class SendOneCommandToArduino {
 		try {
 			oneCommandOutput=  new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
 			reader = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 		
-			
-				try {
 					if(verbose)System.out.println("sending " + command);			
 					oneCommandOutput.write(command,0,command.length());
 					//serialPortOutputStream.write( actuatorCommand.getBytes() );
@@ -89,14 +82,27 @@ public class SendOneCommandToArduino {
 
 					}
 					
-					serialPortInputStream.close();
-					serialPortOutputStream.close();
-					serialPort.close();
+					
 					
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+		
+			try {
+				if(serialPortInputStream!=null)serialPortInputStream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		if(serialPortOutputStream!=null)
+			try {
+				serialPortOutputStream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		if(serialPort!=null)serialPort.close();
 	}
 	
 	public ArrayList<String> getCommandExecutionResults(){
