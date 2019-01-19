@@ -37,6 +37,7 @@ public class SendOneCommandToArduino {
 	boolean verbose=false;
 	ArrayList<String> commandExecutionResults = new ArrayList();
 	
+	
 	public SendOneCommandToArduino(String command, boolean v, File file) {
 		// TODO Auto-generated constructor stub
 		verbose=v;
@@ -88,7 +89,9 @@ public class SendOneCommandToArduino {
 
 					}
 					
-					
+					serialPortInputStream.close();
+					serialPortOutputStream.close();
+					serialPort.close();
 					
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -146,6 +149,8 @@ public void init() {
 		serialPortInputStream = serialPort.getInputStream();
 		serialPortOutputStream = serialPort.getOutputStream();
 
+		
+		
 		if (serialPortInputStream == null) {
 			if(verbose)System.out.println("serialPortInputStream is null.");
 		}
