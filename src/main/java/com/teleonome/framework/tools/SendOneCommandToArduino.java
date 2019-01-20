@@ -73,7 +73,7 @@ public class SendOneCommandToArduino {
 						}
 					}
 				}else {
-					if(verbose)System.out.println("sending " + command);			
+					System.out.println("sending " + command);			
 					oneCommandOutput.write(command,0,command.length());
 					//serialPortOutputStream.write( actuatorCommand.getBytes() );
 					try {
