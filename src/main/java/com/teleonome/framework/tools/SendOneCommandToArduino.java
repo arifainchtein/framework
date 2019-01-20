@@ -62,8 +62,8 @@ public class SendOneCommandToArduino {
 
 				command = commands.get(i);
 				if(command.startsWith("$")) {
-					if(command.startsWith("$Delay")) {
-						int seconds = Integer.parseInt(command.substring(6));
+					if(command.startsWith("$Delay#")) {
+						int seconds = Integer.parseInt(command.substring(7));
 						System.out.println("delaying " + seconds + " seconds at " + new Date());
 						try {
 							Thread.sleep(seconds*1000);
