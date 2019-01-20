@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 
 import org.apache.commons.io.FileUtils;
@@ -39,7 +40,7 @@ public class SendOneCommandToArduino {
 	public SendOneCommandToArduino(String command, boolean v, File file) {
 		ArrayList<String> commands = new ArrayList();
 		commands.add(command);
-		 process( commands,  v,  file);
+		process( commands,  v,  file);
 	}
 	public SendOneCommandToArduino(ArrayList<String> commands, boolean v, File file) {
 		process(commands,  v,  file);
@@ -58,30 +59,33 @@ public class SendOneCommandToArduino {
 			String command;
 
 			for(int i=0;i<commands.size();i++) {
-				
+
 				command = commands.get(i);
-				if(verbose)System.out.println("sending " + command);			
-				oneCommandOutput.write(command,0,command.length());
-				//serialPortOutputStream.write( actuatorCommand.getBytes() );
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				oneCommandOutput.flush();
-				if(verbose)System.out.println("waiting for response ");
-				String line;
-				if(command.equals("GetSensorData")) {
-					line = reader.readLine();
-					commandExecutionResults.add(line);
-					if(file!=null) {
-						FileUtils.writeStringToFile(file, line + System.lineSeparator(), Charset.defaultCharset(), true);
-					}else {
-						System.out.println(line);
+				if(command.startsWith("$")) {
+					if(command.startsWith("$Delay")) {
+						int seconds = Integer.parseInt(command.substring(6));
+						System.out.println("delaying " + seconds + " seconds at " + new Date());
+						try {
+							Thread.sleep(seconds*1000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}else {
-					do{
+					if(verbose)System.out.println("sending " + command);			
+					oneCommandOutput.write(command,0,command.length());
+					//serialPortOutputStream.write( actuatorCommand.getBytes() );
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					oneCommandOutput.flush();
+					if(verbose)System.out.println("waiting for response ");
+					String line;
+					if(command.equals("GetSensorData")) {
 						line = reader.readLine();
 						commandExecutionResults.add(line);
 						if(file!=null) {
@@ -89,9 +93,20 @@ public class SendOneCommandToArduino {
 						}else {
 							System.out.println(line);
 						}
-					}while(!line.contains("Ok") && !line.contains("Failure") );
+					}else {
+						do{
+							line = reader.readLine();
+							commandExecutionResults.add(line);
+							if(file!=null) {
+								FileUtils.writeStringToFile(file, line + System.lineSeparator(), Charset.defaultCharset(), true);
+							}else {
+								System.out.println(line);
+							}
+						}while(!line.contains("Ok") && !line.contains("Failure") );
 
+					}
 				}
+
 			}
 
 
