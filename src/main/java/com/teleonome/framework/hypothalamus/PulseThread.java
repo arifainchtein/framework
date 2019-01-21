@@ -112,7 +112,7 @@ public class PulseThread extends Thread{
 						String inputLine = "";
 						do{
 							inputLine = input.readLine();
-							if(inputLine.length()>5) {
+							if(inputLine.length()>5 && !inputLine.equals("Ok-") {
 								logger.info("GetLifeCycleData received inputLine=" + inputLine);
 								tokens = inputLine.split("#");
 								// find which remembereddenewords come the mother and 
