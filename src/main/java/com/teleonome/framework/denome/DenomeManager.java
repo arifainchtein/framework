@@ -5468,6 +5468,9 @@ public class DenomeManager {
 					double pulseSize = aDBManager.getTableSizeMB("pulse");
 					double organimsPulseSize = aDBManager.getTableSizeMB("organismpulse");
 					double rememberedDeneWordsSize = aDBManager.getTableSizeMB("remembereddenewords");
+					double motherRememberedValuesSize = aDBManager.getTableSizeMB("motherrememberedvalues");
+					double lifecycleeventSize = aDBManager.getTableSizeMB("lifecycleevent");
+					
 					double mutationeventSize = aDBManager.getTableSizeMB("mutationevent");
 					double commandrequests = aDBManager.getTableSizeMB("commandrequests");
 					
@@ -5499,6 +5502,13 @@ public class DenomeManager {
 					
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Remembered DeneWords Table Size",""+rememberedDeneWordsSize,"MB","double",true);
 					systemDataDeneWords.put(deneWord);
+					
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Mother Remembered Values Table Size",""+rememberedDeneWordsSize,"MB","double",true);
+					systemDataDeneWords.put(deneWord);
+					
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Life Cycle Event Table Size",""+lifecycleeventSize,"MB","double",true);
+					systemDataDeneWords.put(deneWord);
+					
 					
 					//
 					// hypothalamus

@@ -142,11 +142,15 @@ public class DenomeValidator {
 												// 1)Remembered denewords will not be found in the denome, speially because they can come from other Teleonomes
 												// 2)Action Processing
 												// 3)Mnemosycon Processing
+												// 4)Anything in the Mnemosyne Nuclei
 												ignore=false;
 												if(
+														
 														(identity.getNucleusName().equals(TeleonomeConstants.NUCLEI_PURPOSE) && (identity.getDenechainName().equals(TeleonomeConstants.DENE_TYPE_ACTUATOR_ACTION_PROCESSING) || identity.getDenechainName().equals(TeleonomeConstants.DENE_TYPE_MNEMOSYCON_PROCESSING)))	
 														||
 														deneWordType.equals(TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENEWORD)
+														||
+														identity.getNucleusName().equals(TeleonomeConstants.NUCLEI_MNEMOSYNE)
 														) {
 														ignore=true;
 												}
