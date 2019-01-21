@@ -182,31 +182,33 @@ public class PulseThread extends Thread{
 							String inputLine = "";
 							do{
 								inputLine = input.readLine();
-								sensorDataTokens = inputLine.split("#");
-								wpsRecordTimeMillis=1000*Long.parseLong(sensorDataTokens[0]);
-								logger.info("GetWPSSensorData received inputLine=" + inputLine);
-								// find which remembereddenewords come the mother and 
-								// ******************
-								for (Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
-									currentlyProcessingSensorValueDene = entry2.getKey();
-									reportingAddress = (String) aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,"Reporting Address");
-									valueType = (String) aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
-									
-									if(teleonomeRememberedWordsArrayList.contains(reportingAddress)) {
-										//
-										// note that this is different than in other places where
-										// the string is parsed. in ther places we substract 1
-										// because token[0] correspond to sensorqueueposition 1
-										// however in the case of wps, token0 contains the milliseconds
-										adjustedIndex = ((Integer)entry2.getValue()).intValue();
-										logger.info("processing sensor token:" + adjustedIndex );   
-										sensorValueString = sensorDataTokens[adjustedIndex];
-										anHypothalamus.aMnemosyneManager.unwrap( aDenomeManager.getDenomeName()	, wpsRecordTimeMillis, reportingAddress, valueType,sensorValueString, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_WPS);			
-									}	
+								if(inputLine.length()>5 && !inputLine.startsWith("Ok-")&& !inputLine.startsWith("Failure-")) {
+									sensorDataTokens = inputLine.split("#");
+									wpsRecordTimeMillis=1000*Long.parseLong(sensorDataTokens[0]);
+									logger.info("GetWPSSensorData received inputLine=" + inputLine);
+									// find which remembereddenewords come the mother and 
+									// ******************
+									for (Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
+										currentlyProcessingSensorValueDene = entry2.getKey();
+										reportingAddress = (String) aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,"Reporting Address");
+										valueType = (String) aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+
+										if(teleonomeRememberedWordsArrayList.contains(reportingAddress)) {
+											//
+											// note that this is different than in other places where
+											// the string is parsed. in ther places we substract 1
+											// because token[0] correspond to sensorqueueposition 1
+											// however in the case of wps, token0 contains the milliseconds
+											adjustedIndex = ((Integer)entry2.getValue()).intValue();
+											logger.info("processing sensor token:" + adjustedIndex );   
+											sensorValueString = sensorDataTokens[adjustedIndex];
+											anHypothalamus.aMnemosyneManager.unwrap( aDenomeManager.getDenomeName()	, wpsRecordTimeMillis, reportingAddress, valueType,sensorValueString, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_WPS);			
+										}	
+									}
 								}
-							//
-						}while(!inputLine.equals("Ok-WPSSensorData"));
-						waitingForMama=false;
+								//
+							}while(!inputLine.equals("Ok-GetWPSSensorData"));
+							waitingForMama=false;
 					}
 
 				}catch(IOException e) {
