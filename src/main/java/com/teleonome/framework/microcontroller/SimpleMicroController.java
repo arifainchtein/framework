@@ -66,8 +66,8 @@ public class SimpleMicroController extends MotherMicroController {
 		//
 		// force a generation of the code so that the codehistory is always
 		// populated with valid codes.
-		String code = getCommandCode();
-		logger.debug("generated code " + code);
+		//String code = getCommandCode();
+		//logger.debug("generated code " + code);
 		
 		plainReader = new PlainReader(new StringReader(dataString), sw);
 		 plainWriter = new PlainWriter(sw, plainReader);
