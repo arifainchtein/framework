@@ -124,7 +124,7 @@ public class PulseThread extends Thread{
 								aDenomeManager.storeLifeCycleEvent(eventType, eventTimeMillis,eventValue);
 							}
 							//
-						}while(!inputLine.equals("Ok-LifeCycleData"));
+						}while(!inputLine.equals("Ok-GetLifeCycleData"));
 
 
 						waitingForMama=false;
