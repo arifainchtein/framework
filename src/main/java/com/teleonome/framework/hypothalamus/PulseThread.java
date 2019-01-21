@@ -223,16 +223,6 @@ public class PulseThread extends Thread{
 				}
 
 			}
-			
-				try {
-					if(input!=null)input.close();
-					if(output!=null)output.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					logger.warn(Utils.getStringException(e));
-				}
-			
-
 		} //if(teleonomeRememberedWordsA..
 			
 			
@@ -244,7 +234,7 @@ public class PulseThread extends Thread{
 			double value;
 			try {
 				
-				logger.info("asking mama for  GetLifeCycleData" );
+				logger.info("asking mama for  GetRememberedValueData" );
 				commandToSend = "GetRememberedValueData#1";
 
 				output.write(commandToSend,0,commandToSend.length());
@@ -267,14 +257,15 @@ public class PulseThread extends Thread{
 						String inputLine = "";
 						do{
 							inputLine = input.readLine();
-							logger.info("GetRememberedValueData received inputLine=" + inputLine);
-							tokens = inputLine.split("#");
-							recordMillis = 1000*Long.parseLong(tokens[0]);
-							label = tokens[1];
-							value = Double.parseDouble(tokens[2]);
-							unit=tokens[3];
-							aDenomeManager.storeMotherRememberedValue( now,  recordMillis,  label,  value,  unit);
-						
+							if(inputLine.length()>5 && !inputLine.startsWith("Ok-")&& !inputLine.startsWith("Failure-")) {
+								logger.info("GetRememberedValueData received inputLine=" + inputLine);
+								tokens = inputLine.split("#");
+								recordMillis = 1000*Long.parseLong(tokens[0]);
+								label = tokens[1];
+								value = Double.parseDouble(tokens[2]);
+								unit=tokens[3];
+								aDenomeManager.storeMotherRememberedValue( now,  recordMillis,  label,  value,  unit);
+							}
 							//
 						}while(!inputLine.equals("Ok-GetRememberedValueData"));
 
@@ -295,6 +286,13 @@ public class PulseThread extends Thread{
 
 			}	
 			
+			try {
+				if(input!=null)input.close();
+				if(output!=null)output.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
 			
 			
 			logger.info("abut to create an end awke");
