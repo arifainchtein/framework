@@ -1073,12 +1073,13 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		try {
 			connection = connectionPool.getConnection();
 			
-			String createdOn = getPostgresDateString(new Timestamp(eventTimeMillis));
+			//String createdOn = getPostgresDateString(new Timestamp(eventTimeMillis));
+			Timestamp eventTime = new Timestamp(eventTimeMillis);
 			
 			String sql = "insert into LifeCycleEvent (eventTime,eventTimeMillis, eventType, eventValue) values (?,?,?,?)";
 					
 			preparedStatement = connection.prepareStatement(sql);
-			preparedStatement.setString(1, createdOn);
+			preparedStatement.setTimestamp(1, eventTime);
 			preparedStatement.setLong(2, eventTimeMillis);
 			preparedStatement.setString(3, eventType);
 			preparedStatement.setInt(4, eventValue);
