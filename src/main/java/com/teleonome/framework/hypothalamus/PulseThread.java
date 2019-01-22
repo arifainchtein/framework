@@ -286,13 +286,13 @@ public class PulseThread extends Thread{
 
 			}	
 			
-			try {
-				if(input!=null)input.close();
-				if(output!=null)output.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
-			}
+//			try {
+//				if(input!=null)input.close();
+//				if(output!=null)output.close();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				logger.warn(Utils.getStringException(e));
+//			}
 			
 			
 			logger.info("abut to create an end awke");
