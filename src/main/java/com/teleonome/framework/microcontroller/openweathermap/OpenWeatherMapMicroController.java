@@ -130,7 +130,7 @@ public class OpenWeatherMapMicroController  extends MicroController{
 	public BufferedReader getReader() throws IOException {
 		String  dataString="dataString";
 		
-		anOpenWeatherMapReader  =new OpenWeatherMapReader(new StringReader(""),latitude, longitud, units, appid, connectTimeoutMilliseconds,readTimeoutMilliseconds,dailyCount, timeZoneId);
+		//anOpenWeatherMapReader  =new OpenWeatherMapReader(new StringReader(""),latitude, longitud, units, appid, connectTimeoutMilliseconds,readTimeoutMilliseconds,dailyCount, timeZoneId);
 		
 		return anOpenWeatherMapReader;
 		
