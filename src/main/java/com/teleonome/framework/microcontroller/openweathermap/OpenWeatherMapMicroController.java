@@ -120,6 +120,8 @@ public class OpenWeatherMapMicroController  extends MicroController{
 	@Override
 	public BufferedWriter getWriter() throws IOException {
 		// TODO Auto-generated method stub
+		anOpenWeatherMapWriter = new OpenWeatherMapWriter(sw,anOpenWeatherMapReader);
+       	
          return anOpenWeatherMapWriter;
 	}
 
@@ -127,6 +129,9 @@ public class OpenWeatherMapMicroController  extends MicroController{
 	@Override
 	public BufferedReader getReader() throws IOException {
 		String  dataString="dataString";
+		
+		anOpenWeatherMapReader  =new OpenWeatherMapReader(new StringReader(""),latitude, longitud, units, appid, connectTimeoutMilliseconds,readTimeoutMilliseconds,dailyCount, timeZoneId);
+		
 		return anOpenWeatherMapReader;
 		
 	}
