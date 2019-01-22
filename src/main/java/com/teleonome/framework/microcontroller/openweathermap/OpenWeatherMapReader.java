@@ -27,11 +27,11 @@ public class OpenWeatherMapReader extends BufferedReader{
 
 	
 	String   units,  appid, timeZoneId;
-	int latitude,  longitud;
+	double latitude,  longitud;
 	int connectTimeoutMilliseconds ,readTimeoutMilliseconds,dailyCount;
 	private String currentCommand="";
 	Logger logger;
-	public OpenWeatherMapReader(Reader in, int la, int lo, String u, String a, int co, int r, int d, String tz) {
+	public OpenWeatherMapReader(Reader in, double la, double lo, String u, String a, int co, int r, int d, String tz) {
 		super(in);
 		// TODO Auto-generated constructor stub
 		logger = Logger.getLogger(getClass());
