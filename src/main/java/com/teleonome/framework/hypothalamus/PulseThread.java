@@ -112,7 +112,7 @@ public class PulseThread extends Thread{
 						String inputLine = "";
 						do{
 							inputLine = input.readLine();
-							if(inputLine.length()>5 && !inputLine.startsWith("Ok-")&& !inputLine.startsWith("Failure-")) {
+							if(inputLine.length()>5 && !inputLine.startsWith("Ok")&& !inputLine.startsWith("Failure")) {
 								logger.info("GetLifeCycleData received inputLine=" + inputLine);
 								tokens = inputLine.split("#");
 								// find which remembereddenewords come the mother and 
@@ -124,7 +124,7 @@ public class PulseThread extends Thread{
 								aDenomeManager.storeLifeCycleEvent(eventType, eventTimeMillis,eventValue);
 							}
 							//
-						}while(!inputLine.equals("Ok-GetLifeCycleData"));
+						}while(!inputLine.startsWith("Ok"));
 
 
 						waitingForMama=false;
@@ -207,7 +207,7 @@ public class PulseThread extends Thread{
 									}
 								}
 								//
-							}while(!inputLine.equals("Ok-GetWPSSensorData"));
+							}while(!inputLine.startsWith("Ok"));
 							waitingForMama=false;
 					}
 
@@ -267,7 +267,7 @@ public class PulseThread extends Thread{
 								aDenomeManager.storeMotherRememberedValue( now,  recordMillis,  label,  value,  unit);
 							}
 							//
-						}while(!inputLine.equals("Ok-GetRememberedValueData"));
+						}while(!inputLine.startsWith("Ok"));
 
 
 						waitingForMama=false;
