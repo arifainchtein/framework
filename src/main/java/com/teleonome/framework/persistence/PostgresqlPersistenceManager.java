@@ -3197,8 +3197,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			
 			preparedStatement.setString(3, teleonomeName);
 			preparedStatement.setString(4, identityString);
-			preparedStatement.setDouble(5, (double) value);
-			preparedStatement.setString(6, source);
+			
 			double d = 0;
 			if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
 
@@ -3224,7 +3223,12 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 
 
 				preparedStatement.setDouble(5, d);
+			}else {
+				preparedStatement.setDouble(5, (double) value);				
 			}
+			logger.debug("source=" + source);
+			preparedStatement.setString(6, source);
+			
 			int result = preparedStatement.executeUpdate();
 			preparedStatement.close();
 			connectionPool.closeConnection(connection);
