@@ -1282,13 +1282,13 @@ public class DenomeUtils {
 	
 	
 	
-	public static void addDeneToDeneChainByIdentity(JSONObject pulseJSONObject, JSONObject dene, Identity targetDeneChainidentity) throws InvalidDenomeException {
-		addDeneToDeneChainByIdentity(pulseJSONObject, dene,  targetDeneChainidentity.getNucleusName(), targetDeneChainidentity.getDenechainName());
+	public static boolean addDeneToDeneChainByIdentity(JSONObject pulseJSONObject, JSONObject dene, Identity targetDeneChainidentity) throws InvalidDenomeException {
+		return addDeneToDeneChainByIdentity(pulseJSONObject, dene,  targetDeneChainidentity.getNucleusName(), targetDeneChainidentity.getDenechainName());
 	}
 	
-	public static void addDeneToDeneChainByIdentity(JSONObject pulseJSONObject, JSONObject dene, String nucleusName,  String deneChainName) throws InvalidDenomeException {
+	public static boolean addDeneToDeneChainByIdentity(JSONObject pulseJSONObject, JSONObject dene, String nucleusName,  String deneChainName) throws InvalidDenomeException {
 		// TODO Auto-generated method stub
-		int toReturn =0;
+		boolean toReturn =false;
 		try {
 
 
@@ -1321,6 +1321,7 @@ public class DenomeUtils {
 					deneChain = aJSONObject;
 					denesJSONArray = deneChain.getJSONArray("Denes");
 					denesJSONArray.put(dene);
+					toReturn=true;
 
 				} 
 			}
@@ -1333,7 +1334,7 @@ public class DenomeUtils {
 			info.put("message", m);
 			throw new InvalidDenomeException(info);
 		}
-
+		return toReturn;
 	}
 
 	public void remveCodonFromDeneChain(JSONObject denechain, String codonName){
