@@ -648,13 +648,15 @@ public class PulseThread extends Thread{
 
 			for (Map.Entry<String, Integer> entry : microControllerPointerProcessingQueuePositionIndex) {
 				microControllerPointer = (String)entry.getKey();
+				logger.debug("line 651   microControllerPointer=" + microControllerPointer);
 				aMicroController = (MicroController)anHypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
 				aMicroControllerName = aMicroController.getName();
+				logger.debug("line 654 aMicroControllerName=" + aMicroControllerName );
 				anHypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_PULSE_STATUS_INFO, "Processing MicroController " + aMicroControllerName);
 
 				output = aMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
 				input = aMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
-				logger.debug("line 1851 aMicroControllerName=" + aMicroControllerName + " microControllerPointer=" + microControllerPointer);
+				
 
 				if(!executedFirstPulseSinceReboot){
 					//public static final String DENE_TYPE_ON_START_ACTION = "On Start Action";
