@@ -1154,16 +1154,14 @@ public class DenomeUtils {
 
 	}
 	
-	public static void addDeneWordToDeneByIdentity(JSONObject pulseJSONObject, JSONObject deneWord, Identity targetDeneChainidentity) throws InvalidDenomeException {
-		addDeneWordToDeneByIdentity(pulseJSONObject, deneWord,  targetDeneChainidentity.getNucleusName(), targetDeneChainidentity.getDenechainName(), targetDeneChainidentity.getDeneName());
+	public static boolean addDeneWordToDeneByIdentity(JSONObject pulseJSONObject, JSONObject deneWord, Identity targetDeneChainidentity) throws InvalidDenomeException {
+		return addDeneWordToDeneByIdentity(pulseJSONObject, deneWord,  targetDeneChainidentity.getNucleusName(), targetDeneChainidentity.getDenechainName(), targetDeneChainidentity.getDeneName());
 	}
 	
 	public static boolean addDeneWordToDeneByIdentity(JSONObject pulseJSONObject, JSONObject deneWord, String nucleusName,  String deneChainName, String deneName) throws InvalidDenomeException {
 		// TODO Auto-generated method stub
 		boolean toReturn =false;
 		try {
-
-
 			//
 			// now parse them
 			JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
