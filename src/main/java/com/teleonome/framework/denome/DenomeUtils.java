@@ -1196,7 +1196,7 @@ public class DenomeUtils {
 						if(aDeneJSONObject.getString("Name").equals(deneName)){
 							JSONArray denewordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
 							denewordsJSONArray.put(deneWord);
-							toReturn=false;
+							toReturn=true;
 							break done;
 						}
 					}
