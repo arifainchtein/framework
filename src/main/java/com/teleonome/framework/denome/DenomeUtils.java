@@ -1158,9 +1158,9 @@ public class DenomeUtils {
 		addDeneWordToDeneByIdentity(pulseJSONObject, deneWord,  targetDeneChainidentity.getNucleusName(), targetDeneChainidentity.getDenechainName(), targetDeneChainidentity.getDeneName());
 	}
 	
-	public static void addDeneWordToDeneByIdentity(JSONObject pulseJSONObject, JSONObject deneWord, String nucleusName,  String deneChainName, String deneName) throws InvalidDenomeException {
+	public static boolean addDeneWordToDeneByIdentity(JSONObject pulseJSONObject, JSONObject deneWord, String nucleusName,  String deneChainName, String deneName) throws InvalidDenomeException {
 		// TODO Auto-generated method stub
-		int toReturn =0;
+		boolean toReturn =false;
 		try {
 
 
@@ -1198,6 +1198,7 @@ public class DenomeUtils {
 						if(aDeneJSONObject.getString("Name").equals(deneName)){
 							JSONArray denewordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
 							denewordsJSONArray.put(deneWord);
+							toReturn=false;
 							break done;
 						}
 					}
@@ -1212,7 +1213,7 @@ public class DenomeUtils {
 			info.put("message", m);
 			throw new InvalidDenomeException(info);
 		}
-
+		return toReturn;
 	}
 	
 	public static boolean removeDeneWordFromDeneByIdentity(JSONObject pulseJSONObject, Identity targetDeneWordIdentity) throws InvalidDenomeException {
