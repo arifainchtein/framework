@@ -930,7 +930,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_HUMAN_INTERFACE_WEB_PAGE_PAGE_TITLE ="Page Title";
 	public static final String DENEWORD_HUMAN_INTERFACE_WEB_PAGE_PAGE_POSITION ="Page Position";
 	public static final String DENEWORD_TYPE_PANEL_DENECHAIN_POINTER="Panel DeneChain Pointer";
-	public static final String DENEWORD_TYPE_PANEL_IN_PAGE_POSITION="Panel In Page Pointer";
+	public static final String DENEWORD_TYPE_PANEL_IN_PAGE_POSITION="Panel In Page Position";
 	public static final String DENEWORD_TYPE_PANEL_IN_PANEL_POSITION="Panel In Panel Position";
 	public static final String DENEWORD_TYPE_PANEL_VISUALIZATION_STYLE="Panel Visualization Style";
 	public static final String DENEWORD_TYPE_PANEL_DATA_SOURCE_POINTER="Panel Data Source Pointer";
