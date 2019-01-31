@@ -490,8 +490,8 @@ public abstract class Hypothalamus {
 				exoZeroPublisher = exoZeroContext.socket(ZMQ.PUB);
 				exoZeroPublisher.setHWM(1);
 				exoZeroNetworkIpAddress = exoZeroInetAddress.getHostAddress();
-				logger.info("binding zeromq to " + exoZeroNetworkIpAddress);
-				exoZeroPublisher.bind("tcp://" + exoZeroNetworkIpAddress + ":5563");
+				logger.info("startExoZeroPublisher binding zeromq to " + exoZeroNetworkIpAddress);
+				exoZeroPublisher.bind("tcp://" + exoZeroNetworkIpAddress + ":" + TeleonomeConstants.EXOZERO_PULSE_PORT);
 				exoZeroNetworkActive=true;
 			}
 		} catch (SocketException | UnknownHostException e2) {
@@ -511,8 +511,8 @@ public abstract class Hypothalamus {
 				endoZeroPublisher = endoZeroContext.socket(ZMQ.PUB);
 				endoZeroPublisher.setHWM(1);
 				endoZeroNetworkIpAddress = endoZeroInetAddress.getHostAddress();
-				logger.info("binding zeromq to " + endoZeroNetworkIpAddress);
-				endoZeroPublisher.bind("tcp://" + endoZeroNetworkIpAddress + ":5563");
+				logger.info("startEndoZeroPublisher binding zeromq to " + endoZeroNetworkIpAddress);
+				endoZeroPublisher.bind("tcp://" + endoZeroNetworkIpAddress + ":" + TeleonomeConstants.ENDOZERO_PULSE_PORT);
 				endoZeroNetworkActive=true;
 			}
 		} catch (SocketException | UnknownHostException e2) {

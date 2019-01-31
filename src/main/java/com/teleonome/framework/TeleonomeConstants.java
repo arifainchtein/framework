@@ -8,8 +8,10 @@ public class TeleonomeConstants {
 	// the ports for the exoZeroNetwork
 	//
 	public static final int EXOZERO_PULSE_PORT=5563;
-	public static final int EXOZERO_MNEMOSYNE_MANAGER_PORT=5564;
+	public static final int ENDOZERO_PULSE_PORT=5565;
 	
+	public static final int EXOZERO_MNEMOSYNE_MANAGER_PORT=5564;
+
 	//
 	// the Computer Model values  (Internal:Descriptive:Computer Info:Computer Model
 	//

@@ -189,6 +189,7 @@ public class NetworkUtilities {
 			networkInterface  = enu.nextElement();
 			for(Enumeration ifaces = networkInterface.getInetAddresses();ifaces.hasMoreElements();){
 				inetAddr = (InetAddress)ifaces.nextElement();
+				logger.debug("getExoZeroNetworkAddress looking at=" + inetAddr.getHostAddress() );
 				if(!inetAddr.getHostAddress().equals(TeleonomeConstants.ADA_INTERNAL_HOST_IPADDRESS)) {
 					if(!inetAddr.isLoopbackAddress()){
 						if(inetAddr.isSiteLocalAddress()){
