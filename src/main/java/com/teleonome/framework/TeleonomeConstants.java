@@ -189,7 +189,7 @@ public class TeleonomeConstants {
 	public static final String DENECHAIN_DESCRIPTIVE = "Descriptive";
 	public static final String DENECHAIN_COMPONENTS = "Components";
 	public static final String DENECHAIN_ANALYTICONS = "Analyticons";
-	public static final String DENECHAIN_CONTROL_PARAMETERS = "Control Parameters";
+	public static final String DENE_CONTROL_PARAMETERS = "Control Parameters";
 	public static final String  DENECHAIN_MEDULA = "Medula";
 	
 	public static final String DENECHAIN_EXTERNAL_DATA = "External Data";
@@ -395,6 +395,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_MICROCONTROLLER_DIGITAL_PORT="Digital";
 	public static final String DENEWORD_TYPE_ACTUATOR_MICROCONTROLLER_POINTER = "Actuator Microcontroller Pointer";
 	public static final String DENEWORD_TYPE_ACTUATOR_POINTER = "Actuator Pointer";
+	public static final String DENEWORD_TYPE_ACTION_SUCCESS_TASKS="Action Success Tasks";
 	public static final String DENEWORD_TYPE_ACTION_SUCCESS_TASK_TRUE_EXPRESSION="Action Success Tasks True Expression";
 	public static final String DENEWORD_TYPE_ACTION_SUCCESS_TASK_FALSE_EXPRESSION="Action Success Tasks False Expression";
 	public static final String DENEWORD_TYPE_MNEMOSYNE_OPERATION_FALSE_EXPRESSION="Mnemosyne Operations False Expression";
@@ -519,6 +520,7 @@ public class TeleonomeConstants {
 	//
 	// dene types
 	//
+	public static final String DENE_TYPE_ACTION="Action";
 	public static final String DENE_TYPE_ACTUATOR_CONDITION = "Actuator Condition";
 	public static final String DENE_TYPE_ACTUATOR_CONDITION_PROCESSING = "Actuator Condition Processing";
 	public static final String DENE_TYPE_PROCESS_MEMORY_INFO="Process Memory Info";
@@ -923,6 +925,11 @@ public class TeleonomeConstants {
 	public static final String HOMEOBOX_DEFINITION_SENSOR="Sensor";
 	public static final String HUMAN_INTERFACE_PANEL = "Human Interface Panel";
 	public static final String IN_PANEL_POSITION=  "In Panel Position";
+	
+	public static final String DENECHAIN_REFERENCE="Reference";
+	public static final String DENE_STATUS="Status";
+	
+	
 	//
 	// the denetypes to make the human interface
 	//
