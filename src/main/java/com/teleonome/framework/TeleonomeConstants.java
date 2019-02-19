@@ -508,6 +508,8 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_ACTION_PROCESSING_RESULT="Action Processing Result";
 	public static final String DENEWORD_CONDITION_PROCESSING_RESULT="Condition Processing Result";
 	public static final String DENEWORD_ACTION_EXPRESSION="Action Expression";
+	public static final String DENEWORD_EXPRESSION="Expression";
+	
 	public static final String DENEWORD_CONDITION_EXPRESSION="Condition Expression";
 	public static final String CONDITION_NAME="Condition Name";
 	
