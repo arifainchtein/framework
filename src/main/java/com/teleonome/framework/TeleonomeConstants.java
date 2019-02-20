@@ -476,6 +476,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_OPERATIONAL_STATUS_BLUE_VALUE="Operational Status Blue Value";
 	public static final String DENEWORD_OPERATIONAL_STATUS_BLINK_VALUE="Operational Status Blink Value";
 	public static final String DENEWORD_OPERATIONAL_STATUS_BOOTSTRAP_EQUIVALENT="Operational Status Bootstrap Equivalent";
+	public static final String BOOTSTRAP_CRISIS="crisis";
 	public static final String BOOTSTRAP_DANGER="danger";
 	public static final String BOOTSTRAP_WARNING="warning";
 	public static final String BOOTSTRAP_SUCCESS="success";

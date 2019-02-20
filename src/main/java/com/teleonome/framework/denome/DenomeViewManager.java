@@ -317,7 +317,7 @@ public class DenomeViewManager {
 
 								sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 								sensorValuesJSONArray = this.loadDenesFromPointers(sensorValuesPointersJSONArray);
-								System.out.println("sensorValuesPointersJSONArray=" + sensorValuesPointersJSONArray + " sensorValuesJSONArray=" + sensorValuesJSONArray);
+								//System.out.println("sensorValuesPointersJSONArray=" + sensorValuesPointersJSONArray + " sensorValuesJSONArray=" + sensorValuesJSONArray);
 								
 								if(sensorValuesJSONArray.length()>0){	
 
