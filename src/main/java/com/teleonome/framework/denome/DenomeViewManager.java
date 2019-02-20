@@ -547,7 +547,7 @@ public class DenomeViewManager {
 				for (Map.Entry<JSONObject, Integer> entry : actuatorExecutionPositionDeneIndex) {
 
 					actionListDene = entry.getKey();
-					System.out.println("k=" + actionListDene + " v=" + entry.getValue() );
+					//System.out.println("k=" + actionListDene + " v=" + entry.getValue() );
 					
 					
 					actionListDeneName = actionListDene.getString("Name");
