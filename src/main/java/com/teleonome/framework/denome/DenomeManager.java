@@ -7246,7 +7246,7 @@ public class DenomeManager {
 	public AbstractMap.SimpleEntry<String, JSONArray>  evaluateAction(String teleonomeName, JSONObject actuatorActionJSONObject) throws JSONException{
 		String commandToExecute="";
 		//logger.debug("evaluate action actuatorActionJSONObject=" + actuatorActionJSONObject);
-		logger.debug("processing " + actuatorActionJSONObject.toString(4));
+		logger.debug("line 7249processing " + actuatorActionJSONObject.toString(4));
 		String actuatorActionConditionVariable_Name, actuatorActionConditionPointer;
 		Object actuatorActionConditionVariable_Value = null;
 		Object actuatorActionConditionVariable_Value_Rendered=null, actuatorActionConditionVariable_Type;
