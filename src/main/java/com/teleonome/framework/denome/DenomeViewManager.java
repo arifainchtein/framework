@@ -131,7 +131,7 @@ public class DenomeViewManager {
 
 	public JSONArray getMutations(String mutationType){
 		if(!denomeObject.has("Mutations")){
-			System.out.println("Denome does not have Mutations");
+			logger.debug("Denome does not have Mutations");
 			return null;
 		}
 		String mutationName="";
@@ -153,7 +153,7 @@ public class DenomeViewManager {
 
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
-			System.out.println("the mutation " + mutationName + " does not have a type");
+			logger.debug("the mutation " + mutationName + " does not have a type");
 			e.printStackTrace();
 		}
 		return null;
@@ -317,7 +317,7 @@ public class DenomeViewManager {
 
 								sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 								sensorValuesJSONArray = this.loadDenesFromPointers(sensorValuesPointersJSONArray);
-								//System.out.println("sensorValuesPointersJSONArray=" + sensorValuesPointersJSONArray + " sensorValuesJSONArray=" + sensorValuesJSONArray);
+								//logger.debug("sensorValuesPointersJSONArray=" + sensorValuesPointersJSONArray + " sensorValuesJSONArray=" + sensorValuesJSONArray);
 								
 								if(sensorValuesJSONArray.length()>0){	
 
@@ -500,15 +500,15 @@ public class DenomeViewManager {
 							//
 							// The Dene that contains the executive position deneword also has a dene of type Action list,
 							// the value of that deneword is a pointer to the dene that contains the action
-							//System.out.println(" aDeneJSONObject=" + anActuatorDeneJSONObject);
-							//System.out.println("anActuatorDeneJSONObject=" + anActuatorDeneJSONObject);
+							//logger.debug(" aDeneJSONObject=" + anActuatorDeneJSONObject);
+							//logger.debug("anActuatorDeneJSONObject=" + anActuatorDeneJSONObject);
 							String actionListPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(anActuatorDeneJSONObject,TeleonomeConstants.DENE_TYPE_ACTION_LIST, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							//
 							// now use the pointer to get to the denes that contain the actions
 							//
 							if(actionListPointer!=null){
 								try {
-									System.out.println("actionListPointer=" + actionListPointer);
+									logger.debug("actionListPointer=" + actionListPointer);
 									actionListDene = getDeneByIdentity(new Identity(actionListPointer));
 								} catch (InvalidDenomeException e) {
 									// TODO Auto-generated catch block
@@ -547,7 +547,7 @@ public class DenomeViewManager {
 				for (Map.Entry<JSONObject, Integer> entry : actuatorExecutionPositionDeneIndex) {
 
 					actionListDene = entry.getKey();
-					//System.out.println("k=" + actionListDene + " v=" + entry.getValue() );
+					//logger.debug("k=" + actionListDene + " v=" + entry.getValue() );
 					
 					
 					actionListDeneName = actionListDene.getString("Name");
@@ -570,7 +570,7 @@ public class DenomeViewManager {
 						denePointer = (String)actionDeneWordPointers.getString(n);
 						try {
 							actionDene = getDeneByIdentity(new Identity(denePointer));
-							System.out.println("denePointer=" + denePointer + " actionDene=" + actionDene);
+							logger.debug("denePointer=" + denePointer + " actionDene=" + actionDene);
 							evaluationPosition = (Integer)getDeneWordAttributeByDeneWordNameFromDenePointer( denePointer, "Evaluation Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);  
 							actuatorActionEvaluationPositionActionIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(actionDene, new Integer(evaluationPosition)));
 							//
@@ -1437,7 +1437,7 @@ public class DenomeViewManager {
 
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
-			System.out.println("the mutation " + mutationName + " does not have a type");
+			logger.debug("the mutation " + mutationName + " does not have a type");
 			e.printStackTrace();
 		}
 		return toReturn;
