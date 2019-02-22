@@ -643,6 +643,8 @@ public class DenomeUtils {
 		}
 		return toReturn;
 	}
+	
+	
 	public static boolean isDeneOfType(JSONObject dene, String whichDeneType){
 		boolean itIs=false;
 		try{
