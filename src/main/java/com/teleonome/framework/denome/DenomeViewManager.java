@@ -570,7 +570,7 @@ public class DenomeViewManager {
 						denePointer = (String)actionDeneWordPointers.getString(n);
 						try {
 							actionDene = getDeneByIdentity(new Identity(denePointer));
-							//System.out.println("denePointer=" + denePointer + " actionDene=" + actionDene);
+							System.out.println("denePointer=" + denePointer + " actionDene=" + actionDene);
 							evaluationPosition = (Integer)getDeneWordAttributeByDeneWordNameFromDenePointer( denePointer, "Evaluation Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);  
 							actuatorActionEvaluationPositionActionIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(actionDene, new Integer(evaluationPosition)));
 							//
