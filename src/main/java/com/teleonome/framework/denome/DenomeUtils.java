@@ -639,7 +639,7 @@ public class DenomeUtils {
 				id.getNucleusName().equals(TeleonomeConstants.NUCLEI_MNEMOSYNE) ||
 				id.getNucleusName().equals(TeleonomeConstants.NUCLEI_PURPOSE)
 				) {
-			toReturn=true;
+			toReturn=false;
 		}
 		return toReturn;
 	}
