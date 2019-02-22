@@ -14,16 +14,6 @@ import java.util.Vector;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Category;
 import org.apache.log4j.Logger;
-import org.eclipse.paho.client.mqttv3.IMqttActionListener;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,17 +36,17 @@ import com.teleonome.framework.utils.Utils;
 
 public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressMonitor{
 
-	private MqttClient anMqttClient;
+	
 	private String publishingResults="";
 	private String mqttBrokerAddress;
-	MemoryPersistence persistence = new MemoryPersistence();
+	
 	private Category logger;
 	private  int localPort = 8888;
 	private int remotePort = 8888;
 	private int sshPort=22;
 	private String userName="pi";
 	JSONArray configParams;
-	String host="";
+	String host="", privateKey="";
 	DenomeManager aDenomeManager;
 	JSch jsch=new JSch();
 	Session session=null;
@@ -74,8 +64,12 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			try {
 				dene = configParams.getJSONObject(i);
 				deneName = dene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
-				if(deneName.equals("DG Server IP Address")){
+				if(deneName.equals("SFTP Server IP Address")){
 					host = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "Server IP Address", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				}else if(deneName.equals("SFTP Key File Name")) {
+					
+					privateKey = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "Server IP Address", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					
 				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -235,48 +229,12 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			logger.warn(Utils.getStringException(e));
 		}
 
-
-		//logger.debug("creating tunnel connected about to set port forwarding" );
-
-		//		try {
-		//			assinged_port = session.setPortForwardingL(localPort, host, remotePort);
-		//		} catch (JSchException e) {
-		//			// TODO Auto-generated catch block
-		//			logger.warn(Utils.getStringException(e));
-		//			publishingResults="Fault#DigitalGeppettoPublisher#Error Setting Port Forward";
-		//			return false;
-		//		}
-		//        logger.debug("assinged_port:"+assinged_port+" -> "+remotePort+":"+remotePort);
+		logger.debug("assinged_port:"+assinged_port+" -> "+remotePort+":"+remotePort);
 		return true;
 
 	}
 
-	//	private boolean connectToDG() {
-	//		
-	//       	try {
-	//			anMqttClient = new MqttClient(mqttBrokerAddress, dgTeleonomeName, persistence);
-	//		} catch (MqttException e) {
-	//			logger.warn(Utils.getStringException(e));
-	//			publishingResults="Fault#DigitalGeppettoPublisher#Error Creating MQTTClient";
-	//			return false;
-	//		}
-	//       	
-	//           MqttConnectOptions connOpts = new MqttConnectOptions();
-	//           connOpts.setAutomaticReconnect(true);
-	//           connOpts.setCleanSession(true);
-	//           connOpts.setKeepAliveInterval(300);
-	//          // connOpts.setMaxInflight(1000);
-	//        	try{
-	//        		anMqttClient.connect(connOpts);
-	//			} catch (MqttException e1) {
-	//				// TODO Auto-generated catch block
-	//				logger.warn(Utils.getStringException(e1));
-	//				publishingResults="Fault#DigitalGeppettoPublisher#Error Connecting to MQTT Server";
-	//				return false;
-	//			}
-	//       return true;
-	//	}
-	//	
+	
 	private boolean publishToDG() {
 
 

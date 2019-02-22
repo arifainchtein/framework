@@ -364,6 +364,7 @@ public class TeleonomeConstants {
 	//
 	// Deneword types
 	//
+	public static final String DENEWORD_TYPE_MICROCONTROLLER_CONFIG_PARAM_LIST = "Microcontroller Config Parameter List";
 	public static final String DENEWORD_TYPE_ACTION="Action";
 	public static final String DENEWORD_TYPE_CURRENT_PULSE="Current Pulse";
 	public static final String DENEWORD_TYPE_CURRENT_PULSE_FREQUENCY="Current Pulse Frequency";
@@ -888,7 +889,7 @@ public class TeleonomeConstants {
 	public static final String SPERM_HYPOTHALAMUS_HOMEOBOXES="Homeoboxes";
 	public static final String SPERM_HYPOTHALAMUS_ACTIONS="Actions";
 	public static final String SPERM_HYPOTHALAMUS_MUTATIONS="Mutations";
-	
+	public static final String SPERM_DENE_TYPE_CREATE_MUTATION="Create Mutation";
 	public static final String SPERM_DENE_TYPE_CREATE_DENE_CHAIN="Create Dene Chain";
 	public static final String SPERM_ACTION_DENWORD_UPDATE_VALUE_LIST="DeneWords Update List";
 
@@ -898,6 +899,7 @@ public class TeleonomeConstants {
 	public static final String SPERM_ACTION_DENEWORD_EXECUTION_POINT_PRE_HOMEBOX="Pre Homebox Insertion";
 	public static final String SPERM_ACTION_DENEWORD_EXECUTION_POINT_POST_HOMEBOX="Post Homebox Insertion";
 	public static final String SPERM_ACTION_DENEWORD_DENECHAIN_NAME="DeneChain Name";
+	public static final String SPERM_ACTION_DENEWORD_MUTATION_NAME="Mutation Name";
 	
 	public static final String SPERM_MEDULA="Medula";
 	public static final String SPERM_PURPOSE_NAME="Name";

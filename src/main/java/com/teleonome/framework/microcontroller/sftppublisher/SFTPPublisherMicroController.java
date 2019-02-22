@@ -10,20 +10,11 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import org.apache.log4j.Logger;
-import org.eclipse.paho.client.mqttv3.IMqttActionListener;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import com.teleonome.framework.TeleonomeConstants;
+import org.json.JSONArray;
+
+
 import com.teleonome.framework.denome.DenomeManager;
-import com.teleonome.framework.denome.DenomeUtils;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.microcontroller.MicroController;
 
