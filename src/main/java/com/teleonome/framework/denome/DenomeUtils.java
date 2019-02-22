@@ -45,332 +45,332 @@ public class DenomeUtils {
 			JSONArray memoryStatusDeneWords = new JSONArray();
 			memoryStatusDene.put("DeneWords", memoryStatusDeneWords);
 			JSONObject deneWord = null;
-				int pacemakerPid = Integer.parseInt(FileUtils.readFileToString(new File("PaceMakerProcess.info")).split("@")[0]);
+			int pacemakerPid = Integer.parseInt(FileUtils.readFileToString(new File("PaceMakerProcess.info")).split("@")[0]);
 			int webPid = Integer.parseInt(FileUtils.readFileToString(new File("WebServerProcess.info")).split("@")[0]);
 			int heartProcessInfo = Integer.parseInt(FileUtils.readFileToString(new File("heart/HeartProcess.info")).split("@")[0]);
 			String[] cmdArray = { "top", "-n1","-b","-p"+ pacemakerPid , "-p" + webPid , "-p" + heartProcessInfo  };
 			ProcessBuilder pb = new ProcessBuilder(cmdArray);
 			pb.redirectError();
-			
-			    Process p = pb.start();
-			    
-			     is = p.getInputStream();
-			    int value = -1;
-			    StringBuffer buffer = new StringBuffer();
-			    while ((value = is.read()) != -1) {
-			    	buffer.append((char)value);
-			    }
-			    int exitCode = p.waitFor();
-			    
-			    
-			    String[] lines = buffer.toString().split("\\r?\\n");
-			    String[] splited;
-			//    System.out.println("lines=" + lines.length);
-			    for(int i=0;i<lines.length;i++) {
-			   	switch(i) {
-			    
-			    	case 0:
-			    		//
-			    		// top - 09:27:57 up 14:06,  4 users,  load average: 0.71, 0.58, 0.80
-			    		//
-			    		splited = lines[i].split(",");
-//			    		System.out.println("lines[i]=" + lines[i]);
-//			    		System.out.println("splited[0]=" + splited[0]);
-//			    		System.out.println("splited[1]=" + splited[1]);
-//			    		System.out.println("splited[2]=" + splited[2]);
-//			    		System.out.println("splited[3]=" + splited[3]);
-//			    		System.out.println("splited[4]=" + splited[4]);
-//			    		
-			    		
-			    		String theTime =splited[0].split("up")[0];
-			    		String upTime =splited[0].split("up")[1];
-			    		String numberUsers = splited[1];
-			    		
-			    		deneWord = DenomeUtils.buildDeneWordJSONObject("Time",""+theTime,null,"String",true);
-						memoryStatusDeneWords.put(deneWord);
-						
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Up Time",""+upTime,null,"String",true);
-						memoryStatusDeneWords.put(deneWord);
-						
-						
-			    		double loadAverage1Minute = 0;
-			    		double loadAverage5Minute = 0;
-			    		double loadAverage15Minute = 0;
-			    		//
-			    		// the very fist time that the pulse run this parsing does not
-			    		// work so just let it be zero, it will correct itself
-			    		// after the pacemaker has beeen runing for more than one minute
-			    		try{
-			    			loadAverage1Minute = Double.parseDouble(splited[2].split(":")[1]);
-			    			 loadAverage5Minute = Double.parseDouble(splited[3]);
-				    		 loadAverage15Minute = Double.parseDouble(splited[4]);
-				    		
-			    		}catch(ArrayIndexOutOfBoundsException e) {
-			    			
-			    		}catch(java.lang.NumberFormatException e) {
-			    			
-			    		}
-			    		//System.out.println("lines[i]="+lines[i]);
-			    		
-			    		
-			    		deneWord = DenomeUtils.buildDeneWordJSONObject("Load Average 1 Minute",""+loadAverage1Minute,null,"double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Load Average 5 Minute",""+loadAverage5Minute,null,"double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Load Average 15 Minute",""+loadAverage15Minute,null,"double",true);
-						memoryStatusDeneWords.put(deneWord);
-			    		break;
-			    	case 1:
-			    		 // Tasks:   4 total,   0 running,   4 sleeping,   0 stopped,   0 zombie
-			    		splited = lines[i].split(",");
-					    		for(int j=0;j<splited.length;j++) {
-					    	//		System.out.println("line " + j + " token " + j + " value=" + splited[j]);
-					    		}
-			    		break;
-			    	case 2:
-			    		// %Cpu(s): 22.7 us, 15.0 sy,  0.0 ni, 57.5 id,  3.5 wa,  0.0 hi,  1.2 si,  0.0 st
-			    		
-			    		splited = lines[i].split(":")[1].trim().split(",");
-			    	//	System.out.println("ddd=" +  lines[i].split(":")[1]);//[0].split(" ")[0]);
-			    	//	System.out.println("splited=" + splited.length);//[0].split(" ")[0]);
-			    		
-			    		double cpuUsageAsPercentByUser = Double.parseDouble(splited[0].trim().split("\\s+")[0]);
-			    		double cpuUsageAsPercentBySystem = Double.parseDouble(splited[1].trim().split("\\s+")[0]);
-			    		double cpuUsageAsPercentByLowPriorityServices = Double.parseDouble(splited[2].trim().split("\\s+")[0]);
-			    		double cpuUsageAsPercentByIdleProcess = Double.parseDouble(splited[3].trim().split("\\s+")[0]);
-			    		double cpuUsageAsPercentByIOWait = Double.parseDouble(splited[4].trim().split("\\s+")[0]);
-			    		double cpuUsageAsPercentByHardwareInterrupt = Double.parseDouble(splited[5].trim().split("\\s+")[0]);
-			    		double cpuUsageAsPercentBySoftwareInterrupts = Double.parseDouble(splited[6].trim().split("\\s+")[0]);
-			    		double cpuUsageAsPercentByStealTime = Double.parseDouble(splited[7].trim().split("\\s+")[0]);
-					   
-			    		deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By User",""+cpuUsageAsPercentByUser,"%","double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By System",""+cpuUsageAsPercentBySystem,"%","double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By Low Priority Services",""+cpuUsageAsPercentByLowPriorityServices,"%","double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By Idle Process",""+cpuUsageAsPercentByIdleProcess,"%","double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By IOWait",""+cpuUsageAsPercentByIOWait,"%","double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By Hardware Interrupt",""+cpuUsageAsPercentByHardwareInterrupt,"%","double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Cpu Usage As Percent By Software Interrupts",""+cpuUsageAsPercentBySoftwareInterrupts,"%","double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By Steal Time",""+cpuUsageAsPercentByStealTime,"%","double",true);
-						memoryStatusDeneWords.put(deneWord);
-			    		break;
-			    	case 3:
-			    		//
-			    		//KiB Mem:    380416 total,   364956 used,    15460 free,     5028 buffers
-			    		splited = lines[i].split(":")[1].split(",");
-			    		double totalSystemMemory = Double.parseDouble(splited[0].trim().split("\\s+")[0])/1000;
-			    		int freeSystemMemory = Integer.parseInt(splited[1].trim().split("\\s+")[0])/1000;
-			    		int memoryUsed = Integer.parseInt(splited[2].trim().split("\\s+")[0])/1000;
-			    		double bufferCache = Double.parseDouble(splited[3].trim().split("\\s+")[0]);
-			    		logger.debug("lines[i]=" + lines[i]);
-			    		logger.debug("splited[2]="+ splited[2]);
-			    		logger.debug("memoryUsed="+ memoryUsed);
-			    		
-			    		deneWord = DenomeUtils.buildDeneWordJSONObject("Total System Memory",""+totalSystemMemory,"Mb","double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Free System Memory",""+freeSystemMemory,"Mb","int",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Memory Used",""+memoryUsed,"Mb","int",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Buffer Cache",""+bufferCache,"Kb","double",true);
-						memoryStatusDeneWords.put(deneWord);
 
-			    		break;
-			    	case 4:
-			    		//KiB Swap:   102396 total,      628 used,   101768 free.    97036 cached Mem
-			    		splited = lines[i].split(":")[1].split(",");
-			    		double totalSwapAvailable= Double.parseDouble(splited[0].trim().split(" ")[0]);
-			    		double totalSwapUsed = Double.parseDouble(splited[1].trim().split(" ")[0]);
-			    		//
-			    		// there is a bug look at the period after the word free above
-			    		// bviously they meant a , but put . so do something weird
-			    		// to parse 
-			    		// 101768 free.    97036 cached Mem
-			    		//System.out.println("splited[2].trim()=" + splited[2].trim().split("\\s+")[2]);
-			    		
-			    		double totalSwapFree = Double.parseDouble(splited[2].trim().split("\\s+")[0].trim().split("\\s+")[0]);
-			    		double cachedMemory = Double.parseDouble(splited[2].trim().split("\\s+")[2].trim().split("\\s+")[0]);
-			    		
-			    		deneWord = DenomeUtils.buildDeneWordJSONObject("Total Swap Available",""+totalSwapAvailable,"Kb","double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Total Swap Used",""+totalSwapUsed,"Kb","double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Total Swap Free",""+totalSwapFree,"Kb","double",true);
-						memoryStatusDeneWords.put(deneWord);
-						deneWord = DenomeUtils.buildDeneWordJSONObject("Cached Memory",""+cachedMemory,"Kb","double",true);
-						memoryStatusDeneWords.put(deneWord);
-			    		break;
-			    	}
-			  //  System.out.println("memoryStatusDene " + memoryStatusDene.toString(4) );
-			    }
-			    
-			} catch (IOException exp) {
-			    exp.printStackTrace();
-			} catch (InterruptedException ex) {
-			    //Logger.getLogger(JavaApplication256.class.getName()).log(Level.SEVERE, null, ex);
+			Process p = pb.start();
+
+			is = p.getInputStream();
+			int value = -1;
+			StringBuffer buffer = new StringBuffer();
+			while ((value = is.read()) != -1) {
+				buffer.append((char)value);
 			}
+			int exitCode = p.waitFor();
+
+
+			String[] lines = buffer.toString().split("\\r?\\n");
+			String[] splited;
+			//    System.out.println("lines=" + lines.length);
+			for(int i=0;i<lines.length;i++) {
+				switch(i) {
+
+				case 0:
+					//
+					// top - 09:27:57 up 14:06,  4 users,  load average: 0.71, 0.58, 0.80
+					//
+					splited = lines[i].split(",");
+					//			    		System.out.println("lines[i]=" + lines[i]);
+					//			    		System.out.println("splited[0]=" + splited[0]);
+					//			    		System.out.println("splited[1]=" + splited[1]);
+					//			    		System.out.println("splited[2]=" + splited[2]);
+					//			    		System.out.println("splited[3]=" + splited[3]);
+					//			    		System.out.println("splited[4]=" + splited[4]);
+					//			    		
+
+					String theTime =splited[0].split("up")[0];
+					String upTime =splited[0].split("up")[1];
+					String numberUsers = splited[1];
+
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Time",""+theTime,null,"String",true);
+					memoryStatusDeneWords.put(deneWord);
+
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Up Time",""+upTime,null,"String",true);
+					memoryStatusDeneWords.put(deneWord);
+
+
+					double loadAverage1Minute = 0;
+					double loadAverage5Minute = 0;
+					double loadAverage15Minute = 0;
+					//
+					// the very fist time that the pulse run this parsing does not
+					// work so just let it be zero, it will correct itself
+					// after the pacemaker has beeen runing for more than one minute
+					try{
+						loadAverage1Minute = Double.parseDouble(splited[2].split(":")[1]);
+						loadAverage5Minute = Double.parseDouble(splited[3]);
+						loadAverage15Minute = Double.parseDouble(splited[4]);
+
+					}catch(ArrayIndexOutOfBoundsException e) {
+
+					}catch(java.lang.NumberFormatException e) {
+
+					}
+					//System.out.println("lines[i]="+lines[i]);
+
+
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Load Average 1 Minute",""+loadAverage1Minute,null,"double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Load Average 5 Minute",""+loadAverage5Minute,null,"double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Load Average 15 Minute",""+loadAverage15Minute,null,"double",true);
+					memoryStatusDeneWords.put(deneWord);
+					break;
+				case 1:
+					// Tasks:   4 total,   0 running,   4 sleeping,   0 stopped,   0 zombie
+					splited = lines[i].split(",");
+					for(int j=0;j<splited.length;j++) {
+						//		System.out.println("line " + j + " token " + j + " value=" + splited[j]);
+					}
+					break;
+				case 2:
+					// %Cpu(s): 22.7 us, 15.0 sy,  0.0 ni, 57.5 id,  3.5 wa,  0.0 hi,  1.2 si,  0.0 st
+
+					splited = lines[i].split(":")[1].trim().split(",");
+					//	System.out.println("ddd=" +  lines[i].split(":")[1]);//[0].split(" ")[0]);
+					//	System.out.println("splited=" + splited.length);//[0].split(" ")[0]);
+
+					double cpuUsageAsPercentByUser = Double.parseDouble(splited[0].trim().split("\\s+")[0]);
+					double cpuUsageAsPercentBySystem = Double.parseDouble(splited[1].trim().split("\\s+")[0]);
+					double cpuUsageAsPercentByLowPriorityServices = Double.parseDouble(splited[2].trim().split("\\s+")[0]);
+					double cpuUsageAsPercentByIdleProcess = Double.parseDouble(splited[3].trim().split("\\s+")[0]);
+					double cpuUsageAsPercentByIOWait = Double.parseDouble(splited[4].trim().split("\\s+")[0]);
+					double cpuUsageAsPercentByHardwareInterrupt = Double.parseDouble(splited[5].trim().split("\\s+")[0]);
+					double cpuUsageAsPercentBySoftwareInterrupts = Double.parseDouble(splited[6].trim().split("\\s+")[0]);
+					double cpuUsageAsPercentByStealTime = Double.parseDouble(splited[7].trim().split("\\s+")[0]);
+
+					deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By User",""+cpuUsageAsPercentByUser,"%","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By System",""+cpuUsageAsPercentBySystem,"%","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By Low Priority Services",""+cpuUsageAsPercentByLowPriorityServices,"%","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By Idle Process",""+cpuUsageAsPercentByIdleProcess,"%","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By IOWait",""+cpuUsageAsPercentByIOWait,"%","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By Hardware Interrupt",""+cpuUsageAsPercentByHardwareInterrupt,"%","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Cpu Usage As Percent By Software Interrupts",""+cpuUsageAsPercentBySoftwareInterrupts,"%","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Usage As Percent By Steal Time",""+cpuUsageAsPercentByStealTime,"%","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					break;
+				case 3:
+					//
+					//KiB Mem:    380416 total,   364956 used,    15460 free,     5028 buffers
+					splited = lines[i].split(":")[1].split(",");
+					double totalSystemMemory = Double.parseDouble(splited[0].trim().split("\\s+")[0])/1000;
+					int freeSystemMemory = Integer.parseInt(splited[1].trim().split("\\s+")[0])/1000;
+					int memoryUsed = Integer.parseInt(splited[2].trim().split("\\s+")[0])/1000;
+					double bufferCache = Double.parseDouble(splited[3].trim().split("\\s+")[0]);
+					logger.debug("lines[i]=" + lines[i]);
+					logger.debug("splited[2]="+ splited[2]);
+					logger.debug("memoryUsed="+ memoryUsed);
+
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Total System Memory",""+totalSystemMemory,"Mb","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Free System Memory",""+freeSystemMemory,"Mb","int",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Memory Used",""+memoryUsed,"Mb","int",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Buffer Cache",""+bufferCache,"Kb","double",true);
+					memoryStatusDeneWords.put(deneWord);
+
+					break;
+				case 4:
+					//KiB Swap:   102396 total,      628 used,   101768 free.    97036 cached Mem
+					splited = lines[i].split(":")[1].split(",");
+					double totalSwapAvailable= Double.parseDouble(splited[0].trim().split(" ")[0]);
+					double totalSwapUsed = Double.parseDouble(splited[1].trim().split(" ")[0]);
+					//
+					// there is a bug look at the period after the word free above
+					// bviously they meant a , but put . so do something weird
+					// to parse 
+					// 101768 free.    97036 cached Mem
+					//System.out.println("splited[2].trim()=" + splited[2].trim().split("\\s+")[2]);
+
+					double totalSwapFree = Double.parseDouble(splited[2].trim().split("\\s+")[0].trim().split("\\s+")[0]);
+					double cachedMemory = Double.parseDouble(splited[2].trim().split("\\s+")[2].trim().split("\\s+")[0]);
+
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Total Swap Available",""+totalSwapAvailable,"Kb","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Total Swap Used",""+totalSwapUsed,"Kb","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Total Swap Free",""+totalSwapFree,"Kb","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Cached Memory",""+cachedMemory,"Kb","double",true);
+					memoryStatusDeneWords.put(deneWord);
+					break;
+				}
+				//  System.out.println("memoryStatusDene " + memoryStatusDene.toString(4) );
+			}
+
+		} catch (IOException exp) {
+			exp.printStackTrace();
+		} catch (InterruptedException ex) {
+			//Logger.getLogger(JavaApplication256.class.getName()).log(Level.SEVERE, null, ex);
+		}
 		try {
 			if(is!=null)is.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
 		}
-		
+
 		return memoryStatusDene;
 	}
-	
-		/**
-		 * this method returns and array containg denes.  each dene is the line from the top
-		 * process for each of the three process, cerebellum, heart and web.  for the top 5 lines see the methiod above
-		 * @return
-		 */
-		public static JSONArray generateProcessMemoryStatusDene() {
-			JSONArray toReturn = new JSONArray();
-			InputStream is=null;
-			try {
-				
-				JSONObject deneWord = null;
-					int pacemakerPid = Integer.parseInt(FileUtils.readFileToString(new File("PaceMakerProcess.info")).split("@")[0]);
-				int webPid = Integer.parseInt(FileUtils.readFileToString(new File("WebServerProcess.info")).split("@")[0]);
-				int heartProcessInfo = Integer.parseInt(FileUtils.readFileToString(new File("heart/HeartProcess.info")).split("@")[0]);
-				String[] cmdArray = { "top", "-n1","-b","-p"+ pacemakerPid , "-p" + webPid , "-p" + heartProcessInfo  };
-				ProcessBuilder pb = new ProcessBuilder(cmdArray);
-				pb.redirectError();
-				
-				    Process p = pb.start();
-				    
-				     is = p.getInputStream();
-				    int value = -1;
-				    StringBuffer buffer = new StringBuffer();
-				    while ((value = is.read()) != -1) {
-				    	buffer.append((char)value);
-				    }
-				    int exitCode = p.waitFor();
-				    
-				    
-				    String[] lines = buffer.toString().split("\\r?\\n");
-				    String[] splited;
-				//    System.out.println("lines=" + lines.length);
-				    for(int i=0;i<lines.length;i++) {
-				    	switch(i) {
-				    	case 7:
-				    	case 8:
-				    	case 9:
-				    		//24587 pi        20   0  171808  42972   5468 S  0.0 11.3   4:11.48 java
-				    		splited = lines[i].trim().split("\\s+");
-				    		int processId = Integer.parseInt(splited[0]);
-				    		String processName="";
-				    		if(processId==pacemakerPid) {
-				    			processName  =TeleonomeConstants.PROCESS_HYPOTHALAMUS;
-				    			
-				    		}else if(processId==heartProcessInfo) {
-				    			processName  =TeleonomeConstants.PROCESS_HEART;
-				    			
-				    		}else if(processId==webPid) {
-				    			processName  =TeleonomeConstants.PROCESS_WEB_SERVER;
-				    			
-				    		}
-				    		String user = splited[1];
-				    		int priority = Integer.parseInt(splited[2]);
-				    		int niceLevel = Integer.parseInt(splited[3]);
-				    		int virtualMemoryUedByProcess = Integer.parseInt(splited[4]);
-				    		int residentMemoryUedByProcess = 0;
-				    		try{
-				    			residentMemoryUedByProcess = Integer.parseInt(splited[5]);
-				    		}catch(NumberFormatException e) {
-				    			
-				    		}
-				    		int shareableMemory = Integer.parseInt(splited[6]);
-				    		String currentStatus = splited[7];
-				    		double cpuUsedByProcessAsPercentage = Double.parseDouble(splited[8]);
-				    		double memoryUsedByProcessAsPercentage = Double.parseDouble(splited[9]);
-				    		String timeUsedByProcessAsPercentage = splited[10];
-				    		String command =  splited[11];
-				    		
-				    		JSONObject processStatusDene = new JSONObject();
-				    		processStatusDene.put("Dene Type", TeleonomeConstants.DENE_TYPE_PROCESS_MEMORY_INFO);
-				    		processStatusDene.put("Name", processName);
-							JSONArray processStatusDeneWords = new JSONArray();
-							processStatusDene.put("DeneWords", processStatusDeneWords);
-									    		
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("User",""+user,null,"String",true);
-				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Priority",""+priority,null,"int",true);
-				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Nice Level",""+niceLevel,null,"",true);
-				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Virtual Memory Used By Process",""+virtualMemoryUedByProcess,"Kb","int",true);
-				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Resident Memory Used By Process",""+residentMemoryUedByProcess,"Kb","int",true);
-				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Shareable Memory",""+shareableMemory,"Kb","int",true);
-				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Current Status",""+currentStatus,null,"String",true);
-				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Used By Process As Percentage",""+cpuUsedByProcessAsPercentage,"%","double",true);
-				    		processStatusDeneWords.put(deneWord);
-				    		deneWord = DenomeUtils.buildDeneWordJSONObject("Time Process Has Been Running",""+timeUsedByProcessAsPercentage,null,"String",true);
-				    		processStatusDeneWords.put(deneWord);
-				    		
-				    		if(processName.equals(TeleonomeConstants.PROCESS_HYPOTHALAMUS)) {
-				    			double hypothalamusAvailableMemory = Runtime.getRuntime().freeMemory()/1024000;
-								double hypothalamusMaxMemory = Runtime.getRuntime().maxMemory()/1024000;
-								
-								deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HYPOTHALAMUS_PROCESS_AVAILABLE_MEMORY,""+hypothalamusAvailableMemory,"Mb","double",true);
-					    		processStatusDeneWords.put(deneWord);
-					    		deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HYPOTHALAMUS_PROCESS_MAXIMUM_MEMORY,""+hypothalamusMaxMemory,"Mb","double",true);
-					    		processStatusDeneWords.put(deneWord);
-				    		}else if(processName.equals(TeleonomeConstants.PROCESS_WEB_SERVER)) {
-				    			String webserverPingInfoS = FileUtils.readFileToString(new File("WebServerPing.info"));
-								if(webserverPingInfoS!=null) {
-									JSONObject webserverPingInfo = new JSONObject(webserverPingInfoS);
-									double webserverAvailableMemory = webserverPingInfo.getDouble(TeleonomeConstants.WEBSERVER_PROCESS_AVAILABLE_MEMORY);
-									double webserverMaxMemory = webserverPingInfo.getDouble(TeleonomeConstants.WEBSERVER_PROCESS_MAXIMUM_MEMORY);
-									deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.WEBSERVER_PROCESS_AVAILABLE_MEMORY,""+webserverAvailableMemory,"Mb","double",true);
-						    		processStatusDeneWords.put(deneWord);
-						    		deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.WEBSERVER_PROCESS_MAXIMUM_MEMORY,""+webserverMaxMemory,"Mb","double",true);
-						    		processStatusDeneWords.put(deneWord);
-								}
-								
-				    		}else if(processName.equals(TeleonomeConstants.PROCESS_HEART)) {
-				    			String heartPingInfoS = FileUtils.readFileToString(new File("heart/HeartPing.info"));
-								if(heartPingInfoS!=null) {
-									JSONObject heartPingInfo = new JSONObject(heartPingInfoS);
-									double heartAvailableMemory = heartPingInfo.getDouble(TeleonomeConstants.HEART_PROCESS_AVAILABLE_MEMORY);
-									double heartMaxMemory = heartPingInfo.getDouble(TeleonomeConstants.HEART_PROCESS_MAXIMUM_MEMORY);
-									deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HEART_PROCESS_AVAILABLE_MEMORY,""+heartAvailableMemory,"Mb","double",true);
-						    		processStatusDeneWords.put(deneWord);
-						    		deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HEART_PROCESS_MAXIMUM_MEMORY,""+heartMaxMemory,"Mb","double",true);
-						    		processStatusDeneWords.put(deneWord);
-								}
-				    		}
-				    		//System.out.println("processStatusDene=" + processStatusDene.toString(4));
-				    		toReturn.put(processStatusDene);
-				    		break;
-				    	
-				    	}
-				    }
-				    
-				} catch (IOException exp) {
-				    exp.printStackTrace();
-				} catch (InterruptedException ex) {
-				    //Logger.getLogger(JavaApplication256.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			try {
-				if(is!=null)is.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
+	/**
+	 * this method returns and array containg denes.  each dene is the line from the top
+	 * process for each of the three process, cerebellum, heart and web.  for the top 5 lines see the methiod above
+	 * @return
+	 */
+	public static JSONArray generateProcessMemoryStatusDene() {
+		JSONArray toReturn = new JSONArray();
+		InputStream is=null;
+		try {
+
+			JSONObject deneWord = null;
+			int pacemakerPid = Integer.parseInt(FileUtils.readFileToString(new File("PaceMakerProcess.info")).split("@")[0]);
+			int webPid = Integer.parseInt(FileUtils.readFileToString(new File("WebServerProcess.info")).split("@")[0]);
+			int heartProcessInfo = Integer.parseInt(FileUtils.readFileToString(new File("heart/HeartProcess.info")).split("@")[0]);
+			String[] cmdArray = { "top", "-n1","-b","-p"+ pacemakerPid , "-p" + webPid , "-p" + heartProcessInfo  };
+			ProcessBuilder pb = new ProcessBuilder(cmdArray);
+			pb.redirectError();
+
+			Process p = pb.start();
+
+			is = p.getInputStream();
+			int value = -1;
+			StringBuffer buffer = new StringBuffer();
+			while ((value = is.read()) != -1) {
+				buffer.append((char)value);
 			}
-			
-			return toReturn;
+			int exitCode = p.waitFor();
+
+
+			String[] lines = buffer.toString().split("\\r?\\n");
+			String[] splited;
+			//    System.out.println("lines=" + lines.length);
+			for(int i=0;i<lines.length;i++) {
+				switch(i) {
+				case 7:
+				case 8:
+				case 9:
+					//24587 pi        20   0  171808  42972   5468 S  0.0 11.3   4:11.48 java
+					splited = lines[i].trim().split("\\s+");
+					int processId = Integer.parseInt(splited[0]);
+					String processName="";
+					if(processId==pacemakerPid) {
+						processName  =TeleonomeConstants.PROCESS_HYPOTHALAMUS;
+
+					}else if(processId==heartProcessInfo) {
+						processName  =TeleonomeConstants.PROCESS_HEART;
+
+					}else if(processId==webPid) {
+						processName  =TeleonomeConstants.PROCESS_WEB_SERVER;
+
+					}
+					String user = splited[1];
+					int priority = Integer.parseInt(splited[2]);
+					int niceLevel = Integer.parseInt(splited[3]);
+					int virtualMemoryUedByProcess = Integer.parseInt(splited[4]);
+					int residentMemoryUedByProcess = 0;
+					try{
+						residentMemoryUedByProcess = Integer.parseInt(splited[5]);
+					}catch(NumberFormatException e) {
+
+					}
+					int shareableMemory = Integer.parseInt(splited[6]);
+					String currentStatus = splited[7];
+					double cpuUsedByProcessAsPercentage = Double.parseDouble(splited[8]);
+					double memoryUsedByProcessAsPercentage = Double.parseDouble(splited[9]);
+					String timeUsedByProcessAsPercentage = splited[10];
+					String command =  splited[11];
+
+					JSONObject processStatusDene = new JSONObject();
+					processStatusDene.put("Dene Type", TeleonomeConstants.DENE_TYPE_PROCESS_MEMORY_INFO);
+					processStatusDene.put("Name", processName);
+					JSONArray processStatusDeneWords = new JSONArray();
+					processStatusDene.put("DeneWords", processStatusDeneWords);
+
+					deneWord = DenomeUtils.buildDeneWordJSONObject("User",""+user,null,"String",true);
+					processStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Priority",""+priority,null,"int",true);
+					processStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Nice Level",""+niceLevel,null,"",true);
+					processStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Virtual Memory Used By Process",""+virtualMemoryUedByProcess,"Kb","int",true);
+					processStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Resident Memory Used By Process",""+residentMemoryUedByProcess,"Kb","int",true);
+					processStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Shareable Memory",""+shareableMemory,"Kb","int",true);
+					processStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Current Status",""+currentStatus,null,"String",true);
+					processStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("CPU Used By Process As Percentage",""+cpuUsedByProcessAsPercentage,"%","double",true);
+					processStatusDeneWords.put(deneWord);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Time Process Has Been Running",""+timeUsedByProcessAsPercentage,null,"String",true);
+					processStatusDeneWords.put(deneWord);
+
+					if(processName.equals(TeleonomeConstants.PROCESS_HYPOTHALAMUS)) {
+						double hypothalamusAvailableMemory = Runtime.getRuntime().freeMemory()/1024000;
+						double hypothalamusMaxMemory = Runtime.getRuntime().maxMemory()/1024000;
+
+						deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HYPOTHALAMUS_PROCESS_AVAILABLE_MEMORY,""+hypothalamusAvailableMemory,"Mb","double",true);
+						processStatusDeneWords.put(deneWord);
+						deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HYPOTHALAMUS_PROCESS_MAXIMUM_MEMORY,""+hypothalamusMaxMemory,"Mb","double",true);
+						processStatusDeneWords.put(deneWord);
+					}else if(processName.equals(TeleonomeConstants.PROCESS_WEB_SERVER)) {
+						String webserverPingInfoS = FileUtils.readFileToString(new File("WebServerPing.info"));
+						if(webserverPingInfoS!=null) {
+							JSONObject webserverPingInfo = new JSONObject(webserverPingInfoS);
+							double webserverAvailableMemory = webserverPingInfo.getDouble(TeleonomeConstants.WEBSERVER_PROCESS_AVAILABLE_MEMORY);
+							double webserverMaxMemory = webserverPingInfo.getDouble(TeleonomeConstants.WEBSERVER_PROCESS_MAXIMUM_MEMORY);
+							deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.WEBSERVER_PROCESS_AVAILABLE_MEMORY,""+webserverAvailableMemory,"Mb","double",true);
+							processStatusDeneWords.put(deneWord);
+							deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.WEBSERVER_PROCESS_MAXIMUM_MEMORY,""+webserverMaxMemory,"Mb","double",true);
+							processStatusDeneWords.put(deneWord);
+						}
+
+					}else if(processName.equals(TeleonomeConstants.PROCESS_HEART)) {
+						String heartPingInfoS = FileUtils.readFileToString(new File("heart/HeartPing.info"));
+						if(heartPingInfoS!=null) {
+							JSONObject heartPingInfo = new JSONObject(heartPingInfoS);
+							double heartAvailableMemory = heartPingInfo.getDouble(TeleonomeConstants.HEART_PROCESS_AVAILABLE_MEMORY);
+							double heartMaxMemory = heartPingInfo.getDouble(TeleonomeConstants.HEART_PROCESS_MAXIMUM_MEMORY);
+							deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HEART_PROCESS_AVAILABLE_MEMORY,""+heartAvailableMemory,"Mb","double",true);
+							processStatusDeneWords.put(deneWord);
+							deneWord = DenomeUtils.buildDeneWordJSONObject(TeleonomeConstants.HEART_PROCESS_MAXIMUM_MEMORY,""+heartMaxMemory,"Mb","double",true);
+							processStatusDeneWords.put(deneWord);
+						}
+					}
+					//System.out.println("processStatusDene=" + processStatusDene.toString(4));
+					toReturn.put(processStatusDene);
+					break;
+
+				}
+			}
+
+		} catch (IOException exp) {
+			exp.printStackTrace();
+		} catch (InterruptedException ex) {
+			//Logger.getLogger(JavaApplication256.class.getName()).log(Level.SEVERE, null, ex);
 		}
+		try {
+			if(is!=null)is.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return toReturn;
+	}
 	public boolean deneContainsDeneWordByName(JSONObject deneJSONObject,String name ){
 		JSONArray deneWords;
 		JSONObject deneWord;
@@ -631,6 +631,18 @@ public class DenomeUtils {
 	}
 
 
+	public static boolean isMutationIdentity(String hoxDeneTargetPointer){
+		Identity id = new Identity(hoxDeneTargetPointer);
+		boolean toReturn=true;
+		if(id.getNucleusName().equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE) ||
+				id.getNucleusName().equals(TeleonomeConstants.NUCLEI_INTERNAL) ||
+				id.getNucleusName().equals(TeleonomeConstants.NUCLEI_MNEMOSYNE) ||
+				id.getNucleusName().equals(TeleonomeConstants.NUCLEI_PURPOSE)
+				) {
+			toReturn=true;
+		}
+		return toReturn;
+	}
 	public static boolean isDeneOfType(JSONObject dene, String whichDeneType){
 		boolean itIs=false;
 		try{
@@ -661,7 +673,7 @@ public class DenomeUtils {
 		Vector teleonomeToReconnect = new Vector();
 		boolean somebodyIsWating=false;
 		try {
-			
+
 			JSONObject dependentPulseDenome = dependentTeleonomePulse.getJSONObject("Denome");
 			String dependentTeleonomeName = dependentPulseDenome.getString("Name");
 			JSONArray dependentPulseNuclei = dependentPulseDenome.getJSONArray("Nuclei");
@@ -673,7 +685,7 @@ public class DenomeUtils {
 			JSONObject lastPulseExternalTeleonomeJSONObject;
 			String externalSourceOfData;
 
-			
+
 			long lastPulseExternalTimeInMillis,difference;
 			String lastPulseExternalTime;
 			Identity externalDataCurrentPulseIdentity,numberOfPulseForStaleIdentity;
@@ -700,7 +712,7 @@ public class DenomeUtils {
 								//
 								logger.debug("line 662 Denomemutils, looking for  " + externalDataDeneName);
 								if(publisherTeleonomeName.equals(externalDataDeneName)) {
-							
+
 									String externalDeneStatus=TeleonomeConstants.EXTERNAL_DATA_STATUS_STALE;
 									Identity denewordStatusIdentity = new Identity(dependentTeleonomeName,TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_EXTERNAL_DATA,publisherTeleonomeName, TeleonomeConstants.EXTERNAL_DATA_STATUS);
 									try {
@@ -713,10 +725,10 @@ public class DenomeUtils {
 									if(externalDeneStatus.equals(TeleonomeConstants.EXTERNAL_DATA_STATUS_STALE)) {
 										somebodyIsWating=true;
 									}
-									
+
 								}
-							
-								
+
+
 							}
 						}
 					}
@@ -725,16 +737,16 @@ public class DenomeUtils {
 			//
 			// now check the mnemosycons of denetype DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER
 			//
-			
+
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
 		}
-		
+
 		return somebodyIsWating;
 	}
-	
-	
+
+
 	private String getDeneWordAttributeByIdentity(Identity denewordStatusIdentity, String denewordValueAttribute) {
 		// TODO Auto-generated method stub
 		return null;
@@ -922,8 +934,8 @@ public class DenomeUtils {
 			logger.debug("deneWord=" + deneWord.toString(4));
 			try{
 				if(	deneWord.has(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE) && 
-					deneWord.getString(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE).equals(deneWordType)){
-					
+						deneWord.getString(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE).equals(deneWordType)){
+
 					if(whatToReturn.equals(TeleonomeConstants.COMPLETE)){
 						toReturn.put(deneWord);
 					}else{
@@ -937,7 +949,7 @@ public class DenomeUtils {
 		return toReturn;
 	}
 
-	
+
 	public static Object getDeneWordByIdentity(JSONObject dataSource, Identity identity, String whatToBring) throws InvalidDenomeException{
 		//
 		// if we are pointing at itself return the default
@@ -1052,7 +1064,7 @@ public class DenomeUtils {
 			}else {
 				deneWord.put("Value", value);
 			}
-			
+
 		}
 		deneWord.put("Value Type", valueType);
 		if(units!=null)deneWord.put("Units", units);
@@ -1112,8 +1124,47 @@ public class DenomeUtils {
 		JSONArray mutationsArray = denomeObject.getJSONArray("Mutations");
 		mutationsArray.put(mutation);
 	}
-	
-	
+
+	public static boolean addDeneToMutationDeneChainByIdentity(JSONObject pulseJSONObject,JSONObject dene, Identity targetIdentity) {
+		JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
+		JSONArray mutationsArray = denomeObject.getJSONArray("Mutations");
+		String mutationName = targetIdentity.getNucleusName();
+		String deneChainName = targetIdentity.getDenechainName();
+		boolean toReturn =false;
+		//
+		// now parse them
+		String name;
+		JSONObject aJSONObject, selectedMutation = null;
+
+		for(int i=0;i<mutationsArray.length();i++){
+			aJSONObject = (JSONObject) mutationsArray.get(i);
+			name = aJSONObject.getString("Name");
+
+			if(name.equals(mutationName)){
+				selectedMutation= aJSONObject;
+			}
+		}
+		if(selectedMutation==null)return toReturn;
+		JSONArray deneChainsArray = selectedMutation.getJSONArray("DeneChains");
+		JSONObject aDeneJSONObject, deneChain;
+		JSONArray denesJSONArray;
+		String valueType, valueInString;
+		Object object;
+		boolean keepGoing=true;
+		for(int i=0;i<deneChainsArray.length();i++){
+			aJSONObject = (JSONObject) deneChainsArray.get(i);
+			//System.out.println("removing dene, from denechain, aJSONObject=" + aJSONObject);
+			if(aJSONObject.has("Name") && aJSONObject.getString("Name").equals(deneChainName)){
+				deneChain = aJSONObject;
+				denesJSONArray = deneChain.getJSONArray("Denes");
+				denesJSONArray.put(dene);
+				toReturn=true;
+			} 
+		}
+		return toReturn;
+	}
+
+
 	public static void addDeneChainToNucleusByIdentity(JSONObject pulseJSONObject, JSONObject deneChain, Identity targetIdentity) throws InvalidDenomeException {
 		addDeneChainToNucleusByIdentity(pulseJSONObject, deneChain,  targetIdentity.getNucleusName());
 	}
@@ -1153,11 +1204,11 @@ public class DenomeUtils {
 		}
 
 	}
-	
+
 	public static boolean addDeneWordToDeneByIdentity(JSONObject pulseJSONObject, JSONObject deneWord, Identity targetDeneChainidentity) throws InvalidDenomeException {
 		return addDeneWordToDeneByIdentity(pulseJSONObject, deneWord,  targetDeneChainidentity.getNucleusName(), targetDeneChainidentity.getDenechainName(), targetDeneChainidentity.getDeneName());
 	}
-	
+
 	public static boolean addDeneWordToDeneByIdentity(JSONObject pulseJSONObject, JSONObject deneWord, String nucleusName,  String deneChainName, String deneName) throws InvalidDenomeException {
 		// TODO Auto-generated method stub
 		boolean toReturn =false;
@@ -1191,15 +1242,15 @@ public class DenomeUtils {
 					deneChain = aJSONObject;
 					denesJSONArray = deneChain.getJSONArray("Denes");
 					done:
-					for(int j=0;j<denesJSONArray.length();j++){
-						aDeneJSONObject = denesJSONArray.getJSONObject(j);
-						if(aDeneJSONObject.getString("Name").equals(deneName)){
-							JSONArray denewordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
-							denewordsJSONArray.put(deneWord);
-							toReturn=true;
-							break done;
+						for(int j=0;j<denesJSONArray.length();j++){
+							aDeneJSONObject = denesJSONArray.getJSONObject(j);
+							if(aDeneJSONObject.getString("Name").equals(deneName)){
+								JSONArray denewordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
+								denewordsJSONArray.put(deneWord);
+								toReturn=true;
+								break done;
+							}
 						}
-					}
 				}
 			}
 		} catch (JSONException e) {
@@ -1213,11 +1264,11 @@ public class DenomeUtils {
 		}
 		return toReturn;
 	}
-	
+
 	public static boolean removeDeneWordFromDeneByIdentity(JSONObject pulseJSONObject, Identity targetDeneWordIdentity) throws InvalidDenomeException {
 		return removeDeneWordFromDeneByIdentity(pulseJSONObject,  targetDeneWordIdentity.getNucleusName(), targetDeneWordIdentity.getDenechainName(), targetDeneWordIdentity.getDeneName(), targetDeneWordIdentity.getDeneWordName());
 	}
-	
+
 	public static boolean removeDeneWordFromDeneByIdentity(JSONObject pulseJSONObject, String nucleusName,  String deneChainName, String deneName, String deneWordName) throws InvalidDenomeException {
 		// TODO Auto-generated method stub
 		int toReturn =0;
@@ -1253,19 +1304,19 @@ public class DenomeUtils {
 					deneChain = aJSONObject;
 					denesJSONArray = deneChain.getJSONArray("Denes");
 					done:
-					for(int j=0;j<denesJSONArray.length();j++){
-						aDeneJSONObject = denesJSONArray.getJSONObject(j);
-						if(aDeneJSONObject.getString("Name").equals(deneName)){
-							JSONArray deneWordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
-							for(int k=0;k<deneWordsJSONArray.length();k++){
-								JSONObject deneWord = (JSONObject) deneWordsJSONArray.get(k);
-								if(deneWord.getString("Name").equals(deneWordName)){
-									deneWordsJSONArray.remove(k);
-									return true;
+						for(int j=0;j<denesJSONArray.length();j++){
+							aDeneJSONObject = denesJSONArray.getJSONObject(j);
+							if(aDeneJSONObject.getString("Name").equals(deneName)){
+								JSONArray deneWordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
+								for(int k=0;k<deneWordsJSONArray.length();k++){
+									JSONObject deneWord = (JSONObject) deneWordsJSONArray.get(k);
+									if(deneWord.getString("Name").equals(deneWordName)){
+										deneWordsJSONArray.remove(k);
+										return true;
+									}
 								}
 							}
 						}
-					}
 				}
 			}
 		} catch (JSONException e) {
@@ -1279,13 +1330,13 @@ public class DenomeUtils {
 		}
 		return false;
 	}
-	
-	
-	
+
+
+
 	public static boolean addDeneToDeneChainByIdentity(JSONObject pulseJSONObject, JSONObject dene, Identity targetDeneChainidentity) throws InvalidDenomeException {
 		return addDeneToDeneChainByIdentity(pulseJSONObject, dene,  targetDeneChainidentity.getNucleusName(), targetDeneChainidentity.getDenechainName());
 	}
-	
+
 	public static boolean addDeneToDeneChainByIdentity(JSONObject pulseJSONObject, JSONObject dene, String nucleusName,  String deneChainName) throws InvalidDenomeException {
 		// TODO Auto-generated method stub
 		boolean toReturn =false;
@@ -1418,67 +1469,67 @@ public class DenomeUtils {
 
 	public static int removeAllDenesFromChainByDeneType(JSONObject pulseJSONObject, String nucleusName,  String deneChainName, String deneType) throws InvalidDenomeException {
 		// TODO Auto-generated method stub
-				int toReturn =0;
-				try {
-					//
-					// now parse them
-					JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
-					JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
-					String name;
-					JSONObject aJSONObject, selectedNucleus = null,purposeNucleus = null;
+		int toReturn =0;
+		try {
+			//
+			// now parse them
+			JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
+			JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
+			String name;
+			JSONObject aJSONObject, selectedNucleus = null,purposeNucleus = null;
 
-					for(int i=0;i<nucleiArray.length();i++){
-						aJSONObject = (JSONObject) nucleiArray.get(i);
-						name = aJSONObject.getString("Name");
+			for(int i=0;i<nucleiArray.length();i++){
+				aJSONObject = (JSONObject) nucleiArray.get(i);
+				name = aJSONObject.getString("Name");
 
-						if(name.equals(nucleusName)){
-							selectedNucleus= aJSONObject;
+				if(name.equals(nucleusName)){
+					selectedNucleus= aJSONObject;
+				}
+			}
+			//System.out.println("removing dene, from denechain, selectedNucleus=" + selectedNucleus);
+			JSONArray deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
+			JSONObject aDeneJSONObject, deneChain;
+			JSONArray denesJSONArray;
+			String valueType, valueInString;
+			Object object;
+			boolean keepGoing=true;
+			for(int i=0;i<deneChainsArray.length();i++){
+				aJSONObject = (JSONObject) deneChainsArray.get(i);
+				//System.out.println("line 1106 removing dene, from denechain, aJSONObject=" + aJSONObject.getString("Name"));
+				if(aJSONObject.has("Name") && aJSONObject.getString("Name").equals(deneChainName)){
+					deneChain = aJSONObject;
+					while(keepGoing){
+						keepGoing=false;
+						denesJSONArray = deneChain.getJSONArray("Denes");
+						for(int j=0;j<denesJSONArray.length();j++){
+							aDeneJSONObject = denesJSONArray.getJSONObject(j);
+							//System.out.println("line 1114 deneName=" + aDeneJSONObject.getString("Name")  + " aDeneJSONObject.getStrin="+ aDeneJSONObject.getString("Name"));
+							if(aDeneJSONObject.has(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE) && 
+									aDeneJSONObject.get(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE).equals(deneType)){
+								denesJSONArray.remove(j);
+								toReturn++;
+								keepGoing=true;
+							}
 						}
 					}
-					//System.out.println("removing dene, from denechain, selectedNucleus=" + selectedNucleus);
-					JSONArray deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
-					JSONObject aDeneJSONObject, deneChain;
-					JSONArray denesJSONArray;
-					String valueType, valueInString;
-					Object object;
-					boolean keepGoing=true;
-					for(int i=0;i<deneChainsArray.length();i++){
-						aJSONObject = (JSONObject) deneChainsArray.get(i);
-						//System.out.println("line 1106 removing dene, from denechain, aJSONObject=" + aJSONObject.getString("Name"));
-						if(aJSONObject.has("Name") && aJSONObject.getString("Name").equals(deneChainName)){
-							deneChain = aJSONObject;
-							while(keepGoing){
-								keepGoing=false;
-								denesJSONArray = deneChain.getJSONArray("Denes");
-								for(int j=0;j<denesJSONArray.length();j++){
-									aDeneJSONObject = denesJSONArray.getJSONObject(j);
-									//System.out.println("line 1114 deneName=" + aDeneJSONObject.getString("Name")  + " aDeneJSONObject.getStrin="+ aDeneJSONObject.getString("Name"));
-									if(aDeneJSONObject.has(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE) && 
-											aDeneJSONObject.get(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE).equals(deneType)){
-										denesJSONArray.remove(j);
-										toReturn++;
-										keepGoing=true;
-									}
-								}
-							}
-						} 
-					}
+				} 
+			}
 
 
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					// TODO Auto-generated catch block
-					Hashtable info = new Hashtable();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			// TODO Auto-generated catch block
+			Hashtable info = new Hashtable();
 
-					String m = "The denome is not formated Correctly. Error:" + e.getMessage() +" Stacktrace:" + ExceptionUtils.getStackTrace(e);
-					info.put("message", m);
-					throw new InvalidDenomeException(info);
-				}
-				return toReturn;
+			String m = "The denome is not formated Correctly. Error:" + e.getMessage() +" Stacktrace:" + ExceptionUtils.getStackTrace(e);
+			info.put("message", m);
+			throw new InvalidDenomeException(info);
+		}
+		return toReturn;
 	}
 	public static int removeDeneFromChain(JSONObject pulseJSONObject, String nucleusName,  String deneChainName, String deneName) throws InvalidDenomeException {
 		// TODO Auto-generated method stub
-	//	System.out.println("line 1140 about to remove " + nucleusName + ":"  + deneChainName + ":"+ deneName);
+		//	System.out.println("line 1140 about to remove " + nucleusName + ":"  + deneChainName + ":"+ deneName);
 		int toReturn =0;
 		try {
 
@@ -1510,29 +1561,29 @@ public class DenomeUtils {
 				//System.out.println("removing dene, from denechain, aJSONObject=" + aJSONObject);
 				if(aJSONObject.has("Name") && aJSONObject.getString("Name").equals(deneChainName)){
 					deneChain = aJSONObject;
-//					while(keepGoing){
-//						keepGoing=false;
-						denesJSONArray = deneChain.getJSONArray("Denes");
+					//					while(keepGoing){
+					//						keepGoing=false;
+					denesJSONArray = deneChain.getJSONArray("Denes");
 					//	System.out.println("line 1175 denesJSONArray.length()=" + denesJSONArray.length());
-						
-						done:
+
+					done:
 						for(int j=0;j<denesJSONArray.length();j++){
 							aDeneJSONObject = denesJSONArray.getJSONObject(j);
-						//	System.out.println("line 1177 deneName=" + deneName  + " aDeneJSONObject.getStrin="+ aDeneJSONObject.getString("Name"));
+							//	System.out.println("line 1177 deneName=" + deneName  + " aDeneJSONObject.getStrin="+ aDeneJSONObject.getString("Name"));
 							if(aDeneJSONObject.getString("Name").equals(deneName)){
-						//		System.out.println(" about line 1179 eneName=" + deneName  + " aDeneJSONObject.getStrin="+ aDeneJSONObject.getString("Name"));
-							   denesJSONArray.remove(j);
+								//		System.out.println(" about line 1179 eneName=" + deneName  + " aDeneJSONObject.getStrin="+ aDeneJSONObject.getString("Name"));
+								denesJSONArray.remove(j);
 								toReturn++;
 								//keepGoing=true;
 								break done;
 							}
 						}
 					//	System.out.println("line 1189 after removing");
-						for(int j=0;j<denesJSONArray.length();j++){
-							aDeneJSONObject = denesJSONArray.getJSONObject(j);
-							//System.out.println("line 1192 deneName=" + deneName  + " aDeneJSONObject.getStrin="+ aDeneJSONObject.getString("Name"));
-						}
-//					}
+					for(int j=0;j<denesJSONArray.length();j++){
+						aDeneJSONObject = denesJSONArray.getJSONObject(j);
+						//System.out.println("line 1192 deneName=" + deneName  + " aDeneJSONObject.getStrin="+ aDeneJSONObject.getString("Name"));
+					}
+					//					}
 				} 
 			}
 
@@ -1630,6 +1681,7 @@ public class DenomeUtils {
 		}
 		return false;
 	}
+
 	public static boolean containsDenomicElementByIdentity(JSONObject pulseJSONObject, Identity identity){
 
 		String nucleusName=identity.getNucleusName();
@@ -1640,7 +1692,7 @@ public class DenomeUtils {
 		JSONArray denesJSONArray, deneWordsJSONArray;
 		String valueType, valueInString, name;
 		Object object;
-		
+
 		JSONArray deneChainsArray=null;
 		try {
 			JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
@@ -1656,7 +1708,7 @@ public class DenomeUtils {
 			if(selectedNucleus==null)return false;
 
 			deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
-			
+
 			for(int i=0;i<deneChainsArray.length();i++){
 				aJSONObject = (JSONObject) deneChainsArray.get(i);
 				if(aJSONObject.getString("Name").equals(deneChainName)){
@@ -1686,7 +1738,7 @@ public class DenomeUtils {
 		}
 		return false;
 	}
-	
+
 	public static JSONObject getDenomicElementByIdentity(JSONObject pulseJSONObject, Identity identity){
 
 		String nucleusName=identity.getNucleusName();
@@ -1697,7 +1749,7 @@ public class DenomeUtils {
 		JSONArray denesJSONArray, deneWordsJSONArray;
 		String valueType, valueInString, name;
 		Object object;
-		
+
 		JSONArray deneChainsArray=null;
 		try {
 			JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
@@ -1713,7 +1765,7 @@ public class DenomeUtils {
 			if(selectedNucleus==null)return null;
 
 			deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
-			
+
 			for(int i=0;i<deneChainsArray.length();i++){
 				aJSONObject = (JSONObject) deneChainsArray.get(i);
 				if(aJSONObject.getString("Name").equals(deneChainName)){
@@ -1751,7 +1803,7 @@ public class DenomeUtils {
 		JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
 		return denomeObject.getString("Name");
 	}
-	
+
 	public static JSONObject getDeneByPointer(JSONObject pulseJSONObject, String nucleusName,String deneChainName, String deneName) throws InvalidDenomeException{
 		JSONArray deneChainsArray=null;
 		//
@@ -1809,7 +1861,7 @@ public class DenomeUtils {
 	public static JSONObject getDeneChainByIdentity(JSONObject pulseJSONObject, Identity identity) throws InvalidDenomeException {
 		return getDeneChainByName( pulseJSONObject, identity.getNucleusName(), identity.getDenechainName()); 
 	}
-	
+
 	public static JSONArray getAllDeneChainNamesForNucleus(JSONObject pulseJSONObject, String nucleusName) {
 		JSONArray deneChains = getAllDeneChainsForNucleus( pulseJSONObject,  nucleusName);
 		JSONArray toReturn = new JSONArray();
@@ -1820,7 +1872,7 @@ public class DenomeUtils {
 		}
 		return toReturn;
 	}
-	
+
 	public static JSONArray getAllDeneChainsForNucleus(JSONObject pulseJSONObject, String nucleusName) {
 		// TODO Auto-generated method stub
 		JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
@@ -1840,16 +1892,16 @@ public class DenomeUtils {
 		JSONArray deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
 		return deneChainsArray;
 	}
-//	public static JSONArray getAllDeneNamesForDeneChain(JSONObject pulseJSONObject, String nucleusName, String deneChainName) {
-//		JSONArray denes = getAllDenesForDeneChain( pulseJSONObject,  nucleusName,  deneChainName);
-//		JSONArray toReturn = new JSONArray();
-//		JSONObject dene;
-//		for(int j=0;j<denes.length();j++) {
-//			 dene = denes.getJSONObject(j);
-//			toReturn.put(dene.getString("Name"));
-//		}
-//		return toReturn;
-//	}
+	//	public static JSONArray getAllDeneNamesForDeneChain(JSONObject pulseJSONObject, String nucleusName, String deneChainName) {
+	//		JSONArray denes = getAllDenesForDeneChain( pulseJSONObject,  nucleusName,  deneChainName);
+	//		JSONArray toReturn = new JSONArray();
+	//		JSONObject dene;
+	//		for(int j=0;j<denes.length();j++) {
+	//			 dene = denes.getJSONObject(j);
+	//			toReturn.put(dene.getString("Name"));
+	//		}
+	//		return toReturn;
+	//	}
 	public static JSONArray getAllDeneNamesForDeneChain(JSONObject pulseJSONObject, String nucleusName, String deneChainName) {
 		// TODO Auto-generated method stub
 		JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
@@ -1879,21 +1931,21 @@ public class DenomeUtils {
 				}
 			}
 		}
-		
+
 		return deneNamesArrays;
 	}
-	
-//	public static JSONArray getAllDeneWordNamesForDene(JSONObject pulseJSONObject, String nucleusName, String deneChainName, String deneName) {
-//		JSONArray deneWords = getAllDeneWordsForDene( pulseJSONObject,  nucleusName,  deneChainName, deneName);
-//		JSONArray toReturn = new JSONArray();
-//		JSONObject deneWord;
-//		for(int j=0;j<deneWords.length();j++) {
-//			deneWord = deneWords.getJSONObject(j);
-//			toReturn.put(deneWord.getString("Name"));
-//		}
-//		return toReturn;
-//	}
-	
+
+	//	public static JSONArray getAllDeneWordNamesForDene(JSONObject pulseJSONObject, String nucleusName, String deneChainName, String deneName) {
+	//		JSONArray deneWords = getAllDeneWordsForDene( pulseJSONObject,  nucleusName,  deneChainName, deneName);
+	//		JSONArray toReturn = new JSONArray();
+	//		JSONObject deneWord;
+	//		for(int j=0;j<deneWords.length();j++) {
+	//			deneWord = deneWords.getJSONObject(j);
+	//			toReturn.put(deneWord.getString("Name"));
+	//		}
+	//		return toReturn;
+	//	}
+
 	public static JSONArray getAllDeneWordNamesForDene(JSONObject pulseJSONObject, String nucleusName, String deneChainName, String deneName) {
 		// TODO Auto-generated method stub
 		JSONObject denomeObject = pulseJSONObject.getJSONObject("Denome");
@@ -1928,10 +1980,10 @@ public class DenomeUtils {
 				}
 			}
 		}
-		
+
 		return deneWordNamesArrays;
 	}
-	
+
 	public static JSONObject getDeneChainByName(JSONObject pulseJSONObject, String nucleusName,  String deneChainName) throws InvalidDenomeException {
 		// TODO Auto-generated method stub
 		try {
@@ -1978,7 +2030,7 @@ public class DenomeUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * this methods takes a denome and updates a deneword value  it then returns the updated denome
 	 * @param sourceData - the denome to update
@@ -2076,5 +2128,5 @@ public class DenomeUtils {
 		return sourceData;
 	}
 
-	
+
 }
