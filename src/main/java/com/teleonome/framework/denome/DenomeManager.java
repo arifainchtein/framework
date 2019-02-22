@@ -6040,6 +6040,7 @@ public class DenomeManager {
 
 	public void addSensorValueRenderedDeneWordToPulse(JSONObject currentlyProcessingSensorValueDene, String inputLine){
 
+		inputLine = inputLine.trim();
 		//
 		// get the address of the deneword where this data is going to
 		String reportingAddress, deneWordName, sourceDeneName, unit, timeStringFormat, valueType;
@@ -6055,7 +6056,7 @@ public class DenomeManager {
 			// rangeMaximum and rangeMinimum can be null, if the data been sent from the sensor is of type ON/OFF or some
 			// other non numerical information
 			try{
-				Double parseValue = Double.parseDouble(inputLine.trim());
+				Double parseValue = Double.parseDouble();
 			}catch(NumberFormatException e){
 				logger.debug(inputLine + " is not numeric");
 				ignoreMaximumMinimum=true;
