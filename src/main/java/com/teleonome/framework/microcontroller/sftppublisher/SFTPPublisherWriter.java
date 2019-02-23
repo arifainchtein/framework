@@ -65,11 +65,9 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 				dene = configParams.getJSONObject(i);
 				deneName = dene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
 				if(deneName.equals("SFTP Server IP Address")){
-					host = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "Server IP Address", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					host = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "SFTP Server IP Address", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 				}else if(deneName.equals("SFTP Key File Name")) {
-					
-					privateKey = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "Server IP Address", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					
+					privateKey = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "SFTP Key File Name", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
