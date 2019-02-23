@@ -359,11 +359,11 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 						// compress the file and save it to upload it and then delete it
 						//
 						//byte[] messageBytes = StringCompressor.compress(fileInString);
-						 sourceFilename = Utils.getLocalDirectory() + "SFTPPubTemp";
+						 sourceFilename = Utils.getLocalDirectory() + "DGPubTemp";
 						File sourceFile = new File(sourceFilename);
 						
 						try {
-							FileUtils.writeStringToFile(sourceFile, tempPulseJSONObject.toString(4));
+							FileUtils.writeStringToFile(sourceFile, tempPulseJSONObject.toString(4), "UTF8");
 							//FileUtils.writeByteArrayToFile(tempFile, messageBytes);
 							 destinationDir="/home/pi/Teleonome/" + teleonomeName;
 							//sourceFilename = Utils.getLocalDirectory() + "Teleonome.denome";
@@ -374,7 +374,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 							File destinationFile = new File(destinationFileName);
 							
 							 Utils.zipFile(sourceFile, destinationFile);
-							 logger.debug("sending the zip file");
+							 logger.debug("sending the zip file, destinationFileName=" + destinationFileName);
 								
 							 uploadFile( destinationDir, destinationFileName,   "Teleonome.zip");
 							
