@@ -4470,78 +4470,80 @@ public class DenomeManager {
 				JSONArray actuatorDeneWordPointers, microControllerPointersJSONArray;
 				String actuatorDeneWordPointer;
 				JSONObject actuatorJSONObject=null;
-
+				logger.info("line 4473, denes.length " + denes);
 				//
 				// actionDeneWordPointers cntains an array of string which are pointers to the denes that contain the evaluation postion
 				String denePointer;
 				JSONObject actionDene = null;
 				Integer evaluationPosition;
 				String microControllerPointer=null;
-
-				for(int i=0;i<denes.length();i++){
-					//
-					// every action dene in has two denewords, one that points to the action dene to be executed
-					// and one that points to the actuator, which is needed to get the microcontroller pointer
-					microControllerPointer=null;
-					mutationActionDeneJSONObject = (JSONObject) denes.get(i);
-					actionDeneWordPointers = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(mutationActionDeneJSONObject, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					actuatorDeneWordPointers = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(mutationActionDeneJSONObject, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					//
-					// there is only actuator so get the first element
-					actuatorDeneWordPointer=null;
-					if(actuatorDeneWordPointers.length()>0){
-						actuatorDeneWordPointer = actuatorDeneWordPointers.getString(0);
-						actuatorJSONObject = getDeneByIdentity(new Identity(actuatorDeneWordPointer));
-						microControllerPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(actuatorJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_MICROCONTROLLER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				if(denes!=null && denes.length()>0) {
+					for(int i=0;i<denes.length();i++){
 						//
-						// again there will only be one and only one so that the zero value
-						if(microControllerPointersJSONArray.length()>0){
-							microControllerPointer = microControllerPointersJSONArray.getString(0);
+						// every action dene in has two denewords, one that points to the action dene to be executed
+						// and one that points to the actuator, which is needed to get the microcontroller pointer
+						microControllerPointer=null;
+						mutationActionDeneJSONObject = (JSONObject) denes.get(i);
+						actionDeneWordPointers = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(mutationActionDeneJSONObject, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						actuatorDeneWordPointers = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(mutationActionDeneJSONObject, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						//
+						// there is only actuator so get the first element
+						actuatorDeneWordPointer=null;
+						logger.info("line 4492, actuatorDeneWordPointers.length() " + actuatorDeneWordPointers.length());
+						if(actuatorDeneWordPointers.length()>0){
+							actuatorDeneWordPointer = actuatorDeneWordPointers.getString(0);
+							actuatorJSONObject = getDeneByIdentity(new Identity(actuatorDeneWordPointer));
+							microControllerPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(actuatorJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_MICROCONTROLLER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							//
+							// again there will only be one and only one so that the zero value
+							if(microControllerPointersJSONArray.length()>0){
+								microControllerPointer = microControllerPointersJSONArray.getString(0);
+							}
 						}
-					}
-					logger.info("in load mutation immediately, actionDeneWordPointers=" + actionDeneWordPointers);
-					//
-					// every item in actionPointers is an action that needs to be executed
-					// and all the actions in this dene must come from the same actuator
-					// therefore there is only one pointer to the microcontroller
-					// only execute the actions if we have a microControllerPointer
-					//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+						logger.info("in load mutation immediately, microControllerPointer=" + microControllerPointer + " actionDeneWordPointers=" + actionDeneWordPointers);
+						//
+						// every item in actionPointers is an action that needs to be executed
+						// and all the actions in this dene must come from the same actuator
+						// therefore there is only one pointer to the microcontroller
+						// only execute the actions if we have a microControllerPointer
+						//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-					MutationActionsExecutionResult aMutationActionsExecutionResult;
-					if(microControllerPointer!=null){
-						for(int n=0;n<actionDeneWordPointers.length();n++){
-							denePointer = (String)actionDeneWordPointers.getString(n);
-							logger.info("in load mutation immediately, denePointer=" + denePointer);						
-							//
-							// now execute the action
-							JSONObject actuatorActionJSONObject = getDeneByIdentity(new Identity(denePointer));
-							logger.info("in load mutation immediately, microControllerPointer=" + microControllerPointer);						
-							//
-							// commandsToExecute is an ArrayList with one memeber 
-							// ArrayList<Map.Entry<String, JSONObject>> toReturn = new ArrayList();
-							//	
-							// check to see if there are any after execution actions
-							//
-							String pointerToActionSuccessTasks = (String) this.getDeneWordAttributeByDeneWordTypeFromDene(actuatorActionJSONObject,  TeleonomeConstants.DENEWORD_TYPE_ACTION_SUCCESS_TASK_TRUE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-							String pointerToMnemosyneTasks = (String) this.getDeneWordAttributeByDeneWordTypeFromDene(actuatorActionJSONObject,  TeleonomeConstants.MNEMOSYNE_OPERATION_INDEX_LABEL, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						MutationActionsExecutionResult aMutationActionsExecutionResult;
+						if(microControllerPointer!=null){
+							for(int n=0;n<actionDeneWordPointers.length();n++){
+								denePointer = (String)actionDeneWordPointers.getString(n);
+								logger.info("in load mutation immediately, denePointer=" + denePointer);						
+								//
+								// now execute the action
+								JSONObject actuatorActionJSONObject = getDeneByIdentity(new Identity(denePointer));
+								logger.info("in load mutation immediately, microControllerPointer=" + microControllerPointer);						
+								//
+								// commandsToExecute is an ArrayList with one memeber 
+								// ArrayList<Map.Entry<String, JSONObject>> toReturn = new ArrayList();
+								//	
+								// check to see if there are any after execution actions
+								//
+								String pointerToActionSuccessTasks = (String) this.getDeneWordAttributeByDeneWordTypeFromDene(actuatorActionJSONObject,  TeleonomeConstants.DENEWORD_TYPE_ACTION_SUCCESS_TASK_TRUE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+								String pointerToMnemosyneTasks = (String) this.getDeneWordAttributeByDeneWordTypeFromDene(actuatorActionJSONObject,  TeleonomeConstants.MNEMOSYNE_OPERATION_INDEX_LABEL, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
-							logger.info("in load mutation immediately, pointerToActionSuccessTasks=" + pointerToActionSuccessTasks);						
-							logger.info("in load mutation immediately, actuatorActionJSONObject=" + actuatorActionJSONObject);						
+								logger.info("in load mutation immediately, pointerToActionSuccessTasks=" + pointerToActionSuccessTasks);						
+								logger.info("in load mutation immediately, actuatorActionJSONObject=" + actuatorActionJSONObject);						
 
-							//
-							// now load the action
-							commandToExecute = aDenomeManager.evaluateMutationAction(actuatorActionJSONObject);	
-							logger.info("in load mutation immediately, commandToExecute=" + commandToExecute);						
+								//
+								// now load the action
+								commandToExecute = aDenomeManager.evaluateMutationAction(actuatorActionJSONObject);	
+								logger.info("in load mutation immediately, commandToExecute=" + commandToExecute);						
 
-							aMutationActionsExecutionResult = new MutationActionsExecutionResult(pointerToActionSuccessTasks, commandToExecute, selectedDenomeFileName, pointerToMnemosyneTasks);
+								aMutationActionsExecutionResult = new MutationActionsExecutionResult(pointerToActionSuccessTasks, commandToExecute, selectedDenomeFileName, pointerToMnemosyneTasks);
 
-							//
-							// check t
-							microControllerPointerMutationActionsExecutionResultArrayList.add(new AbstractMap.SimpleEntry<String, MutationActionsExecutionResult>(microControllerPointer,aMutationActionsExecutionResult));	
+								//
+								// check t
+								microControllerPointerMutationActionsExecutionResultArrayList.add(new AbstractMap.SimpleEntry<String, MutationActionsExecutionResult>(microControllerPointer,aMutationActionsExecutionResult));	
 
-							//commandsToExecuteVector.addElement(commandToExecute);
+								//commandsToExecuteVector.addElement(commandToExecute);
+							}
+
 						}
-
 					}
 				}
 			}
