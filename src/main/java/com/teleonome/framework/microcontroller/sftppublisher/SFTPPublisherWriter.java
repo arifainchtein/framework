@@ -351,7 +351,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 					}
 					
 				}else if(deneName.equals("SFTP Publish Contents")) {
-					String contentsPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "Publish Contents", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					String contentsPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "SFTP Publish Contents", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 					if(contentsPointer.equals(TeleonomeConstants.COMMANDS_PUBLISH_TELEONOME_PULSE)) {
 						
