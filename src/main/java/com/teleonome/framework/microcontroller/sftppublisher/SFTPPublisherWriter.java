@@ -100,8 +100,8 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			logger.debug("create tunnel returned" + createdTunnel);
 
 			if(createdTunnel) {
-				boolean publishToDG = publishToDG();
-				if(publishToDG)publishingResults="ok-publishing dg";
+				boolean publishToSFTP = publishToSFTP();
+				if(publishToSFTP)publishingResults="ok-publishing SFTP";
 				session.disconnect();
 			}
 		}else {
@@ -240,7 +240,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 	}
 
 	
-	private boolean publishToDG() {
+	private boolean publishToSFTP() {
 
 
 		Integer I;
@@ -307,9 +307,9 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			try {
 				dene = configParams.getJSONObject(i);
 				deneName = dene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
-				logger.debug("publishToDG deneName=" + deneName );
+				logger.debug("publishToSFTP deneName=" + deneName );
 				
-				if(deneName.startsWith("DG Upload Image")) {
+				if(deneName.startsWith("SFTP Upload Image")) {
 					String imagePointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "Upload Image", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 					// 
@@ -350,7 +350,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 						logger.debug("Did not upload " + sourceFilename + " because it could not be found");
 					}
 					
-				}else if(deneName.equals("DG Publish Contents")) {
+				}else if(deneName.equals("SFTP Publish Contents")) {
 					String contentsPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "Publish Contents", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 					if(contentsPointer.equals(TeleonomeConstants.COMMANDS_PUBLISH_TELEONOME_PULSE)) {
@@ -359,7 +359,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 						// compress the file and save it to upload it and then delete it
 						//
 						//byte[] messageBytes = StringCompressor.compress(fileInString);
-						 sourceFilename = Utils.getLocalDirectory() + "DGPubTemp";
+						 sourceFilename = Utils.getLocalDirectory() + "SFTPPubTemp";
 						File sourceFile = new File(sourceFilename);
 						
 						try {
@@ -369,7 +369,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 							//sourceFilename = Utils.getLocalDirectory() + "Teleonome.denome";
 							// logger.debug("sending the denome file");
 						//	uploadFile( destinationDir, sourceFilename,   "Teleonome.denome");
-							String destinationFileName = Utils.getLocalDirectory() + "DGPubTemp.zip";
+							String destinationFileName = Utils.getLocalDirectory() + "SFTPPubTemp.zip";
 							
 							File destinationFile = new File(destinationFileName);
 							
