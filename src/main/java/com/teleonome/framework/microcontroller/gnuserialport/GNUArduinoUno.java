@@ -94,6 +94,13 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 			if (portId == null) {
 				if(counter<=maxNumberReconnects) {
 					counter++;
+					logger.info("Could not find Serial Port," + counter + " out of " + maxNumberReconnects);
+					try {
+						Thread.sleep(3000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}else {
 					System.out.println("Could not find COM port.");
 					logger.warn("Could not find COM port.");
