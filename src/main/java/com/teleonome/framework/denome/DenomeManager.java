@@ -4512,11 +4512,11 @@ public class DenomeManager {
 						if(microControllerPointer!=null){
 							for(int n=0;n<actionDeneWordPointers.length();n++){
 								denePointer = (String)actionDeneWordPointers.getString(n);
-								logger.info("in load mutation immediately, denePointer=" + denePointer);						
+								logger.info("4515 in load mutation immediately, denePointer=" + denePointer);						
 								//
 								// now execute the action
 								JSONObject actuatorActionJSONObject = getDeneByIdentity(new Identity(denePointer));
-								logger.info("in load mutation immediately, microControllerPointer=" + microControllerPointer);						
+								logger.info("4519 in load mutation immediately, microControllerPointer=" + microControllerPointer);						
 								//
 								// commandsToExecute is an ArrayList with one memeber 
 								// ArrayList<Map.Entry<String, JSONObject>> toReturn = new ArrayList();
@@ -4526,13 +4526,13 @@ public class DenomeManager {
 								String pointerToActionSuccessTasks = (String) this.getDeneWordAttributeByDeneWordTypeFromDene(actuatorActionJSONObject,  TeleonomeConstants.DENEWORD_TYPE_ACTION_SUCCESS_TASK_TRUE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 								String pointerToMnemosyneTasks = (String) this.getDeneWordAttributeByDeneWordTypeFromDene(actuatorActionJSONObject,  TeleonomeConstants.MNEMOSYNE_OPERATION_INDEX_LABEL, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
-								logger.info("in load mutation immediately, pointerToActionSuccessTasks=" + pointerToActionSuccessTasks);						
-								logger.info("in load mutation immediately, actuatorActionJSONObject=" + actuatorActionJSONObject);						
+								logger.info("4529 in load mutation immediately, pointerToActionSuccessTasks=" + pointerToActionSuccessTasks);						
+								logger.info("4530 in load mutation immediately, actuatorActionJSONObject=" + actuatorActionJSONObject);						
 
 								//
 								// now load the action
 								commandToExecute = aDenomeManager.evaluateMutationAction(actuatorActionJSONObject);	
-								logger.info("in load mutation immediately, commandToExecute=" + commandToExecute);						
+								logger.info("line 4535 in load mutation immediately, commandToExecute=" + commandToExecute);						
 
 								aMutationActionsExecutionResult = new MutationActionsExecutionResult(pointerToActionSuccessTasks, commandToExecute, selectedDenomeFileName, pointerToMnemosyneTasks);
 
