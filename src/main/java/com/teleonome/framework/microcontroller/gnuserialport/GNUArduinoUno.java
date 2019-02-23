@@ -74,26 +74,39 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 
 
 		CommPortIdentifier currPortId=null;
-		while (portId == null && portEnum.hasMoreElements()) {
-			currPortId = (CommPortIdentifier) portEnum.nextElement();
-			//System.out.println("currPortId=" + currPortId.getName());
-			logger.debug("looking for ports, currPortId=" + currPortId.getName());
-
-			for (String portName : PORT_NAMES) {
-				if ( currPortId.getName().equals(portName) || currPortId.getName().startsWith(portName) ){
-					// Try to connect to the Arduino on this port
-					portId = currPortId;
-					break;
+		int counter=0;
+		int maxNumberReconnects=3;
+		boolean keepGoing=true;
+		do {
+			while (portId == null && portEnum.hasMoreElements()) {
+				currPortId = (CommPortIdentifier) portEnum.nextElement();
+				//System.out.println("currPortId=" + currPortId.getName());
+				logger.debug("looking for ports, currPortId=" + currPortId.getName());
+	
+				for (String portName : PORT_NAMES) {
+					if ( currPortId.getName().equals(portName) || currPortId.getName().startsWith(portName) ){
+						// Try to connect to the Arduino on this port
+						portId = currPortId;
+						break;
+					}
 				}
 			}
-		}
-		if (portId == null) {
-			//System.out.println("Could not find COM port.");
-			logger.warn("Could not find COM port.");
-			Hashtable<String, String> h = new Hashtable();
-			h.put("message","Could not find COM port");
-			throw new MicrocontrollerCommunicationException(h);
-		}
+			if (portId == null) {
+				if(counter<=maxNumberReconnects) {
+					counter++;
+				}else {
+					System.out.println("Could not find COM port.");
+					logger.warn("Could not find COM port.");
+					Hashtable<String, String> h = new Hashtable();
+					h.put("message","Could not find COM port");
+					throw new MicrocontrollerCommunicationException(h);
+				}
+				
+			}else {
+				keepGoing=false;
+			}
+		}while(keepGoing);
+		
 		logger.debug("Found COM Port1.");
 		try {
 			//
@@ -133,7 +146,7 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 			JSONObject commParamsDene = aDenomeManager.getDeneByIdentity(new Identity(pointerToCommParamsDene));
 			DATA_RATE = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(commParamsDene, "Serial Data Rate", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).intValue();
 			logger.debug("using datarate=" + DATA_RATE);
-			int counter=0;
+		    counter=0;
 			boolean openAndTested=false;
 			logger.debug("about to open port , sleeping 10 sec first" );
 			
