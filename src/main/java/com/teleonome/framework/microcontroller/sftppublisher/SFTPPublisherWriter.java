@@ -97,7 +97,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 		// this is because otherwise you run the risk of floding the serial bus
 		// so to make it standards all microcontrollers do this
 		
-		if(command.equals("Publish")) {			
+		if(command.equals("Publish Via SFTP")) {			
 			boolean createdTunnel = createTunnel();
 			logger.debug("create tunnel returned" + createdTunnel);
 
