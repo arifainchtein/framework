@@ -90,6 +90,13 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 	public void write(String command, int off, int len) throws IOException {
 		publishingResults="";
 		logger.debug("received command:" + command);
+		//
+		// put a three second delay,
+		// this is because the AsyncCycle puts a 3 second delay
+		// after writing the message
+		// this is because otherwise you run the risk of floding the serial bus
+		// so to make it standards all microcontrollers do this
+		
 		if(command.equals("Publish")) {			
 			boolean createdTunnel = createTunnel();
 			logger.debug("create tunnel returned" + createdTunnel);

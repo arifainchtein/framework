@@ -6056,7 +6056,7 @@ public class DenomeManager {
 			// rangeMaximum and rangeMinimum can be null, if the data been sent from the sensor is of type ON/OFF or some
 			// other non numerical information
 			try{
-				Double parseValue = Double.parseDouble();
+				Double parseValue = Double.parseDouble(inputLine);
 			}catch(NumberFormatException e){
 				logger.debug(inputLine + " is not numeric");
 				ignoreMaximumMinimum=true;
