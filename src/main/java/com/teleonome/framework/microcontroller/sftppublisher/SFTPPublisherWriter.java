@@ -369,7 +369,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 							//sourceFilename = Utils.getLocalDirectory() + "Teleonome.denome";
 							// logger.debug("sending the denome file");
 						//	uploadFile( destinationDir, sourceFilename,   "Teleonome.denome");
-							String destinationFileName = Utils.getLocalDirectory() + "SFTPPubTemp.zip";
+							String destinationFileName = Utils.getLocalDirectory() + "DGPubTemp.zip";
 							
 							File destinationFile = new File(destinationFileName);
 							
