@@ -843,7 +843,7 @@ public class TeleonomeConstants {
 	
 	
 	public static final String EXTERNAL_SOURCE_TELEONOME_NAME="External Source Teleonome Name";
-	public static final String EXTERNAL_DATA_STATUS_STALE="danger";
+	public static final String EXTERNAL_DATA_STATUS_STALE="secondary";
 	public static final String EXTERNAL_DATA_STATUS="ExternalDataStatus";
 	public static final String EXTERNAL_DATA_STATUS_OK="success";
 	public static final String DENE_SYSTEM_DATA="System Data";
