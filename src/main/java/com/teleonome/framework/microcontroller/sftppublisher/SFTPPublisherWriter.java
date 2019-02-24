@@ -101,7 +101,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 
 			if(createdTunnel) {
 				boolean publishToSFTP = publishToSFTP();
-				if(publishToSFTP)publishingResults="ok-publishing SFTP";
+				if(publishToSFTP)publishingResults="Ok-publishing SFTP";
 				session.disconnect();
 			}
 		}else {
