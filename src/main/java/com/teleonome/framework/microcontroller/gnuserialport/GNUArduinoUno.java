@@ -60,8 +60,6 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 	@Override
 	public void init(JSONArray params) throws MicrocontrollerCommunicationException {
 		// TODO Auto-generated method stub
-		Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
-
 		CommPortIdentifier portId = null;
 		try {
 			INTER_SENSOR_READ_TIME_OUT_MILLISECONDS = ((Integer)aDenomeManager.getDeneWordValueByName(TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_DESCRIPTIVE, TeleonomeConstants.DENE_VITAL, "Inter Sensor Read Timeout Milliseconds")).intValue();
@@ -71,6 +69,11 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 			logger.warn(Utils.getStringException(e1));
 			System.exit(-1);
 		}
+		
+		Enumeration portEnum = null;
+		CommPortIdentifier.getPortIdentifiers();
+
+		
 
 
 		CommPortIdentifier currPortId=null;
@@ -78,6 +81,8 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 		int maxNumberReconnects=3;
 		boolean keepGoing=true;
 		do {
+			 portEnum = CommPortIdentifier.getPortIdentifiers();
+			 logger.debug("looking for ports, portEnum=" + portEnum);
 			while (portId == null && portEnum.hasMoreElements()) {
 				currPortId = (CommPortIdentifier) portEnum.nextElement();
 				//System.out.println("currPortId=" + currPortId.getName());
