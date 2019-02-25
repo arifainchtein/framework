@@ -101,13 +101,13 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 					counter++;
 					logger.info("Could not find Serial Port," + counter + " out of " + maxNumberReconnects);
 					try {
-						Thread.sleep(3000);
+						Thread.sleep(5000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}else {
-					System.out.println("Could not find COM port.");
+					
 					logger.warn("Could not find COM port.");
 					Hashtable<String, String> h = new Hashtable();
 					h.put("message","Could not find COM port");
