@@ -1675,10 +1675,12 @@ public class DenomeUtils {
 		JSONObject mutationsObject = pulseJSONObject.getJSONObject("Denome");
 		JSONArray mutationsArray = mutationsObject.getJSONArray("Mutations");
 		String name;
-		for(int i=0;i<mutationsArray.length();i++){
-			name =  mutationsArray.getJSONObject(i).getString("Name");
-			if(name.equals(mutationName)){
-				return true;
+		if(mutationsArray.length()>0) {
+			for(int i=0;i<mutationsArray.length();i++){
+				name =  mutationsArray.getJSONObject(i).getString("Name");
+				if(name.equals(mutationName)){
+					return true;
+				}
 			}
 		}
 		return false;
