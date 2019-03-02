@@ -2266,6 +2266,7 @@ public class DenomeUtils {
 					
 					
 					anActuatorActionListDeneJSONObject = entry4.getKey();
+					logger.debug("anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject);
 					actuatorName = anActuatorActionListDeneJSONObject.getString("name");
 					actuatorExecution = anActuatorActionListDeneJSONObject.getInt(TeleonomeConstants.DENEWORD_EXECUTION_POSITION);
 					reportLines.add("<h4>"+actuatorName +"</h4><br>");
