@@ -8,6 +8,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
@@ -2168,6 +2169,8 @@ public class DenomeUtils {
 		reportLines.add("</head>");
 		reportLines.add("<body>");
 
+	
+		
 				SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss Z");
 		com.teleonome.framework.denome.DenomeViewManager aDenomeViewerManager = new com.teleonome.framework.denome.DenomeViewManager();
 		 
@@ -2177,6 +2180,9 @@ public class DenomeUtils {
 		String teleonomeName = denomeObject.getString("Name");
 		aDenomeViewerManager.loadDenome(pulse);
 
+		reportLines.add("<h1>"+teleonomeName +"</h2><br>");
+		reportLines.add("<h5>Report Created:"+dateTimeFormat.format(new Date()) +"</h5><br>");
+		
 		JSONArray stateMutationsJSONArray = aDenomeViewerManager
 				.getMutations(TeleonomeConstants.MUTATION_TYPE_STATE);
 		JSONArray structureMutationsJSONArray = aDenomeViewerManager
