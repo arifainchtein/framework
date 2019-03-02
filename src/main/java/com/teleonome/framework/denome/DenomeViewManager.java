@@ -214,6 +214,7 @@ public class DenomeViewManager {
 
 			
 			denomeObject = denomeJSONObject.getJSONObject("Denome");
+			logger.debug("line 217 just read the denomeObject,, length=" + denomeObject.length());
 			String denomeName = denomeObject.getString("Name");
 			//
 			// now parse them
