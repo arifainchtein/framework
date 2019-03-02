@@ -2269,10 +2269,17 @@ public class DenomeUtils {
 					
 					
 					
-					logger.debug("anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject);
-					
-					actuatorPointer = (String)DenomeUtils.getDeneWordAttributeByDeneWordTypeFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					//logger.debug("anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject);
+					//
+					// the codon is the name of the actuator
+					//
+					actuatorName = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("line 2277 actuatorName=" + actuatorName);
+					//
+					// then get the actuator dene
+					actuatorPointer = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_ACTUATORS).toString();
 					try {
+						logger.debug("actuatorPointer=" + actuatorPointer);
 						actuatorDene = DenomeUtils.getDeneByIdentity(pulse, new Identity(actuatorPointer));
 					} catch (InvalidDenomeException e) {
 						// TODO Auto-generated catch block
