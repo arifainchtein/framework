@@ -189,9 +189,12 @@ public class DenomeViewManager {
 		return buffer.toString();
 	}
 
-
-
 	public void loadDenome(String denomeFileInString) throws MissingDenomeException, TeleonomeValidationException{
+		JSONObject denomeJSONObject = new JSONObject(denomeFileInString);
+		loadDenome( denomeJSONObject);
+	}
+
+	public void loadDenome(JSONObject denomeJSONObject) throws MissingDenomeException, TeleonomeValidationException{
 		//
 		// read the denome from the hard disk
 		//  if its not found, then read it from the db
@@ -209,7 +212,7 @@ public class DenomeViewManager {
 			// end of variable initialization
 			//
 
-			denomeJSONObject = new JSONObject(denomeFileInString);
+			
 			denomeObject = denomeJSONObject.getJSONObject("Denome");
 			String denomeName = denomeObject.getString("Name");
 			//

@@ -3,6 +3,7 @@ package com.teleonome.framework.denome;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +27,8 @@ import com.teleonome.framework.denome.DenomeManager.IntegerCompare;
 import com.teleonome.framework.denome.DenomeManager.MutationActionsExecutionResult;
 import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.InvalidMutation;
+import com.teleonome.framework.exception.MissingDenomeException;
+import com.teleonome.framework.exception.TeleonomeValidationException;
 import com.teleonome.framework.utils.Utils;
 
 public class DenomeUtils {
@@ -2132,5 +2135,200 @@ public class DenomeUtils {
 		return sourceData;
 	}
 
+	public static ArrayList generateDenomePhysiologyReportHTMLTable(JSONObject pulse) throws MissingDenomeException, TeleonomeValidationException {
+		ArrayList<String> reportLines = new ArrayList();
+		
+		reportLines.add("<!DOCTYPE html>");
+		reportLines.add("<html>");
+		reportLines.add("<head>");
+		reportLines.add("<style>");
+		reportLines.add(".ReportTable {");
+		reportLines.add("  font-family: \"Trebuchet MS\", Arial, Helvetica, sans-serif;");
+		reportLines.add("  border-collapse: collapse;");
+		reportLines.add("  width: 100%;");
+		reportLines.add("	}");
 
+		reportLines.add(".ReportTable td, #ReportTable th {");
+		reportLines.add("  border: 1px solid #ddd;");
+		reportLines.add("	  padding: 8px;");
+		reportLines.add("	}");
+
+		reportLines.add("	.ReportTable tr:nth-child(even){background-color: #f2f2f2;}");
+
+		reportLines.add("	.ReportTable tr:hover {background-color: #ddd;}");
+
+		reportLines.add("	.ReportTable th {");
+		reportLines.add("	  padding-top: 12px;");
+		reportLines.add("  padding-bottom: 12px;");
+		reportLines.add("  text-align: left;");
+		reportLines.add("  background-color: #4CAF50;");
+		reportLines.add("  color: white;");
+		reportLines.add("	}");
+		reportLines.add("</style>");
+		reportLines.add("</head>");
+		reportLines.add("<body>");
+
+				SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss Z");
+		com.teleonome.framework.denome.DenomeViewManager aDenomeViewerManager = new com.teleonome.framework.denome.DenomeViewManager();
+		 
+		
+		
+		JSONObject denomeObject =  pulse.getJSONObject("Denome");
+		String teleonomeName = denomeObject.getString("Name");
+		aDenomeViewerManager.loadDenome(pulse);
+
+		JSONArray stateMutationsJSONArray = aDenomeViewerManager
+				.getMutations(TeleonomeConstants.MUTATION_TYPE_STATE);
+		JSONArray structureMutationsJSONArray = aDenomeViewerManager
+				.getMutations(TeleonomeConstants.MUTATION_TYPE_STRUCTURE);
+		int structureMutationsJSONArrayLength = 0;
+		if (structureMutationsJSONArray != null)
+			structureMutationsJSONArrayLength = structureMutationsJSONArray.length();
+		int stateMutationsJSONArrayLength = 0;
+		if (stateMutationsJSONArray != null)
+			stateMutationsJSONArrayLength = stateMutationsJSONArray.length();
+
+		Hashtable pointerToMicroControllerSensorDenesVectorIndex= aDenomeViewerManager.getPointerToMicroControllerSensorDenesVectorIndex();
+		 ArrayList<Map.Entry<String, Integer>>  microControllerPointerProcessingQueuePositionIndex = aDenomeViewerManager.getMicroControllerPointerProcessingQueuePositionIndex();
+		Vector sensorDeneVector;
+		JSONObject sensorDeneJSONObject;
+		
+		Hashtable microControllerNameActuatorsIndex = aDenomeViewerManager.getMicroControllerNameActuatorsIndex();
+		String microControllerPointer;
+		String microControllerName;
+		ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex = new ArrayList(); 
+		ArrayList<Map.Entry<JSONObject, Integer>> actuatorRequestQueuePositionDeneWordIndex = new ArrayList(); 
+		Integer queuePosition=null;
+
+		JSONObject  value;
+		JSONArray sensorValuesPointersJSONArray, sensorValuesJSONArray;
+		String sensorRequestQueuePosition;
+		//ArrayList sensorTableBySensorArrayList = new ArrayList();
+		ArrayList actuatorTableByActuatorArrayList = new ArrayList();
+		
+		//JSONObject sensorReportLine;
+		for (Map.Entry<String, Integer> entry : microControllerPointerProcessingQueuePositionIndex) {
+			microControllerPointer = (String)entry.getKey();
+			queuePosition = (Integer)entry.getValue();
+			microControllerName = microControllerPointer.split(":")[microControllerPointer.split(":").length-1];
+			sensorDeneVector = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get( microControllerPointer);
+			reportLines.add("<h2>"+microControllerName +"</h2><br>");
+			reportLines.add("<h5>Execution Queue Position:"+queuePosition +"</h5><br>");
+			reportLines.add("<h3>Sensors</h3><br>");
+			reportLines.add("<table class=\"ReportTable\">");
+			reportLines.add("<tr><th>Sensor Name</th><th>Value</th><th>"+TeleonomeConstants.DENEWORD_SENSOR_REQUEST_QUEUE_POSITION+"</th><th>"+TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE+"</th></tr>");
+			
+			if(sensorDeneVector!=null){
+				for (int m=0;m<sensorDeneVector.size();m++){//Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
+					sensorDeneJSONObject = (JSONObject)sensorDeneVector.elementAt(m);
+					sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(sensorDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					sensorValuesJSONArray = aDenomeViewerManager.loadDenesFromPointers(sensorValuesPointersJSONArray);
+					String unitsText;
+					for(int k=0;k<sensorValuesJSONArray.length();k++){
+						value = sensorValuesJSONArray.getJSONObject(k);
+						//logger.debug("value.getString(Name)=" + value.getString("Name"));
+						unitsText = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(value, "Unit", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						sensorRequestQueuePosition = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(value, "Sensor Request Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).toString();
+						reportLines.add("<tr><td>"+sensorDeneJSONObject.getString("Name")+"</td><td>"+value.getString("Name")+"</td><th>"+sensorRequestQueuePosition+"</th><th>"+unitsText+"</th></tr>");		
+					}
+				}
+			} 
+				
+			reportLines.add("</table>");
+			reportLines.add("<br>");		
+			
+			ArrayList<Map.Entry<JSONObject, Integer>> actuatorExecutionPositionDeneIndex = (ArrayList<Map.Entry<JSONObject, Integer>>)microControllerNameActuatorsIndex.get(microControllerPointer);
+			JSONObject anActuatorActionListDeneJSONObject, actionJSONObject;
+			JSONArray pointersToActionsJSONArray, actionsJSONArray;
+			JSONArray actuatorActionConditionPointersJSONArray;
+			String actuatorActionConditionPointer;
+			String conditionName;
+			JSONObject actuatorActionConditionJSONObject;
+			String actuatorName;
+			int actuatorExecution;
+			
+			
+			if(actuatorExecutionPositionDeneIndex!=null){
+				logger.debug("actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex.size());
+				reportLines.add("<h3>Actuators</h3><br>");
+				
+				
+				             
+				for (Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionDeneIndex) {
+					//actuatorReportLine = new JSONObject();
+					
+					
+					
+					anActuatorActionListDeneJSONObject = entry4.getKey();
+					actuatorName = anActuatorActionListDeneJSONObject.getString("name");
+					actuatorExecution = anActuatorActionListDeneJSONObject.getInt(TeleonomeConstants.DENEWORD_EXECUTION_POSITION);
+					reportLines.add("<h4>"+actuatorName +"</h4><br>");
+					reportLines.add("<h6 Execution Position:>"+actuatorExecution +"</h6><br>");
+					
+					reportLines.add("<table>");
+					reportLines.add("<tr><th>Action Name</th><th>Expression</th><th>Evaluation Position</th><th>"+TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT+"</th><th>Conditions</th><th>Variables</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th></tr>");
+					
+					pointersToActionsJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					actionsJSONArray = aDenomeViewerManager.loadDenesFromPointers(pointersToActionsJSONArray);
+					
+					for (int l=0;l<actionsJSONArray.length();l++) {
+						
+						actionJSONObject = actionsJSONArray.getJSONObject(l);
+						String actionName =  actionJSONObject.getString( TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+						String executionPoint = TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT_IMMEDIATE;
+						Object hasExecutionPoint = DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject,TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						if(hasExecutionPoint!=null && hasExecutionPoint instanceof String) {
+							executionPoint = (String)hasExecutionPoint;
+						}
+						String activeText = ((Boolean)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, "Active", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).toString();
+						String expression = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, "Expression", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						String commandTrue = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_TRUE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						String commandFalse = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						String evaluationPostion = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, "Evaluation Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).toString();
+						if(commandTrue==null)commandTrue="Not Available";
+						if(commandFalse==null)commandFalse="Not Available";
+						
+						actuatorActionConditionPointersJSONArray = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(actionJSONObject,TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_CONDITION_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						JSONArray actuatorActionConditionNamesJSONArray = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(actionJSONObject,TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_CONDITION_POINTER, TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+						StringBuffer conditionBuffer = new StringBuffer();
+						StringBuffer variableBuffer = new StringBuffer();
+						
+						for(int j=0;j<actuatorActionConditionPointersJSONArray.length();j++){
+							actuatorActionConditionPointer = (String) actuatorActionConditionPointersJSONArray.getString(j);
+							conditionName = actuatorActionConditionNamesJSONArray.getString(j);
+
+							actuatorActionConditionJSONObject=null;
+							//
+							// actuatorActionConditionJSONObject is a deneword get the value which is a denepointer and render it
+							try {
+								actuatorActionConditionJSONObject = aDenomeViewerManager.getDeneByIdentity(new Identity(actuatorActionConditionPointer));
+								String conditionExpression = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, "Expression", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+								conditionBuffer.append(conditionName + "=<b>" + conditionExpression + "</b><br>");
+								//
+								// process the variables for this condition
+								//
+								JSONArray variables = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_TYPE_CONDITION_VARIABLE_POINTER, TeleonomeConstants.COMPLETE);
+								JSONObject variableJSONObject;
+								for(int k=0;k<variables.length();k++){		
+									variableJSONObject = variables.getJSONObject(k);
+									String variableName = variableJSONObject.getString("Name");
+									String variableValue = variableJSONObject.getString("Value");
+									String defaultValue = variableJSONObject.getString("Default");
+									variableBuffer.append(variableName + ":{Default:"+defaultValue+";value:"+defaultValue+"}=" + variableValue + "<br>");
+								}
+								reportLines.add("<tr><th>"+actionName+"</th><th>"+expression+"</th><th>"+evaluationPostion+"</th><th>"+executionPoint+"</th><th>"+conditionBuffer.toString()+"</th><th>"+variableBuffer+"</th><th>"+commandTrue+"</th><th>"+commandFalse+"</th></tr>");	
+							} catch (InvalidDenomeException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
+						
+					} 
+					reportLines.add("</table>");
+				} 
+			}
+		}
+		reportLines.add("</body></html>");
+		return reportLines;
+	}
 }
