@@ -190,7 +190,7 @@ public class DenomeViewManager {
 	}
 
 	public void loadDenome(String denomeFileInString) throws MissingDenomeException, TeleonomeValidationException{
-		JSONObject denomeJSONObject = new JSONObject(denomeFileInString);
+		denomeJSONObject = new JSONObject(denomeFileInString);
 		loadDenome( denomeJSONObject);
 	}
 
@@ -574,7 +574,7 @@ public class DenomeViewManager {
 						denePointer = (String)actionDeneWordPointers.getString(n);
 						try {
 							actionDene = getDeneByIdentity(new Identity(denePointer));
-							logger.debug("denePointer=" + denePointer + " actionDene=" + actionDene);
+							logger.debug("line 577 denePointer=" + denePointer + " actionDene=" + actionDene);
 							evaluationPosition = (Integer)getDeneWordAttributeByDeneWordNameFromDenePointer( denePointer, "Evaluation Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);  
 							actuatorActionEvaluationPositionActionIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(actionDene, new Integer(evaluationPosition)));
 							//
