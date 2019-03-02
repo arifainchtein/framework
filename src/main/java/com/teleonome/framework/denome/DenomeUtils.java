@@ -2256,10 +2256,10 @@ public class DenomeUtils {
 			
 			if(actuatorExecutionPositionDeneIndex!=null){
 				logger.debug("actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex.size());
-				reportLines.add("<h3>Actuators</h3><br>");
+				reportLines.add("<h3>Actions</h3><br>");
 				
 				
-				             
+				reportLines.add("<table>");            
 				for (Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionDeneIndex) {
 					//actuatorReportLine = new JSONObject();
 					
@@ -2288,11 +2288,10 @@ public class DenomeUtils {
 					actuatorName = actuatorDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
 					actuatorExecution = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_EXECUTION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					
-					reportLines.add("<h4>"+actuatorName +"</h4><br>");
-					reportLines.add("<h6 Execution Position:>"+actuatorExecution +"</h6><br>");
 					
-					reportLines.add("<table>");
-					reportLines.add("<tr><th>Action Name</th><th>Expression</th><th>Evaluation Position</th><th>"+TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT+"</th><th>Conditions</th><th>Variables</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th></tr>");
+					
+					
+					reportLines.add("<tr><th>Actuator Name</th><th>Execution Position</th><th>Action Name</th><th>Expression</th><th>Evaluation Position</th><th>"+TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT+"</th><th>Conditions</th><th>Variables</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th></tr>");
 					
 					pointersToActionsJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					actionsJSONArray = aDenomeViewerManager.loadDenesFromPointers(pointersToActionsJSONArray);
@@ -2342,7 +2341,8 @@ public class DenomeUtils {
 									String defaultValue = variableJSONObject.getString("Default");
 									variableBuffer.append(variableName + ":{Default:"+defaultValue+";value:"+defaultValue+"}=" + variableValue + "<br>");
 								}
-								reportLines.add("<tr><th>"+actionName+"</th><th>"+expression+"</th><th>"+evaluationPostion+"</th><th>"+executionPoint+"</th><th>"+conditionBuffer.toString()+"</th><th>"+variableBuffer+"</th><th>"+commandTrue+"</th><th>"+commandFalse+"</th></tr>");	
+								
+								reportLines.add("<tr><td>"+actuatorName+"</td><td>"+actuatorExecution+"</td><td>"+actionName+"</td><td>"+expression+"</td><td>"+evaluationPostion+"</td><td>"+executionPoint+"</td><td>"+conditionBuffer.toString()+"</td><td>"+variableBuffer+"</td><td>"+commandTrue+"</td><td>"+commandFalse+"</td></tr>");	
 							} catch (InvalidDenomeException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
@@ -2350,8 +2350,9 @@ public class DenomeUtils {
 						}
 						
 					} 
-					reportLines.add("</table>");
+					
 				} 
+				reportLines.add("</table>");
 			}
 		}
 		reportLines.add("</body></html>");
