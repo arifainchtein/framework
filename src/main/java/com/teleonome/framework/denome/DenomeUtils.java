@@ -2249,8 +2249,8 @@ public class DenomeUtils {
 			JSONArray actuatorActionConditionPointersJSONArray;
 			String actuatorActionConditionPointer;
 			String conditionName;
-			JSONObject actuatorActionConditionJSONObject;
-			String actuatorName;
+			JSONObject actuatorActionConditionJSONObject, actuatorDene = null;
+			String actuatorName, actuatorPointer;
 			int actuatorExecution;
 			
 			
@@ -2266,9 +2266,21 @@ public class DenomeUtils {
 					
 					
 					anActuatorActionListDeneJSONObject = entry4.getKey();
+					
+					
+					
 					logger.debug("anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject);
-					actuatorName = anActuatorActionListDeneJSONObject.getString("name");
-					actuatorExecution = anActuatorActionListDeneJSONObject.getInt(TeleonomeConstants.DENEWORD_EXECUTION_POSITION);
+					
+					actuatorPointer = (String)DenomeUtils.getDeneWordAttributeByDeneWordTypeFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					try {
+						actuatorDene = DenomeUtils.getDeneByIdentity(pulse, new Identity(actuatorPointer));
+					} catch (InvalidDenomeException e) {
+						// TODO Auto-generated catch block
+						logger.warn(Utils.getStringException(e));
+					}
+					actuatorName = actuatorDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+					actuatorExecution = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_EXECUTION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					
 					reportLines.add("<h4>"+actuatorName +"</h4><br>");
 					reportLines.add("<h6 Execution Position:>"+actuatorExecution +"</h6><br>");
 					
