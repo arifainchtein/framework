@@ -214,7 +214,7 @@ public class DenomeViewManager {
 
 			
 			denomeObject = denomeJSONObject.getJSONObject("Denome");
-			logger.debug("line 217 just read the denomeObject, length=" + denomeObject.length());
+			logger.debug("line 217 just read the denomeObject, length=" + denomeObject.toString().length());
 			String denomeName = denomeObject.getString("Name");
 			//
 			// now parse them
@@ -1041,6 +1041,7 @@ public class DenomeViewManager {
 
 			//
 			// now parse them
+			logger.debug("line 1044 denomeJSONObject=" + denomeJSONObject);
 			JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
 			JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
 
