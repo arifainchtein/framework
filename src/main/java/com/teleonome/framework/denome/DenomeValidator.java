@@ -32,6 +32,7 @@ public class DenomeValidator {
 		JSONObject errorJSONObject;
 
 		try {
+			logger.debug("abut to load the denome");
 			aDenomeViewerManager.loadDenome(denomeInString);
 		} catch (TeleonomeValidationException e1) {
 			// TODO Auto-generated catch block
