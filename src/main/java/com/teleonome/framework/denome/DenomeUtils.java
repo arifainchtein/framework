@@ -2277,7 +2277,7 @@ public class DenomeUtils {
 					logger.debug("line 2277 actuatorName=" + actuatorName);
 					//
 					// then get the actuator dene
-					actuatorPointer = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_ACTUATORS).toString();
+					actuatorPointer = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_ACTUATORS, actuatorName).toString();
 					try {
 						logger.debug("actuatorPointer=" + actuatorPointer);
 						actuatorDene = DenomeUtils.getDeneByIdentity(pulse, new Identity(actuatorPointer));
