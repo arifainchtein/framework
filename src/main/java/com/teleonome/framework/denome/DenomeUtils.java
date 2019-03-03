@@ -2180,8 +2180,8 @@ public class DenomeUtils {
 		String teleonomeName = denomeObject.getString("Name");
 		aDenomeViewerManager.loadDenome(pulse);
 
-		reportLines.add("<h1>"+teleonomeName +"</h2><br>");
-		reportLines.add("<h5>Report Created:"+dateTimeFormat.format(new Date()) +"</h5><br>");
+		reportLines.add("<h1>"+teleonomeName +"</h1>");
+		reportLines.add("<h5>Report Created:"+dateTimeFormat.format(new Date()) +"</h5>");
 		
 		JSONArray stateMutationsJSONArray = aDenomeViewerManager
 				.getMutations(TeleonomeConstants.MUTATION_TYPE_STATE);
@@ -2218,8 +2218,9 @@ public class DenomeUtils {
 			queuePosition = (Integer)entry.getValue();
 			microControllerName = microControllerPointer.split(":")[microControllerPointer.split(":").length-1];
 			sensorDeneVector = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get( microControllerPointer);
-			reportLines.add("<h2>"+microControllerName +"</h2><br>");
-			reportLines.add("<h5>Execution Queue Position:"+queuePosition +"</h5><br>");
+			logger.debug("line 2221 sensorDeneVector=" + sensorDeneVector.size());
+			reportLines.add("<h2>"+microControllerName +"</h2>");
+			reportLines.add("<h5>Execution Queue Position:"+queuePosition +"</h5>");
 			reportLines.add("<h3>Sensors</h3><br>");
 			reportLines.add("<table class=\"ReportTable\">");
 			reportLines.add("<tr><th>Sensor Name</th><th>Value</th><th>"+TeleonomeConstants.DENEWORD_SENSOR_REQUEST_QUEUE_POSITION+"</th><th>"+TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE+"</th></tr>");
@@ -2259,7 +2260,9 @@ public class DenomeUtils {
 				reportLines.add("<h3>Actions</h3><br>");
 				
 				
-				reportLines.add("<table>");            
+				reportLines.add("<table>");   
+				reportLines.add("<tr><th>Actuator Name</th><th>Execution Position</th><th>Action Name</th><th>Expression</th><th>Evaluation Position</th><th>"+TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT+"</th><th>Conditions</th><th>Variables</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th></tr>");
+				
 				for (Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionDeneIndex) {
 					//actuatorReportLine = new JSONObject();
 					
@@ -2291,7 +2294,6 @@ public class DenomeUtils {
 					
 					
 					
-					reportLines.add("<tr><th>Actuator Name</th><th>Execution Position</th><th>Action Name</th><th>Expression</th><th>Evaluation Position</th><th>"+TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT+"</th><th>Conditions</th><th>Variables</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th></tr>");
 					
 					pointersToActionsJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					actionsJSONArray = aDenomeViewerManager.loadDenesFromPointers(pointersToActionsJSONArray);
