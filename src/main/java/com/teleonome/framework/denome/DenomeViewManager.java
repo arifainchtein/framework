@@ -234,6 +234,7 @@ public class DenomeViewManager {
 			//
 
 			
+			JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
 			
 			denomeName = denomeObject.getString("Name");
 			//
