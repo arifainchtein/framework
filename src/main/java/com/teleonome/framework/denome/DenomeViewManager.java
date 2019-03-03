@@ -488,18 +488,18 @@ public class DenomeViewManager {
 					for(int j=0;j<v.size();j++){
 						aDeneJSONObject = (JSONObject) v.elementAt(j);
 						isSensor = DenomeUtils.isDeneOfType(aDeneJSONObject, TeleonomeConstants.DENE_TYPE_SENSOR);
-
+						logger.info("line 491 aDeneJSONObject.=" + aDeneJSONObject.getString("Name") + " isSensor="+isSensor);
 						if(isSensor){
 							sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 							sensorValuesJSONArray = this.loadDenesFromPointers(sensorValuesPointersJSONArray);
 
 
-							logger.debug("sensorValuesJSONArray.length=" + sensorValuesJSONArray.length());
+							logger.info("sensorValuesJSONArray.length=" + sensorValuesJSONArray.length());
 							for(int k=0;k<sensorValuesJSONArray.length();k++){
 
 								aDeneValueJSONObject = (JSONObject) sensorValuesJSONArray.get(k);
-								logger.debug("k="+ k + " aDeneValueJSONObject:" + aDeneValueJSONObject);
+								logger.info("k="+ k + " aDeneValueJSONObject:" + aDeneValueJSONObject);
 
 								I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneValueJSONObject, "Sensor Request Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
@@ -514,11 +514,11 @@ public class DenomeViewManager {
 							sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 							sensorValuesJSONArray = this.loadDenesFromPointers(sensorValuesPointersJSONArray);
-
-
+							
 
 							for(int k=0;k<sensorValuesJSONArray.length();k++){
 								aDeneValueJSONObject = (JSONObject) sensorValuesJSONArray.get(k);
+								logger.info("line 521 aDeneJSONObject.=" + aDeneValueJSONObject.getString("Name"));
 
 								I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneValueJSONObject, "Sensor Request Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 								logger.debug("In denomemanager, aDeneValueJSONObject=" + aDeneValueJSONObject.getString("Name") + " Sensor Request Queue Position=" + I);
