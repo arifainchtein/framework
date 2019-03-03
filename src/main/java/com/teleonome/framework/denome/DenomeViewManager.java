@@ -495,7 +495,7 @@ public class DenomeViewManager {
 				for(Enumeration<String> en = pointerToMicroControllerActuatorDenesVectorIndex.keys();en.hasMoreElements();){
 					pointerToMicroController = en.nextElement();
 					v = (Vector)pointerToMicroControllerActuatorDenesVectorIndex.get(pointerToMicroController);
-
+					actuatorExecutionPositionDeneIndex=new ArrayList();
 					for(int j=0;j<v.size();j++){
 						anActuatorDeneJSONObject = (JSONObject) v.elementAt(j);
 						actuatorDeneName = anActuatorDeneJSONObject.getString("Name");
