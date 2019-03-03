@@ -2200,7 +2200,7 @@ public class DenomeUtils {
 		JSONObject sensorDeneJSONObject;
 		
 		Hashtable microControllerNameActuatorsIndex = aDenomeViewerManager.getMicroControllerNameActuatorsIndex();
-		logger.debug("line 2203 microControllerNameActuatorsIndex=" + microControllerNameActuatorsIndex);
+		
 		String microControllerPointer;
 		String microControllerName;
 		ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex = new ArrayList(); 
@@ -2265,7 +2265,7 @@ public class DenomeUtils {
 			
 			
 			if(actuatorExecutionPositionActionListDeneIndex!=null){
-				logger.debug("actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionActionListDeneIndex.size());
+				logger.debug("line 2268 microControllerPointer=" + microControllerPointer);
 				reportLines.add("<h3>Actions</h3>");
 				
 				
@@ -2279,13 +2279,14 @@ public class DenomeUtils {
 					// this action list can be either a On Start, or normal
 					//
 					anActuatorActionListDeneJSONObject = entry4.getKey();
+					logger.debug("line 2282 anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject.toString(4));
 					
 					//logger.debug("anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject);
 					//
 					// the codon is the name of the actuator
 					//
 					actuatorName = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("line 2277 anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject.getString("Name") + " actuatorName=" + actuatorName);
+					logger.debug("line 2289 anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject.getString("Name"));
 					//
 					// then get the actuator dene
 					actuatorPointer = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_ACTUATORS, actuatorName).toString();
