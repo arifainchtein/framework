@@ -2211,6 +2211,15 @@ public class DenomeUtils {
 		String sensorRequestQueuePosition;
 		//ArrayList sensorTableBySensorArrayList = new ArrayList();
 		ArrayList actuatorTableByActuatorArrayList = new ArrayList();
+		JSONObject anActuatorActionListDeneJSONObject, actionJSONObject;
+		JSONArray pointersToActionsJSONArray, actionsJSONArray;
+		JSONArray actuatorActionConditionPointersJSONArray;
+		String actuatorActionConditionPointer;
+		String conditionName;
+		JSONObject actuatorActionConditionJSONObject, actuatorDene = null;
+		String actuatorName, actuatorPointer;
+		int actuatorExecution;
+		ArrayList<Map.Entry<JSONObject, Integer>> actuatorExecutionPositionDeneIndex;
 		
 		//JSONObject sensorReportLine;
 		for (Map.Entry<String, Integer> entry : microControllerPointerProcessingQueuePositionIndex) {
@@ -2221,11 +2230,12 @@ public class DenomeUtils {
 			logger.debug("line 2221 microControllerPointer="+ microControllerPointer );
 			reportLines.add("<h2>"+microControllerName +"</h2>");
 			reportLines.add("<h5>Execution Queue Position:"+queuePosition +"</h5>");
-			reportLines.add("<h3>Sensors</h3><br>");
-			reportLines.add("<table class=\"ReportTable\">");
-			reportLines.add("<tr><th>Sensor Name</th><th>Value</th><th>"+TeleonomeConstants.DENEWORD_SENSOR_REQUEST_QUEUE_POSITION+"</th><th>"+TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE+"</th></tr>");
 			
 			if(sensorDeneVector!=null){
+				reportLines.add("<h3>Sensors</h3><br>");
+				reportLines.add("<table class=\"ReportTable\">");
+				reportLines.add("<tr><th>Sensor Name</th><th>Value</th><th>"+TeleonomeConstants.DENEWORD_SENSOR_REQUEST_QUEUE_POSITION+"</th><th>"+TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE+"</th></tr>");
+				
 				logger.debug("line 2229 sensorDeneVector=" + sensorDeneVector.size());
 				for (int m=0;m<sensorDeneVector.size();m++){//Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
 					sensorDeneJSONObject = (JSONObject)sensorDeneVector.elementAt(m);
@@ -2240,27 +2250,22 @@ public class DenomeUtils {
 						reportLines.add("<tr><td>"+sensorDeneJSONObject.getString("Name")+"</td><td>"+value.getString("Name")+"</td><th>"+sensorRequestQueuePosition+"</th><th>"+unitsText+"</th></tr>");		
 					}
 				}
+				reportLines.add("</table>");
 			} else {
 				logger.debug("line 2244 sensorDeneVector is null");
+				reportLines.add("<h3>No Sensors</h3><br>");
+					
 			}
 				
-			reportLines.add("</table>");
+			
 			reportLines.add("<br>");		
 			
-			ArrayList<Map.Entry<JSONObject, Integer>> actuatorExecutionPositionDeneIndex = (ArrayList<Map.Entry<JSONObject, Integer>>)microControllerNameActuatorsIndex.get(microControllerPointer);
-			JSONObject anActuatorActionListDeneJSONObject, actionJSONObject;
-			JSONArray pointersToActionsJSONArray, actionsJSONArray;
-			JSONArray actuatorActionConditionPointersJSONArray;
-			String actuatorActionConditionPointer;
-			String conditionName;
-			JSONObject actuatorActionConditionJSONObject, actuatorDene = null;
-			String actuatorName, actuatorPointer;
-			int actuatorExecution;
+			actuatorExecutionPositionDeneIndex = (ArrayList<Map.Entry<JSONObject, Integer>>)microControllerNameActuatorsIndex.get(microControllerPointer);
 			
 			
 			if(actuatorExecutionPositionDeneIndex!=null){
 				logger.debug("actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex.size());
-				reportLines.add("<h3>Actions</h3><br>");
+				reportLines.add("<h3>Actions</h3>");
 				
 				
 				reportLines.add("<table>");   
@@ -2269,11 +2274,7 @@ public class DenomeUtils {
 				for (Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionDeneIndex) {
 					//actuatorReportLine = new JSONObject();
 					
-					
-					
 					anActuatorActionListDeneJSONObject = entry4.getKey();
-					
-					
 					
 					//logger.debug("anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject);
 					//
@@ -2300,7 +2301,7 @@ public class DenomeUtils {
 					
 					pointersToActionsJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					actionsJSONArray = aDenomeViewerManager.loadDenesFromPointers(pointersToActionsJSONArray);
-					
+					logger.debug("line 2304, for "  + microControllerPointer + " there are "  + actionsJSONArray + " actions");
 					for (int l=0;l<actionsJSONArray.length();l++) {
 						
 						actionJSONObject = actionsJSONArray.getJSONObject(l);
