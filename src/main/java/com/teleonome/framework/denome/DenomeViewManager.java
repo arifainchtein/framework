@@ -471,9 +471,9 @@ public class DenomeViewManager {
 				Hashtable pointerToMicroControllerSensorDenesVectorIndex = new Hashtable();
 				for(int j=0;j<sensorDenesJSONArray.length();j++){
 					aDeneJSONObject = (JSONObject) sensorDenesJSONArray.get(j);
-					//logger.debug("line 516 aDeneJSONObject=" + aDeneJSONObject.toString(4));
+					logger.info("line 474 aDeneJSONObject=" + aDeneJSONObject.getString("Name"));
 					pointerToMicroController =  (String) getDeneWordAttributeByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_MICROCONTROLLER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					//logger.debug("line 516 aDeneJSONObject=" + aDeneJSONObject.toString(4));
+					logger.info("line 476 pointerToMicroController=" + pointerToMicroController);
 					v = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get(pointerToMicroController);
 					if(v==null)v = new Vector();
 					v.addElement(aDeneJSONObject);
