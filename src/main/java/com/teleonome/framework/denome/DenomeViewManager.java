@@ -211,7 +211,7 @@ public class DenomeViewManager {
 	}
 
 	// ********************************************
-	private void loadDenome(JSONObject denomeJSONObject) throws MissingDenomeException{//
+	public void loadDenome(JSONObject denomeJSONObject) throws MissingDenomeException{//
 		
 
 		try {
