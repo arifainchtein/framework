@@ -2200,6 +2200,7 @@ public class DenomeUtils {
 		JSONObject sensorDeneJSONObject;
 		
 		Hashtable microControllerNameActuatorsIndex = aDenomeViewerManager.getMicroControllerNameActuatorsIndex();
+		logger.debug("line 2203 microControllerNameActuatorsIndex=" + microControllerNameActuatorsIndex);
 		String microControllerPointer;
 		String microControllerName;
 		ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex = new ArrayList(); 
