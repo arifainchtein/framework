@@ -2217,9 +2217,9 @@ public class DenomeUtils {
 		String actuatorActionConditionPointer;
 		String conditionName;
 		JSONObject actuatorActionConditionJSONObject, actuatorDene = null;
-		String actuatorName, actuatorPointer;
+		String actuatorName, actuatorPointer, actionType;
 		int actuatorExecution;
-		ArrayList<Map.Entry<JSONObject, Integer>> actuatorExecutionPositionDeneIndex;
+		ArrayList<Map.Entry<JSONObject, Integer>> actuatorExecutionPositionActionListDeneIndex;
 		
 		//JSONObject sensorReportLine;
 		for (Map.Entry<String, Integer> entry : microControllerPointerProcessingQueuePositionIndex) {
@@ -2260,20 +2260,23 @@ public class DenomeUtils {
 			
 			reportLines.add("<br>");		
 			
-			actuatorExecutionPositionDeneIndex = (ArrayList<Map.Entry<JSONObject, Integer>>)microControllerNameActuatorsIndex.get(microControllerPointer);
+			actuatorExecutionPositionActionListDeneIndex = (ArrayList<Map.Entry<JSONObject, Integer>>)microControllerNameActuatorsIndex.get(microControllerPointer);
 			
 			
-			if(actuatorExecutionPositionDeneIndex!=null){
-				logger.debug("actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex.size());
+			if(actuatorExecutionPositionActionListDeneIndex!=null){
+				logger.debug("actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionActionListDeneIndex.size());
 				reportLines.add("<h3>Actions</h3>");
 				
 				
 				reportLines.add("<table>");   
-				reportLines.add("<tr><th>Actuator Name</th><th>Execution Position</th><th>Action Name</th><th>Expression</th><th>Evaluation Position</th><th>"+TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT+"</th><th>Conditions</th><th>Variables</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th></tr>");
+				reportLines.add("<tr><th>Actuator Name</th><th>Execution Position</th><th>Action Name</th><th>Action Type</th><th>Expression</th><th>Evaluation Position</th><th>"+TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT+"</th><th>Conditions</th><th>Variables</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th></tr>");
 				
-				for (Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionDeneIndex) {
+				for (Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionActionListDeneIndex) {
 					//actuatorReportLine = new JSONObject();
 					
+					//
+					// this action list can be either a On Start, or normal
+					//
 					anActuatorActionListDeneJSONObject = entry4.getKey();
 					
 					//logger.debug("anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject);
@@ -2281,7 +2284,7 @@ public class DenomeUtils {
 					// the codon is the name of the actuator
 					//
 					actuatorName = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("line 2277 actuatorName=" + actuatorName);
+					logger.debug("line 2277 anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject.getString("Name") + " actuatorName=" + actuatorName);
 					//
 					// then get the actuator dene
 					actuatorPointer = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_ACTUATORS, actuatorName).toString();
@@ -2301,7 +2304,7 @@ public class DenomeUtils {
 					
 					pointersToActionsJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					actionsJSONArray = aDenomeViewerManager.loadDenesFromPointers(pointersToActionsJSONArray);
-					logger.debug("line 2304, for "  + microControllerPointer + " there are "  + actionsJSONArray.length() + " actions");
+					logger.debug("line 2304, for "  + microControllerPointer + " there are pointersToActionsJSONArray=" + pointersToActionsJSONArray.length() +  " actions=" + actionsJSONArray.length());
 					for (int l=0;l<actionsJSONArray.length();l++) {
 						
 						actionJSONObject = actionsJSONArray.getJSONObject(l);
