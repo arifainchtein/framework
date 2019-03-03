@@ -2301,7 +2301,7 @@ public class DenomeUtils {
 					
 					pointersToActionsJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					actionsJSONArray = aDenomeViewerManager.loadDenesFromPointers(pointersToActionsJSONArray);
-					logger.debug("line 2304, for "  + microControllerPointer + " there are "  + actionsJSONArray + " actions");
+					logger.debug("line 2304, for "  + microControllerPointer + " there are "  + actionsJSONArray.length() + " actions");
 					for (int l=0;l<actionsJSONArray.length();l++) {
 						
 						actionJSONObject = actionsJSONArray.getJSONObject(l);
