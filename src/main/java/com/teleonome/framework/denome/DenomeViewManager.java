@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -49,7 +50,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.teleonome.framework.TeleonomeConstants;
-import com.teleonome.framework.denome.DenomeManager.IntegerCompare;
 import com.teleonome.framework.exception.InvalidDeneStructureRequestException;
 import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.MissingDenomeException;
@@ -98,7 +98,23 @@ public class DenomeViewManager {
 	Hashtable pointerToMicroControllerActuatorExecutionPositionForInitialDeneIndex  = new Hashtable();
 
 
-
+	//
+	// new variables fr new loaddenome method
+	//
+	JSONArray analyticonDenesJSONArray ,mnemosyconDenesJSONArray ;
+	JSONArray microProcessorsDenesJSONArray;
+	String denomeName;
+	Vector sensorDenesVector = new Vector();
+	ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordForInitialIndex = new ArrayList(); 
+	Hashtable pointerToMicroControllerSensorsDeneWordsForInitialBySensorRequestQueuePositionIndex = new Hashtable();
+	Hashtable<String,ArrayList> denesToRememberByTeleonome = new Hashtable();
+	Hashtable<String,JSONArray> externalDataNameDeneWords = new Hashtable();	
+	HashMap externalDataLocationHashMap = new HashMap();
+	Hashtable microControllerNameMicroControllerParamsIndex = new Hashtable();
+	Hashtable<String,ArrayList> deneWordsToRememberByTeleonome = new Hashtable();
+	Hashtable<String,ArrayList> deneChainsToRememberByTeleonome = new Hashtable();
+	JSONArray rememeberedDeneWordsMnemosyconDenesJSONArray = new JSONArray();
+	
 	public DenomeViewManager(){
 		logger = Logger.getLogger(getClass());
 		logger.debug("Initiating Denome Manager");
@@ -194,7 +210,841 @@ public class DenomeViewManager {
 		loadDenome( denomeJSONObject);
 	}
 
-	public void loadDenome(JSONObject denomeJSONObject) throws MissingDenomeException, TeleonomeValidationException{
+	// ********************************************
+	private void loadDenome(JSONObject denomeJSONObject) throws MissingDenomeException{//
+		
+
+		try {
+			//
+			// initialize the variables so as to not duplicate
+			//
+			actuatorExecutionPositionDeneIndex = new ArrayList();
+
+			actuatorExecutionPositionDeneForInitialIndex = new ArrayList();
+			sensorRequestQueuePositionDeneWordIndex = new ArrayList();
+			analyticonDenesJSONArray = new JSONArray();
+			mnemosyconDenesJSONArray = new JSONArray();
+
+			pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex = new Hashtable();
+			pointerToMicroControllerSensorsDeneWordsForInitialBySensorRequestQueuePositionIndex= new Hashtable();
+			microControllerPointerProcessingQueuePositionIndex = new ArrayList();
+
+			//
+			// end of variable initialization
+			//
+
+			
+			
+			denomeName = denomeObject.getString("Name");
+			//
+			// make sure it is garbage cllected
+			//
+			
+
+
+			//
+			// now parse them
+			JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
+
+			JSONObject aJSONObject;
+			String name;
+			for(int i=0;i<nucleiArray.length();i++){
+				aJSONObject = (JSONObject) nucleiArray.get(i);
+				name = aJSONObject.getString("Name");
+
+				if(name.equals(TeleonomeConstants.NUCLEI_INTERNAL)){
+					internalNucleus= aJSONObject;
+				}else if(name.equals(TeleonomeConstants.NUCLEI_PURPOSE)){
+					purposeNucleus= aJSONObject;
+				}else if(name.equals(TeleonomeConstants.NUCLEI_MNEMOSYNE)){
+					mnemosyneNucleus= aJSONObject;
+				}else if(name.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
+					humanInterfaceNucleus= aJSONObject;
+				}
+
+			}
+			if(internalNucleus==null){
+				Hashtable info = new Hashtable();
+				String m = "The internalNucleus was not found. Using: " + selectedDenomeFileName;
+				info.put("message", m);
+				throw new MissingDenomeException(info);
+			}
+
+			if(purposeNucleus==null){
+				Hashtable info = new Hashtable();
+				String m = "The purposeNucleus was not found. Using: " + selectedDenomeFileName;
+				info.put("message", m);
+				throw new MissingDenomeException(info);
+			}
+			//
+			// Now check to see if there is a processing chain, (iuf the denome has not actuators there will not be) if so delete the processing denechain  DENECHAIN_ACTUATOR_LOGIC_PROCESSING
+			// so that when this pulse is written to disk only the processing info
+			// for this pulse is stored
+
+			this.getDeneChainByName(denomeJSONObject, TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_ACTUATOR_LOGIC_PROCESSING);
+
+
+			JSONArray deneChainsPurpose = purposeNucleus.getJSONArray("DeneChains");
+			JSONObject deneChain;
+
+
+			//
+			// to prune do this until there are no more processing logic
+			logger.debug("before removing the processing logic, the number f denechains in purpose is =" +deneChainsPurpose.length());
+
+			boolean keepGoing=true;
+			boolean removed=false;
+			while(keepGoing){
+				removed=false;
+				found:
+					for(int i=0;i<deneChainsPurpose.length();i++){
+						deneChain = deneChainsPurpose.getJSONObject(i);
+						logger.debug("in load denome,deneChain=" + deneChain.getString("Name") + " size=" + deneChain.getJSONArray("Denes").length() );
+						if(deneChain.getString("Name").equals( TeleonomeConstants.DENECHAIN_ACTUATOR_LOGIC_PROCESSING)){
+							deneChainsPurpose.remove(i);
+							//logger.debug("removing o=" + o);
+							removed=true;
+							break found;
+						}
+					}
+				if(!removed)keepGoing=false;
+			}
+			logger.debug("after removing the processing logic, the number f denechains in purpose is =" +deneChainsPurpose.length());
+
+
+
+
+
+			// create the vector of sensors and actuators, you are storing the dene that 
+			// represents the sensor or the actuator
+
+			JSONArray internalNucleusDeneChains = (JSONArray) internalNucleus.get("DeneChains");
+			JSONObject aDeneChainJSONObject, aDeneValueJSONObject;
+			JSONArray sensorDenesJSONArray;
+			JSONArray sensorValuesJSONArray;
+
+			JSONArray onStartActionsDenesJSONArray, actuatorDenesJSONArray, descriptiveDenesJSONArray;
+			Integer executionPosition=0;
+
+			int evaluationPosition = 0;
+			String aDeneJSONObject_Name;
+			actuatorDeneNameActuatorActionEvaluationPositionActionIndex = new Hashtable();
+			actuatorDeneNameActuatorActionEvaluationPositionActionForInitialIndex = new Hashtable();
+			new ArrayList(); 
+
+			//
+			// process the sensors and actuators
+			//
+			String actuatorDeneName = null;
+			JSONObject aDeneJSONObject, actuatorDeneJSONObject, aDeneWordJSONObject;
+			JSONArray vitalDeneWordsJsonArray;
+			//
+			// get the denechain int an index to process them in a specific order
+			//
+			Hashtable deneChainNameDeneChainIndex = new Hashtable();
+			for(int i=0;i<internalNucleusDeneChains.length();i++){
+				aDeneChainJSONObject = (JSONObject) internalNucleusDeneChains.get(i);
+				name = aDeneChainJSONObject.getString("Name");
+				deneChainNameDeneChainIndex.put(name, aDeneChainJSONObject);
+				logger.debug("in denomemanager, adding denechain " + name);
+			}
+			logger.debug("complete dene chains");
+			//for(int i=0;i<internalNucleusDeneChains.length();i++){
+			//
+			// process the chains in the order
+			// descriptive
+			// compoents
+			// sensors
+			// actuators
+			// Analyticons
+			//
+			JSONObject aDescriptiveDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_DESCRIPTIVE);
+			descriptiveDenesJSONArray = (JSONArray)aDescriptiveDeneChainJSONObject.get("Denes");
+			//
+			// process the vital dene
+			//
+			for(int j=0;j<descriptiveDenesJSONArray.length();j++){
+				aDeneJSONObject = (JSONObject) descriptiveDenesJSONArray.get(j);
+				aDeneJSONObject_Name = aDeneJSONObject.getString("Name");
+				if(aDeneJSONObject_Name.equals(TeleonomeConstants.DENE_VITAL)){
+					vitalDeneWordsJsonArray = aDeneJSONObject.getJSONArray("DeneWords");
+					for(int k=0;k<vitalDeneWordsJsonArray.length();k++){
+						aDeneWordJSONObject = (JSONObject) vitalDeneWordsJsonArray.get(k);
+						if(aDeneWordJSONObject.getString("Name").equals(TeleonomeConstants.VITAL_DENEWORD_BASE_PULSE_FREQUENCY)){
+							basePulseFrequency = aDeneWordJSONObject.getInt("Value");
+						}else if(aDeneWordJSONObject.getString("Name").equals(TeleonomeConstants.VITAL_DENEWORD_INTER_SENSOR_READ_TIMEOUT_MILLISECONDS)){
+							this.interSensorReadTimeoutMilliseconds = aDeneWordJSONObject.getInt("Value");
+						}else if(aDeneWordJSONObject.getString("Name").equals(TeleonomeConstants.VITAL_DENEWORD_TIMEZONE)){
+							this.timeZone = aDeneWordJSONObject.getString("Value");
+						}
+					}
+				}
+			}
+			//
+			// process
+
+
+
+
+			JSONObject aComponentsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_COMPONENTS);
+
+			//
+			// Cant assume that all teleonomes will have Compnents
+			String pointerToMicroController;
+			JSONObject microProcessorDene;
+			Integer I;
+
+			if(aComponentsDeneChainJSONObject!=null){
+				//
+				// get all the microcontrollers
+				// sort them according to the procesisng position
+				// and store them in microControllerPointerProcessingQueuePositionIndex 
+
+				microProcessorsDenesJSONArray = DenomeUtils.getDenesByDeneType(aComponentsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MICROCONTROLLER);
+				microControllerPointerProcessingQueuePositionIndex = new ArrayList();
+				String microProcessorName, microControllerConfigParameterPointer, microControllerConfigParameterListPointer;
+				JSONObject microControllerConfigParameterListDene, microControllerConfigParameterDeneWord;
+				JSONArray microControllerParams, microControllerParamsPointers;
+				logger.debug("microProcessorsDenesJSONArray.length()=" + microProcessorsDenesJSONArray.length());
+
+				for(int m=0;m<microProcessorsDenesJSONArray.length();m++){
+					microProcessorDene = microProcessorsDenesJSONArray.getJSONObject(m);
+					microProcessorName = microProcessorDene.getString("Name");
+					logger.debug("microProcessorName=" + microProcessorName);
+					pointerToMicroController = "@" +  denomeName + ":" + TeleonomeConstants.NUCLEI_INTERNAL + ":" + TeleonomeConstants.DENECHAIN_COMPONENTS + ":" + microProcessorName;
+					//
+					// Process the MicroController Config Parameter
+					//
+					microControllerParams = new JSONArray();
+					microControllerConfigParameterListPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(microProcessorDene, TeleonomeConstants.DENE_TYPE_MICROCONTROLLER_CONFIG_PARAMETER_LIST, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("microControllerConfigParameterListPointer=" + microControllerConfigParameterListPointer);
+
+					if(microControllerConfigParameterListPointer!=null && !microControllerConfigParameterListPointer.equals("")){
+						try {
+							//
+							// get the dene that has the list
+							logger.debug("microControllerConfigParameterListPointer=" + microControllerConfigParameterListPointer);
+							microControllerConfigParameterListDene = this.getDeneByIdentity(new Identity(microControllerConfigParameterListPointer));
+							//
+							// get just the value for each deneword in the list, this is a pointer to the actual dene
+							// 
+							microControllerParamsPointers = getAllDeneWordAttributeByDeneWordTypeFromDene(microControllerConfigParameterListDene, TeleonomeConstants.DENE_TYPE_MICROCONTROLLER_CONFIG_PARAMETER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							//
+							// now loop over every pointer to get the dene
+							//
+							for(int n=0;n<microControllerParamsPointers.length();n++){
+								microControllerConfigParameterPointer = microControllerParamsPointers.getString(n);
+								logger.debug("microControllerConfigParameterPointer=" + microControllerConfigParameterPointer);
+								microControllerConfigParameterDeneWord = getDeneByIdentity(new Identity(microControllerConfigParameterPointer));
+								microControllerParams.put(microControllerConfigParameterDeneWord);
+							}		
+						} catch (InvalidDenomeException e) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e));
+						}
+						microControllerNameMicroControllerParamsIndex.put(microProcessorName, microControllerParams);
+					}
+
+					//
+					// Process the Queue Position
+					//
+					I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(microProcessorDene, "Processing Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("Processing Queue Position=" + I);
+					microControllerPointerProcessingQueuePositionIndex.add(new AbstractMap.SimpleEntry<String, Integer>(pointerToMicroController, I));
+					Collections.sort(microControllerPointerProcessingQueuePositionIndex, new Comparator<Map.Entry<?, Integer>>(){
+						public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
+							return o1.getValue().compareTo(o2.getValue());
+						}});
+				}
+
+			}
+
+			boolean isSensor=false;
+			Vector v;
+			JSONObject aSensorsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_SENSORS);
+			//
+			// Cant assume that all teleonomes will have sensors
+			if(aSensorsDeneChainJSONObject!=null){
+
+				sensorDenesJSONArray = getDenesByDeneType(aSensorsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_SENSOR);
+				Hashtable pointerToMicroControllerSensorDenesVectorIndex = new Hashtable();
+				for(int j=0;j<sensorDenesJSONArray.length();j++){
+					aDeneJSONObject = (JSONObject) sensorDenesJSONArray.get(j);
+					//logger.debug("line 516 aDeneJSONObject=" + aDeneJSONObject.toString(4));
+					pointerToMicroController =  (String) getDeneWordAttributeByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_MICROCONTROLLER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					//logger.debug("line 516 aDeneJSONObject=" + aDeneJSONObject.toString(4));
+					v = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get(pointerToMicroController);
+					if(v==null)v = new Vector();
+					v.addElement(aDeneJSONObject);
+					pointerToMicroControllerSensorDenesVectorIndex.put(pointerToMicroController,v);
+				}
+				sensorDenesVector = new Vector();
+				JSONArray sensorValuesPointersJSONArray;
+				for(Enumeration<String> en = pointerToMicroControllerSensorDenesVectorIndex.keys();en.hasMoreElements();){
+					pointerToMicroController = en.nextElement();
+					v = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get(pointerToMicroController);
+					sensorRequestQueuePositionDeneWordIndex = new ArrayList();
+					for(int j=0;j<v.size();j++){
+						aDeneJSONObject = (JSONObject) v.elementAt(j);
+						isSensor = DenomeUtils.isDeneOfType(aDeneJSONObject, TeleonomeConstants.DENE_TYPE_SENSOR);
+
+						if(isSensor){
+							sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+							sensorValuesJSONArray = this.loadDenesFromPointers(sensorValuesPointersJSONArray);
+
+
+							logger.debug("sensorValuesJSONArray.length=" + sensorValuesJSONArray.length());
+							for(int k=0;k<sensorValuesJSONArray.length();k++){
+
+								aDeneValueJSONObject = (JSONObject) sensorValuesJSONArray.get(k);
+								logger.debug("k="+ k + " aDeneValueJSONObject:" + aDeneValueJSONObject);
+
+								I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneValueJSONObject, "Sensor Request Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+								sensorRequestQueuePositionDeneWordIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(aDeneValueJSONObject, I));
+								Collections.sort(sensorRequestQueuePositionDeneWordIndex, new Comparator<Map.Entry<?, Integer>>(){
+									public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
+										return o1.getValue().compareTo(o2.getValue());
+									}});
+
+							}
+						}else if(DenomeUtils.isDeneOfType(aDeneJSONObject, TeleonomeConstants.DENE_TYPE_ON_START_SENSOR)){
+							sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+							sensorValuesJSONArray = this.loadDenesFromPointers(sensorValuesPointersJSONArray);
+
+
+
+							for(int k=0;k<sensorValuesJSONArray.length();k++){
+								aDeneValueJSONObject = (JSONObject) sensorValuesJSONArray.get(k);
+
+								I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneValueJSONObject, "Sensor Request Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+								logger.debug("In denomemanager, aDeneValueJSONObject=" + aDeneValueJSONObject.getString("Name") + " Sensor Request Queue Position=" + I);
+
+								sensorRequestQueuePositionDeneWordForInitialIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(aDeneValueJSONObject, I));
+								Collections.sort(sensorRequestQueuePositionDeneWordForInitialIndex, new Comparator<Map.Entry<?, Integer>>(){
+									public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
+										return o1.getValue().compareTo(o2.getValue());
+									}});
+
+							}
+						}
+
+
+					}
+					//
+					// finishing running through the sensors of a microcontroller, so store it
+					//
+					pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex.put(pointerToMicroController, sensorRequestQueuePositionDeneWordIndex);
+					pointerToMicroControllerSensorsDeneWordsForInitialBySensorRequestQueuePositionIndex.put(pointerToMicroController, sensorRequestQueuePositionDeneWordForInitialIndex);
+					logger.debug("storing data for microcontrollerpointer: " + pointerToMicroController + " sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size() + " sensorRequestQueuePositionDeneWordForInitialIndex:" + sensorRequestQueuePositionDeneWordForInitialIndex.size());
+				}
+			}
+			//
+			// do the actuatorsinitial first
+			//
+			JSONObject anActuatorsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_ACTUATORS);
+
+
+			//
+			// Cant assume that all teleonomes will have actuators
+			//
+			JSONObject onStartActionJSONObject;
+			String actionCodonName;
+			String actionListDeneName;
+			if(anActuatorsDeneChainJSONObject!=null){
+				//
+				// identify which actions should be executed on the start pulse
+				// from those actions, get the codon to get the name of the actuator
+				// with the actuat
+				onStartActionsDenesJSONArray = getDenesByDeneType(anActuatorsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_ON_START_ACTION);
+
+				Hashtable pointerToMicroControllerActuatorDenesVectorForInitialIndex = new Hashtable();
+				for(int j=0;j<onStartActionsDenesJSONArray.length();j++){
+
+
+					onStartActionJSONObject = (JSONObject) onStartActionsDenesJSONArray.getJSONObject(j);
+					logger.debug("onStartActionJSONObject=" + onStartActionJSONObject);
+					actionCodonName = (String)getDeneWordAttributeByDeneWordNameFromDene(onStartActionJSONObject,TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					//
+					// the codonName is also the name of the actuator that contains this action, so get the actuator
+					actuatorDeneJSONObject = getDeneFromDeneChainByDeneName(anActuatorsDeneChainJSONObject,actionCodonName);
+					logger.debug("line 628 actuatorDeneJSONObject=" + actuatorDeneJSONObject);
+
+					pointerToMicroController =  (String) getDeneWordAttributeByDeneWordTypeFromDene(actuatorDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_MICROCONTROLLER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("line 631 pointerToMicroController=" + pointerToMicroController);
+					v = (Vector)pointerToMicroControllerActuatorDenesVectorForInitialIndex.get(pointerToMicroController);
+					if(v==null)v = new Vector();
+					if(!v.contains(actuatorDeneJSONObject)) {
+						v.addElement(actuatorDeneJSONObject);
+						logger.debug("line 634 adding actuator dene to vector, size =" + v.size());
+					}
+					pointerToMicroControllerActuatorDenesVectorForInitialIndex.put(pointerToMicroController,v);
+				}
+
+
+				JSONObject actionListDene=null;
+
+				for(Enumeration<String> en = pointerToMicroControllerActuatorDenesVectorForInitialIndex.keys();en.hasMoreElements();){
+					pointerToMicroController = en.nextElement();
+					v = (Vector)pointerToMicroControllerActuatorDenesVectorForInitialIndex.get(pointerToMicroController);
+					actuatorExecutionPositionDeneForInitialIndex = new ArrayList();
+					for(int j=0;j<v.size();j++){
+						actuatorDeneJSONObject = (JSONObject) v.elementAt(j);
+						actuatorDeneName = actuatorDeneJSONObject.getString("Name");
+						executionPosition = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDeneJSONObject,"Execution Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("line 652 actuatorDeneName=" + actuatorDeneName + " executionPosition=" + executionPosition);
+						if(executionPosition!=null && executionPosition>-1){
+							//
+							// The Dene that contains the executive position deneword also has a dene of type Action list,
+							// the value of that deneword is a pointer to the dene that contains the action
+							String actionListPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(actuatorDeneJSONObject,TeleonomeConstants.DENEWORD_TYPE_ON_START_ACTION_LIST, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							//
+							// now use the pointer to get to the denes that contain the actions
+							// th  pointer could be null
+							logger.debug(" line 657, actionListPointer=" + actionListPointer);
+
+							if(actionListPointer!=null){
+								try {
+									actionListDene = getDeneByIdentity(new Identity(actionListPointer));
+								} catch (InvalidDenomeException e) {
+									// TODO Auto-generated catch block
+									logger.warn(Utils.getStringException(e));
+								}
+								logger.debug(" line 581, actionListDene=" + actionListDene+ " executionPosition=" + executionPosition);
+								actuatorExecutionPositionDeneForInitialIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(actionListDene, new Integer(executionPosition)));
+							}
+						}
+					}
+
+					Collections.sort(actuatorExecutionPositionDeneForInitialIndex, new IntegerCompare());
+					pointerToMicroControllerActuatorExecutionPositionForInitialDeneIndex.put(pointerToMicroController, actuatorExecutionPositionDeneForInitialIndex);
+
+
+
+					// 
+					//
+					// at this point actuatorExecutionPositionDeneForInitialIndex contains the actuators sorted according to the execution position
+					// next for every actuatordene sort its actions according to their evaluation position
+					// so evaluate wheter or not to execute an action
+
+					logger.debug("actuatorExecutionPositionDeneForInitialIndex=" + actuatorExecutionPositionDeneForInitialIndex.size());;
+					for (Map.Entry<JSONObject, Integer> entry : actuatorExecutionPositionDeneForInitialIndex) {
+						actionListDene = entry.getKey();
+						actionListDeneName = actionListDene.getString("Name");
+						logger.debug(" line 689 actionListDeneName=" + actionListDeneName);
+						//
+						// the actionListDene contains denewords of type Dene Pointer which we need to resolve
+						// the value of the evaluation pointer
+						//
+						// so first get the denewords of typeDene Pointer which will point to the dene that contains the evaluation position
+						// the method returns a JSONArray of JSONObjects
+						//
+						//logger.debug("actionListDene=" + actionListDene);
+						JSONArray actionDeneWordPointers = (JSONArray) DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(actionListDene, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE,TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug(" line 689 actionDeneWordPointers=" + actionDeneWordPointers.length());
+
+
+						//
+						// actionDeneWordPointers cntains an array of string which are pointers to the denes that contain the evaluation postion
+						String denePointer;
+						JSONObject actionDene = null;
+						ArrayList<Map.Entry<JSONObject, Integer>>  actuatorActionEvaluationPositionActionIndex = new ArrayList(); 
+						for(int n=0;n<actionDeneWordPointers.length();n++){
+							denePointer = (String)actionDeneWordPointers.getString(n);
+							try {
+								actionDene = getDeneByIdentity(new Identity(denePointer));
+								evaluationPosition = (Integer)getDeneWordAttributeByDeneWordNameFromDenePointer( denePointer, TeleonomeConstants.EVALUATION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);  
+								actuatorActionEvaluationPositionActionIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(actionDene, new Integer(evaluationPosition)));
+								//
+								// Now store this actuatorActionEvaluationPositionActionIndex which contains the order and what actions to
+								// execute FOR A SPECIFICACTUATOR into a Vector whcih will maintain the order of execution of the
+								// actuators.  this is critical because every actuator has an action with evaluation position eual to 1
+
+							} catch (InvalidDenomeException e) {
+								// TODO Auto-generated catch block
+								logger.warn(Utils.getStringException(e));
+							}
+
+						}
+
+
+						//
+						// now sort the actions
+						//
+						Collections.sort(actuatorActionEvaluationPositionActionIndex, new IntegerCompare());
+						//
+						// we are inside of the loop processing the actuators in the correct order and
+						// actuatorActionEvaluationPositionActionIndex contains the action denes
+						// in the correct order, so create a list that contains the actuatorName and the actions to be executed
+						///
+						logger.debug("line 737, actionListDeneName=" + actionListDeneName + " actuatorActionEvaluationPositionActionIndex=" + actuatorActionEvaluationPositionActionIndex);
+						actuatorDeneNameActuatorActionEvaluationPositionActionForInitialIndex.put(actionListDeneName, actuatorActionEvaluationPositionActionIndex);
+					}
+				}
+				//
+				// then the normal
+				//
+				actuatorDenesJSONArray = getDenesByDeneType(anActuatorsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_ACTUATOR);
+
+				Hashtable pointerToMicroControllerActuatorDenesVectorIndex = new Hashtable();
+				for(int j=0;j<actuatorDenesJSONArray.length();j++){
+					aDeneJSONObject = (JSONObject) actuatorDenesJSONArray.getJSONObject(j);
+					pointerToMicroController =  (String) getDeneWordAttributeByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_MICROCONTROLLER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					v = (Vector)pointerToMicroControllerActuatorDenesVectorIndex.get(pointerToMicroController);
+					if(v==null)v = new Vector();
+					v.addElement(aDeneJSONObject);
+					pointerToMicroControllerActuatorDenesVectorIndex.put(pointerToMicroController,v);
+				}
+
+
+				actionListDene=null;
+
+				for(Enumeration<String> en = pointerToMicroControllerActuatorDenesVectorIndex.keys();en.hasMoreElements();){
+					pointerToMicroController = en.nextElement();
+					logger.debug("line 779 pointerToMicroController=" + pointerToMicroController);
+					v = (Vector)pointerToMicroControllerActuatorDenesVectorIndex.get(pointerToMicroController);
+					actuatorExecutionPositionDeneIndex = new ArrayList();
+					for(int j=0;j<v.size();j++){
+						aDeneJSONObject = (JSONObject) v.elementAt(j);
+						actuatorDeneName = aDeneJSONObject.getString("Name");
+						executionPosition = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneJSONObject,"Execution Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug(" line 786 actuatorDeneName=" + actuatorDeneName+ " executionPosition=" + executionPosition);
+						if(executionPosition!=null && executionPosition>-1){
+							//
+							// The Dene that contains the executive position deneword also has a dene of type Action list,
+							// the value of that deneword is a pointer to the dene that contains the action
+							String actionListPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(aDeneJSONObject,TeleonomeConstants.DENE_TYPE_ACTION_LIST, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							//
+							// now use the pointer to get to the denes that contain the actions
+							//
+							logger.debug("actionListPointer=" + actionListPointer);
+							//
+							// if the actuators are only for startup this could be null
+							if(actionListPointer!=null){
+								try {
+									actionListDene = getDeneByIdentity(new Identity(actionListPointer));
+									logger.debug("line 801 actionListDene=" + actionListDene.toString(4));
+								} catch (InvalidDenomeException e) {
+									// TODO Auto-generated catch block
+									logger.warn(Utils.getStringException(e));
+								}
+								actuatorExecutionPositionDeneIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(actionListDene, new Integer(executionPosition)));
+							}
+						}
+					}
+
+					Collections.sort(actuatorExecutionPositionDeneIndex, new IntegerCompare());
+					pointerToMicroControllerActuatorExecutionPositionDeneIndex.put(pointerToMicroController, actuatorExecutionPositionDeneIndex);
+					logger.debug("line 813 , pointerToMicroController=" + pointerToMicroController +" actuatorExecutionPositionDeneIndex size="+ actuatorExecutionPositionDeneIndex.size());
+					// 
+					//
+					// at this point actuatorExecutionPositionDeneWordIndex contains the actuators sorted according to the execution position
+					// next for every actuatordene sort its actions according to their evaluation position
+					// so evaluate wheter or not to execute an action
+					for (Map.Entry<JSONObject, Integer> entry : actuatorExecutionPositionDeneIndex) {
+
+						actionListDene = entry.getKey();
+						actionListDeneName = actionListDene.getString("Name");
+						logger.debug("line 823 , actionListDeneName=" + actionListDeneName);
+
+						//
+						// the actionListDene contains denewords of type Dene Pointer which we need to resolve
+						// the value of the evaluation pointer
+						//
+						// so first get the denewords of typeDene Pointer which will point to the dene that contains the evaluation position
+						// the method returns a JSONArray of JSONObjects
+						//
+						//logger.debug("actionListDene=" + actionListDene);
+						JSONArray actionDeneWordPointers = (JSONArray) DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(actionListDene, TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE,TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+
+						//
+						// actionDeneWordPointers cntains an array of string which are pointers to the denes that contain the evaluation postion
+						String denePointer;
+						JSONObject actionDene = null;
+						ArrayList<Map.Entry<JSONObject, Integer>>  actuatorActionEvaluationPositionActionIndex = new ArrayList(); 
+						for(int n=0;n<actionDeneWordPointers.length();n++){
+							denePointer = (String)actionDeneWordPointers.getString(n);
+							try {
+								actionDene = getDeneByIdentity(new Identity(denePointer));
+								evaluationPosition = (Integer)getDeneWordAttributeByDeneWordNameFromDenePointer( denePointer, "Evaluation Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);  
+								actuatorActionEvaluationPositionActionIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(actionDene, new Integer(evaluationPosition)));
+								//
+								// Now store this actuatorActionEvaluationPositionActionIndex which contains the order and what actions to
+								// execute FOR A SPECIFICACTUATOR into a Vector whcih will maintain the order of execution of the
+								// actuators.  this is critical because every actuator has an action with evaluation position eual to 1
+
+							} catch (InvalidDenomeException e) {
+								// TODO Auto-generated catch block
+								logger.warn(Utils.getStringException(e));
+							}
+
+						}
+
+
+						//
+						// now sort the actions
+						//
+						Collections.sort(actuatorActionEvaluationPositionActionIndex, new IntegerCompare());
+						//
+						// we are inside of the loop processing the actuators in the correct order and
+						// actuatorActionEvaluationPositionActionIndex contains the action denes
+						// in the correct order, so create a list that contains the actuatorName and the actions to be executed
+						///
+						logger.debug("line 869 , actionListDeneName=" + actionListDeneName + " actuatorActionEvaluationPositionActionIndex.size()=" + actuatorActionEvaluationPositionActionIndex.size());
+						actuatorDeneNameActuatorActionEvaluationPositionActionIndex.put(actionListDeneName, actuatorActionEvaluationPositionActionIndex);
+					}
+				}
+			}
+
+
+
+
+
+			//
+			// End of actuator dene chain processing
+			//
+			//mnemosyconExecutionPositionDeneIndex
+			//
+			// begin processing analyticons
+			//
+			//
+			// Cant assume that all teleonomes will have analyticons
+			//
+			if(deneChainNameDeneChainIndex.containsKey(TeleonomeConstants.DENECHAIN_ANALYTICONS)) {
+				JSONObject anAnalyticonsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_ANALYTICONS);
+				//logger.debug("in denomemagager anAnalyticonsDeneChainJSONObject= " + anAnalyticonsDeneChainJSONObject);
+				if(anAnalyticonsDeneChainJSONObject!=null){
+					analyticonDenesJSONArray = DenomeUtils.getDenesByDeneType(anAnalyticonsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_ANALYTYCON);
+				}
+			}
+			//logger.debug("line 858 deneChainNameDeneChainIndex=" + deneChainNameDeneChainIndex);
+			//
+			// end of processing analyticons
+			//
+			// process the mnemosycons
+			// cant assumew all teleonome have mnemosycons
+			//
+			if(deneChainNameDeneChainIndex.containsKey(TeleonomeConstants.DENECHAIN_MNEMOSYCONS)) {
+
+				// then get all the denes of type DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER 
+				//
+				// Hashtable<String,ArrayList> deneWordsToRememberByTeleonome
+
+				deneWordsToRememberByTeleonome = new Hashtable();
+				denesToRememberByTeleonome = new Hashtable();
+				deneChainsToRememberByTeleonome = new Hashtable();
+
+				JSONObject rememberedWordsMnemosyconJSONObject;
+				boolean active=false;
+				JSONArray rememberedDeneWordsJSONArray,rememberedDenesJSONArray, rememberedDeneChainsJSONArray;
+				String rememberedDeneWordTeleonomeName,rememberedDeneTeleonomeName, rememberedDeneChainTeleonomeName,rememberedDeneWordPointer, rememberedDeneChainPointer, rememberedDenePointer;
+				Identity rememberedDeneWordIdentity, rememberedDeneIdentity, rememberedDeneChainIdentity;
+				ArrayList teleonomeRememeberedWordsArrayList, teleonomeRememberedDenesArrayList, teleonomeRememberedDeneChainsArrayList;
+
+				JSONObject anMnemosyconsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_MNEMOSYCONS);
+				logger.debug("in denomemagager anMnemosyconsDeneChainJSONObject= " + anMnemosyconsDeneChainJSONObject);
+				if(anMnemosyconsDeneChainJSONObject!=null){
+					mnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON);
+					rememeberedDeneWordsMnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER);
+					for(int i=0;i<rememeberedDeneWordsMnemosyconDenesJSONArray.length();i++) {
+						rememberedWordsMnemosyconJSONObject = rememeberedDeneWordsMnemosyconDenesJSONArray.getJSONObject(i);
+						active = (boolean) this.getDeneWordAttributeByDeneWordNameFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						if(active) {
+							//
+							// the denechainstoremember
+							//
+							rememberedDeneChainsJSONArray = getAllDeneWordAttributeByDeneWordTypeFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENECHAIN, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							logger.debug("rememberedDeneChainsJSONArray= " + rememberedDeneChainsJSONArray);
+
+							//
+							// this array will contain elements that are actually pointers, 
+							//
+							// "@Tlaloc:Purpose:Sensor Data:Solar Radiation:Solar Radiation Data","@Tlaloc:Purpose:Sensor Data:Ambient Temperature:Ambient Temperature Data"
+							//
+							// get the name of the teleonome and use to get the vector of all the other remembered words, and stored the identity in the vector
+
+							if(rememberedDeneChainsJSONArray!=null && rememberedDeneChainsJSONArray.length()>0) {
+								for(int j=0;j<rememberedDeneChainsJSONArray.length();j++) {
+									rememberedDeneChainPointer= rememberedDeneChainsJSONArray.getString(j);
+
+									rememberedDeneChainIdentity = new Identity(rememberedDeneChainPointer);
+									rememberedDeneChainTeleonomeName = rememberedDeneChainIdentity.getTeleonomeName();
+
+									logger.debug("rememberedDeneChainTeleonomeName=" + rememberedDeneChainTeleonomeName + " rememberedDeneChainPointer= " + rememberedDeneChainPointer);
+
+									teleonomeRememberedDeneChainsArrayList = deneChainsToRememberByTeleonome.get(rememberedDeneChainTeleonomeName);
+									if(teleonomeRememberedDeneChainsArrayList==null)teleonomeRememberedDeneChainsArrayList = new ArrayList();
+									teleonomeRememberedDeneChainsArrayList.add(rememberedDeneChainPointer);
+									logger.debug("adding to remembered denechains= " + rememberedDeneChainPointer);
+									deneChainsToRememberByTeleonome.put(rememberedDeneChainTeleonomeName, teleonomeRememberedDeneChainsArrayList);
+
+								}
+							}
+							//
+							// the denestoremember
+							//
+							rememberedDenesJSONArray = getAllDeneWordAttributeByDeneWordTypeFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							logger.debug("rememberedDeneChainsJSONArray= " + rememberedDeneChainsJSONArray);
+
+							if(rememberedDenesJSONArray!=null && rememberedDenesJSONArray.length()>0) {
+								for(int j=0;j<rememberedDenesJSONArray.length();j++) {
+									rememberedDenePointer= rememberedDenesJSONArray.getString(j);
+
+									rememberedDeneIdentity = new Identity(rememberedDenePointer);
+									rememberedDeneTeleonomeName = rememberedDeneIdentity.getTeleonomeName();
+
+									logger.debug("rememberedDeneTeleonomeName=" + rememberedDeneTeleonomeName + " rememberedDenePointer= " + rememberedDenePointer);
+
+									teleonomeRememberedDenesArrayList = denesToRememberByTeleonome.get(rememberedDeneTeleonomeName);
+									if(teleonomeRememberedDenesArrayList==null)teleonomeRememberedDenesArrayList = new ArrayList();
+									teleonomeRememberedDenesArrayList.add(rememberedDenePointer);
+									logger.debug("adding to remembered dene= " + rememberedDenePointer);
+									denesToRememberByTeleonome.put(rememberedDeneTeleonomeName, teleonomeRememberedDenesArrayList);
+
+								}
+							}
+							//
+							// the denewords to remember
+							//
+							rememberedDeneWordsJSONArray = getAllDeneWordAttributeByDeneWordTypeFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENEWORD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							logger.debug("rememberedDeneWordsJSONArray= " + rememberedDeneWordsJSONArray);
+
+							//
+							// this array will contain elements that are actually pointers, 
+							//
+							// "@Tlaloc:Purpose:Sensor Data:Solar Radiation:Solar Radiation Data","@Tlaloc:Purpose:Sensor Data:Ambient Temperature:Ambient Temperature Data"
+							//
+							// get the name of the teleonome and use to get the vector of all the other remembered words, and stored the identity in the vector
+							for(int j=0;j<rememberedDeneWordsJSONArray.length();j++) {
+								rememberedDeneWordPointer= rememberedDeneWordsJSONArray.getString(j);
+
+								rememberedDeneWordIdentity = new Identity(rememberedDeneWordPointer);
+								rememberedDeneWordTeleonomeName = rememberedDeneWordIdentity.getTeleonomeName();
+
+								logger.debug("rememberedDeneWordTeleonomeName=" + rememberedDeneWordTeleonomeName + " rememberedDeneWordPointer= " + rememberedDeneWordPointer);
+
+								teleonomeRememeberedWordsArrayList = deneWordsToRememberByTeleonome.get(rememberedDeneWordTeleonomeName);
+								if(teleonomeRememeberedWordsArrayList==null)teleonomeRememeberedWordsArrayList = new ArrayList();
+								teleonomeRememeberedWordsArrayList.add(rememberedDeneWordPointer);
+								logger.debug("adding to remembered denewords= " + rememberedDeneWordPointer);
+								deneWordsToRememberByTeleonome.put(rememberedDeneWordTeleonomeName, teleonomeRememeberedWordsArrayList);
+
+							}
+						}
+
+					}
+				}
+
+			}
+
+			//
+			// process the purpose nucleus
+			//
+			JSONArray purposeNucleusDeneChains = (JSONArray) purposeNucleus.get("DeneChains");
+			JSONArray externalDataDeneWordsJSONArray;
+			JSONObject externalDataDeneJSONObject,externalDeneWordJSONObject;
+			String dataLocation, sourceTeleonomeName;
+			externalDataNameDeneWords = new Hashtable();
+			String deneType;
+			externalDataLocationHashMap = new HashMap();
+			Identity dataLocationIdentity=null;
+			ArrayList externalDataLocations=null;
+			for(int i=0;i<purposeNucleusDeneChains.length();i++){
+				aDeneChainJSONObject = (JSONObject) purposeNucleusDeneChains.get(i);
+
+				if(aDeneChainJSONObject.has("Name") && aDeneChainJSONObject.getString("Name").equals(TeleonomeConstants.DENECHAIN_EXTERNAL_DATA)){
+					JSONArray externalDataDenes = aDeneChainJSONObject.getJSONArray("Denes");
+					for(int j=0;j<externalDataDenes.length();j++){
+						//
+						// check to see if this dene is of type Visualization Info,
+						// if so skip it
+
+						externalDataDeneJSONObject = (JSONObject) externalDataDenes.get(j);
+						deneType = externalDataDeneJSONObject.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
+						if(deneType.equals(TeleonomeConstants.DENE_TYPE_EXTERNAL_DATA_SOURCE)){	
+							sourceTeleonomeName = externalDataDeneJSONObject.getString("Name");
+							externalDataDeneWordsJSONArray  = externalDataDeneJSONObject.getJSONArray("DeneWords");
+							externalDataNameDeneWords.put(sourceTeleonomeName, externalDataDeneWordsJSONArray);
+							for(int k=0;k<externalDataDeneWordsJSONArray.length();k++){
+								externalDeneWordJSONObject = (JSONObject) externalDataDeneWordsJSONArray.get(k);
+								logger.debug("line 929, externalDeneWordJSONObject=" + externalDeneWordJSONObject.getString("Name") );
+								if(externalDeneWordJSONObject.has("Data Location")) {
+									dataLocation = (String) externalDeneWordJSONObject.getString("Data Location");
+									dataLocationIdentity = new Identity(dataLocation);
+									logger.debug("line 933, for external teleonome =" + dataLocationIdentity.getTeleonomeName() + " adding "+ dataLocation );
+
+									externalDataLocations = (ArrayList) externalDataLocationHashMap.get(dataLocationIdentity.getTeleonomeName());
+									if(externalDataLocations==null)externalDataLocations = new ArrayList();
+									if(!externalDataLocations.contains(dataLocation))externalDataLocations.add(dataLocation);
+									externalDataLocationHashMap.put(dataLocationIdentity.getTeleonomeName(), externalDataLocations);
+								}
+
+
+							}
+
+						}
+					}
+				}
+			}
+
+
+
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			Hashtable info = new Hashtable();
+			logger.warn(Utils.getStringException(e));
+
+			String m = "The denome file was not formated properly.  Path: " + selectedDenomeFileName + " Error:" + e.getMessage() + "\rStacktrace:";
+			logger.debug(m);
+			info.put("message", m);
+			throw new MissingDenomeException(info);
+		}
+    }
+	
+	public JSONObject getDeneFromDeneChainByDeneName(JSONObject deneChain, String deneName) throws JSONException{
+		JSONArray denesJSONArray = deneChain.getJSONArray("Denes");
+		logger.debug("getDeneFromDeneChainByDeneName point 2, deneName=" + deneName + " deneChain=" + deneChain.getString("Name"));
+		JSONObject aDeneJSONObject;
+		for(int j=0;j<denesJSONArray.length();j++){
+			aDeneJSONObject = (JSONObject) denesJSONArray.get(j);
+			//logger.debug("getdenebyidentity point3 " + aDeneJSONObject);
+
+			if(aDeneJSONObject.getString("Name").equals(deneName)){
+				return aDeneJSONObject;
+			}
+		}
+		return null;
+	}
+	
+	public Object getDeneWordAttributeByDeneWordNameFromDene(JSONObject deneJSONObject , String name, String whatToBring) throws JSONException{
+		//logger.debug("getDeneWordAttributeByDeneWordNameFromDene, name=" + name + " deneJSONObject=" + deneJSONObject);
+		JSONArray deneWords = deneJSONObject.getJSONArray("DeneWords");
+		for(int i=0;i<deneWords.length();i++){
+			JSONObject deneWord = deneWords.getJSONObject(i); 
+			String deneWordName = deneWord.getString("Name");
+			//logger.debug("getByName, deneWordName=" + deneWordName );
+
+			if(deneWordName.equals(name)){
+				if(whatToBring.equals(TeleonomeConstants.COMPLETE)){
+					return deneWord;
+				}else{
+					return deneWord.get(whatToBring);
+				}
+
+			}
+		}
+		return null;
+	}
+	// **********************************************
+	
+	
+	
+	
+	
+	public void loadDenomeOriginal(JSONObject denomeJSONObject) throws MissingDenomeException, TeleonomeValidationException{
 		//
 		// read the denome from the hard disk
 		//  if its not found, then read it from the db
@@ -638,6 +1488,23 @@ public class DenomeViewManager {
 		}
 	}
 
+	public JSONArray getAllDeneWordAttributeByDeneWordTypeFromDene(JSONObject deneJSONObject , String type, String whatToBring) throws JSONException{
+		JSONArray deneWords = deneJSONObject.getJSONArray("DeneWords");
+		JSONArray toReturn = new JSONArray();
+		for(int i=0;i<deneWords.length();i++){
+			JSONObject deneWord = deneWords.getJSONObject(i); 
+			if(!deneWord.has("DeneWord Type"))continue;
+			String deneWordValueType = deneWord.getString(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE);
+			if(deneWordValueType.equals(type)){
+				if(whatToBring.equals(TeleonomeConstants.COMPLETE)){
+					toReturn.put(deneWord);
+				}else{
+					toReturn.put(deneWord.get(whatToBring));
+				}
+			}
+		}
+		return toReturn;
+	}
 	/**
 	 *  this method will return a list of all the teleonomes that are needed in the  external data
 	 *  denechain and it is used in SubscriberThreads
