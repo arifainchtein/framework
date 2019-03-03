@@ -2218,7 +2218,7 @@ public class DenomeUtils {
 			queuePosition = (Integer)entry.getValue();
 			microControllerName = microControllerPointer.split(":")[microControllerPointer.split(":").length-1];
 			sensorDeneVector = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get( microControllerPointer);
-			logger.debug("line 2221 microControllerPointer="+ microControllerPointer + " sensorDeneVector=" + sensorDeneVector);
+			logger.debug("line 2221 microControllerPointer="+ microControllerPointer );
 			reportLines.add("<h2>"+microControllerName +"</h2>");
 			reportLines.add("<h5>Execution Queue Position:"+queuePosition +"</h5>");
 			reportLines.add("<h3>Sensors</h3><br>");
@@ -2226,7 +2226,7 @@ public class DenomeUtils {
 			reportLines.add("<tr><th>Sensor Name</th><th>Value</th><th>"+TeleonomeConstants.DENEWORD_SENSOR_REQUEST_QUEUE_POSITION+"</th><th>"+TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE+"</th></tr>");
 			
 			if(sensorDeneVector!=null){
-				logger.debug("line 2221 sensorDeneVector=" + sensorDeneVector.size());
+				logger.debug("line 2229 sensorDeneVector=" + sensorDeneVector.size());
 				for (int m=0;m<sensorDeneVector.size();m++){//Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
 					sensorDeneJSONObject = (JSONObject)sensorDeneVector.elementAt(m);
 					sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(sensorDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
@@ -2347,12 +2347,12 @@ public class DenomeUtils {
 									variableBuffer.append(variableName + ":{Default:"+defaultValue+";value:"+defaultValue+"}=" + variableValue + "<br>");
 								}
 								
-								reportLines.add("<tr><td>"+actuatorName+"</td><td>"+actuatorExecution+"</td><td>"+actionName+"</td><td>"+expression+"</td><td>"+evaluationPostion+"</td><td>"+executionPoint+"</td><td>"+conditionBuffer.toString()+"</td><td>"+variableBuffer+"</td><td>"+commandTrue+"</td><td>"+commandFalse+"</td></tr>");	
 							} catch (InvalidDenomeException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
 						}
+						reportLines.add("<tr><td>"+actuatorName+"</td><td>"+actuatorExecution+"</td><td>"+actionName+"</td><td>"+expression+"</td><td>"+evaluationPostion+"</td><td>"+executionPoint+"</td><td>"+conditionBuffer.toString()+"</td><td>"+variableBuffer+"</td><td>"+commandTrue+"</td><td>"+commandFalse+"</td></tr>");	
 						
 					} 
 					
