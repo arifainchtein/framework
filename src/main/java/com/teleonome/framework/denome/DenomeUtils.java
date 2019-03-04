@@ -2142,6 +2142,10 @@ public class DenomeUtils {
 		reportLines.add("<!DOCTYPE html>");
 		reportLines.add("<html>");
 		reportLines.add("<head>");
+		reportLines.add("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css\">");
+		reportLines.add("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>");
+		reportLines.add("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js\"></script>");
+		
 		reportLines.add("<style>");
 		reportLines.add(".ReportTable {");
 		reportLines.add("  font-family: \"Trebuchet MS\", Arial, Helvetica, sans-serif;");
