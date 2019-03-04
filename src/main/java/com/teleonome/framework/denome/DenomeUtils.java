@@ -2225,6 +2225,7 @@ public class DenomeUtils {
 		//JSONObject sensorReportLine;
 		Map.Entry<JSONObject, Integer> valueMap;
 		String sensorValueName, sensorName;
+		String variableName,variableValue, defaultValue; 
 		
 		for (Map.Entry<String, Integer> entry : microControllerPointerProcessingQueuePositionIndex) {
 			microControllerPointer = (String)entry.getKey();
@@ -2364,8 +2365,9 @@ public class DenomeUtils {
 							//
 							// actuatorActionConditionJSONObject is a deneword get the value which is a denepointer and render it
 							try {
+								logger.debug("line 2368 actuatorActionConditionPointer=" +actuatorActionConditionPointer);
 								actuatorActionConditionJSONObject = aDenomeViewerManager.getDeneByIdentity(new Identity(actuatorActionConditionPointer));
-								String conditionExpression = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, "Expression", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+								String conditionExpression = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorActionConditionJSONObject, "Expression", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 								conditionBuffer.append(conditionName + "=<b>" + conditionExpression + "</b><br>");
 								//
 								// process the variables for this condition
@@ -2375,9 +2377,13 @@ public class DenomeUtils {
 								JSONObject variableJSONObject;
 								for(int k=0;k<variables.length();k++){		
 									variableJSONObject = variables.getJSONObject(k);
-									String variableName = variableJSONObject.getString("Name");
-									String variableValue = variableJSONObject.getString("Value");
-									String defaultValue = variableJSONObject.getString("Default");
+									logger.debug("line 2380, variableJSONObject=" + variableJSONObject);
+									 variableName = variableJSONObject.getString("Name");
+									 variableValue = variableJSONObject.getString("Value");
+									 defaultValue = "";
+									 if(variableJSONObject.has("Default")) {
+										 defaultValue = variableJSONObject.getString("Default");
+									 }
 									variableBuffer.append(variableName + ":{Default:"+defaultValue+";value:"+defaultValue+"}=" + variableValue + "<br>");
 								}
 								
