@@ -508,6 +508,7 @@ public class DenomeViewManager {
 									public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
 										return o1.getValue().compareTo(o2.getValue());
 									}});
+								logger.info("line 511, after sorting sensorRequestQueuePositionDeneWordIndex="+ sensorRequestQueuePositionDeneWordIndex.size() + " aDeneValueJSONObject:" + aDeneValueJSONObject);
 
 							}
 						}else if(DenomeUtils.isDeneOfType(aDeneJSONObject, TeleonomeConstants.DENE_TYPE_ON_START_SENSOR)){
