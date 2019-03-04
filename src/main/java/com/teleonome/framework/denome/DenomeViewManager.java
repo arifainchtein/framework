@@ -508,7 +508,7 @@ public class DenomeViewManager {
 									public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
 										return o1.getValue().compareTo(o2.getValue());
 									}});
-								logger.info("line 511, after sorting sensorRequestQueuePositionDeneWordIndex="+ sensorRequestQueuePositionDeneWordIndex.size() + " aDeneValueJSONObject:" + aDeneValueJSONObject);
+								logger.info("line 511, after sorting sensorRequestQueuePositionDeneWordIndex="+ sensorRequestQueuePositionDeneWordIndex.size() + " aDeneValueJSONObject:" + aDeneValueJSONObject.getString("Name"));
 
 							}
 						}else if(DenomeUtils.isDeneOfType(aDeneJSONObject, TeleonomeConstants.DENE_TYPE_ON_START_SENSOR)){
@@ -538,9 +538,10 @@ public class DenomeViewManager {
 					//
 					// finishing running through the sensors of a microcontroller, so store it
 					//
+					logger.debug("line 541");
 					pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex.put(pointerToMicroController, sensorRequestQueuePositionDeneWordIndex);
 					pointerToMicroControllerSensorsDeneWordsForInitialBySensorRequestQueuePositionIndex.put(pointerToMicroController, sensorRequestQueuePositionDeneWordForInitialIndex);
-					logger.debug("storing data for microcontrollerpointer: " + pointerToMicroController + " sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size() + " sensorRequestQueuePositionDeneWordForInitialIndex:" + sensorRequestQueuePositionDeneWordForInitialIndex.size());
+					logger.debug("line 543 storing data for microcontrollerpointer: " + pointerToMicroController + " sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size() + " sensorRequestQueuePositionDeneWordForInitialIndex:" + sensorRequestQueuePositionDeneWordForInitialIndex.size());
 				}
 			}
 			//
