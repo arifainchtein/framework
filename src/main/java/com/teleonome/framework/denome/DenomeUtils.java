@@ -2259,16 +2259,18 @@ public class DenomeUtils {
 					sensorRequestQueuePosition = valueMap.getValue();
 					logger.debug("line 2258 sensorRequestQueuePosition=" + sensorRequestQueuePosition);
 					reportingAddress = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, TeleonomeConstants.DENEWORD_REPORTING_ADDRESS, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("line 2262 reportingAddress=" + reportingAddress);
 					unitsText="";
 					try {
 						reportingAddressDene = DenomeUtils.getDeneByIdentity(pulse, new Identity(reportingAddress));
+						logger.debug("line 2266 reportingAddressDene=" + reportingAddressDene);
 						unitsText = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(reportingAddressDene, TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						logger.debug("line 2255 unitsText=" + unitsText);
+						logger.debug("line 2268 unitsText=" + unitsText);
 					} catch (InvalidDenomeException e) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e));
 					}
-					reportLines.add("<tr><td>"+sensorValueDeneJSONObject.getString(TeleonomeConstants.CODON)+"</td><td>"+sensorValueDeneJSONObject.getString("Name")+"</td><td>"+sensorRequestQueuePosition+"</td><td>"+unitsText+"</td><td>"+reportingAddress+"</td></tr>");		
+					//reportLines.add("<tr><td>"+sensorValueDeneJSONObject.getString(TeleonomeConstants.CODON)+"</td><td>"+sensorValueDeneJSONObject.getString("Name")+"</td><td>"+sensorRequestQueuePosition+"</td><td>"+unitsText+"</td><td>"+reportingAddress+"</td></tr>");		
 					logger.debug("line 2264");
 					
 					//}
