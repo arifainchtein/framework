@@ -2257,7 +2257,7 @@ public class DenomeUtils {
 					logger.debug("line 2256,  sensorValueDeneJSONObject=" + sensorValueDeneJSONObject);
 					sensorValueName = sensorValueDeneJSONObject.getString("Name");
 					logger.debug("line 2258,  sensorValueName=" + sensorValueName);
-					sensorName = sensorValueDeneJSONObject.getString(TeleonomeConstants.CODON);
+					sensorName = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					logger.debug("line 2260,  sensorName=" + sensorName);
 					
 					sensorRequestQueuePosition = valueMap.getValue();
