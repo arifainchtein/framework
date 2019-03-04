@@ -485,7 +485,7 @@ public class DenomeViewManager {
 					pointerToMicroController = en.nextElement();
 					v = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get(pointerToMicroController);
 					sensorRequestQueuePositionDeneWordIndex = new ArrayList();
-					logger.debug("line 488,pointerToMicroController=" + pointerToMicroController );
+					logger.info("line 488,pointerToMicroController=" + pointerToMicroController );
 					for(int j=0;j<v.size();j++){
 						aDeneJSONObject = (JSONObject) v.elementAt(j);
 						isSensor = DenomeUtils.isDeneOfType(aDeneJSONObject, TeleonomeConstants.DENE_TYPE_SENSOR);
@@ -540,10 +540,10 @@ public class DenomeViewManager {
 					//
 					// finishing running through the sensors of a microcontroller, so store it
 					//
-					logger.debug("line 541");
+					logger.info("line 541");
 					pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex.put(pointerToMicroController, sensorRequestQueuePositionDeneWordIndex);
 					pointerToMicroControllerSensorsDeneWordsForInitialBySensorRequestQueuePositionIndex.put(pointerToMicroController, sensorRequestQueuePositionDeneWordForInitialIndex);
-					logger.debug("line 543 storing data for microcontrollerpointer: " + pointerToMicroController + " sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size() + " sensorRequestQueuePositionDeneWordForInitialIndex:" + sensorRequestQueuePositionDeneWordForInitialIndex.size());
+					logger.info("line 543 storing data for microcontrollerpointer: " + pointerToMicroController + " sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size() + " sensorRequestQueuePositionDeneWordForInitialIndex:" + sensorRequestQueuePositionDeneWordForInitialIndex.size());
 				}
 			}
 			//
