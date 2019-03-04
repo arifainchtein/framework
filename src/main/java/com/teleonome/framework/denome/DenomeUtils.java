@@ -2224,7 +2224,7 @@ public class DenomeUtils {
 		String unitsText;
 		//JSONObject sensorReportLine;
 		Map.Entry<JSONObject, Integer> valueMap;
-		String sensorValueName;
+		String sensorValueName, sensorName;
 		
 		for (Map.Entry<String, Integer> entry : microControllerPointerProcessingQueuePositionIndex) {
 			microControllerPointer = (String)entry.getKey();
@@ -2255,8 +2255,8 @@ public class DenomeUtils {
 					valueMap = (Map.Entry<JSONObject, Integer>)sensorRequestQueuePositionDeneWordIndex.get(m);
 					sensorValueDeneJSONObject =valueMap.getKey();
 					sensorValueName = sensorValueDeneJSONObject.getString("Name");
-					
-					logger.debug("line 2253value.getString(Name)=" + sensorValueName);
+					sensorName = sensorValueDeneJSONObject.getString(TeleonomeConstants.CODON);
+					logger.debug("line 2253, sensorName=" + sensorName + " value.getString(Name)=" + sensorValueName);
 					
 					
 					sensorRequestQueuePosition = valueMap.getValue();
@@ -2273,7 +2273,7 @@ public class DenomeUtils {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e));
 					}
-					reportLines.add("<tr><td>"+sensorValueDeneJSONObject.getString(TeleonomeConstants.CODON)+"</td><td>"+sensorValueName+"</td><td>"+sensorRequestQueuePosition+"</td><td>"+unitsText+"</td><td>"+reportingAddress+"</td></tr>");		
+					reportLines.add("<tr><td>"+ sensorName + "</td><td>"+sensorValueName+"</td><td>"+sensorRequestQueuePosition+"</td><td>"+unitsText+"</td><td>"+reportingAddress+"</td></tr>");		
 					logger.debug("line 2264");
 					
 					//}
