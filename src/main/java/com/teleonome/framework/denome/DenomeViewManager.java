@@ -130,7 +130,11 @@ public class DenomeViewManager {
 		return aDenomeManager;
 	}
 
-
+	public Hashtable getPointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex() {
+		return pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex;
+	}
+	
+	
 	public Hashtable getPointerToMicroControllerSensorDenesVectorIndex(){
 		return pointerToMicroControllerSensorDenesVectorIndex;		
 	}

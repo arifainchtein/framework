@@ -2194,7 +2194,7 @@ public class DenomeUtils {
 		if (stateMutationsJSONArray != null)
 			stateMutationsJSONArrayLength = stateMutationsJSONArray.length();
 
-		Hashtable pointerToMicroControllerSensorDenesVectorIndex= aDenomeViewerManager.getPointerToMicroControllerSensorDenesVectorIndex();
+		Hashtable pointerToMicroControllerSensorDenesVectorIndex= aDenomeViewerManager.getPointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex();
 		 ArrayList<Map.Entry<String, Integer>>  microControllerPointerProcessingQueuePositionIndex = aDenomeViewerManager.getMicroControllerPointerProcessingQueuePositionIndex();
 		Vector sensorDeneVector;
 		JSONObject sensorDeneJSONObject;
@@ -2203,7 +2203,7 @@ public class DenomeUtils {
 		
 		String microControllerPointer;
 		String microControllerName;
-		ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex = new ArrayList(); 
+		ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex; 
 		ArrayList<Map.Entry<JSONObject, Integer>> actuatorRequestQueuePositionDeneWordIndex = new ArrayList(); 
 		Integer queuePosition=null;
 
@@ -2227,19 +2227,21 @@ public class DenomeUtils {
 			microControllerPointer = (String)entry.getKey();
 			queuePosition = (Integer)entry.getValue();
 			microControllerName = microControllerPointer.split(":")[microControllerPointer.split(":").length-1];
-			sensorDeneVector = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get( microControllerPointer);
+			
+			
+			sensorRequestQueuePositionDeneWordIndex = (ArrayList)pointerToMicroControllerSensorDenesVectorIndex.get( microControllerPointer);
 			logger.debug("line 2221 microControllerPointer="+ microControllerPointer );
 			reportLines.add("<h2>"+microControllerName +"</h2>");
 			reportLines.add("<h5>Execution Queue Position:"+queuePosition +"</h5>");
 			
-			if(sensorDeneVector!=null){
+			if(sensorRequestQueuePositionDeneWordIndex!=null){
 				reportLines.add("<h3>Sensors</h3><br>");
 				reportLines.add("<table class=\"ReportTable\">");
 				reportLines.add("<tr><th>Sensor Name</th><th>Value</th><th>"+TeleonomeConstants.DENEWORD_SENSOR_REQUEST_QUEUE_POSITION+"</th><th>"+TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE+"</th></tr>");
 				
-				logger.debug("line 2229 sensorDeneVector=" + sensorDeneVector.size());
-				for (int m=0;m<sensorDeneVector.size();m++){//Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
-					sensorDeneJSONObject = (JSONObject)sensorDeneVector.elementAt(m);
+				logger.debug("line 2229 sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size());
+				for (int m=0;m<sensorRequestQueuePositionDeneWordIndex.size();m++){//Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
+					sensorDeneJSONObject = (JSONObject)sensorRequestQueuePositionDeneWordIndex.get(m);
 					sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(sensorDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					sensorValuesJSONArray = aDenomeViewerManager.loadDenesFromPointers(sensorValuesPointersJSONArray);
 					String unitsText;
