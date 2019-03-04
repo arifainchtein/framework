@@ -2287,7 +2287,7 @@ public class DenomeUtils {
 			}
 				
 			
-			reportLines.add("<br>");		
+			
 			
 			actuatorExecutionPositionActionListDeneIndex = (ArrayList<Map.Entry<JSONObject, Integer>>)microControllerNameActuatorsIndex.get(microControllerPointer);
 			
@@ -2348,8 +2348,8 @@ public class DenomeUtils {
 						String commandTrue = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_TRUE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						String commandFalse = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						String evaluationPostion = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, "Evaluation Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).toString();
-						if(commandTrue==null)commandTrue="Not Available";
-						if(commandFalse==null)commandFalse="Not Available";
+						if(commandTrue==null)commandTrue="";
+						if(commandFalse==null)commandFalse="";
 						
 						actuatorActionConditionPointersJSONArray = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(actionJSONObject,TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_CONDITION_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						JSONArray actuatorActionConditionNamesJSONArray = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(actionJSONObject,TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_CONDITION_POINTER, TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
@@ -2370,7 +2370,8 @@ public class DenomeUtils {
 								//
 								// process the variables for this condition
 								//
-								JSONArray variables = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_TYPE_CONDITION_VARIABLE_POINTER, TeleonomeConstants.COMPLETE);
+								JSONArray variables = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(actuatorActionConditionJSONObject, TeleonomeConstants.DENEWORD_TYPE_CONDITION_VARIABLE_POINTER, TeleonomeConstants.COMPLETE);
+								logger.debug("line 2374, variables=" + variables);
 								JSONObject variableJSONObject;
 								for(int k=0;k<variables.length();k++){		
 									variableJSONObject = variables.getJSONObject(k);
