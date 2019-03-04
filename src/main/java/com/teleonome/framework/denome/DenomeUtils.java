@@ -2254,21 +2254,22 @@ public class DenomeUtils {
 //										value = sensorValuesJSONArray.getJSONObject(k);
 					valueMap = (Map.Entry<JSONObject, Integer>)sensorRequestQueuePositionDeneWordIndex.get(m);
 					sensorValueDeneJSONObject =valueMap.getKey();
+					logger.debug("line 2256,  sensorValueDeneJSONObject=" + sensorValueDeneJSONObject);
 					sensorValueName = sensorValueDeneJSONObject.getString("Name");
+					logger.debug("line 2258,  sensorValueName=" + sensorValueName);
 					sensorName = sensorValueDeneJSONObject.getString(TeleonomeConstants.CODON);
-					logger.debug("line 2253, sensorName=" + sensorName + " value.getString(Name)=" + sensorValueName);
-					
+					logger.debug("line 2260,  sensorName=" + sensorName);
 					
 					sensorRequestQueuePosition = valueMap.getValue();
-					logger.debug("line 2258 sensorRequestQueuePosition=" + sensorRequestQueuePosition);
+					logger.debug("line 2264 sensorRequestQueuePosition=" + sensorRequestQueuePosition);
 					reportingAddress = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, TeleonomeConstants.DENEWORD_REPORTING_ADDRESS, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("line 2262 reportingAddress=" + reportingAddress);
+					logger.debug("line 2266 reportingAddress=" + reportingAddress);
 					unitsText="";
 					try {
 						reportingAddressDeneWord = (JSONObject) DenomeUtils.getDeneWordByIdentity(pulse, new Identity(reportingAddress), TeleonomeConstants.COMPLETE);
-						logger.debug("line 2266 reportingAddressDeneWord=" + reportingAddressDeneWord);
+						logger.debug("line 2270 reportingAddressDeneWord=" + reportingAddressDeneWord);
 						unitsText = reportingAddressDeneWord.getString( TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE);
-						logger.debug("line 2268 unitsText=" + unitsText);
+						logger.debug("line 2272 unitsText=" + unitsText);
 					} catch (InvalidDenomeException e) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e));
