@@ -2243,8 +2243,10 @@ public class DenomeUtils {
 				for (int m=0;m<sensorRequestQueuePositionDeneWordIndex.size();m++){//Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
 					sensorDeneJSONObject = ((Map.Entry<JSONObject, Integer>)sensorRequestQueuePositionDeneWordIndex.get(m)).getKey();
 					sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(sensorDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("line 2246 sensorValuesPointersJSONArray=" + sensorValuesPointersJSONArray);
 					sensorValuesJSONArray = aDenomeViewerManager.loadDenesFromPointers(sensorValuesPointersJSONArray);
 					String unitsText;
+					logger.debug("line 2248 sensorValuesJSONArray=" + sensorValuesJSONArray.length());
 					for(int k=0;k<sensorValuesJSONArray.length();k++){
 						value = sensorValuesJSONArray.getJSONObject(k);
 						//logger.debug("value.getString(Name)=" + value.getString("Name"));
