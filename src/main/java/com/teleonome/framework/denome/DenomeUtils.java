@@ -2217,7 +2217,7 @@ public class DenomeUtils {
 		JSONArray actuatorActionConditionPointersJSONArray;
 		String actuatorActionConditionPointer;
 		String conditionName, reportingAddress;
-		JSONObject actuatorActionConditionJSONObject, actuatorDene = null;
+		JSONObject reportingAddressDene, actuatorActionConditionJSONObject, actuatorDene = null;
 		String actuatorName, actuatorPointer, actionType;
 		int actuatorExecution;
 		ArrayList<Map.Entry<JSONObject, Integer>> actuatorExecutionPositionActionListDeneIndex;
@@ -2254,12 +2254,20 @@ public class DenomeUtils {
 					valueMap = (Map.Entry<JSONObject, Integer>)sensorRequestQueuePositionDeneWordIndex.get(m);
 					sensorValueDeneJSONObject =valueMap.getKey();
 					logger.debug("line 2253value.getString(Name)=" + sensorValueDeneJSONObject.getString("Name"));
-					unitsText = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("line 2255 unitsText=" + unitsText);
+					
 					
 					sensorRequestQueuePosition = valueMap.getValue();
 					logger.debug("line 2258 sensorRequestQueuePosition=" + sensorRequestQueuePosition);
 					reportingAddress = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, TeleonomeConstants.DENEWORD_REPORTING_ADDRESS, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					unitsText="";
+					try {
+						reportingAddressDene = DenomeUtils.getDeneByIdentity(pulse, new Identity(reportingAddress));
+						unitsText = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(reportingAddressDene, TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("line 2255 unitsText=" + unitsText);
+					} catch (InvalidDenomeException e) {
+						// TODO Auto-generated catch block
+						logger.warn(Utils.getStringException(e));
+					}
 					reportLines.add("<tr><td>"+sensorValueDeneJSONObject.getString(TeleonomeConstants.CODON)+"</td><td>"+sensorValueDeneJSONObject.getString("Name")+"</td><td>"+sensorRequestQueuePosition+"</td><td>"+unitsText+"</td><td>"+reportingAddress+"</td></tr>");		
 					logger.debug("line 2264");
 					
