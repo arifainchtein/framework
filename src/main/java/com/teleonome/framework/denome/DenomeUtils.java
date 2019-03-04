@@ -2216,7 +2216,7 @@ public class DenomeUtils {
 		JSONArray pointersToActionsJSONArray, actionsJSONArray;
 		JSONArray actuatorActionConditionPointersJSONArray;
 		String actuatorActionConditionPointer;
-		String conditionName;
+		String conditionName, reportingAddress;
 		JSONObject actuatorActionConditionJSONObject, actuatorDene = null;
 		String actuatorName, actuatorPointer, actionType;
 		int actuatorExecution;
@@ -2239,7 +2239,7 @@ public class DenomeUtils {
 			if(sensorRequestQueuePositionDeneWordIndex!=null){
 				reportLines.add("<h3>Sensors</h3><br>");
 				reportLines.add("<table class=\"ReportTable\">");
-				reportLines.add("<tr><th>Sensor Name</th><th>Value</th><th>"+TeleonomeConstants.DENEWORD_SENSOR_REQUEST_QUEUE_POSITION+"</th><th>"+TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE+"</th></tr>");
+				reportLines.add("<tr><th>Sensor Name</th><th>Value</th><th>"+TeleonomeConstants.DENEWORD_SENSOR_REQUEST_QUEUE_POSITION+"</th><th>"+TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE+"</th><th>"+TeleonomeConstants.DENEWORD_REPORTING_ADDRESS+"</th></tr>");
 				
 				logger.debug("line 2229 sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size());
 				for (int m=0;m<sensorRequestQueuePositionDeneWordIndex.size();m++){
@@ -2259,8 +2259,8 @@ public class DenomeUtils {
 					
 					sensorRequestQueuePosition = valueMap.getValue();
 					logger.debug("line 2258 sensorRequestQueuePosition=" + sensorRequestQueuePosition);
-					
-					reportLines.add("<tr><td>"+sensorValueDeneJSONObject.getString(TeleonomeConstants.CODON)+"</td><td>"+sensorValueDeneJSONObject.getString("Name")+"</td><th>"+sensorRequestQueuePosition+"</th><th>"+unitsText+"</th></tr>");		
+					reportingAddress = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, TeleonomeConstants.DENEWORD_REPORTING_ADDRESS, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					reportLines.add("<tr><td>"+sensorValueDeneJSONObject.getString(TeleonomeConstants.CODON)+"</td><td>"+sensorValueDeneJSONObject.getString("Name")+"</td><th>"+sensorRequestQueuePosition+"</th><th>"+unitsText+"</th><th>"+reportingAddress+"</th></tr>");		
 					logger.debug("line 2264");
 					
 					//}
