@@ -2241,7 +2241,7 @@ public class DenomeUtils {
 				
 				logger.debug("line 2229 sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size());
 				for (int m=0;m<sensorRequestQueuePositionDeneWordIndex.size();m++){//Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
-					sensorDeneJSONObject = (JSONObject)sensorRequestQueuePositionDeneWordIndex.get(m);
+					sensorDeneJSONObject = ((Map.Entry<JSONObject, Integer>)sensorRequestQueuePositionDeneWordIndex.get(m)).getKey();
 					sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(sensorDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					sensorValuesJSONArray = aDenomeViewerManager.loadDenesFromPointers(sensorValuesPointersJSONArray);
 					String unitsText;
