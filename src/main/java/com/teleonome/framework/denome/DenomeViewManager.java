@@ -485,6 +485,7 @@ public class DenomeViewManager {
 					pointerToMicroController = en.nextElement();
 					v = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get(pointerToMicroController);
 					sensorRequestQueuePositionDeneWordIndex = new ArrayList();
+					logger.debug("line 488,pointerToMicroController=" + pointerToMicroController );
 					for(int j=0;j<v.size();j++){
 						aDeneJSONObject = (JSONObject) v.elementAt(j);
 						isSensor = DenomeUtils.isDeneOfType(aDeneJSONObject, TeleonomeConstants.DENE_TYPE_SENSOR);
@@ -535,6 +536,7 @@ public class DenomeViewManager {
 
 
 					}
+					
 					//
 					// finishing running through the sensors of a microcontroller, so store it
 					//
