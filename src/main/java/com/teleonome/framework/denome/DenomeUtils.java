@@ -2258,9 +2258,11 @@ public class DenomeUtils {
 					logger.debug("line 2255 unitsText=" + unitsText);
 					
 					sensorRequestQueuePosition = valueMap.getValue();
-					logger.debug("line 2258 unitsText=" + unitsText);
+					logger.debug("line 2258 sensorRequestQueuePosition=" + sensorRequestQueuePosition);
 					
 					reportLines.add("<tr><td>"+sensorValueDeneJSONObject.getString(TeleonomeConstants.CODON)+"</td><td>"+sensorValueDeneJSONObject.getString("Name")+"</td><th>"+sensorRequestQueuePosition+"</th><th>"+unitsText+"</th></tr>");		
+					logger.debug("line 2264");
+					
 					//}
 				}
 				reportLines.add("</table>");
