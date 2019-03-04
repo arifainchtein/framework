@@ -2292,13 +2292,12 @@ public class DenomeUtils {
 			actuatorExecutionPositionActionListDeneIndex = (ArrayList<Map.Entry<JSONObject, Integer>>)microControllerNameActuatorsIndex.get(microControllerPointer);
 			
 			
-			if(actuatorExecutionPositionActionListDeneIndex!=null){
+			if(actuatorExecutionPositionActionListDeneIndex!=null && actuatorExecutionPositionActionListDeneIndex.size()>0){
+				
 				logger.debug("line 2268 microControllerPointer=" + microControllerPointer);
 				reportLines.add("<h3>Actions</h3>");
-				
-				
-				reportLines.add("<table>");   
-				reportLines.add("<tr><th>Actuator Name</th><th>Execution Position</th><th>Action Name</th><th>Action Type</th><th>Expression</th><th>Evaluation Position</th><th>"+TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT+"</th><th>Conditions</th><th>Variables</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th></tr>");
+				reportLines.add("<table class=\"ReportTable\">");
+				reportLines.add("<tr><th>Actuator Name</th><th>Execution Position</th><th>Action Name</th><th>Expression</th><th>Evaluation Position</th><th>"+TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT+"</th><th>Conditions</th><th>Variables</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th></tr>");
 				
 				for (Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionActionListDeneIndex) {
 					//actuatorReportLine = new JSONObject();
@@ -2392,6 +2391,9 @@ public class DenomeUtils {
 					
 				} 
 				reportLines.add("</table>");
+			}else {
+				logger.debug("line 2395 actuatorExecutionPositionActionListDeneIndex is null");
+				reportLines.add("<h3>No Actuators</h3><br>");
 			}
 		}
 		reportLines.add("</body></html>");
