@@ -2250,7 +2250,7 @@ public class DenomeUtils {
 					//					for(int k=0;k<sensorValuesJSONArray.length();k++){
 //										value = sensorValuesJSONArray.getJSONObject(k);
 					sensorValueDeneJSONObject = ((Map.Entry<JSONObject, Integer>)sensorRequestQueuePositionDeneWordIndex.get(m)).getKey();
-					//logger.debug("value.getString(Name)=" + value.getString("Name"));
+					logger.debug("line 2253value.getString(Name)=" + sensorValueDeneJSONObject.getString("Name"));
 					unitsText = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, "Unit", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					sensorRequestQueuePosition = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, "Sensor Request Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).toString();
 					reportLines.add("<tr><td>"+sensorValueDeneJSONObject.getString(TeleonomeConstants.CODON)+"</td><td>"+sensorValueDeneJSONObject.getString("Name")+"</td><th>"+sensorRequestQueuePosition+"</th><th>"+unitsText+"</th></tr>");		
