@@ -2235,8 +2235,15 @@ public class DenomeUtils {
 			
 			sensorRequestQueuePositionDeneWordIndex = (ArrayList)pointerToMicroControllerSensorDenesVectorIndex.get( microControllerPointer);
 			logger.debug("line 2221 microControllerPointer="+ microControllerPointer );
+			
+			
+			reportLines.add("<div class=\"panel panel-default\">");
+			reportLines.add("<div class=\"panel-heading\">");
 			reportLines.add("<h2>"+microControllerName +"</h2>");
 			reportLines.add("<h5>Execution Queue Position:"+queuePosition +"</h5>");
+			reportLines.add("</div>");
+			reportLines.add(" <div class=\"panel-body\">");
+			
 			
 			if(sensorRequestQueuePositionDeneWordIndex!=null){
 				reportLines.add("<h3>Sensors</h3><br>");
@@ -2384,7 +2391,7 @@ public class DenomeUtils {
 									 if(variableJSONObject.has("Default")) {
 										 defaultValue = variableJSONObject.getString("Default");
 									 }
-									variableBuffer.append(variableName + ":{Default:"+defaultValue+";value:"+defaultValue+"}=" + variableValue + "<br>");
+									variableBuffer.append(variableName + ":" + variableValue + "<br>");
 								}
 								
 							} catch (InvalidDenomeException e1) {
@@ -2402,6 +2409,8 @@ public class DenomeUtils {
 				logger.debug("line 2395 actuatorExecutionPositionActionListDeneIndex is null");
 				reportLines.add("<h3>No Actuators</h3><br>");
 			}
+			reportLines.add("</div>");
+			reportLines.add("</div>");
 		}
 		reportLines.add("</body></html>");
 		return reportLines;
