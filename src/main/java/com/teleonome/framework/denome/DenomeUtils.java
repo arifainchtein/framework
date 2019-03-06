@@ -2256,15 +2256,17 @@ public class DenomeUtils {
 		int startingX = 400;
 		int startingY = 30;
 		int mainHeight= 500;
-		int mcuBoxTotalWidth=200;
-		int mcuBoxWidth=200;
+		int lineArrowLength=40;
+		int mcuBoxWidth=180;
+		int mcuBoxTotalWidth=mcuBoxWidth+ lineArrowLength;
+		
 		int mcuBoxHeight=50;
 		int mainWidth= 430 + mcuBoxTotalWidth* numberOfMCU;
 		int startXValueForMCUBox=300;
 		int startYValueForMCUBox=100;
 		int nameMargin=10;
 		int textY=130;
-		int lineArrowLength=40;
+		
 
 		int mcuLineYPos=startYValueForMCUBox + mcuBoxHeight/2;
 
