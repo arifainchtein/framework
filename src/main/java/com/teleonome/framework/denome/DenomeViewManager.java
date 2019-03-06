@@ -476,7 +476,7 @@ public class DenomeViewManager {
 			if(aSensorsDeneChainJSONObject!=null){
 
 				sensorDenesJSONArray = getDenesByDeneType(aSensorsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_SENSOR);
-				Hashtable pointerToMicroControllerSensorDenesVectorIndex = new Hashtable();
+				pointerToMicroControllerSensorDenesVectorIndex = new Hashtable();
 				for(int j=0;j<sensorDenesJSONArray.length();j++){
 					aDeneJSONObject = (JSONObject) sensorDenesJSONArray.get(j);
 					logger.info("line 474 aDeneJSONObject=" + aDeneJSONObject.getString("Name"));

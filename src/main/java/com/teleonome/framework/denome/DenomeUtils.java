@@ -2413,7 +2413,8 @@ public class DenomeUtils {
 
 		ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex; 
 		ArrayList<Map.Entry<JSONObject, Integer>> actuatorRequestQueuePositionDeneWordIndex = new ArrayList(); 
-		pointerToMicroControllerSensorDenesVectorIndex = aDenomeViewerManager.getPointerToMicroControllerSensorDenesVectorIndex();
+		Hashtable pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex = aDenomeViewerManager.getPointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex();
+		aDenomeViewerManager.getPointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex();
 		Vector allSensorDenesForMicroController;
 		JSONObject aSensorDeneJSONObject;
 		boolean isSensor;
@@ -2425,7 +2426,7 @@ public class DenomeUtils {
 			microControllerName = microControllerPointer.split(":")[microControllerPointer.split(":").length-1];
 			microControllerNameNoSpaces= microControllerName.replace(" ", "");
 			logger.info("line 2414,pointerToMicroController=" + microControllerPointer );
-			sensorRequestQueuePositionDeneWordIndex = (ArrayList)pointerToMicroControllerSensorDenesVectorIndex.get( microControllerPointer);
+			sensorRequestQueuePositionDeneWordIndex = (ArrayList)pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex.get( microControllerPointer);
 
 			allSensorDenesForMicroController = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get(microControllerPointer);
 			if(allSensorDenesForMicroController!=null) {
