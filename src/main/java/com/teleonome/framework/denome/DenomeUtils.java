@@ -2358,7 +2358,7 @@ public class DenomeUtils {
 		currentX -= mcuBoxTotalWidth;
 		reportLines.add("<rect x=\""+currentX+ "\" y=\""+secondRowY+"\" width=\""+mcuBoxWidth +"\" height=\""+ mcuBoxHeight + "\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 159, 223); stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+ (currentX+nameMargin) + "\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Mnemosycons</text>");
-		//      460 = 500-40
+		//      520 = 500-40
 		int endOfArrowToAsyncBoxX = currentX-lineArrowLength-arrowHeadWidth;
 
 		reportLines.add("<line x1=\""+currentX+"\" y1=\""+ secondRowTextY +"\" x2=\""+ endOfArrowToAsyncBoxX +"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
@@ -2367,10 +2367,12 @@ public class DenomeUtils {
 		// the asynchrnous is the last box of the second row
 		// its length will be the length needed to return to the middle of the external data to make the return up arrow
 		// that point is defined by
+		///           190                     100          180/2
 		int middleOfExternalDataBoxX = externalDataX + mcuBoxWidth/2; // 100+75
-		//    285=460-175
-		int asyncBoxWidth = endOfArrowToAsyncBoxX - middleOfExternalDataBoxX-2*lineArrowLength;
-		int asyncBoxStartingX = endOfArrowToAsyncBoxX-asyncBoxWidth-2*lineArrowLength;
+		//    270=520-190-50-10
+		int asyncBoxWidth = endOfArrowToAsyncBoxX - middleOfExternalDataBoxX-lineArrowLength-arrowHeadWidth;
+		//     230               190 +                                                                  520                         270 -20
+		int asyncBoxStartingX =middleOfExternalDataBoxX+lineArrowLength;//endOfArrowToAsyncBoxX-asyncBoxWidth-2*lineArrowLength;
 		reportLines.add("<rect x=\""+asyncBoxStartingX+"\" y=\""+secondRowY+"\" width=\""+asyncBoxWidth+"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 192, 159); stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+(asyncBoxStartingX + nameMargin)+"\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Asynchronous Period (60 seconds)</text>");
 
