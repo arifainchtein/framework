@@ -2261,9 +2261,10 @@ public class DenomeUtils {
 		int lineArrowLength=50;
 		int mcuBoxWidth=180;
 		int mcuBoxTotalWidth=mcuBoxWidth+ lineArrowLength + 2*arrowHeadWidth;
-		
+		int boundingRectangleX=50;
+		int boundingRectangleY=50;
 		int mcuBoxHeight=50;
-		int mainWidth= 430 + mcuBoxTotalWidth* numberOfMCU;
+		
 		
 		int startYValueForMCUBox=100;
 		int nameMargin=10;
@@ -2272,14 +2273,15 @@ public class DenomeUtils {
 		
 		int mcuLineYPos=startYValueForMCUBox + mcuBoxHeight/2;
 
-		int boundingRectangleX=50;
-		int boundingRectangleY=50;
+		
 
 		int externalDataX=100;
 		int externalDataY=100;
 		int externalDataText=50;
 		int externalDataLineX1=externalDataX + mcuBoxWidth;
 		int arrowGoingDownLength=50;
+		
+		int mainWidth= boundingRectangleX + externalDataX + mcuBoxTotalWidth* (numberOfMCU + 1) + boundingRectangleX;
 		
 		int startXValueForMCUBox=externalDataLineX1+lineArrowLength;
 		
