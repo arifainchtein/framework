@@ -2157,7 +2157,7 @@ public class DenomeUtils {
 		if (stateMutationsJSONArray != null)
 			stateMutationsJSONArrayLength = stateMutationsJSONArray.length();
 
-		Hashtable pointerToMicroControllerSensorDenesVectorIndex= aDenomeViewerManager.getPointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex();
+		Hashtable pointerToMicroControllerSensorDenesVectorIndex= aDenomeViewerManager.getPointerToMicroControllerSensorDenesVectorIndex();
 		ArrayList<Map.Entry<String, Integer>>  microControllerPointerProcessingQueuePositionIndex = aDenomeViewerManager.getMicroControllerPointerProcessingQueuePositionIndex();
 		Vector sensorDeneVector;
 		JSONObject sensorDeneJSONObject;
