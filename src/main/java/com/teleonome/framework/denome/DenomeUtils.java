@@ -2359,7 +2359,7 @@ public class DenomeUtils {
 		reportLines.add("<rect x=\""+currentX+ "\" y=\""+secondRowY+"\" width=\""+mcuBoxWidth +"\" height=\""+ mcuBoxHeight + "\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 159, 223); stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+ (currentX+nameMargin) + "\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Mnemosycons</text>");
 		//      520 = 500-40
-		int endOfArrowToAsyncBoxX = currentX-lineArrowLength-arrowHeadWidth;
+		int endOfArrowToAsyncBoxX = currentX-lineArrowLength;
 
 		reportLines.add("<line x1=\""+currentX+"\" y1=\""+ secondRowTextY +"\" x2=\""+ endOfArrowToAsyncBoxX +"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 
@@ -2368,7 +2368,7 @@ public class DenomeUtils {
 		// its length will be the length needed to return to the middle of the external data to make the return up arrow
 		// that point is defined by
 		///           190                     100          180/2
-		int middleOfExternalDataBoxX = externalDataX + mcuBoxWidth/2; // 100+75
+		int middleOfExternalDataBoxX = externalDataX  + mcuBoxWidth/2; // 100+75
 		//    270=520-190-50-10
 		int asyncBoxWidth = endOfArrowToAsyncBoxX - middleOfExternalDataBoxX-lineArrowLength-arrowHeadWidth;
 		//     230               190 +                                                                  520                         270 -20
