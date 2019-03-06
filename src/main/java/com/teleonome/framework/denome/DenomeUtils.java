@@ -2691,10 +2691,30 @@ public class DenomeUtils {
 				actionNameNoSpaces = actionName.replace(" ", "");
 				actionEvaluationPosition = actionInfo.getInt("ActionEvaluationPosition" );
 				executionPoint = actionInfo.getString("ExecutionPoint");
-				actuatorCommandTrueExpression=actionInfo.getString("ActuatorCommandTrueExpression");
-				actuatorCommandFalseExpression=actionInfo.getString("ActuatorCommandFalseExpression");
-				actuatorActionConditionPointersJSONArray = actionInfo.getJSONArray("ActuatorActionConditionPointersJSONArray" );
-				actuatorActionConditionNamesJSONArray = actionInfo.getJSONArray("ActuatorActionConditionNamesJSONArray" );
+				
+				if(actionInfo.has("ActuatorCommandTrueExpression")) {
+					actuatorCommandTrueExpression=actionInfo.getString("ActuatorCommandTrueExpression");
+				}else {
+					actuatorCommandTrueExpression="";
+				}
+				
+				if(actionInfo.has("ActuatorCommandFalseExpression")) {
+					actuatorCommandFalseExpression=actionInfo.getString("ActuatorCommandFalseExpression");
+				}else {
+					actuatorCommandFalseExpression="";
+				}
+				
+				if(actionInfo.has("ActuatorActionConditionPointersJSONArray" )) {
+					actuatorActionConditionPointersJSONArray = actionInfo.getJSONArray("ActuatorActionConditionPointersJSONArray" );
+				}else {
+					actuatorActionConditionPointersJSONArray=new JSONArray();
+				}
+				if(actionInfo.has("ActuatorActionConditionNamesJSONArray" )) {
+					actuatorActionConditionNamesJSONArray = actionInfo.getJSONArray("ActuatorActionConditionNamesJSONArray" );
+				}else {
+					actuatorActionConditionNamesJSONArray=new JSONArray();
+				}
+				
 				logger.debug("line 2698, actuatorName=" + actuatorName );
 				//
 				// Breadcrumb div
