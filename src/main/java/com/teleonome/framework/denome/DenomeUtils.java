@@ -2195,47 +2195,47 @@ public class DenomeUtils {
 		reportLines.add("    background: rgb(185, 240, 174); ");
 		reportLines.add("     color: #000; ");
 		reportLines.add(" }");
-		reportLines.add("#Detail-Area{");
-		reportLines.add("     margin-top:10px;");
-		reportLines.add("   z-index: 100;");
-		reportLines.add("         }");
-		reportLines.add("         .sensor{");
-		reportLines.add("   margin-top:20px;");
-		reportLines.add("         }");
-		reportLines.add("         .ActionTitle{");
-		reportLines.add("   font-size:24px;");
-		reportLines.add("        }");
-		reportLines.add("         .ActionDetailSection{");
-		reportLines.add("    margin-top:0px;");
-		reportLines.add("   margin-left:20px;");
-		reportLines.add("  margin-right:20px;");
-		reportLines.add("     }");
-		reportLines.add("        .actuator-selector{");
-		reportLines.add(" margin-top:20px;");
-		reportLines.add("      }");
-		reportLines.add("         .actuator-level{");
-		reportLines.add("margin-left:100px;");
-		reportLines.add("}");
-
-		reportLines.add("         .dropdown-submenu {");
-		reportLines.add("        position: relative;");
-		reportLines.add("       }");
-
-		reportLines.add("     .dropdown-submenu .dropdown-menu {");
-		reportLines.add("     top: 0;");
-		reportLines.add("    left: 100%;");
-		reportLines.add("     margin-top: -1px;");
+		reportLines.add("	#Detail-Area{");
+		reportLines.add("   	margin-top:10px;");
+		reportLines.add("   	z-index: 100;");
 		reportLines.add("   }");
-
-		reportLines.add(".ReportTable {");
-		reportLines.add("  font-family: \"Trebuchet MS\", Arial, Helvetica, sans-serif;");
-		reportLines.add("  border-collapse: collapse;");
-		reportLines.add("  width: 100%;");
+		reportLines.add("   .sensor{");
+		reportLines.add("   	margin-top:20px;");
+		reportLines.add("   }");
+		reportLines.add("   .ActionTitle{");
+		reportLines.add("   	font-size:24px;");
+		reportLines.add("   }");
+		reportLines.add("   .ActionDetailSection{");
+		reportLines.add("    	margin-top:0px;");
+		reportLines.add("   	margin-left:20px;");
+		reportLines.add("  		margin-right:20px;");
+		reportLines.add("    }");
+		reportLines.add("    .actuator-selector{");
+		reportLines.add(" 		margin-top:20px;");
+		reportLines.add("     }");
+		reportLines.add("     .actuator-level{");
+		reportLines.add("		margin-left:100px;");
 		reportLines.add("	}");
 
-		reportLines.add(".ReportTable td, #ReportTable th {");
-		reportLines.add("  border: 1px solid #ddd;");
-		reportLines.add("	  padding: 8px;");
+		reportLines.add("    .dropdown-submenu {");
+		reportLines.add("        position: relative;");
+		reportLines.add("     }");
+
+		reportLines.add("   .dropdown-submenu .dropdown-menu {");
+		reportLines.add("     	top: 0;");
+		reportLines.add("    	left: 100%;");
+		reportLines.add("     	margin-top: -1px;");
+		reportLines.add("   }");
+
+		reportLines.add("	.ReportTable {");
+		reportLines.add("  		font-family: \"Trebuchet MS\", Arial, Helvetica, sans-serif;");
+		reportLines.add("  		border-collapse: collapse;");
+		reportLines.add("  		width: 100%;");
+		reportLines.add("	}");
+
+		reportLines.add("	.ReportTable td, #ReportTable th {");
+		reportLines.add("  		border: 1px solid #ddd;");
+		reportLines.add("	  	padding: 8px;");
 		reportLines.add("	}");
 
 		reportLines.add("	.ReportTable tr:nth-child(even){background-color: #f2f2f2;}");
@@ -2243,11 +2243,11 @@ public class DenomeUtils {
 		reportLines.add("	.ReportTable tr:hover {background-color: #ddd;}");
 
 		reportLines.add("	.ReportTable th {");
-		reportLines.add("	  padding-top: 12px;");
-		reportLines.add("  padding-bottom: 12px;");
-		reportLines.add("  text-align: left;");
-		reportLines.add("  background-color: #4CAF50;");
-		reportLines.add("  color: white;");
+		reportLines.add("		padding-top: 12px;");
+		reportLines.add("  		padding-bottom: 12px;");
+		reportLines.add("  		text-align: left;");
+		reportLines.add("  		background-color: #4CAF50;");
+		reportLines.add("  		color: white;");
 		reportLines.add("	}");
 		reportLines.add("</style>");
 		reportLines.add("</head>");
@@ -2257,7 +2257,7 @@ public class DenomeUtils {
 		int startingY = 30;
 		int mainHeight= 500;
 		int mcuBoxTotalWidth=200;
-		int mcuBoxWidth=150;
+		int mcuBoxWidth=200;
 		int mcuBoxHeight=50;
 		int mainWidth= 430 + mcuBoxTotalWidth* numberOfMCU;
 		int startXValueForMCUBox=300;
@@ -2280,9 +2280,9 @@ public class DenomeUtils {
 		//                100                    50                50                    20
 		int secondRowY= startYValueForMCUBox + mcuBoxHeight + arrowGoingDownLength + arrowHeadHeight;
 		//                    220           25             
-		int secondRowTextY = secondRowY + mcuBoxHeight/2 ;
+		int secondRowTextY = 10+secondRowY + mcuBoxHeight/2 ;
 
-		reportLines.add("<svg  id=\"MainDiagram\" height=\""+ mainHeight+"\" width=\""+ mainHeight+"\">");
+		reportLines.add("<svg  id=\"MainDiagram\" height=\""+ mainHeight+"\" width=\""+ mainWidth+"\">");
 		reportLines.add("<defs>");
 		reportLines.add("<marker id=\"arrow\" markerWidth=\"10\" markerHeight=\"10\" refX=\"0\" refY=\"3\" orient=\"auto\" markerUnits=\"strokeWidth\" viewBox=\"0 0 10 10\">");
 		reportLines.add("<path d=\"M0,0 L0,6 L9,3 z\" fill=\"#00\" />");
@@ -2366,7 +2366,7 @@ public class DenomeUtils {
 		int asyncBoxWidth = endOfArrowToAsyncBoxX - middleOfExternalDataBoxX-lineArrowLength;
 		int asyncBoxStartingX = endOfArrowToAsyncBoxX-asyncBoxWidth;
 		reportLines.add("<rect x=\""+asyncBoxStartingX+"\" y=\""+secondRowY+"\" width=\""+asyncBoxWidth+"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 192, 159); stroke: black; stroke-width: 4px;\"/>");
-		reportLines.add("<text x=\""+(asyncBoxStartingX + nameMargin)+"\" y=\""+secondRowY+"\" font-family=\"Verdana\" font-size=\"12\" >Asynchronous Period (60 seconds)</text>");
+		reportLines.add("<text x=\""+(asyncBoxStartingX + nameMargin)+"\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Asynchronous Period (60 seconds)</text>");
 
 		reportLines.add("<line x1=\""+ asyncBoxStartingX +"\" y1=\""+ secondRowTextY +"\" x2=\""+middleOfExternalDataBoxX+"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 		//
@@ -2687,7 +2687,7 @@ public class DenomeUtils {
 				microControllerName=actionInfo.getString("MicroControllerName");
 				actuatorName=actionInfo.getString("ActuatorName");
 				actionName=actionInfo.getString("ActionName");
-				actionExpression = actionInfo.getString("ActionExpression");
+				actionExpression = actionInfo.getString("ActionExpression").replace("<", "&lt;" ).replace(">", "&gt;" ).replace("&", "&amp;" );
 				actionNameNoSpaces = actionName.replace(" ", "");
 				actionEvaluationPosition = actionInfo.getInt("ActionEvaluationPosition" );
 				executionPoint = actionInfo.getString("ExecutionPoint");
@@ -2744,7 +2744,7 @@ public class DenomeUtils {
 				reportLines.add("								<p class=\"card-text\">Execution Order:<b>2</b></p>");
 				reportLines.add("								<p class=\"card-text\">Execution Point:<b>"+ executionPoint + "</b></p>");
 
-				reportLines.add("								<p class=\"card-text\">Expression:<b>("+ actionExpression +")</b></p>");
+				reportLines.add("								<p class=\"card-text\">Expression:<b>"+ actionExpression +"</b></p>");
 				reportLines.add("								<table class=\"ReportTable\">");
 				reportLines.add("									<tr><th>Condition Name</th><th>Expression</th><th>Variables</th></tr>");
 				reportLines.add("									<tr>");
@@ -2766,7 +2766,7 @@ public class DenomeUtils {
 						String conditionExpression = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorActionConditionJSONObject, "Expression", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 						reportLines.add("										<td>" + conditionName + "</td>");
-						reportLines.add("										<td><b>" + conditionExpression + "</b></td>");
+						reportLines.add("										<td><b>" + conditionExpression.replace("<", "&lt;" ).replace(">", "&gt;" ).replace("&", "&amp;" ) + "</b></td>");
 						reportLines.add("										<td>");
 						reportLines.add("											<table>");
 						//
