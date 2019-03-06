@@ -2666,7 +2666,7 @@ public class DenomeUtils {
 				}
 			}
 
-			logger.debug("line 2669, finished sensors="  );
+			logger.debug("line 2669, finished sensors=m actionSectionInfoJSONArray.length()=" + actionSectionInfoJSONArray.length()  );
 			
 			reportLines.add("					<div class=\"row\">");
 			reportLines.add("						<hr class=\"col-xs-12\"  >");
