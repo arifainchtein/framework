@@ -2261,8 +2261,6 @@ public class DenomeUtils {
 		int lineArrowLength=50;
 		int mcuBoxWidth=180;
 		int mcuBoxTotalWidth=mcuBoxWidth+ lineArrowLength + 2*arrowHeadWidth;
-		int boundingRectangleX=50;
-		int boundingRectangleY=50;
 		int mcuBoxHeight=50;
 		
 		
@@ -2281,7 +2279,13 @@ public class DenomeUtils {
 		int externalDataLineX1=externalDataX + mcuBoxWidth;
 		int arrowGoingDownLength=50;
 		
-		int mainWidth= boundingRectangleX + externalDataX + mcuBoxTotalWidth* (numberOfMCU + 1) + boundingRectangleX;
+		int boundingRectangleX=50;
+		int boundingRectangleY=50;
+		int boundingRectangleWidth=boundingRectangleX  + mcuBoxTotalWidth* (numberOfMCU + 1) + boundingRectangleX;
+		int boundingRectangleHeight=boundingRectangleY + 2*mcuBoxHeight + arrowGoingDownLength +  boundingRectangleY;
+		
+		
+		int mainWidth= boundingRectangleX  + mcuBoxTotalWidth* (numberOfMCU + 1) + boundingRectangleX;
 		
 		int startXValueForMCUBox=externalDataLineX1+lineArrowLength;
 		
@@ -2300,7 +2304,7 @@ public class DenomeUtils {
 
 		reportLines.add("<text x=\""+startingX+"\" y=\""+startingY+"\" font-family=\"Verdana\" font-size=\"20\" >"+ teleonomeName+"</text>");
 
-		reportLines.add("<rect x=\""+boundingRectangleX+"\" y=\""+boundingRectangleY+"\" width=\"850\" height=\"350\" rx=\"11\" ry=\"11\" style=\"fill: rgb(232, 237, 238);; stroke: black; stroke-width: 4px;\"/>");
+		reportLines.add("<rect x=\""+boundingRectangleX+"\" y=\""+boundingRectangleY+"\" width=\""+boundingRectangleWidth +"\" height=\""+boundingRectangleHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(232, 237, 238);; stroke: black; stroke-width: 4px;\"/>");
 
 		reportLines.add("<rect  x=\""+externalDataX+"\" y=\""+externalDataY+"\" width=\""+mcuBoxWidth +"\" height=\""+mcuBoxHeight+" \" rx=\"11\" ry=\"11\" style=\"fill: rgb(174, 235, 240);; stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+(externalDataX+nameMargin)+"\" y=\""+textY+"\" font-family=\"Verdana\" font-size=\"12\" >External Data</text>");
