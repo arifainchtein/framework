@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 
@@ -644,8 +645,8 @@ public class DenomeUtils {
 		}
 		return toReturn;
 	}
-	
-	
+
+
 	public static boolean isDeneOfType(JSONObject dene, String whichDeneType){
 		boolean itIs=false;
 		try{
@@ -2133,20 +2134,99 @@ public class DenomeUtils {
 		return sourceData;
 	}
 
-// **********************************sdhfkjsdfldjfklsdjflksdjfsdkljflsdkjf
-	
-// * ****************************
+	// **********************************sdhfkjsdfldjfklsdjflksdjfsdkljflsdkjf
+
+	// * ****************************
 	public static ArrayList generateDenomePhysiologyReportHTMLTable(JSONObject pulse) throws MissingDenomeException, TeleonomeValidationException {
 		ArrayList<String> reportLines = new ArrayList();
-		
+		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss Z");
+		com.teleonome.framework.denome.DenomeViewManager aDenomeViewerManager = new com.teleonome.framework.denome.DenomeViewManager();
+
+
+		JSONObject denomeObject =  pulse.getJSONObject("Denome");
+		String teleonomeName = denomeObject.getString("Name");
+		aDenomeViewerManager.loadDenome(pulse);
+		JSONArray stateMutationsJSONArray = aDenomeViewerManager
+				.getMutations(TeleonomeConstants.MUTATION_TYPE_STATE);
+		JSONArray structureMutationsJSONArray = aDenomeViewerManager
+				.getMutations(TeleonomeConstants.MUTATION_TYPE_STRUCTURE);
+		int structureMutationsJSONArrayLength = 0;
+		if (structureMutationsJSONArray != null)
+			structureMutationsJSONArrayLength = structureMutationsJSONArray.length();
+		int stateMutationsJSONArrayLength = 0;
+		if (stateMutationsJSONArray != null)
+			stateMutationsJSONArrayLength = stateMutationsJSONArray.length();
+
+		Hashtable pointerToMicroControllerSensorDenesVectorIndex= aDenomeViewerManager.getPointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex();
+		ArrayList<Map.Entry<String, Integer>>  microControllerPointerProcessingQueuePositionIndex = aDenomeViewerManager.getMicroControllerPointerProcessingQueuePositionIndex();
+		Vector sensorDeneVector;
+		JSONObject sensorDeneJSONObject;
+
+		int numberOfMCU=microControllerPointerProcessingQueuePositionIndex.size();
+
 		reportLines.add("<!DOCTYPE html>");
 		reportLines.add("<html>");
 		reportLines.add("<head>");
 		reportLines.add("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css\">");
 		reportLines.add("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>");
 		reportLines.add("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js\"></script>");
-		
+		reportLines.add("<meta charset=\"utf-8\">");
+		reportLines.add("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">");
+
 		reportLines.add("<style>");
+
+
+		reportLines.add(" .disabled {");
+		reportLines.add("     pointer-events:none; ");
+		reportLines.add("    opacity:0.6;        "); 
+		reportLines.add("}");
+
+		reportLines.add(" .breadcrumb    {");
+		reportLines.add("    background-color: white;");
+		reportLines.add("}");
+		reportLines.add(".CloseDetail{");
+		reportLines.add("    margin-top:-20px;");
+		reportLines.add("         }");
+		reportLines.add("  .panel-heading-microcontroller{");
+
+		reportLines.add(" }");
+
+		reportLines.add(" .panel-default > .panel-heading-microcontroller {");
+		reportLines.add("    background: rgb(185, 240, 174); ");
+		reportLines.add("     color: #000; ");
+		reportLines.add(" }");
+		reportLines.add("#Detail-Area{");
+		reportLines.add("     margin-top:10px;");
+		reportLines.add("   z-index: 100;");
+		reportLines.add("         }");
+		reportLines.add("         .sensor{");
+		reportLines.add("   margin-top:20px;");
+		reportLines.add("         }");
+		reportLines.add("         .ActionTitle{");
+		reportLines.add("   font-size:24px;");
+		reportLines.add("        }");
+		reportLines.add("         .ActionDetailSection{");
+		reportLines.add("    margin-top:0px;");
+		reportLines.add("   margin-left:20px;");
+		reportLines.add("  margin-right:20px;");
+		reportLines.add("     }");
+		reportLines.add("        .actuator-selector{");
+		reportLines.add(" margin-top:20px;");
+		reportLines.add("      }");
+		reportLines.add("         .actuator-level{");
+		reportLines.add("margin-left:100px;");
+		reportLines.add("}");
+
+		reportLines.add("         .dropdown-submenu {");
+		reportLines.add("        position: relative;");
+		reportLines.add("       }");
+
+		reportLines.add("     .dropdown-submenu .dropdown-menu {");
+		reportLines.add("     top: 0;");
+		reportLines.add("    left: 100%;");
+		reportLines.add("     margin-top: -1px;");
+		reportLines.add("   }");
+
 		reportLines.add(".ReportTable {");
 		reportLines.add("  font-family: \"Trebuchet MS\", Arial, Helvetica, sans-serif;");
 		reportLines.add("  border-collapse: collapse;");
@@ -2173,44 +2253,134 @@ public class DenomeUtils {
 		reportLines.add("</head>");
 		reportLines.add("<body>");
 
-	
-		
-				SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss Z");
-		com.teleonome.framework.denome.DenomeViewManager aDenomeViewerManager = new com.teleonome.framework.denome.DenomeViewManager();
-		 
-		
-		
-		JSONObject denomeObject =  pulse.getJSONObject("Denome");
-		String teleonomeName = denomeObject.getString("Name");
-		aDenomeViewerManager.loadDenome(pulse);
+		int startingX = 400;
+		int startingY = 30;
+		int mainHeight= 500;
+		int mcuBoxTotalWidth=200;
+		int mcuBoxWidth=150;
+		int mcuBoxHeight=50;
+		int mainWidth= 430 + mcuBoxTotalWidth* numberOfMCU;
+		int startXValueForMCUBox=300;
+		int startYValueForMCUBox=100;
+		int nameMargin=10;
+		int textY=130;
+		int lineArrowLength=40;
 
-		reportLines.add("<h1>"+teleonomeName +"</h1>");
-		reportLines.add("<h5>Report Created:"+dateTimeFormat.format(new Date()) +"</h5>");
-		
-		JSONArray stateMutationsJSONArray = aDenomeViewerManager
-				.getMutations(TeleonomeConstants.MUTATION_TYPE_STATE);
-		JSONArray structureMutationsJSONArray = aDenomeViewerManager
-				.getMutations(TeleonomeConstants.MUTATION_TYPE_STRUCTURE);
-		int structureMutationsJSONArrayLength = 0;
-		if (structureMutationsJSONArray != null)
-			structureMutationsJSONArrayLength = structureMutationsJSONArray.length();
-		int stateMutationsJSONArrayLength = 0;
-		if (stateMutationsJSONArray != null)
-			stateMutationsJSONArrayLength = stateMutationsJSONArray.length();
+		int mcuLineYPos=startYValueForMCUBox + mcuBoxHeight/2;
 
-		Hashtable pointerToMicroControllerSensorDenesVectorIndex= aDenomeViewerManager.getPointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex();
-		 ArrayList<Map.Entry<String, Integer>>  microControllerPointerProcessingQueuePositionIndex = aDenomeViewerManager.getMicroControllerPointerProcessingQueuePositionIndex();
-		Vector sensorDeneVector;
-		JSONObject sensorDeneJSONObject;
-		
-		Hashtable microControllerNameActuatorsIndex = aDenomeViewerManager.getMicroControllerNameActuatorsIndex();
-		
-		String microControllerPointer;
-		String microControllerName;
-		ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex; 
-		ArrayList<Map.Entry<JSONObject, Integer>> actuatorRequestQueuePositionDeneWordIndex = new ArrayList(); 
+		int boundingRectangleX=50;
+		int boundingRectangleY=50;
+
+		int externalDataX=100;
+		int externalDataY=100;
+		int externalDataText=50;
+		int externalDataLineX1=250;
+		int arrowGoingDownLength=50;
+		int arrowHeadHeight=20;
+		//                100                    50                50                    20
+		int secondRowY= startYValueForMCUBox + mcuBoxHeight + arrowGoingDownLength + arrowHeadHeight;
+		//                    220           25             
+		int secondRowTextY = secondRowY + mcuBoxHeight/2 ;
+
+		reportLines.add("<svg  id=\"MainDiagram\" height=\""+ mainHeight+"\" width=\""+ mainHeight+"\">");
+		reportLines.add("<defs>");
+		reportLines.add("<marker id=\"arrow\" markerWidth=\"10\" markerHeight=\"10\" refX=\"0\" refY=\"3\" orient=\"auto\" markerUnits=\"strokeWidth\" viewBox=\"0 0 10 10\">");
+		reportLines.add("<path d=\"M0,0 L0,6 L9,3 z\" fill=\"#00\" />");
+		reportLines.add("</marker>");
+		reportLines.add("</defs>");
+		reportLines.add("<g>");
+
+		reportLines.add("<text x=\""+startingX+"\" y=\""+startingY+"\" font-family=\"Verdana\" font-size=\"20\" >"+ teleonomeName+"</text>");
+
+		reportLines.add("<rect x=\""+boundingRectangleX+"\" y=\""+boundingRectangleY+"\" width=\"850\" height=\"350\" rx=\"11\" ry=\"11\" style=\"fill: rgb(232, 237, 238);; stroke: black; stroke-width: 4px;\"/>");
+
+		reportLines.add("<rect  x=\""+externalDataX+"\" y=\""+externalDataY+"\" width=\""+mcuBoxWidth +"\" height=\""+mcuBoxHeight+" \" rx=\"11\" ry=\"11\" style=\"fill: rgb(174, 235, 240);; stroke: black; stroke-width: 4px;\"/>");
+		reportLines.add("<text x=\""+(externalDataX+nameMargin)+"\" y=\""+textY+"\" font-family=\"Verdana\" font-size=\"12\" >External Data</text>");
+		reportLines.add("<line x1=\""+externalDataLineX1+"\" y1=\""+mcuLineYPos+"\" x2=\""+(externalDataLineX1+lineArrowLength)+"\" y2=\""+ mcuLineYPos +"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+
 		Integer queuePosition=null;
+		String microControllerPointer;
+		String microControllerName, microControllerNameNoSpaces;
+		int counter=0;
+		int currentX=0;
+		int lineX1=0;
+		int lineX2=0;
+		for (Map.Entry<String, Integer> entry : microControllerPointerProcessingQueuePositionIndex) {
+			microControllerPointer = (String)entry.getKey();
+			queuePosition = (Integer)entry.getValue();
+			microControllerName = microControllerPointer.split(":")[microControllerPointer.split(":").length-1];
+			currentX = startXValueForMCUBox +(counter*mcuBoxTotalWidth);
+			lineX1=currentX + mcuBoxWidth;
+			lineX2=lineX1+lineArrowLength;
 
+			reportLines.add("<rect class=\"Microcontroller\" data-name=\""+ microControllerName +"\"  x=\""+currentX+"\" y=\""+startYValueForMCUBox+"\" width=\""+mcuBoxWidth +"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(185, 240, 174); stroke: black; stroke-width: 4px;\"/>");
+			reportLines.add("<text class=\"Microcontroller\" data-name=\""+ microControllerName +"\"  x=\""+ (currentX +nameMargin) +"\" y=\""+textY+"\" font-family=\"Verdana\" font-size=\"12\" >"+microControllerName+"</text>");
+			counter++;
+			//
+			// increment the counter first, because the line for the last mcu does not go to the end and moves to the right
+			// instead the x is half way throught the box and it goes down
+			if(counter<numberOfMCU) {
+				reportLines.add("<line x1=\""+lineX1+"\" y1=\""+mcuLineYPos+"\" x2=\""+lineX2+"\" y2=\""+mcuLineYPos+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+			}else {
+				lineX1=currentX + mcuBoxWidth/2;
+				lineX2=lineX1;
+				int lastLineY1=startYValueForMCUBox + mcuBoxHeight;
+				int lastLineY2=lastLineY1 + arrowGoingDownLength;
+				reportLines.add("<line x1=\""+lineX1+"\" y1=\""+lastLineY1+"\" x2=\""+lineX2+"\" y2=\""+lastLineY2+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+
+			}
+		}
+
+		//
+		// at this point currentX is the beginning of the last box of the first row
+		// and the beginning of the first box f the second row
+
+		//		reportLines.add("<rect class=\"Microcontroller\" data-name=\"Mother Microcontroller\"  x=\"500\" y=\"100\" width=\"150\" height=\"50\" rx=\"11\" ry=\"11\" style=\"fill: rgb(185, 240, 174); stroke: black; stroke-width: 4px;\"/>");
+		//		reportLines.add("<text class=\"Microcontroller\" data-name=\"Mother Microcontroller\"  x=\"510\" y=\"130\" font-family=\"Verdana\" font-size=\"12\" >Mother Microcontroller</text>");
+		//		reportLines.add("<line x1=\"650\" y1=\"125\" x2=\"680\" y2=\"125\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+		//
+		//		reportLines.add("<rect class=\"Microcontroller\" data-name=\"SFTP Microcontroller\"  x=\"700\" y=\"100\" width=\"150\" height=\"50\" rx=\"11\" ry=\"11\" style=\"fill: rgb(185, 240, 174); stroke: black; stroke-width: 4px;\"/>");
+		//		reportLines.add("<text class=\"Microcontroller\" data-name=\"SFTP Microcontroller\"  x=\"710\" y=\"130\" font-family=\"Verdana\" font-size=\"12\" >SFTP Microcontroller</text>");
+		//		reportLines.add("<line x1=\"775\" y1=\"150\" x2=\"775\" y2=\"200\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+
+
+		reportLines.add("<rect x=\""+currentX + "\" y=\""+ secondRowY +"\" width=\""+mcuBoxWidth +"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 220, 159); stroke: black; stroke-width: 4px;\"/>");
+		reportLines.add("<text x=\""+( currentX + nameMargin)+"\" y=\""+secondRowTextY + "\" font-family=\"Verdana\" font-size=\"12\" >Analyticons</text>");
+		reportLines.add("<line x1=\""+ currentX +"\" y1=\""+ secondRowTextY+"\" x2=\""+(currentX-lineArrowLength) +"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+
+
+		currentX -= mcuBoxTotalWidth;
+		reportLines.add("<rect x=\""+currentX+ "\" y=\""+secondRowY+"\" width=\""+mcuBoxWidth +"\" height=\""+ mcuBoxHeight + "\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 159, 223); stroke: black; stroke-width: 4px;\"/>");
+		reportLines.add("<text x=\""+ (currentX+nameMargin) + "\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Mnemosycons</text>");
+		//      460 = 500-40
+		int endOfArrowToAsyncBoxX = currentX-lineArrowLength;
+
+		reportLines.add("<line x1=\""+currentX+"\" y1=\""+ secondRowTextY +"\" x2=\""+ endOfArrowToAsyncBoxX +"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+
+		//
+		// the asynchrnous is the last box of the second row
+		// its length will be the length needed to return to the middle of the external data to make the return up arrow
+		// that point is defined by
+		int middleOfExternalDataBoxX = externalDataX + mcuBoxWidth/2; // 100+75
+		//    285=460-175
+		int asyncBoxWidth = endOfArrowToAsyncBoxX - middleOfExternalDataBoxX-lineArrowLength;
+		int asyncBoxStartingX = endOfArrowToAsyncBoxX-asyncBoxWidth;
+		reportLines.add("<rect x=\""+asyncBoxStartingX+"\" y=\""+secondRowY+"\" width=\""+asyncBoxWidth+"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 192, 159); stroke: black; stroke-width: 4px;\"/>");
+		reportLines.add("<text x=\""+(asyncBoxStartingX + nameMargin)+"\" y=\""+secondRowY+"\" font-family=\"Verdana\" font-size=\"12\" >Asynchronous Period (60 seconds)</text>");
+
+		reportLines.add("<line x1=\""+ asyncBoxStartingX +"\" y1=\""+ secondRowTextY +"\" x2=\""+middleOfExternalDataBoxX+"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+		//
+		//back up to external data
+		// 170
+		int bottomOfExternalDataY = externalDataY + mcuBoxHeight;
+		reportLines.add("<line x1=\""+middleOfExternalDataBoxX+"\" y1=\""+ secondRowTextY +"\" x2=\""+ middleOfExternalDataBoxX+"\" y2=\""+bottomOfExternalDataY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+		reportLines.add("</g>");
+		reportLines.add("</svg>");
+
+		reportLines.add("<div class=\"container\" id=\"Detail-Area\">"); 
+		//
+		// now loop over the microcontrollers to render every one
+		//
 		JSONObject  sensorValueDeneJSONObject;
 		JSONArray sensorValuesPointersJSONArray, sensorValuesJSONArray;
 		Integer sensorRequestQueuePosition;
@@ -2229,31 +2399,92 @@ public class DenomeUtils {
 		//JSONObject sensorReportLine;
 		Map.Entry<JSONObject, Integer> valueMap;
 		String sensorValueName, sensorName;
-		String variableName,variableValue, defaultValue; 
-		
+		String variableName,variableValue, defaultValue;
+		Hashtable microControllerNameActuatorsIndex = aDenomeViewerManager.getMicroControllerNameActuatorsIndex();
+
+		ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex; 
+		ArrayList<Map.Entry<JSONObject, Integer>> actuatorRequestQueuePositionDeneWordIndex = new ArrayList(); 
+		pointerToMicroControllerSensorDenesVectorIndex = aDenomeViewerManager.getPointerToMicroControllerSensorDenesVectorIndex();
+		Vector allSensorDenesForMicroController;
+		JSONObject aSensorDeneJSONObject;
+		boolean isSensor;
+
 		for (Map.Entry<String, Integer> entry : microControllerPointerProcessingQueuePositionIndex) {
 			microControllerPointer = (String)entry.getKey();
 			queuePosition = (Integer)entry.getValue();
+
 			microControllerName = microControllerPointer.split(":")[microControllerPointer.split(":").length-1];
-			
-			
+			microControllerNameNoSpaces= microControllerName.replace(" ", "");
+			logger.info("line 2414,pointerToMicroController=" + microControllerPointer );
 			sensorRequestQueuePositionDeneWordIndex = (ArrayList)pointerToMicroControllerSensorDenesVectorIndex.get( microControllerPointer);
-			logger.debug("line 2221 microControllerPointer="+ microControllerPointer );
-			
-			
-			reportLines.add("<div class=\"panel panel-default\">");
-			reportLines.add("<div class=\"panel-heading\">");
-			reportLines.add("<h2>"+microControllerName +"</h2>");
-			reportLines.add("<h5>Execution Queue Position:"+queuePosition +"</h5>");
-			reportLines.add("</div>");
-			reportLines.add(" <div class=\"panel-body\">");
-			
-			
+
+			allSensorDenesForMicroController = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get(microControllerPointer);
+			logger.debug("line 2422 allSensorDenesForMicroController="+ allSensorDenesForMicroController.size() );
+			//					
+
+
+
+			reportLines.add("	<div class=\"row Microcontroller-Details\"  id=\""+microControllerNameNoSpaces+"-Details\">");
+			reportLines.add("		<div class=\"panel panel-default\">");
+			//
+			// panel heading
+			//
+			reportLines.add("			<div class=\"panel-heading panel-heading-microcontroller\">");
+			reportLines.add("				<div class=\"col-10 text-center\">");  
+			reportLines.add("					"+microControllerName );
+			reportLines.add("				</div>");
+			reportLines.add("				<div class=\"col-2\"> ");  
+			reportLines.add("					<button type=\"button\" class=\"btn-md pull-right CloseDetail\" >&times;</button>");
+			reportLines.add("				</div>");
+			reportLines.add("			</div>");
+
+			//
+			// panel body
+			//
+			reportLines.add("			<div class=\"panel-body\">");
+			reportLines.add("				<ul class=\"nav nav-tabs justify-content-center\">");  
+			reportLines.add("					<li class=\"nav-item\">");
+			reportLines.add("						<a class=\"nav-link active\" href=\"#\" onclick=\"return show_detail('"+microControllerNameNoSpaces+"-SensorDetails');\">Sensors</a>");
+			reportLines.add("					</li>");
+			reportLines.add("					<li class=\"nav-item\">");
+			reportLines.add("						<a class=\"nav-link\" href=\"#\" onclick=\"return show_detail('"+microControllerNameNoSpaces+"-ActuatorDetails');\">Actuators</a>");
+			reportLines.add("					</li>");
+			reportLines.add("				</ul>");
+
+			reportLines.add("				<div class=\"SensorDetail\" id=\""+microControllerNameNoSpaces+"-SensorDetails\" style=\"display: none;\"> ");  			
+
+
+			reportLines.add("					<div class=\"row\">");
+			//
+			// draw every sensor with a 3 column button
+			for(int j=0;j<allSensorDenesForMicroController.size();j++){
+				aSensorDeneJSONObject = (JSONObject) allSensorDenesForMicroController.elementAt(j);
+				isSensor = DenomeUtils.isDeneOfType(aSensorDeneJSONObject, TeleonomeConstants.DENE_TYPE_SENSOR);
+				logger.info("line 491 aDeneJSONObject.=" + aSensorDeneJSONObject.getString("Name") + " isSensor="+isSensor);
+				if(isSensor){
+					reportLines.add("						<div class=\"col-sm-3 sensor\">");
+					reportLines.add("							<button class=\"btn btn-primary dropdown-toggle sensor\" type=\"button\">"+aSensorDeneJSONObject.getString("Name") +" </button>");
+					reportLines.add("						</div>");
+				}
+			}
+
+			reportLines.add("					</div>");
+
+			reportLines.add("					<div class=\"row\">");
+			reportLines.add("						<hr class=\"col-xs-12\"  >");
+			reportLines.add("					</div>");// 
+
+			reportLines.add("					Sensor Values in order of GetSensorData String");
+
+			//
+			// here is the GetSensorData Table
+			//
+
 			if(sensorRequestQueuePositionDeneWordIndex!=null){
 				reportLines.add("<h3>Sensors</h3><br>");
 				reportLines.add("<table class=\"ReportTable\">");
 				reportLines.add("<tr><th>Sensor Name</th><th>Value</th><th>"+TeleonomeConstants.DENEWORD_SENSOR_REQUEST_QUEUE_POSITION+"</th><th>"+TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE+"</th><th>"+TeleonomeConstants.DENEWORD_REPORTING_ADDRESS+"</th></tr>");
-				
+
 				logger.debug("line 2229 sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size());
 				for (int m=0;m<sensorRequestQueuePositionDeneWordIndex.size();m++){
 					//					sensorDeneJSONObject = ((Map.Entry<JSONObject, Integer>)sensorRequestQueuePositionDeneWordIndex.get(m)).getKey();
@@ -2263,7 +2494,7 @@ public class DenomeUtils {
 					//					
 					//					logger.debug("line 2248 sensorValuesJSONArray=" + sensorValuesJSONArray.length());
 					//					for(int k=0;k<sensorValuesJSONArray.length();k++){
-//										value = sensorValuesJSONArray.getJSONObject(k);
+					//										value = sensorValuesJSONArray.getJSONObject(k);
 					valueMap = (Map.Entry<JSONObject, Integer>)sensorRequestQueuePositionDeneWordIndex.get(m);
 					sensorValueDeneJSONObject =valueMap.getKey();
 					logger.debug("line 2256,  sensorValueDeneJSONObject=" + sensorValueDeneJSONObject);
@@ -2271,7 +2502,7 @@ public class DenomeUtils {
 					logger.debug("line 2258,  sensorValueName=" + sensorValueName);
 					sensorName = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					logger.debug("line 2260,  sensorName=" + sensorName);
-					
+
 					sensorRequestQueuePosition = valueMap.getValue();
 					logger.debug("line 2264 sensorRequestQueuePosition=" + sensorRequestQueuePosition);
 					reportingAddress = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, TeleonomeConstants.DENEWORD_REPORTING_ADDRESS, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
@@ -2288,44 +2519,40 @@ public class DenomeUtils {
 					}
 					reportLines.add("<tr><td>"+ sensorName + "</td><td>"+sensorValueName+"</td><td>"+sensorRequestQueuePosition+"</td><td>"+unitsText+"</td><td>"+reportingAddress+"</td></tr>");		
 					logger.debug("line 2264");
-					
+
 					//}
 				}
 				reportLines.add("</table>");
 			} else {
 				logger.debug("line 2244 sensorDeneVector is null");
 				reportLines.add("<h3>No Sensors</h3><br>");
-					
+
 			}
-				
-			
-			
-			
+
+
+
+			reportLines.add("				</div>"); //class=\"SensorDetail\ 
+
+			reportLines.add("				<div class=\"ActuatorDetail\" id=\""+microControllerNameNoSpaces+"-ActuatorDetails\" style=\"display: none;\"> ");  
+
+			//
+			// create an element for every actuator in the microcontroller
+			//
+			JSONObject actionInfo;
+			JSONArray actionSectionInfoJSONArray = new  JSONArray();
 			actuatorExecutionPositionActionListDeneIndex = (ArrayList<Map.Entry<JSONObject, Integer>>)microControllerNameActuatorsIndex.get(microControllerPointer);
-			
-			
 			if(actuatorExecutionPositionActionListDeneIndex!=null && actuatorExecutionPositionActionListDeneIndex.size()>0){
-				
-				logger.debug("line 2268 microControllerPointer=" + microControllerPointer);
-				reportLines.add("<h3>Actions</h3>");
-				reportLines.add("<table class=\"ReportTable\">");
-				reportLines.add("<tr><th>Actuator Name</th><th>Execution Position</th><th>Action Name</th><th>Expression</th><th>Evaluation Position</th><th>"+TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT+"</th><th>Conditions</th><th>Variables</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th><th>"+TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION+"</th></tr>");
-				
-				for (Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionActionListDeneIndex) {
-					//actuatorReportLine = new JSONObject();
-					
-					//
-					// this action list can be either a On Start, or normal
-					//
+				counter=0;
+				for(Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionActionListDeneIndex) {
 					anActuatorActionListDeneJSONObject = entry4.getKey();
-					logger.debug("line 2282 anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject.toString(4));
-					
+					logger.debug("line 2545 anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject.toString(4));
+
 					//logger.debug("anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject);
 					//
 					// the codon is the name of the actuator
 					//
 					actuatorName = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("line 2289 anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject.getString("Name"));
+					logger.debug("line 2552 anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject.getString("Name"));
 					//
 					// then get the actuator dene
 					actuatorPointer = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_ACTUATORS, actuatorName).toString();
@@ -2338,85 +2565,282 @@ public class DenomeUtils {
 					}
 					actuatorName = actuatorDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
 					actuatorExecution = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_EXECUTION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					
-					
-					
-					
-					
+					reportLines.add("				<div class=\"row\">");
+
+					//
+					// dont add an arrow for the first 
+					if(counter>0) {
+						//
+						// the arrow
+						//
+						reportLines.add("					<div class=\"col-sm-1\">");
+						reportLines.add("						<svg   id=\"arrow1\" height=\"150\" width=\"250\">");
+						reportLines.add("							<defs>");
+						reportLines.add("								<marker id=\"arrowHead\" markerWidth=\"10\" markerHeight=\"10\" refX=\"0\" refY=\"3\" orient=\"auto\" markerUnits=\"strokeWidth\" viewBox=\"0 0 10 10\">");
+						reportLines.add("						        	<path d=\"M0,0 L0,6 L9,3 z\" fill=\"#00\" />");
+						reportLines.add("								</marker>");
+						reportLines.add("							</defs>");
+						reportLines.add("							<g>");
+						reportLines.add("							<line x1=\"0\" y1=\"35\" x2=\"50\" y2=\"35\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrowHead)\" />");
+						reportLines.add("							</g>");
+						reportLines.add("						</svg>");
+						reportLines.add("					</div>"); //<div class=\"col-sm-1\">");
+					}
+
+					counter++;
+
+
+					reportLines.add("					<div class=\"col-sm-2  dropdown\">");
+					reportLines.add("						<button class=\"btn btn-primary dropdown-toggle actuator-selector\" type=\"button\" data-toggle=\"dropdown\">" + actuatorExecution  + "-" + actuatorName);
+					reportLines.add("						<span class=\"caret\"></span></button>");
+					reportLines.add("						<ul class=\"col-sm-12 text-center dropdown-menu actuator-level\">");
+					reportLines.add("							<li><a tabindex=\"-1\"  href=\"#\"  class=\"disabled\" >Select Action</a></li>");
+					String actuatorCommandTrueExpression, actuatorCommandFalseExpression, executionPoint,actionName, actionNameNoSpaces, actionExpression;
+					int actionEvaluationPosition;
+
+					// loop over every action of the actuator
 					pointersToActionsJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					actionsJSONArray = aDenomeViewerManager.loadDenesFromPointers(pointersToActionsJSONArray);
-					logger.debug("line 2304, for "  + microControllerPointer + " there are pointersToActionsJSONArray=" + pointersToActionsJSONArray.length() +  " actions=" + actionsJSONArray.length());
+					logger.debug("line 2574, for "  + microControllerPointer + " there are pointersToActionsJSONArray=" + pointersToActionsJSONArray.length() +  " actions=" + actionsJSONArray.length());
 					for (int l=0;l<actionsJSONArray.length();l++) {
-						
+
 						actionJSONObject = actionsJSONArray.getJSONObject(l);
-						String actionName =  actionJSONObject.getString( TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
-						String executionPoint = TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT_IMMEDIATE;
-						Object hasExecutionPoint = DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject,TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						if(hasExecutionPoint!=null && hasExecutionPoint instanceof String) {
-							executionPoint = (String)hasExecutionPoint;
+						actionName =  actionJSONObject.getString( TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+						actionEvaluationPosition = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.EVALUATION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						actionNameNoSpaces = actionName.replace(" ", "");
+						actionExpression = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_ACTION_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						executionPoint = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						actuatorCommandTrueExpression="";
+						actuatorCommandFalseExpression="";
+						Object o =  DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_TRUE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						if(o !=null) {
+							actuatorCommandTrueExpression=(String)o;
 						}
-						String activeText = ((Boolean)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, "Active", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).toString();
-						String expression = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, "Expression", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						String commandTrue = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_TRUE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						String commandFalse = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						String evaluationPostion = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, "Evaluation Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).toString();
-						if(commandTrue==null)commandTrue="";
-						if(commandFalse==null)commandFalse="";
+						 o =  DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							if(o !=null) {
+								actuatorCommandFalseExpression=(String)o;
+							}
+						actuatorCommandFalseExpression = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						
+						
+						actionInfo = new JSONObject();
+						actionSectionInfoJSONArray.put(actionInfo);
+						actionInfo.put("MicroControllerName", microControllerName);
+						actionInfo.put("ActionEvaluationPosition", actionEvaluationPosition);
+						actionInfo.put("ActuatorName", actuatorName);
+						actionInfo.put("ActionName", actionName);
+						actionInfo.put("ActionExpression", actionExpression);
+						actionInfo.put("ExecutionPoint", executionPoint);
+						actionInfo.put("ActuatorCommandTrueExpression", actuatorCommandTrueExpression);
+						actionInfo.put("ActuatorCommandFalseExpression", actuatorCommandFalseExpression);
 						
 						actuatorActionConditionPointersJSONArray = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(actionJSONObject,TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_CONDITION_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						JSONArray actuatorActionConditionNamesJSONArray = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(actionJSONObject,TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_CONDITION_POINTER, TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
-						StringBuffer conditionBuffer = new StringBuffer();
-						StringBuffer variableBuffer = new StringBuffer();
+						actionInfo.put("ActuatorActionConditionPointersJSONArray", actuatorActionConditionPointersJSONArray);
+						actionInfo.put("ActuatorActionConditionNamesJSONArray", actuatorActionConditionNamesJSONArray);
 						
-						for(int j=0;j<actuatorActionConditionPointersJSONArray.length();j++){
-							actuatorActionConditionPointer = (String) actuatorActionConditionPointersJSONArray.getString(j);
-							conditionName = actuatorActionConditionNamesJSONArray.getString(j);
+						
+						
+						reportLines.add("							<li><a tabindex=\"-1\" class=\"action-link\"  href=\"#\"  onclick=\"return show_action('"+actionNameNoSpaces+"Section');\" >" +actuatorExecution +"."+ actionEvaluationPosition +" - " + actionName + "</a></li>");
+					}
+					reportLines.add("			           </ul>");
+					reportLines.add("					</div>");
 
-							actuatorActionConditionJSONObject=null;
-							//
-							// actuatorActionConditionJSONObject is a deneword get the value which is a denepointer and render it
-							try {
-								logger.debug("line 2368 actuatorActionConditionPointer=" +actuatorActionConditionPointer);
-								actuatorActionConditionJSONObject = aDenomeViewerManager.getDeneByIdentity(new Identity(actuatorActionConditionPointer));
-								String conditionExpression = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorActionConditionJSONObject, "Expression", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-								conditionBuffer.append(conditionName + "=<b>" + conditionExpression + "</b><br>");
-								//
-								// process the variables for this condition
-								//
-								JSONArray variables = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(actuatorActionConditionJSONObject, TeleonomeConstants.DENEWORD_TYPE_CONDITION_VARIABLE_POINTER, TeleonomeConstants.COMPLETE);
-								logger.debug("line 2374, variables=" + variables);
-								JSONObject variableJSONObject;
-								for(int k=0;k<variables.length();k++){		
-									variableJSONObject = variables.getJSONObject(k);
-									logger.debug("line 2380, variableJSONObject=" + variableJSONObject);
-									 variableName = variableJSONObject.getString("Name");
-									 variableValue = variableJSONObject.getString("Value");
-									 defaultValue = "";
-									 if(variableJSONObject.has("Default")) {
-										 defaultValue = variableJSONObject.getString("Default");
-									 }
-									variableBuffer.append(variableName + ":" + variableValue + "<br>");
-								}
-								
-							} catch (InvalidDenomeException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-						}
-						reportLines.add("<tr><td>"+actuatorName+"</td><td>"+actuatorExecution+"</td><td>"+actionName+"</td><td>"+expression+"</td><td>"+evaluationPostion+"</td><td>"+executionPoint+"</td><td>"+conditionBuffer.toString()+"</td><td>"+variableBuffer+"</td><td>"+commandTrue+"</td><td>"+commandFalse+"</td></tr>");	
-						
-					} 
-					
-				} 
-				reportLines.add("</table>");
-			}else {
-				logger.debug("line 2395 actuatorExecutionPositionActionListDeneIndex is null");
-				reportLines.add("<h3>No Actuators</h3><br>");
+
+
+					reportLines.add("				</div>");//class=\"row\"
+
+				}
 			}
-			reportLines.add("</div>");
-			reportLines.add("</div>");
+
+
+			reportLines.add("					<div class=\"row\">");
+			reportLines.add("						<hr class=\"col-xs-12\"  >");
+			reportLines.add("					</div>");// 
+
+			
+
+			//
+			// now do the panels for each Action
+			
+			String actionName;
+			String actionNameNoSpaces, actuatorCommandTrueExpression, actuatorCommandFalseExpression;
+			String actionExpression, executionPoint;
+			int actionEvaluationPosition;
+			JSONArray actuatorActionConditionNamesJSONArray;
+			for(int i=0;i<actionSectionInfoJSONArray.length();i++) {
+				actionInfo = actionSectionInfoJSONArray.getJSONObject(i);
+				microControllerName=actionInfo.getString("MicroControllerName");
+				actuatorName=actionInfo.getString("ActuatorName");
+				actionName=actionInfo.getString("ActionName");
+				actionExpression = actionInfo.getString("ActionExpression");
+				actionNameNoSpaces = actionName.replace(" ", "");
+				actionEvaluationPosition = actionInfo.getInt("ActionEvaluationPosition" );
+				executionPoint = actionInfo.getString("ExecutionPoint");
+				actuatorCommandTrueExpression=actionInfo.getString("ActuatorCommandTrueExpression");
+				actuatorCommandFalseExpression=actionInfo.getString("ActuatorCommandFalseExpression");
+				actuatorActionConditionPointersJSONArray = actionInfo.getJSONArray("ActuatorActionConditionPointersJSONArray" );
+				actuatorActionConditionNamesJSONArray = actionInfo.getJSONArray("ActuatorActionConditionNamesJSONArray" );
+				
+				//
+				// Breadcrumb div
+				//
+				reportLines.add("					<div class=\"ActionDetailSection\" id=\""+ actionNameNoSpaces +"Section\" style=\"display:none\">");
+				reportLines.add("						<div class=\"ActionDetailBreadcrumb\" id=\""+ actionNameNoSpaces +"CardBreadcrumb\" >");
+				reportLines.add("							<nav class=\"\" aria-label=\"breadcrumb\">");
+				reportLines.add("							<ol class=\"breadcrumb\">");
+				reportLines.add("								<li class=\"breadcrumb-item\"><a href=\"#\">"+microControllerName+"</a></li>");
+				reportLines.add("								<li class=\"breadcrumb-item\"><a href=\"#\">"+actuatorName+"</a></li>");
+				reportLines.add("								<li class=\"breadcrumb-item active\" aria-current=\"page\">"+ actionName +"</li>");
+				reportLines.add("							</ol>");
+				reportLines.add("						</nav>");
+				reportLines.add("						</div>"); //class=\"ActionDetailBreadcrumb\"
+				//
+				//Detail div
+				//
+
+				reportLines.add("						<div class=\"card ActionDetail\" id=\""+ actionNameNoSpaces +"Card\" >");
+
+
+				reportLines.add("							<div class=\"card-header text-center\">");
+				reportLines.add("								<span class=\"ActionTitle\">"+actionName+"</span> ");
+
+				reportLines.add("							</div>");
+				reportLines.add("							<div class=\"card-body\">");
+				reportLines.add("								<p class=\"card-text\">Execution Order:<b>2</b></p>");
+				reportLines.add("								<p class=\"card-text\">Execution Point:<b>"+ executionPoint + "</b></p>");
+
+				reportLines.add("								<p class=\"card-text\">Expression:<b>("+ actionExpression +")</b></p>");
+				reportLines.add("								<table class=\"ReportTable\">");
+				reportLines.add("									<tr><th>Condition Name</th><th>Expression</th><th>Variables</th></tr>");
+				reportLines.add("									<tr>");
+
+				
+
+				for(int j=0;j<actuatorActionConditionPointersJSONArray.length();j++){
+					actuatorActionConditionPointer = (String) actuatorActionConditionPointersJSONArray.getString(j);
+					conditionName = actuatorActionConditionNamesJSONArray.getString(j);
+
+
+
+					actuatorActionConditionJSONObject=null;
+					//
+					// actuatorActionConditionJSONObject is a deneword get the value which is a denepointer and render it
+					try {
+						logger.debug("line 2368 actuatorActionConditionPointer=" +actuatorActionConditionPointer);
+						actuatorActionConditionJSONObject = aDenomeViewerManager.getDeneByIdentity(new Identity(actuatorActionConditionPointer));
+						String conditionExpression = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorActionConditionJSONObject, "Expression", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+						reportLines.add("										<td>" + conditionName + "</td>");
+						reportLines.add("										<td><b>" + conditionExpression + "</b></td>");
+						reportLines.add("										<td>");
+						reportLines.add("											<table>");
+						//
+						// process the variables for this condition
+						//
+						JSONArray variables = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(actuatorActionConditionJSONObject, TeleonomeConstants.DENEWORD_TYPE_CONDITION_VARIABLE_POINTER, TeleonomeConstants.COMPLETE);
+						logger.debug("line 2374, variables=" + variables);
+						JSONObject variableJSONObject;
+						for(int k=0;k<variables.length();k++){		
+							variableJSONObject = variables.getJSONObject(k);
+							logger.debug("line 2380, variableJSONObject=" + variableJSONObject);
+							variableName = variableJSONObject.getString("Name");
+							variableValue = variableJSONObject.getString("Value");
+							reportLines.add("												<tr><td>"+variableName+"</td><td>"+variableValue+"</td></tr>");
+							defaultValue = "";
+							if(variableJSONObject.has("Default")) {
+								defaultValue = variableJSONObject.getString("Default");
+							}
+
+						}
+					} catch (InvalidDenomeException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					reportLines.add("											</table>");
+					reportLines.add("										</td>");
+				}
+				reportLines.add("								</table> ");// class=\"ReportTable\">");
+				reportLines.add("								<<p class=\"card-text\">Actuator Command Code True Expression:"+actuatorCommandTrueExpression+"</p>");
+				reportLines.add("								<<p class=\"card-text\">Actuator Command Code False Expression:"+actuatorCommandFalseExpression+"</p>");
+				reportLines.add("								</div>");// card-body
+				reportLines.add("								<div class=\"card-footer\">");
+				reportLines.add("									<a href=\"#\" class=\"card-link\">Card link</a>");
+				reportLines.add("									<a href=\"#\" class=\"card-link\">Another link</a>");
+				reportLines.add("								</div>");
+				reportLines.add("						</div>"); //class=\"card ActionDetail\"
+				reportLines.add("					</div>"); //class=\"ActionDetailSection\"
+			}
+
+			reportLines.add("				</div>"); //class=\"ActuatorDetail\ 
+
+
+			reportLines.add("			</div>"); //class=\"panel-body\"
+
+
+			reportLines.add("		</div>");//panel panel-default">"); 
+			reportLines.add("	</div>");// class=\"row Microcontroller-Details\" "); 
+
 		}
-		reportLines.add("</body></html>");
-		return reportLines;
-	}
+
+		reportLines.add("</div>");// class=\"container\" id=\"Detail-Area\">"); 
+		
+		reportLines.add("<script src=\"https://code.jquery.com/jquery-1.10.2.js\"></script>");
+		reportLines.add("<script>");
+		reportLines.add("	function show_detail(toShow){");
+		reportLines.add("		$('.SensorDetail').hide();");
+		reportLines.add("		        $('.ActuatorDetail').hide();");
+		reportLines.add("		       $('.ActionDetailSection').hide();");
+		reportLines.add("		var show = document.getElementById(toShow);");
+		reportLines.add("		show.style.display = \"\";");
+		reportLines.add("	}");
+
+		reportLines.add("	function show_action(toShow) {");
+		reportLines.add("	$('.ActionDetailSection').hide();");
+		reportLines.add("		var show = document.getElementById(toShow);");
+		reportLines.add("		show.style.display = \"\";");        
+		reportLines.add("	}");
+
+		reportLines.add("	$(document).ready(function(){");
+		reportLines.add("	    $('.Microcontroller-Details').hide();");
+		  
+		reportLines.add("	    $('.dropdown-submenu a.test').on(\"click\", function(e){");
+		reportLines.add("	    	$('.dropdown-submenu>ul').hide();");
+		reportLines.add("	    	$(this).next('ul').toggle();");
+		reportLines.add("	    	e.stopPropagation();");
+		reportLines.add("	    	e.preventDefault();");
+		reportLines.add("	    });");
+		       
+		reportLines.add("	    $('.dropdown-submenu a.test').on(\"click\", function(e){");
+		reportLines.add("	    	$('.dropdown-submenu>ul').hide();");
+		reportLines.add("	    	$(this).next('ul').toggle();");
+		reportLines.add("	    	e.stopPropagation();");
+		reportLines.add("	    	e.preventDefault();");
+		reportLines.add("	    });");
+		        
+
+
+		reportLines.add("	   $(\".Microcontroller\").on('click',function(){");
+		reportLines.add("	   		$('.Microcontroller-Details').hide();");
+
+		reportLines.add("	   		var microName = $(this).data(\"name\");");
+		reportLines.add("	   		$(\"#MainDiagram\").hide();");
+		reportLines.add("	   		$('.ActionDetailSection').hide();");
+		       
+		reportLines.add("	   		$(\"#\" + microName.replace(/ /g,'') +\"-Details\").show();");
+		reportLines.add("	    });");
+
+		reportLines.add("	    $(\".CloseDetail\").on('click',function(){");
+		reportLines.add("	    $('.ActionDetailSection').hide();");
+		reportLines.add("	    $('.SensorDetail').hide();");
+
+		reportLines.add("	    $('.Microcontroller-Details').hide();");
+		reportLines.add("	    $(\"#MainDiagram\").show();");
+		reportLines.add("	    });");
+		reportLines.add("	});");    
+		reportLines.add("</script>");
+	
+	reportLines.add("</body></html>");
+	return reportLines;
+}
 }

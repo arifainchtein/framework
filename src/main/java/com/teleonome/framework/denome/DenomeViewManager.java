@@ -114,6 +114,7 @@ public class DenomeViewManager {
 	Hashtable<String,ArrayList> deneWordsToRememberByTeleonome = new Hashtable();
 	Hashtable<String,ArrayList> deneChainsToRememberByTeleonome = new Hashtable();
 	JSONArray rememeberedDeneWordsMnemosyconDenesJSONArray = new JSONArray();
+	JSONArray sensorDenesJSONArray;
 	
 	public DenomeViewManager(){
 		logger = Logger.getLogger(getClass());
@@ -214,6 +215,9 @@ public class DenomeViewManager {
 		loadDenome( denomeJSONObject);
 	}
 
+	public JSONArray getSensorDenesJSONArray() {
+		return sensorDenesJSONArray;
+	}
 	// ********************************************
 	public void loadDenome(JSONObject denomeJSONObject) throws MissingDenomeException{//
 		
@@ -325,7 +329,7 @@ public class DenomeViewManager {
 
 			JSONArray internalNucleusDeneChains = (JSONArray) internalNucleus.get("DeneChains");
 			JSONObject aDeneChainJSONObject, aDeneValueJSONObject;
-			JSONArray sensorDenesJSONArray;
+			
 			JSONArray sensorValuesJSONArray;
 
 			JSONArray onStartActionsDenesJSONArray, actuatorDenesJSONArray, descriptiveDenesJSONArray;
