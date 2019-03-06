@@ -2258,9 +2258,9 @@ public class DenomeUtils {
 		int mainHeight= 500;
 		int arrowHeadHeight=10;
 		int arrowHeadWidth=10;
-		int lineArrowLength=50;
+		int lineArrowLength=40;
 		int mcuBoxWidth=180;
-		int mcuBoxTotalWidth=mcuBoxWidth+ lineArrowLength;
+		int mcuBoxTotalWidth=mcuBoxWidth+ lineArrowLength + arrowHeadWidth;
 		
 		int mcuBoxHeight=50;
 		int mainWidth= 430 + mcuBoxTotalWidth* numberOfMCU;
@@ -2370,9 +2370,9 @@ public class DenomeUtils {
 		//
 		//back up to external data
 		// 170
-		int bottomOfExternalDataY = externalDataY + mcuBoxHeight+arrowHeadHeight;
+		int bottomOfExternalDataY = externalDataY + mcuBoxHeight+2*arrowHeadHeight;
 		
-		reportLines.add("<line x1=\""+(middleOfExternalDataBoxX+arrowHeadWidth)+"\" y1=\""+ secondRowTextY +"\" x2=\""+ (middleOfExternalDataBoxX+arrowHeadWidth)+"\" y2=\""+bottomOfExternalDataY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+		reportLines.add("<line x1=\""+(middleOfExternalDataBoxX-arrowHeadWidth)+"\" y1=\""+ secondRowTextY +"\" x2=\""+ (middleOfExternalDataBoxX-arrowHeadWidth)+"\" y2=\""+bottomOfExternalDataY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 		reportLines.add("</g>");
 		reportLines.add("</svg>");
 
