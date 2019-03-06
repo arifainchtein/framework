@@ -2282,12 +2282,12 @@ public class DenomeUtils {
 		
 		int boundingRectangleX=50;
 		int boundingRectangleY=50;
-		 //                               50                    250
-		int boundingRectangleWidth=boundingRectangleX  + mcuBoxTotalWidth* (numberOfMCU + 1) ;
+		 //                                                   250
+		int boundingRectangleWidth= 20 + mcuBoxTotalWidth* (numberOfMCU + 1) ;
 		int boundingRectangleHeight=boundingRectangleY + 2*mcuBoxHeight + arrowGoingDownLength +  boundingRectangleY;
 		
 		
-		int mainWidth=boundingRectangleWidth + 20;
+		int mainWidth=2*boundingRectangleWidth + 20;
 		
 		int startXValueForMCUBox=externalDataLineX1+lineArrowLength;
 		
@@ -2359,7 +2359,7 @@ public class DenomeUtils {
 		reportLines.add("<rect x=\""+currentX+ "\" y=\""+secondRowY+"\" width=\""+mcuBoxWidth +"\" height=\""+ mcuBoxHeight + "\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 159, 223); stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+ (currentX+nameMargin) + "\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Mnemosycons</text>");
 		//      460 = 500-40
-		int endOfArrowToAsyncBoxX = currentX-lineArrowLength-arrowHeadWidth;
+		int endOfArrowToAsyncBoxX = currentX-lineArrowLength;//-arrowHeadWidth;
 
 		reportLines.add("<line x1=\""+currentX+"\" y1=\""+ secondRowTextY +"\" x2=\""+ endOfArrowToAsyncBoxX +"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 
