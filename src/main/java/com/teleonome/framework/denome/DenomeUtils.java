@@ -2282,7 +2282,7 @@ public class DenomeUtils {
 		//                100                    50                50                    20
 		int secondRowY= startYValueForMCUBox + mcuBoxHeight + arrowGoingDownLength + arrowHeadHeight;
 		//                    220           25             
-		int secondRowTextY = 10+secondRowY + mcuBoxHeight/2 ;
+		int secondRowTextY = 5+secondRowY + mcuBoxHeight/2 ;
 
 		reportLines.add("<svg  id=\"MainDiagram\" height=\""+ mainHeight+"\" width=\""+ mainWidth+"\">");
 		reportLines.add("<defs>");
