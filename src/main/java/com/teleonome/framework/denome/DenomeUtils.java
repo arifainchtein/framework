@@ -2269,7 +2269,7 @@ public class DenomeUtils {
 		int nameMargin=10;
 		int textY=130;
 		
-
+		
 		int mcuLineYPos=startYValueForMCUBox + mcuBoxHeight/2;
 
 		int boundingRectangleX=50;
@@ -2370,7 +2370,8 @@ public class DenomeUtils {
 		//
 		//back up to external data
 		// 170
-		int bottomOfExternalDataY = externalDataY + mcuBoxHeight-arrowHeadWidth;
+		int bottomOfExternalDataY = externalDataY + mcuBoxHeight+arrowHeadHeight;
+		
 		reportLines.add("<line x1=\""+(middleOfExternalDataBoxX+arrowHeadWidth)+"\" y1=\""+ secondRowTextY +"\" x2=\""+ (middleOfExternalDataBoxX+arrowHeadWidth)+"\" y2=\""+bottomOfExternalDataY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 		reportLines.add("</g>");
 		reportLines.add("</svg>");
