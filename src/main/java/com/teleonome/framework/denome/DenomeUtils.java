@@ -2419,7 +2419,11 @@ public class DenomeUtils {
 			sensorRequestQueuePositionDeneWordIndex = (ArrayList)pointerToMicroControllerSensorDenesVectorIndex.get( microControllerPointer);
 
 			allSensorDenesForMicroController = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get(microControllerPointer);
-			logger.debug("line 2422 allSensorDenesForMicroController="+ allSensorDenesForMicroController.size() );
+			if(allSensorDenesForMicroController!=null) {
+				logger.debug("line 2422 allSensorDenesForMicroController="+ allSensorDenesForMicroController.size() );
+			}else {
+				logger.debug("line 2422 allSensorDenesForMicroController is null");
+			}
 			//					
 
 
