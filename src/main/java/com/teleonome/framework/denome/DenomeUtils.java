@@ -2650,6 +2650,8 @@ public class DenomeUtils {
 						actionInfo.put("ActuatorActionConditionPointersJSONArray", actuatorActionConditionPointersJSONArray);
 						actionInfo.put("ActuatorActionConditionNamesJSONArray", actuatorActionConditionNamesJSONArray);
 						
+						logger.debug("line 2653, for actuatorCommandTrueExpression="  + actuatorCommandTrueExpression);
+						
 						
 						
 						reportLines.add("							<li><a tabindex=\"-1\" class=\"action-link\"  href=\"#\"  onclick=\"return show_action('"+actionNameNoSpaces+"Section');\" >" +actuatorExecution +"."+ actionEvaluationPosition +" - " + actionName + "</a></li>");
@@ -2664,7 +2666,8 @@ public class DenomeUtils {
 				}
 			}
 
-
+			logger.debug("line 2669, finished sensors="  );
+			
 			reportLines.add("					<div class=\"row\">");
 			reportLines.add("						<hr class=\"col-xs-12\"  >");
 			reportLines.add("					</div>");// 
