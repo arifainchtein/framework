@@ -2359,7 +2359,7 @@ public class DenomeUtils {
 		reportLines.add("<rect x=\""+currentX+ "\" y=\""+secondRowY+"\" width=\""+mcuBoxWidth +"\" height=\""+ mcuBoxHeight + "\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 159, 223); stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+ (currentX+nameMargin) + "\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Mnemosycons</text>");
 		//      460 = 500-40
-		int endOfArrowToAsyncBoxX = currentX-lineArrowLength;//-arrowHeadWidth;
+		int endOfArrowToAsyncBoxX = currentX-lineArrowLength-2*arrowHeadWidth;
 
 		reportLines.add("<line x1=\""+currentX+"\" y1=\""+ secondRowTextY +"\" x2=\""+ endOfArrowToAsyncBoxX +"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 
