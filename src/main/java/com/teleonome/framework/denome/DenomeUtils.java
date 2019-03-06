@@ -2260,6 +2260,7 @@ public class DenomeUtils {
 		int arrowHeadWidth=10;
 		int lineArrowLength=50;
 		int mcuBoxWidth=180;
+		//      250                 180           50                  20
 		int mcuBoxTotalWidth=mcuBoxWidth+ lineArrowLength + 2*arrowHeadWidth;
 		int mcuBoxHeight=50;
 		
@@ -2281,7 +2282,8 @@ public class DenomeUtils {
 		
 		int boundingRectangleX=50;
 		int boundingRectangleY=50;
-		int boundingRectangleWidth=boundingRectangleX  + mcuBoxTotalWidth* (numberOfMCU + 1) + boundingRectangleX;
+		 //                               50                    250
+		int boundingRectangleWidth=boundingRectangleX  + mcuBoxTotalWidth* (numberOfMCU + 1) ;
 		int boundingRectangleHeight=boundingRectangleY + 2*mcuBoxHeight + arrowGoingDownLength +  boundingRectangleY;
 		
 		
