@@ -2608,21 +2608,21 @@ public class DenomeUtils {
 
 						actionJSONObject = actionsJSONArray.getJSONObject(l);
 						actionName =  actionJSONObject.getString( TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
-						actionEvaluationPosition = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.EVALUATION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						actionEvaluationPosition = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.EVALUATION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						actionNameNoSpaces = actionName.replace(" ", "");
-						actionExpression = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_ACTION_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						executionPoint = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						actionExpression = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTION_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						executionPoint = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						actuatorCommandTrueExpression="";
 						actuatorCommandFalseExpression="";
-						Object o =  DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_TRUE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						Object o =  DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_TRUE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						if(o !=null) {
 							actuatorCommandTrueExpression=(String)o;
 						}
-						 o =  DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						 o =  DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							if(o !=null) {
 								actuatorCommandFalseExpression=(String)o;
 							}
-						actuatorCommandFalseExpression = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						actuatorCommandFalseExpression = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						
 						
 						actionInfo = new JSONObject();
