@@ -2457,77 +2457,72 @@ public class DenomeUtils {
 
 			reportLines.add("				<div class=\"SensorDetail\" id=\""+microControllerNameNoSpaces+"-SensorDetails\" style=\"display: none;\"> ");  			
 
-
-			reportLines.add("					<div class=\"row\">");
-			//
-			// draw every sensor with a 3 column button
-			for(int j=0;j<allSensorDenesForMicroController.size();j++){
-				aSensorDeneJSONObject = (JSONObject) allSensorDenesForMicroController.elementAt(j);
-				isSensor = DenomeUtils.isDeneOfType(aSensorDeneJSONObject, TeleonomeConstants.DENE_TYPE_SENSOR);
-				logger.info("line 491 aDeneJSONObject.=" + aSensorDeneJSONObject.getString("Name") + " isSensor="+isSensor);
-				if(isSensor){
-					reportLines.add("						<div class=\"col-sm-3 sensor\">");
-					reportLines.add("							<button class=\"btn btn-primary dropdown-toggle sensor\" type=\"button\">"+aSensorDeneJSONObject.getString("Name") +" </button>");
-					reportLines.add("						</div>");
-				}
-			}
-
-			reportLines.add("					</div>");
-
-			reportLines.add("					<div class=\"row\">");
-			reportLines.add("						<hr class=\"col-xs-12\"  >");
-			reportLines.add("					</div>");// 
-
-			reportLines.add("					Sensor Values in order of GetSensorData String");
-
-			//
-			// here is the GetSensorData Table
-			//
-
-			if(sensorRequestQueuePositionDeneWordIndex!=null){
-				reportLines.add("<h3>Sensors</h3><br>");
-				reportLines.add("<table class=\"ReportTable\">");
-				reportLines.add("<tr><th>Sensor Name</th><th>Value</th><th>"+TeleonomeConstants.DENEWORD_SENSOR_REQUEST_QUEUE_POSITION+"</th><th>"+TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE+"</th><th>"+TeleonomeConstants.DENEWORD_REPORTING_ADDRESS+"</th></tr>");
-
-				logger.debug("line 2229 sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size());
-				for (int m=0;m<sensorRequestQueuePositionDeneWordIndex.size();m++){
-					//					sensorDeneJSONObject = ((Map.Entry<JSONObject, Integer>)sensorRequestQueuePositionDeneWordIndex.get(m)).getKey();
-					//					sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(sensorDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					//					logger.debug("line 2246 sensorValuesPointersJSONArray=" + sensorValuesPointersJSONArray);
-					//					sensorValuesJSONArray = aDenomeViewerManager.loadDenesFromPointers(sensorValuesPointersJSONArray);
-					//					
-					//					logger.debug("line 2248 sensorValuesJSONArray=" + sensorValuesJSONArray.length());
-					//					for(int k=0;k<sensorValuesJSONArray.length();k++){
-					//										value = sensorValuesJSONArray.getJSONObject(k);
-					valueMap = (Map.Entry<JSONObject, Integer>)sensorRequestQueuePositionDeneWordIndex.get(m);
-					sensorValueDeneJSONObject =valueMap.getKey();
-					logger.debug("line 2256,  sensorValueDeneJSONObject=" + sensorValueDeneJSONObject);
-					sensorValueName = sensorValueDeneJSONObject.getString("Name");
-					logger.debug("line 2258,  sensorValueName=" + sensorValueName);
-					sensorName = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("line 2260,  sensorName=" + sensorName);
-
-					sensorRequestQueuePosition = valueMap.getValue();
-					logger.debug("line 2264 sensorRequestQueuePosition=" + sensorRequestQueuePosition);
-					reportingAddress = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, TeleonomeConstants.DENEWORD_REPORTING_ADDRESS, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("line 2266 reportingAddress=" + reportingAddress);
-					unitsText="";
-					try {
-						reportingAddressDeneWord = (JSONObject) DenomeUtils.getDeneWordByIdentity(pulse, new Identity(reportingAddress), TeleonomeConstants.COMPLETE);
-						logger.debug("line 2270 reportingAddressDeneWord=" + reportingAddressDeneWord);
-						unitsText = reportingAddressDeneWord.getString( TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE);
-						logger.debug("line 2272 unitsText=" + unitsText);
-					} catch (InvalidDenomeException e) {
-						// TODO Auto-generated catch block
-						logger.warn(Utils.getStringException(e));
+			if(allSensorDenesForMicroController!=null && allSensorDenesForMicroController.size()>0) {
+				reportLines.add("					<div class=\"row\">");
+				//
+				// draw every sensor with a 3 column button
+				for(int j=0;j<allSensorDenesForMicroController.size();j++){
+					aSensorDeneJSONObject = (JSONObject) allSensorDenesForMicroController.elementAt(j);
+					isSensor = DenomeUtils.isDeneOfType(aSensorDeneJSONObject, TeleonomeConstants.DENE_TYPE_SENSOR);
+					logger.info("line 491 aDeneJSONObject.=" + aSensorDeneJSONObject.getString("Name") + " isSensor="+isSensor);
+					if(isSensor){
+						reportLines.add("						<div class=\"col-sm-3 sensor\">");
+						reportLines.add("							<button class=\"btn btn-primary dropdown-toggle sensor\" type=\"button\">"+aSensorDeneJSONObject.getString("Name") +" </button>");
+						reportLines.add("						</div>");
 					}
-					reportLines.add("<tr><td>"+ sensorName + "</td><td>"+sensorValueName+"</td><td>"+sensorRequestQueuePosition+"</td><td>"+unitsText+"</td><td>"+reportingAddress+"</td></tr>");		
-					logger.debug("line 2264");
-
-					//}
 				}
-				reportLines.add("</table>");
-			} else {
+
+				reportLines.add("					</div>");
+				reportLines.add("					<div class=\"row\">");
+				reportLines.add("						<hr class=\"col-xs-12\"  >");
+				reportLines.add("					</div>");// 
+
+				reportLines.add("					Sensor Values in order of GetSensorData String");
+				if(sensorRequestQueuePositionDeneWordIndex!=null){
+					reportLines.add("<h3>Sensors</h3><br>");
+					reportLines.add("<table class=\"ReportTable\">");
+					reportLines.add("<tr><th>Sensor Name</th><th>Value</th><th>"+TeleonomeConstants.DENEWORD_SENSOR_REQUEST_QUEUE_POSITION+"</th><th>"+TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE+"</th><th>"+TeleonomeConstants.DENEWORD_REPORTING_ADDRESS+"</th></tr>");
+
+					logger.debug("line 2229 sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size());
+					for (int m=0;m<sensorRequestQueuePositionDeneWordIndex.size();m++){
+						//					sensorDeneJSONObject = ((Map.Entry<JSONObject, Integer>)sensorRequestQueuePositionDeneWordIndex.get(m)).getKey();
+						//					sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(sensorDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						//					logger.debug("line 2246 sensorValuesPointersJSONArray=" + sensorValuesPointersJSONArray);
+						//					sensorValuesJSONArray = aDenomeViewerManager.loadDenesFromPointers(sensorValuesPointersJSONArray);
+						//					
+						//					logger.debug("line 2248 sensorValuesJSONArray=" + sensorValuesJSONArray.length());
+						//					for(int k=0;k<sensorValuesJSONArray.length();k++){
+						//										value = sensorValuesJSONArray.getJSONObject(k);
+						valueMap = (Map.Entry<JSONObject, Integer>)sensorRequestQueuePositionDeneWordIndex.get(m);
+						sensorValueDeneJSONObject =valueMap.getKey();
+						logger.debug("line 2256,  sensorValueDeneJSONObject=" + sensorValueDeneJSONObject);
+						sensorValueName = sensorValueDeneJSONObject.getString("Name");
+						logger.debug("line 2258,  sensorValueName=" + sensorValueName);
+						sensorName = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("line 2260,  sensorName=" + sensorName);
+
+						sensorRequestQueuePosition = valueMap.getValue();
+						logger.debug("line 2264 sensorRequestQueuePosition=" + sensorRequestQueuePosition);
+						reportingAddress = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(sensorValueDeneJSONObject, TeleonomeConstants.DENEWORD_REPORTING_ADDRESS, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("line 2266 reportingAddress=" + reportingAddress);
+						unitsText="";
+						try {
+							reportingAddressDeneWord = (JSONObject) DenomeUtils.getDeneWordByIdentity(pulse, new Identity(reportingAddress), TeleonomeConstants.COMPLETE);
+							logger.debug("line 2270 reportingAddressDeneWord=" + reportingAddressDeneWord);
+							unitsText = reportingAddressDeneWord.getString( TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE);
+							logger.debug("line 2272 unitsText=" + unitsText);
+						} catch (InvalidDenomeException e) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e));
+						}
+						reportLines.add("<tr><td>"+ sensorName + "</td><td>"+sensorValueName+"</td><td>"+sensorRequestQueuePosition+"</td><td>"+unitsText+"</td><td>"+reportingAddress+"</td></tr>");		
+						logger.debug("line 2264");
+
+						//}
+					}
+					reportLines.add("</table>");
+				}
+			}else {
 				logger.debug("line 2244 sensorDeneVector is null");
 				reportLines.add("<h3>No Sensors</h3><br>");
 
@@ -2537,8 +2532,7 @@ public class DenomeUtils {
 
 			reportLines.add("				</div>"); //class=\"SensorDetail\ 
 
-			reportLines.add("				<div class=\"ActuatorDetail\" id=\""+microControllerNameNoSpaces+"-ActuatorDetails\" style=\"display: none;\"> ");  
-
+			
 			//
 			// create an element for every actuator in the microcontroller
 			//
@@ -2546,6 +2540,10 @@ public class DenomeUtils {
 			JSONArray actionSectionInfoJSONArray = new  JSONArray();
 			actuatorExecutionPositionActionListDeneIndex = (ArrayList<Map.Entry<JSONObject, Integer>>)microControllerNameActuatorsIndex.get(microControllerPointer);
 			if(actuatorExecutionPositionActionListDeneIndex!=null && actuatorExecutionPositionActionListDeneIndex.size()>0){
+				
+			reportLines.add("				<div class=\"ActuatorDetail\" id=\""+microControllerNameNoSpaces+"-ActuatorDetails\" style=\"display: none;\"> ");  
+
+				
 				counter=0;
 				for(Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionActionListDeneIndex) {
 					anActuatorActionListDeneJSONObject = entry4.getKey();
