@@ -2257,7 +2257,7 @@ public class DenomeUtils {
 		int startingY = 30;
 		int mainHeight= 500;
 		int lineArrowLength=40;
-		int mcuBoxWidth=180;
+		int mcuBoxWidth=150;
 		int mcuBoxTotalWidth=mcuBoxWidth+ lineArrowLength;
 		
 		int mcuBoxHeight=50;
