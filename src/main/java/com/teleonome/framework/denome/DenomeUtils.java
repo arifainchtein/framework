@@ -2547,7 +2547,7 @@ public class DenomeUtils {
 				counter=0;
 				for(Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionActionListDeneIndex) {
 					anActuatorActionListDeneJSONObject = entry4.getKey();
-					logger.debug("line 2545 anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject.toString(4));
+					//logger.debug("line 2545 anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject.toString(4));
 
 					//logger.debug("anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject);
 					//
@@ -2603,14 +2603,18 @@ public class DenomeUtils {
 					// loop over every action of the actuator
 					pointersToActionsJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_ACTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					actionsJSONArray = aDenomeViewerManager.loadDenesFromPointers(pointersToActionsJSONArray);
-					logger.debug("line 2574, for "  + microControllerPointer + " there are pointersToActionsJSONArray=" + pointersToActionsJSONArray.length() +  " actions=" + actionsJSONArray.length());
+					logger.debug("line 2606, for "  + microControllerPointer + " there are pointersToActionsJSONArray=" + pointersToActionsJSONArray.length() +  " actions=" + actionsJSONArray.length());
 					for (int l=0;l<actionsJSONArray.length();l++) {
 
 						actionJSONObject = actionsJSONArray.getJSONObject(l);
 						actionName =  actionJSONObject.getString( TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
 						actionEvaluationPosition = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.EVALUATION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("line 2612, for actionEvaluationPosition="  + actionEvaluationPosition);
+						
 						actionNameNoSpaces = actionName.replace(" ", "");
 						actionExpression = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("line 2612, for actionExpression="  + actionExpression);
+						
 						executionPoint = TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT_IMMEDIATE;
 						Object o = DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTION_EXECUTION_POINT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						if(o!=null ) {
@@ -2628,6 +2632,7 @@ public class DenomeUtils {
 							}
 						actuatorCommandFalseExpression = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actionJSONObject, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						
+						logger.debug("line 2635, for actuatorCommandTrueExpression="  + actuatorCommandTrueExpression);
 						
 						actionInfo = new JSONObject();
 						actionSectionInfoJSONArray.put(actionInfo);
