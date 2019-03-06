@@ -2369,7 +2369,7 @@ public class DenomeUtils {
 		// that point is defined by
 		int middleOfExternalDataBoxX = externalDataX + mcuBoxWidth/2; // 100+75
 		//    285=460-175
-		int asyncBoxWidth = endOfArrowToAsyncBoxX - middleOfExternalDataBoxX;
+		int asyncBoxWidth = endOfArrowToAsyncBoxX - middleOfExternalDataBoxX-2*lineArrowLength;
 		int asyncBoxStartingX = endOfArrowToAsyncBoxX-asyncBoxWidth;
 		reportLines.add("<rect x=\""+asyncBoxStartingX+"\" y=\""+secondRowY+"\" width=\""+asyncBoxWidth+"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 192, 159); stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+(asyncBoxStartingX + nameMargin)+"\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Asynchronous Period (60 seconds)</text>");
