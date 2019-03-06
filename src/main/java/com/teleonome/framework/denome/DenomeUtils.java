@@ -2256,7 +2256,9 @@ public class DenomeUtils {
 		int startingX = 400;
 		int startingY = 30;
 		int mainHeight= 500;
-		int lineArrowLength=40;
+		int arrowHeadHeight=10;
+		int arrowHeadWidth=10;
+		int lineArrowLength=50;
 		int mcuBoxWidth=150;
 		int mcuBoxTotalWidth=mcuBoxWidth+ lineArrowLength;
 		
@@ -2278,7 +2280,7 @@ public class DenomeUtils {
 		int externalDataText=50;
 		int externalDataLineX1=250;
 		int arrowGoingDownLength=50;
-		int arrowHeadHeight=20;
+		
 		//                100                    50                50                    20
 		int secondRowY= startYValueForMCUBox + mcuBoxHeight + arrowGoingDownLength + arrowHeadHeight;
 		//                    220           25             
@@ -2337,15 +2339,7 @@ public class DenomeUtils {
 		// at this point currentX is the beginning of the last box of the first row
 		// and the beginning of the first box f the second row
 
-		//		reportLines.add("<rect class=\"Microcontroller\" data-name=\"Mother Microcontroller\"  x=\"500\" y=\"100\" width=\"150\" height=\"50\" rx=\"11\" ry=\"11\" style=\"fill: rgb(185, 240, 174); stroke: black; stroke-width: 4px;\"/>");
-		//		reportLines.add("<text class=\"Microcontroller\" data-name=\"Mother Microcontroller\"  x=\"510\" y=\"130\" font-family=\"Verdana\" font-size=\"12\" >Mother Microcontroller</text>");
-		//		reportLines.add("<line x1=\"650\" y1=\"125\" x2=\"680\" y2=\"125\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
-		//
-		//		reportLines.add("<rect class=\"Microcontroller\" data-name=\"SFTP Microcontroller\"  x=\"700\" y=\"100\" width=\"150\" height=\"50\" rx=\"11\" ry=\"11\" style=\"fill: rgb(185, 240, 174); stroke: black; stroke-width: 4px;\"/>");
-		//		reportLines.add("<text class=\"Microcontroller\" data-name=\"SFTP Microcontroller\"  x=\"710\" y=\"130\" font-family=\"Verdana\" font-size=\"12\" >SFTP Microcontroller</text>");
-		//		reportLines.add("<line x1=\"775\" y1=\"150\" x2=\"775\" y2=\"200\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
-
-
+		
 		reportLines.add("<rect x=\""+currentX + "\" y=\""+ secondRowY +"\" width=\""+mcuBoxWidth +"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 220, 159); stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+( currentX + nameMargin)+"\" y=\""+secondRowTextY + "\" font-family=\"Verdana\" font-size=\"12\" >Analyticons</text>");
 		reportLines.add("<line x1=\""+ currentX +"\" y1=\""+ secondRowTextY+"\" x2=\""+(currentX-lineArrowLength) +"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
@@ -2374,7 +2368,7 @@ public class DenomeUtils {
 		//
 		//back up to external data
 		// 170
-		int bottomOfExternalDataY = externalDataY + mcuBoxHeight;
+		int bottomOfExternalDataY = externalDataY + mcuBoxHeight-arrowHeadWidth;
 		reportLines.add("<line x1=\""+middleOfExternalDataBoxX+"\" y1=\""+ secondRowTextY +"\" x2=\""+ middleOfExternalDataBoxX+"\" y2=\""+bottomOfExternalDataY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 		reportLines.add("</g>");
 		reportLines.add("</svg>");
