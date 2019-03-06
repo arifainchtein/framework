@@ -2359,7 +2359,7 @@ public class DenomeUtils {
 		reportLines.add("<rect x=\""+currentX+ "\" y=\""+secondRowY+"\" width=\""+mcuBoxWidth +"\" height=\""+ mcuBoxHeight + "\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 159, 223); stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+ (currentX+nameMargin) + "\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Mnemosycons</text>");
 		//      460 = 500-40
-		int endOfArrowToAsyncBoxX = currentX-lineArrowLength-2*arrowHeadWidth;
+		int endOfArrowToAsyncBoxX = currentX-lineArrowLength-arrowHeadWidth;
 
 		reportLines.add("<line x1=\""+currentX+"\" y1=\""+ secondRowTextY +"\" x2=\""+ endOfArrowToAsyncBoxX +"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 
@@ -2369,7 +2369,7 @@ public class DenomeUtils {
 		// that point is defined by
 		int middleOfExternalDataBoxX = externalDataX + mcuBoxWidth/2; // 100+75
 		//    285=460-175
-		int asyncBoxWidth = endOfArrowToAsyncBoxX - middleOfExternalDataBoxX-lineArrowLength;
+		int asyncBoxWidth = endOfArrowToAsyncBoxX - middleOfExternalDataBoxX;
 		int asyncBoxStartingX = endOfArrowToAsyncBoxX-asyncBoxWidth;
 		reportLines.add("<rect x=\""+asyncBoxStartingX+"\" y=\""+secondRowY+"\" width=\""+asyncBoxWidth+"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 192, 159); stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+(asyncBoxStartingX + nameMargin)+"\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Asynchronous Period (60 seconds)</text>");
