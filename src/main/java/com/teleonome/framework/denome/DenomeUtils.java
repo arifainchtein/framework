@@ -2415,7 +2415,7 @@ public class DenomeUtils {
 		ArrayList<Map.Entry<JSONObject, Integer>> actuatorRequestQueuePositionDeneWordIndex = new ArrayList(); 
 		Hashtable pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex = aDenomeViewerManager.getPointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex();
 		aDenomeViewerManager.getPointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex();
-		Vector allSensorDenesForMicroController;
+		ArrayList allSensorDenesForMicroController;
 		JSONObject aSensorDeneJSONObject;
 		boolean isSensor;
 
@@ -2428,7 +2428,7 @@ public class DenomeUtils {
 			logger.info("line 2414,pointerToMicroController=" + microControllerPointer );
 			sensorRequestQueuePositionDeneWordIndex = (ArrayList)pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex.get( microControllerPointer);
 
-			allSensorDenesForMicroController = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get(microControllerPointer);
+			allSensorDenesForMicroController = (ArrayList)pointerToMicroControllerSensorDenesVectorIndex.get(microControllerPointer);
 			if(allSensorDenesForMicroController!=null) {
 				logger.debug("line 2422 allSensorDenesForMicroController="+ allSensorDenesForMicroController.size() );
 			}else {
@@ -2472,7 +2472,7 @@ public class DenomeUtils {
 				//
 				// draw every sensor with a 3 column button
 				for(int j=0;j<allSensorDenesForMicroController.size();j++){
-					aSensorDeneJSONObject = (JSONObject) allSensorDenesForMicroController.elementAt(j);
+					aSensorDeneJSONObject = (JSONObject) allSensorDenesForMicroController.get(j);
 					isSensor = DenomeUtils.isDeneOfType(aSensorDeneJSONObject, TeleonomeConstants.DENE_TYPE_SENSOR);
 					logger.info("line 491 aDeneJSONObject.=" + aSensorDeneJSONObject.getString("Name") + " isSensor="+isSensor);
 					if(isSensor){
