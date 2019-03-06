@@ -2259,12 +2259,12 @@ public class DenomeUtils {
 		int arrowHeadHeight=10;
 		int arrowHeadWidth=10;
 		int lineArrowLength=50;
-		int mcuBoxWidth=200;
+		int mcuBoxWidth=180;
 		int mcuBoxTotalWidth=mcuBoxWidth+ lineArrowLength;
 		
 		int mcuBoxHeight=50;
 		int mainWidth= 430 + mcuBoxTotalWidth* numberOfMCU;
-		int startXValueForMCUBox=300;
+		
 		int startYValueForMCUBox=100;
 		int nameMargin=10;
 		int textY=130;
@@ -2278,8 +2278,10 @@ public class DenomeUtils {
 		int externalDataX=100;
 		int externalDataY=100;
 		int externalDataText=50;
-		int externalDataLineX1=250;
+		int externalDataLineX1=externalDataX + mcuBoxWidth;
 		int arrowGoingDownLength=50;
+		
+		int startXValueForMCUBox=externalDataLineX1+lineArrowLength;
 		
 		//                100                    50                50                    20
 		int secondRowY= startYValueForMCUBox + mcuBoxHeight + arrowGoingDownLength + arrowHeadHeight;
@@ -2300,7 +2302,7 @@ public class DenomeUtils {
 
 		reportLines.add("<rect  x=\""+externalDataX+"\" y=\""+externalDataY+"\" width=\""+mcuBoxWidth +"\" height=\""+mcuBoxHeight+" \" rx=\"11\" ry=\"11\" style=\"fill: rgb(174, 235, 240);; stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+(externalDataX+nameMargin)+"\" y=\""+textY+"\" font-family=\"Verdana\" font-size=\"12\" >External Data</text>");
-		reportLines.add("<line x1=\""+externalDataLineX1+"\" y1=\""+mcuLineYPos+"\" x2=\""+(externalDataLineX1+lineArrowLength)+"\" y2=\""+ mcuLineYPos +"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+		reportLines.add("<line x1=\""+externalDataLineX1+"\" y1=\""+mcuLineYPos+"\" x2=\""+startXValueForMCUBox+"\" y2=\""+ mcuLineYPos +"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 
 		Integer queuePosition=null;
 		String microControllerPointer;
