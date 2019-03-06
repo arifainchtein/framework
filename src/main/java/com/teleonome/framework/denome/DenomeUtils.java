@@ -2533,7 +2533,7 @@ public class DenomeUtils {
 				}
 			}else {
 				logger.debug("line 2244 sensorDeneVector is null");
-				reportLines.add("<h3>No Sensors</h3><br>");
+				reportLines.add("					<h3>No Sensors</h3><br>");
 
 			}
 
@@ -2548,9 +2548,10 @@ public class DenomeUtils {
 			JSONObject actionInfo;
 			JSONArray actionSectionInfoJSONArray = new  JSONArray();
 			actuatorExecutionPositionActionListDeneIndex = (ArrayList<Map.Entry<JSONObject, Integer>>)microControllerNameActuatorsIndex.get(microControllerPointer);
+			reportLines.add("				<div class=\"ActuatorDetail\" id=\""+microControllerNameNoSpaces+"-ActuatorDetails\" style=\"display: none;\"> ");  
 			if(actuatorExecutionPositionActionListDeneIndex!=null && actuatorExecutionPositionActionListDeneIndex.size()>0){
 				
-			reportLines.add("				<div class=\"ActuatorDetail\" id=\""+microControllerNameNoSpaces+"-ActuatorDetails\" style=\"display: none;\"> ");  
+			
 
 				
 				counter=0;
@@ -2673,6 +2674,10 @@ public class DenomeUtils {
 					reportLines.add("				</div>");//class=\"row\"
 
 				}
+			}else {
+				//
+				//
+				reportLines.add("<h3>No Actuators</h3>");//class=\"row\"
 			}
 
 			logger.debug("line 2669, finished sensors=m actionSectionInfoJSONArray.length()=" + actionSectionInfoJSONArray.length()  );
@@ -2691,6 +2696,7 @@ public class DenomeUtils {
 			String actionExpression, executionPoint;
 			int actionEvaluationPosition;
 			JSONArray actuatorActionConditionNamesJSONArray;
+			
 			for(int i=0;i<actionSectionInfoJSONArray.length();i++) {
 				actionInfo = actionSectionInfoJSONArray.getJSONObject(i);
 				microControllerName=actionInfo.getString("MicroControllerName");
@@ -2731,20 +2737,18 @@ public class DenomeUtils {
 				reportLines.add("					<div class=\"ActionDetailSection\" id=\""+ actionNameNoSpaces +"Section\" style=\"display:none\">");
 				reportLines.add("						<div class=\"ActionDetailBreadcrumb\" id=\""+ actionNameNoSpaces +"CardBreadcrumb\" >");
 				reportLines.add("							<nav class=\"\" aria-label=\"breadcrumb\">");
-				reportLines.add("							<ol class=\"breadcrumb\">");
-				reportLines.add("								<li class=\"breadcrumb-item\"><a href=\"#\">"+microControllerName+"</a></li>");
-				reportLines.add("								<li class=\"breadcrumb-item\"><a href=\"#\">"+actuatorName+"</a></li>");
-				reportLines.add("								<li class=\"breadcrumb-item active\" aria-current=\"page\">"+ actionName +"</li>");
-				reportLines.add("							</ol>");
-				reportLines.add("						</nav>");
+				reportLines.add("								<ol class=\"breadcrumb\">");
+				reportLines.add("									<li class=\"breadcrumb-item\"><a href=\"#\">"+microControllerName+"</a></li>");
+				reportLines.add("									<li class=\"breadcrumb-item\"><a href=\"#\">"+actuatorName+"</a></li>");
+				reportLines.add("									<li class=\"breadcrumb-item active\" aria-current=\"page\">"+ actionName +"</li>");
+				reportLines.add("								</ol>");
+				reportLines.add("							</nav>");
 				reportLines.add("						</div>"); //class=\"ActionDetailBreadcrumb\"
 				//
 				//Detail div
 				//
 
 				reportLines.add("						<div class=\"card ActionDetail\" id=\""+ actionNameNoSpaces +"Card\" >");
-
-
 				reportLines.add("							<div class=\"card-header text-center\">");
 				reportLines.add("								<span class=\"ActionTitle\">"+actionName+"</span> ");
 
