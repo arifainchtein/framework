@@ -2695,7 +2695,7 @@ public class DenomeUtils {
 				actuatorCommandFalseExpression=actionInfo.getString("ActuatorCommandFalseExpression");
 				actuatorActionConditionPointersJSONArray = actionInfo.getJSONArray("ActuatorActionConditionPointersJSONArray" );
 				actuatorActionConditionNamesJSONArray = actionInfo.getJSONArray("ActuatorActionConditionNamesJSONArray" );
-				
+				logger.debug("line 2698, actuatorName=" + actuatorName );
 				//
 				// Breadcrumb div
 				//
@@ -2735,7 +2735,7 @@ public class DenomeUtils {
 					actuatorActionConditionPointer = (String) actuatorActionConditionPointersJSONArray.getString(j);
 					conditionName = actuatorActionConditionNamesJSONArray.getString(j);
 
-
+					logger.debug("line 2738 conditionName=" + conditionName);
 
 					actuatorActionConditionJSONObject=null;
 					//
