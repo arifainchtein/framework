@@ -1719,7 +1719,7 @@ public class DenomeUtils {
 			for(int i=0;i<deneChainsArray.length();i++){
 				aJSONObject = (JSONObject) deneChainsArray.get(i);
 				if(aJSONObject.getString("Name").equals(deneChainName)){
-					logger.debug("Line 1722, deneName=" + deneName);
+					logger.debug("Line 1722, aJSONObject.getString(\"Name\")=" + aJSONObject.getString("Name"));
 					if(deneName.equals(""))return true;
 
 					denesJSONArray = aJSONObject.getJSONArray("Denes");
