@@ -1694,6 +1694,7 @@ public class DenomeUtils {
 		String deneChainName = identity.getDenechainName();
 		String deneName = identity.getDeneName();
 		String deneWordName = identity.getDeneWordName();
+		logger.debug("Line 1697, " + nucleusName + " " + deneChainName + " " + deneName + " " + deneWordName);
 		JSONObject aJSONObject, aDeneJSONObject, aDeneWordJSONObject, selectedNucleus = null;
 		JSONArray denesJSONArray, deneWordsJSONArray;
 		String valueType, valueInString, name;
@@ -1740,7 +1741,7 @@ public class DenomeUtils {
 				}
 			}
 		}catch(JSONException e){
-
+			logger.warn(Utils.getStringException(e));
 		}
 		return false;
 	}
