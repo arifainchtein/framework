@@ -350,7 +350,7 @@ public class DenomeViewManager {
 			//
 			// get the denechain int an index to process them in a specific order
 			//
-			Hashtable deneChainNameDeneChainIndex = new Hashtable();
+			deneChainNameDeneChainIndex = new Hashtable();
 			for(int i=0;i<internalNucleusDeneChains.length();i++){
 				aDeneChainJSONObject = (JSONObject) internalNucleusDeneChains.get(i);
 				name = aDeneChainJSONObject.getString("Name");
@@ -1567,7 +1567,28 @@ public class DenomeViewManager {
 		hostName=h;
 	}
 
+	public ArrayList<Map.Entry<JSONObject, Integer>> getActuatorsByMicroController(String microControllerPointer) {
+		JSONObject anActuatorsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_ACTUATORS);
 
+		ArrayList<Map.Entry<JSONObject, Integer>> toReturn = new ArrayList();
+		if(anActuatorsDeneChainJSONObject!=null) {
+			JSONArray denes = getDenesByDeneType(anActuatorsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_ACTUATOR);
+			JSONObject dene;
+			Integer executionPosition;
+			for(int i=0;i<denes.length();i++) {
+				dene = denes.getJSONObject(i);
+				if(microControllerPointer.equals(DenomeUtils.getDeneWordAttributeByDeneWordTypeFromDene(dene, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_MICROCONTROLLER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE))) {
+					executionPosition = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene,"Execution Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					if(executionPosition!=null && executionPosition>-1){
+						toReturn.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(dene, new Integer(executionPosition)));
+					}
+				}
+			}
+			Collections.sort(actuatorExecutionPositionDeneIndex, new IntegerCompare());
+			
+		}
+		return toReturn;
+	}
 
 	public JSONArray preparePhysiologyTable(){
 		JSONArray toReturn=null;

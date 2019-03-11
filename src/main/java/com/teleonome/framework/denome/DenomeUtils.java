@@ -2167,8 +2167,8 @@ public class DenomeUtils {
 		reportLines.add("<!DOCTYPE html>");
 		reportLines.add("<html>");
 		reportLines.add("<head>");
-		reportLines.add("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css\">");
 		reportLines.add("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>");
+		reportLines.add("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css\">");
 		reportLines.add("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js\"></script>");
 		reportLines.add("<meta charset=\"utf-8\">");
 		reportLines.add("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">");
@@ -2185,7 +2185,7 @@ public class DenomeUtils {
 		reportLines.add("    background-color: white;");
 		reportLines.add("}");
 		reportLines.add(".CloseDetail{");
-		reportLines.add("    margin-top:-20px;");
+		reportLines.add("    margin-top:-37px;");
 		reportLines.add("         }");
 		reportLines.add("  .panel-heading-microcontroller{");
 
@@ -2194,6 +2194,8 @@ public class DenomeUtils {
 		reportLines.add(" .panel-default > .panel-heading-microcontroller {");
 		reportLines.add("    background: rgb(185, 240, 174); ");
 		reportLines.add("     color: #000; ");
+		reportLines.add("     font-size: 24px; ");
+		
 		reportLines.add(" }");
 		reportLines.add("	#Detail-Area{");
 		reportLines.add("   	margin-top:10px;");
@@ -2202,13 +2204,25 @@ public class DenomeUtils {
 		reportLines.add("   .sensor{");
 		reportLines.add("   	margin-top:20px;");
 		reportLines.add("   }");
+		
+		reportLines.add("   .actionExpression{");
+		reportLines.add("   	font-size:18px;");
+		reportLines.add("   	padding-top:50px;");
+		reportLines.add("   	padding-bottom:20px;");
+		reportLines.add("   }");
+		
 		reportLines.add("   .ActionTitle{");
-		reportLines.add("   	font-size:24px;");
+		reportLines.add("   	font-size:18px;");
 		reportLines.add("   }");
 		reportLines.add("   .ActionDetailSection{");
 		reportLines.add("    	margin-top:0px;");
 		reportLines.add("   	margin-left:20px;");
 		reportLines.add("  		margin-right:20px;");
+		reportLines.add("    }");
+		reportLines.add("   .ActionDetailHeader{");
+		reportLines.add("    	padding-top:15px;");
+		reportLines.add("   	padding-bottom:15px;");
+		reportLines.add("  		background-color:rgb(72, 192, 225);");
 		reportLines.add("    }");
 		reportLines.add("    .actuator-selector{");
 		reportLines.add(" 		margin-top:20px;");
@@ -2246,13 +2260,40 @@ public class DenomeUtils {
 		reportLines.add("		padding-top: 12px;");
 		reportLines.add("  		padding-bottom: 12px;");
 		reportLines.add("  		text-align: left;");
-		reportLines.add("  		background-color: #4CAF50;");
-		reportLines.add("  		color: white;");
+		reportLines.add("  		background-color: rgb(72, 192, 225);");
+		reportLines.add("  		color: black;");
 		reportLines.add("	}");
+		
+		
+		reportLines.add("	a:hover, a:visited, a:link, a:active {");
+		reportLines.add("		text-decoration: none;");
+		reportLines.add("		}");
+
+		reportLines.add("		.controls {");
+		reportLines.add("			margin-bottom: 10px;");
+		reportLines.add("		}");
+
+		reportLines.add("		.collapse-group {");
+		reportLines.add("	padding: 10px;");
+		reportLines.add("	border: 1px solid darkgrey;");
+		reportLines.add("	margin-bottom: 10px;");
+		reportLines.add("		}");
+
+		reportLines.add("		.panel-title .trigger:before {");
+		reportLines.add("		content: '\\e082';");
+		reportLines.add("		font-family: 'Glyphicons Halflings';");
+		reportLines.add("	vertical-align: text-bottom;");
+		reportLines.add("		}");
+
+		reportLines.add("		.panel-title .trigger.collapsed:before {");
+		reportLines.add("	content: '\\e081';");
+		reportLines.add("		}");
+			
+			
 		reportLines.add("</style>");
 		reportLines.add("</head>");
 		reportLines.add("<body>");
-
+		int microControllerLabelNameMaxLenth=24;
 		int startingX = 400;
 		int startingY = 30;
 		int mainHeight= 500;
@@ -2314,7 +2355,7 @@ public class DenomeUtils {
 
 		Integer queuePosition=null;
 		String microControllerPointer;
-		String microControllerName, microControllerNameNoSpaces;
+		String microControllerName, microControllerLabelName, microControllerNameNoSpaces;
 		int counter=0;
 		int currentX=0;
 		int lineX1=0;
@@ -2323,12 +2364,17 @@ public class DenomeUtils {
 			microControllerPointer = (String)entry.getKey();
 			queuePosition = (Integer)entry.getValue();
 			microControllerName = microControllerPointer.split(":")[microControllerPointer.split(":").length-1];
+			if(microControllerName.length()>microControllerLabelNameMaxLenth) {
+				microControllerLabelName=microControllerName.substring(0,(microControllerLabelNameMaxLenth+1)) + "...";
+			}else {
+				microControllerLabelName=microControllerName;
+			}
 			currentX = startXValueForMCUBox +(counter*mcuBoxTotalWidth);
 			lineX1=currentX + mcuBoxWidth;
 			lineX2=lineX1+lineArrowLength;
 
 			reportLines.add("<rect class=\"Microcontroller\" data-name=\""+ microControllerName +"\"  x=\""+currentX+"\" y=\""+startYValueForMCUBox+"\" width=\""+mcuBoxWidth +"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(185, 240, 174); stroke: black; stroke-width: 4px;\"/>");
-			reportLines.add("<text class=\"Microcontroller\" data-name=\""+ microControllerName +"\"  x=\""+ (currentX +nameMargin) +"\" y=\""+textY+"\" font-family=\"Verdana\" font-size=\"12\" >"+microControllerName+"</text>");
+			reportLines.add("<text class=\"Microcontroller\" data-name=\""+ microControllerName +"\"  x=\""+ (currentX +nameMargin) +"\" y=\""+textY+"\" font-family=\"Verdana\" font-size=\"12\" >"+microControllerLabelName+"</text>");
 			counter++;
 			//
 			// increment the counter first, because the line for the last mcu does not go to the end and moves to the right
@@ -2395,7 +2441,7 @@ public class DenomeUtils {
 		Integer sensorRequestQueuePosition;
 		//ArrayList sensorTableBySensorArrayList = new ArrayList();
 		ArrayList actuatorTableByActuatorArrayList = new ArrayList();
-		JSONObject anActuatorActionListDeneJSONObject, actionJSONObject;
+		JSONObject anActuatorActionListDeneJSONObject = null, actionJSONObject;
 		JSONArray pointersToActionsJSONArray, actionsJSONArray;
 		JSONArray actuatorActionConditionPointersJSONArray;
 		String actuatorActionConditionPointer;
@@ -2408,7 +2454,8 @@ public class DenomeUtils {
 		//JSONObject sensorReportLine;
 		Map.Entry<JSONObject, Integer> valueMap;
 		String sensorValueName, sensorName;
-		String variableName,variableValue, defaultValue;
+		String variableName,variableValue;
+		Object defaultValue;
 		Hashtable microControllerNameActuatorsIndex = aDenomeViewerManager.getMicroControllerNameActuatorsIndex();
 
 		ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex; 
@@ -2455,13 +2502,19 @@ public class DenomeUtils {
 			//
 			// panel body
 			//
+			int numberOfSensors=0;
+			if(allSensorDenesForMicroController!=null) {
+				numberOfSensors = allSensorDenesForMicroController.size();
+			}
 			reportLines.add("			<div class=\"panel-body\">");
 			reportLines.add("				<ul class=\"nav nav-tabs justify-content-center\">");  
 			reportLines.add("					<li class=\"nav-item\">");
-			reportLines.add("						<a class=\"nav-link active\" href=\"#\" onclick=\"return show_detail('"+microControllerNameNoSpaces+"-SensorDetails');\">Sensors</a>");
+			reportLines.add("						<a class=\"nav-link active\" href=\"#\" onclick=\"return show_detail('"+microControllerNameNoSpaces+"-SensorDetails');\">Sensors ("+ numberOfSensors +")</a>");
 			reportLines.add("					</li>");
 			reportLines.add("					<li class=\"nav-item\">");
-			reportLines.add("						<a class=\"nav-link\" href=\"#\" onclick=\"return show_detail('"+microControllerNameNoSpaces+"-ActuatorDetails');\">Actuators</a>");
+			ArrayList<Map.Entry<JSONObject, Integer>> actuatorsForMicroController = aDenomeViewerManager.getActuatorsByMicroController(microControllerPointer);
+			int numberOfActuators = actuatorsForMicroController.size();
+			reportLines.add("						<a class=\"nav-link\" href=\"#\" onclick=\"return show_detail('"+microControllerNameNoSpaces+"-ActuatorDetails');\">Actuators ("+ numberOfActuators+")</a>");
 			reportLines.add("					</li>");
 			reportLines.add("				</ul>");
 
@@ -2487,9 +2540,8 @@ public class DenomeUtils {
 				reportLines.add("						<hr class=\"col-xs-12\"  >");
 				reportLines.add("					</div>");// 
 
-				reportLines.add("					Sensor Values in order of GetSensorData String");
 				if(sensorRequestQueuePositionDeneWordIndex!=null){
-					reportLines.add("<h3>Sensors</h3><br>");
+					reportLines.add("<h3>Sensor Values in order of GetSensorData String</h3><br>");
 					reportLines.add("<table class=\"ReportTable\">");
 					reportLines.add("<tr><th>Sensor Name</th><th>Value</th><th>"+TeleonomeConstants.DENEWORD_SENSOR_REQUEST_QUEUE_POSITION+"</th><th>"+TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE+"</th><th>"+TeleonomeConstants.DENEWORD_REPORTING_ADDRESS+"</th></tr>");
 
@@ -2519,7 +2571,11 @@ public class DenomeUtils {
 						try {
 							reportingAddressDeneWord = (JSONObject) DenomeUtils.getDeneWordByIdentity(pulse, new Identity(reportingAddress), TeleonomeConstants.COMPLETE);
 							logger.debug("line 2270 reportingAddressDeneWord=" + reportingAddressDeneWord);
-							unitsText = reportingAddressDeneWord.getString( TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE);
+							if( reportingAddressDeneWord.has( TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE)) {
+								unitsText = reportingAddressDeneWord.getString( TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE);
+							}else {
+								unitsText="";
+							}
 							logger.debug("line 2272 unitsText=" + unitsText);
 						} catch (InvalidDenomeException e) {
 							// TODO Auto-generated catch block
@@ -2550,36 +2606,48 @@ public class DenomeUtils {
 			JSONArray actionSectionInfoJSONArray = new  JSONArray();
 			actuatorExecutionPositionActionListDeneIndex = (ArrayList<Map.Entry<JSONObject, Integer>>)microControllerNameActuatorsIndex.get(microControllerPointer);
 			reportLines.add("				<div class=\"ActuatorDetail\" id=\""+microControllerNameNoSpaces+"-ActuatorDetails\" style=\"display: none;\"> ");  
+			logger.debug("line 2569 microControllerPointer=" + microControllerPointer);
+			logger.debug("line 2570  actuatorExecutionPositionActionListDeneIndex=" + actuatorExecutionPositionActionListDeneIndex);
 			if(actuatorExecutionPositionActionListDeneIndex!=null && actuatorExecutionPositionActionListDeneIndex.size()>0){
 				
-			
-
-				
+				reportLines.add("				<div class=\"row\">");
 				counter=0;
-				for(Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionActionListDeneIndex) {
-					anActuatorActionListDeneJSONObject = entry4.getKey();
+				
+				for(Map.Entry<JSONObject, Integer> entry4 : actuatorsForMicroController) {
+					
+					actuatorDene = entry4.getKey();
+					actuatorName = actuatorDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+					actuatorExecution = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_EXECUTION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					
+					
+					String actionListPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(actuatorDene,TeleonomeConstants.DENE_TYPE_ACTION_LIST, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					//
+					// now use the pointer to get to the denes that contain the actions
+					//
+					logger.debug("line 2586 actionListPointer=" + actionListPointer);
+					//
+					// if the actuators are only for startup this could be null
+					if(actionListPointer!=null){
+						try {
+							anActuatorActionListDeneJSONObject = aDenomeViewerManager.getDeneByIdentity(new Identity(actionListPointer));
+							logger.debug("line 801 actionListDene=" + anActuatorActionListDeneJSONObject.toString(4));
+						} catch (InvalidDenomeException e) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e));
+						}
+					}
+					
+					
+					
+					
 					//logger.debug("line 2545 anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject.toString(4));
 
 					//logger.debug("anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject);
-					//
-					// the codon is the name of the actuator
-					//
-					actuatorName = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(anActuatorActionListDeneJSONObject, TeleonomeConstants.CODON, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					
 					logger.debug("line 2552 anActuatorActionListDeneJSONObject=" + anActuatorActionListDeneJSONObject.getString("Name"));
-					//
-					// then get the actuator dene
-					actuatorPointer = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_ACTUATORS, actuatorName).toString();
-					try {
-						logger.debug("actuatorPointer=" + actuatorPointer);
-						actuatorDene = DenomeUtils.getDeneByIdentity(pulse, new Identity(actuatorPointer));
-					} catch (InvalidDenomeException e) {
-						// TODO Auto-generated catch block
-						logger.warn(Utils.getStringException(e));
-					}
-					actuatorName = actuatorDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
-					actuatorExecution = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorDene, TeleonomeConstants.DENEWORD_EXECUTION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					reportLines.add("				<div class=\"row\">");
-
+					
+					
+					// line was here  xxxx
 					//
 					// dont add an arrow for the first 
 					if(counter>0) {
@@ -2587,7 +2655,7 @@ public class DenomeUtils {
 						// the arrow
 						//
 						reportLines.add("					<div class=\"col-sm-1\">");
-						reportLines.add("						<svg   id=\"arrow1\" height=\"150\" width=\"250\">");
+						reportLines.add("						<svg   id=\"arrow1\" height=\"50\" width=\"250\">");
 						reportLines.add("							<defs>");
 						reportLines.add("								<marker id=\"arrowHead\" markerWidth=\"10\" markerHeight=\"10\" refX=\"0\" refY=\"3\" orient=\"auto\" markerUnits=\"strokeWidth\" viewBox=\"0 0 10 10\">");
 						reportLines.add("						        	<path d=\"M0,0 L0,6 L9,3 z\" fill=\"#00\" />");
@@ -2603,7 +2671,7 @@ public class DenomeUtils {
 					counter++;
 
 
-					reportLines.add("					<div class=\"col-sm-2  dropdown\">");
+					reportLines.add("					<div class=\"col-sm-4  dropdown\">");
 					reportLines.add("						<button class=\"btn btn-primary dropdown-toggle actuator-selector\" type=\"button\" data-toggle=\"dropdown\">" + actuatorExecution  + "-" + actuatorName);
 					reportLines.add("						<span class=\"caret\"></span></button>");
 					reportLines.add("						<ul class=\"col-sm-12 text-center dropdown-menu actuator-level\">");
@@ -2670,11 +2738,9 @@ public class DenomeUtils {
 					reportLines.add("			           </ul>");
 					reportLines.add("					</div>");
 
-
-
-					reportLines.add("				</div>");//class=\"row\"
-
+					// line was here
 				}
+				reportLines.add("				</div>");//class=\"row\"
 			}else {
 				//
 				//
@@ -2749,73 +2815,119 @@ public class DenomeUtils {
 				//Detail div
 				//
 
-				reportLines.add("						<div class=\"card ActionDetail\" id=\""+ actionNameNoSpaces +"Card\" >");
-				reportLines.add("							<div class=\"card-header text-center\">");
+				reportLines.add("						<div class=\" ActionDetail\" id=\""+ actionNameNoSpaces +"Card\" >");
+				reportLines.add("							<div class=\"ActionDetailHeader text-center\">");
 				reportLines.add("								<span class=\"ActionTitle\">"+actionName+"</span> ");
 
 				reportLines.add("							</div>");
-				reportLines.add("							<div class=\"card-body\">");
-				reportLines.add("								<p class=\"card-text\">Execution Order:<b>2</b></p>");
-				reportLines.add("								<p class=\"card-text\">Execution Point:<b>"+ executionPoint + "</b></p>");
-
-				reportLines.add("								<p class=\"card-text\">Expression:<b>"+ actionExpression +"</b></p>");
-				reportLines.add("								<table class=\"ReportTable\">");
-				reportLines.add("									<tr><th>Condition Name</th><th>Expression</th><th>Variables</th></tr>");
-				reportLines.add("									<tr>");
-
 				
+				
+				reportLines.add("							<div class=\"collapse-group\">");
+				reportLines.add("								<div class=\"controls\">");
+				reportLines.add("									<button class=\"btn btn-primary action-detail-open-button\" type=\"button\">");
+				reportLines.add("										Open all");
+				reportLines.add("									</button>");
+				reportLines.add("									<button class=\"btn btn-primary action-detail-close-button\" type=\"button\">");
+				reportLines.add("										Close all");
+				reportLines.add("									</button>");
+				reportLines.add("							 	</div>");
+				
+				
+				reportLines.add("							 	<div class=\"panel panel-default\">");
+				reportLines.add("							 		<div class=\"panel-heading\" role=\"tab\" id=\"headingOne\">");
+				reportLines.add("							 		 	<h4 class=\"panel-title\">");
+				reportLines.add("							 		 		<a role=\"button\" data-toggle=\"collapse\" href=\"#collapseOne\" aria-expanded=\"true\" aria-controls=\"collapseOne\" class=\"trigger collapsed\">Evaluation Expression</a>");      
+				reportLines.add("							 		 	</h4>");
+				reportLines.add("							    	</div>");
+				reportLines.add("							 		<div id=\"collapseOne\" class=\"panel-collapse collapse\" role=\"tabpanel\" aria-labelledby=\"headingOne\">");
+				reportLines.add("							 			<div class=\"panel-body\">");
+				reportLines.add("							 		 		"+actionExpression);             
+				
+				if(actuatorActionConditionPointersJSONArray.length()>100000) {
+					reportLines.add("								<table class=\"ReportTable\">");
+					reportLines.add("									<tr><th>Condition Name</th><th>Expression</th><th>Variables</th></tr>");
+					for(int j=0;j<actuatorActionConditionPointersJSONArray.length();j++){
+						actuatorActionConditionPointer = (String) actuatorActionConditionPointersJSONArray.getString(j);
+						conditionName = actuatorActionConditionNamesJSONArray.getString(j);
 
-				for(int j=0;j<actuatorActionConditionPointersJSONArray.length();j++){
-					actuatorActionConditionPointer = (String) actuatorActionConditionPointersJSONArray.getString(j);
-					conditionName = actuatorActionConditionNamesJSONArray.getString(j);
+						logger.debug("line 2738 conditionName=" + conditionName);
 
-					logger.debug("line 2738 conditionName=" + conditionName);
-
-					actuatorActionConditionJSONObject=null;
-					//
-					// actuatorActionConditionJSONObject is a deneword get the value which is a denepointer and render it
-					try {
-						logger.debug("line 2368 actuatorActionConditionPointer=" +actuatorActionConditionPointer);
-						actuatorActionConditionJSONObject = aDenomeViewerManager.getDeneByIdentity(new Identity(actuatorActionConditionPointer));
-						String conditionExpression = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorActionConditionJSONObject, "Expression", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-						reportLines.add("										<td>" + conditionName + "</td>");
-						reportLines.add("										<td><b>" + conditionExpression.replace("<", "&lt;" ).replace(">", "&gt;" ).replace("&", "&amp;" ) + "</b></td>");
-						reportLines.add("										<td>");
-						reportLines.add("											<table>");
+						actuatorActionConditionJSONObject=null;
 						//
-						// process the variables for this condition
-						//
-						JSONArray variables = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(actuatorActionConditionJSONObject, TeleonomeConstants.DENEWORD_TYPE_CONDITION_VARIABLE_POINTER, TeleonomeConstants.COMPLETE);
-						logger.debug("line 2374, variables=" + variables);
-						JSONObject variableJSONObject;
-						for(int k=0;k<variables.length();k++){		
-							variableJSONObject = variables.getJSONObject(k);
-							logger.debug("line 2380, variableJSONObject=" + variableJSONObject);
-							variableName = variableJSONObject.getString("Name");
-							variableValue = variableJSONObject.getString("Value");
-							reportLines.add("												<tr><td>"+variableName+"</td><td>"+variableValue+"</td></tr>");
-							defaultValue = "";
-							if(variableJSONObject.has("Default")) {
-								defaultValue = variableJSONObject.getString("Default");
+						// actuatorActionConditionJSONObject is a deneword get the value which is a denepointer and render it
+						try {
+							logger.debug("line 2368 actuatorActionConditionPointer=" +actuatorActionConditionPointer);
+							actuatorActionConditionJSONObject = aDenomeViewerManager.getDeneByIdentity(new Identity(actuatorActionConditionPointer));
+							String conditionExpression = (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorActionConditionJSONObject, "Expression", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							reportLines.add("										<tr><td>" + conditionName + "</td>");
+							reportLines.add("										<td><b>" + conditionExpression.replace("&", "&amp;" ).replace("<", " &lt; " ).replace(">", " &gt; " ) + "</b></td>");
+							reportLines.add("										<td>");
+							reportLines.add("											<table>");
+							//
+							// process the variables for this condition
+							//
+							JSONArray variables = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(actuatorActionConditionJSONObject, TeleonomeConstants.DENEWORD_TYPE_CONDITION_VARIABLE_POINTER, TeleonomeConstants.COMPLETE);
+							logger.debug("line 2374, variables=" + variables);
+							JSONObject variableJSONObject;
+							for(int k=0;k<variables.length();k++){		
+								variableJSONObject = variables.getJSONObject(k);
+								logger.debug("line 2380, variableJSONObject=" + variableJSONObject);
+								variableName = variableJSONObject.getString("Name");
+								variableValue = variableJSONObject.getString("Value");
+								reportLines.add("												<tr><td>"+variableName+"</td><td>"+variableValue+"</td></tr>");
+								defaultValue = null;
+								if(variableJSONObject.has("Default")) {
+									defaultValue = variableJSONObject.get("Default");
+								}
+
 							}
-
+						} catch (InvalidDenomeException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
 						}
-					} catch (InvalidDenomeException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						reportLines.add("											</table>");
+						reportLines.add("										</td></tr>");
+						reportLines.add("								</table> ");// class=\"ReportTable\">");
 					}
-					reportLines.add("											</table>");
-					reportLines.add("										</td>");
 				}
-				reportLines.add("								</table> ");// class=\"ReportTable\">");
-				reportLines.add("								<<p class=\"card-text\">Actuator Command Code True Expression:"+actuatorCommandTrueExpression+"</p>");
-				reportLines.add("								<<p class=\"card-text\">Actuator Command Code False Expression:"+actuatorCommandFalseExpression+"</p>");
-				reportLines.add("								</div>");// card-body
-				reportLines.add("								<div class=\"card-footer\">");
-				reportLines.add("									<a href=\"#\" class=\"card-link\">Card link</a>");
-				reportLines.add("									<a href=\"#\" class=\"card-link\">Another link</a>");
-				reportLines.add("								</div>");
+				
+				reportLines.add("							       </div>");
+				reportLines.add("							    </div>");
+				reportLines.add("							 </div>");
+				
+				
+				reportLines.add("							 <div class=\"panel panel-default\">");
+				reportLines.add("							 	<div class=\"panel-heading\" role=\"tab\" id=\"headingTwo\">");
+				reportLines.add("							 		 <h4 class=\"panel-title\">");
+				reportLines.add("							 		 	<a role=\"button\" data-toggle=\"collapse\" href=\"#collapseTwo\" aria-expanded=\"true\" aria-controls=\"collapseTwo\" class=\"trigger collapsed\">Post Evaluation</a>");      
+				reportLines.add("							 		 </h4>");
+				reportLines.add("							    </div>");
+				reportLines.add("							 	<div id=\"collapseTwo\" class=\"panel-collapse collapse\" role=\"tabpanel\" aria-labelledby=\"headingTwo\">");
+				reportLines.add("							 		<div class=\"panel-body\">");
+				
+				reportLines.add("										<h3>Post-Analysis</h3>");
+				reportLines.add("										<p class=\"card-text\">Actuator Command Code True Expression:"+actuatorCommandTrueExpression+"</p>");
+				reportLines.add("										<p class=\"card-text\">Actuator Command Code False Expression:"+actuatorCommandFalseExpression+"</p>");
+				//reportLines.add("									</div>");// card-body
+				//reportLines.add("										<div class=\"card-footer\">");
+				reportLines.add("											<a href=\"#\" class=\"card-link\">Card link</a>");
+				reportLines.add("											<a href=\"#\" class=\"card-link\">Another link</a>");
+				//reportLines.add("										</div>");
+				
+				reportLines.add("							       </div>");
+				reportLines.add("							    </div>");
+				reportLines.add("							 </div>");
+				
+				
+				reportLines.add("						 </div>");
+				
+				
+				
+				
+				
+				
+				
+				
 				reportLines.add("						</div>"); //class=\"card ActionDetail\"
 				reportLines.add("					</div>"); //class=\"ActionDetailSection\"
 			}
@@ -2852,6 +2964,14 @@ public class DenomeUtils {
 		reportLines.add("	$(document).ready(function(){");
 		reportLines.add("	    $('.Microcontroller-Details').hide();");
 		  
+		reportLines.add("	    $(\".action-detail-open-button\").on(\"click\", function() {");
+		reportLines.add("	    	$(this).closest('.collapse-group').find('.collapse').collapse('show');");
+		reportLines.add("	    });");
+
+		reportLines.add("	    $(\".action-detail-close-button\").on(\"click\", function() {");
+		reportLines.add("	    	$(this).closest('.collapse-group').find('.collapse').collapse('hide');");
+		reportLines.add("	    });");
+			
 		reportLines.add("	    $('.dropdown-submenu a.test').on(\"click\", function(e){");
 		reportLines.add("	    	$('.dropdown-submenu>ul').hide();");
 		reportLines.add("	    	$(this).next('ul').toggle();");
