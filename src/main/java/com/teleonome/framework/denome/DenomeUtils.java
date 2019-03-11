@@ -1724,14 +1724,7 @@ public class DenomeUtils {
 
 					denesJSONArray = aJSONObject.getJSONArray("Denes");
 					logger.debug("Line 1726, denesJSONArray=" + denesJSONArray.length());
-					if(denesJSONArray.length()==0) {
-						try {
-							FileUtils.writeStringToFile(new File("Bug.denome"), pulseJSONObject.toString(4));
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
+					
 					for(int j=0;j<denesJSONArray.length();j++){
 						aDeneJSONObject = (JSONObject) denesJSONArray.get(j);
 
