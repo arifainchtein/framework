@@ -1713,12 +1713,13 @@ public class DenomeUtils {
 				}
 			}
 			if(selectedNucleus==null)return false;
-
+			logger.debug("Line 1716");
 			deneChainsArray = selectedNucleus.getJSONArray("DeneChains");
 
 			for(int i=0;i<deneChainsArray.length();i++){
 				aJSONObject = (JSONObject) deneChainsArray.get(i);
 				if(aJSONObject.getString("Name").equals(deneChainName)){
+					logger.debug("Line 1722, deneName=" + deneName);
 					if(deneName.equals(""))return true;
 
 					denesJSONArray = aJSONObject.getJSONArray("Denes");
@@ -1726,6 +1727,7 @@ public class DenomeUtils {
 						aDeneJSONObject = (JSONObject) denesJSONArray.get(j);
 
 						if(aDeneJSONObject.getString("Name").equals(deneName)){
+							logger.debug("Line 1730, deneWordName=" + deneWordName);
 							if(deneWordName.equals(""))return true;
 
 							deneWordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
