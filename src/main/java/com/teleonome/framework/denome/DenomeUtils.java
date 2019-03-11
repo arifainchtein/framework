@@ -1723,6 +1723,7 @@ public class DenomeUtils {
 					if(deneName.equals(""))return true;
 
 					denesJSONArray = aJSONObject.getJSONArray("Denes");
+					logger.debug("Line 1726, denesJSONArray=" + denesJSONArray.length());
 					for(int j=0;j<denesJSONArray.length();j++){
 						aDeneJSONObject = (JSONObject) denesJSONArray.get(j);
 
