@@ -24,6 +24,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 	
 		String dgTeleonomeName="";
 		Logger logger;
+		JSONArray configParams;
 		
 		public PiFourValuesFourDigitDisplaysMicroController(DenomeManager d, String n) {
 			super(d, n);
@@ -31,8 +32,8 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 			// TODO Auto-generated constructor stub  
 		}
 		
-		public void init(JSONArray configParams) throws MicrocontrollerCommunicationException {
-			
+		public void init(JSONArray c) throws MicrocontrollerCommunicationException {
+			configParams=c;
 			//
 			// configParams will contain 3 denes (plus a codon), which represents every display,
 			// the three dnewords are:
@@ -50,6 +51,9 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 		@Override
 		public BufferedWriter getWriter() throws IOException {
 			// TODO Auto-generated method stub
+			aPiFourValuesFourDigitDisplaysWriter = new PiFourValuesFourDigitDisplaysWriter(sw, configParams, aDenomeManager) ;
+			aPiFourValuesFourDigitDisplaysReader = new PiFourValuesFourDigitDisplaysReader(new StringReader(""), aPiFourValuesFourDigitDisplaysWriter) ;
+			
 			  return aPiFourValuesFourDigitDisplaysWriter;
 		}
 
