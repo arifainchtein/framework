@@ -7,11 +7,14 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.denome.DenomeUtils;
+import com.teleonome.framework.denome.Identity;
+import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.utils.Utils;
 
 public class PiFourValuesFourDigitDisplaysWriter extends BufferedWriter {
@@ -37,19 +40,32 @@ public class PiFourValuesFourDigitDisplaysWriter extends BufferedWriter {
 		if(command.startsWith("Update")) {
 			JSONObject displayInfo;
 			int clockPin, dataPin;
+			double value;
 			String identityPointer;
 			ArrayList results;
-			String resultsString;
+			String resultsString,valuePointer;
+			JSONObject dataSource;
 			for(int i=0;i<params.length();i++) {
 				displayInfo = params.getJSONObject(i);
-				clockPin = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(displayInfo, "Clock Pin", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				dataPin = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(displayInfo, "Data Pin", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				command = "python single.py " + clockPin + " " + dataPin;
+				
 				try {
+					clockPin = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(displayInfo, "Clock Pin", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					dataPin = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(displayInfo, "Data Pin", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					valuePointer = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(displayInfo, "Identity", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					value = (double) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					command = "python single.py " + clockPin + " " + dataPin + " " + value;
 					results = Utils.executeCommand(command);
 					 resultsString = String.join(", ", results);
 						logger.debug("command=" + command + " results=" + resultsString);
 				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
+					publishingResults="Fault#PiFourValuesFourDigitDisplaysMicroController#" + i;
+				} catch (InvalidDenomeException e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
+					publishingResults="Fault#PiFourValuesFourDigitDisplaysMicroController#" + i;
+				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
 					publishingResults="Fault#PiFourValuesFourDigitDisplaysMicroController#" + i;
