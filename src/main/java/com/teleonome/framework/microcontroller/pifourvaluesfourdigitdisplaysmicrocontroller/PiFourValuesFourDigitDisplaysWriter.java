@@ -52,7 +52,23 @@ public class PiFourValuesFourDigitDisplaysWriter extends BufferedWriter {
 					clockPin = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(displayInfo, "Clock Pin", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					dataPin = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(displayInfo, "Data Pin", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					valuePointer = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(displayInfo, "Identity", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					value = (double) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					//
+					// check if the pointer is in external data,if so, check t see if the data is stale
+					//
+					if(valuePointer.contains(TeleonomeConstants.DENECHAIN_EXTERNAL_DATA)) {
+						if(aDenomeManager.isExternalDataOk(valuePointer)) {
+							value = (double) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							
+						}else {
+							value=999.9;
+						}
+						value = (double) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						
+					}else {
+						value = (double) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						
+					}
+					
 					command = "python single.py " + clockPin + " " + dataPin + " " + value;
 					results = Utils.executeCommand(command);
 					 resultsString = String.join(", ", results);

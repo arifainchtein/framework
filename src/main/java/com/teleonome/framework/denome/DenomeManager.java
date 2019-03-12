@@ -7762,7 +7762,7 @@ public class DenomeManager {
 		return (identity.getNucleusName().equals(TeleonomeConstants.NUCLEI_PURPOSE) && identity.getDenechainName().equals(TeleonomeConstants.DENECHAIN_EXTERNAL_DATA));
 	}
 
-	private boolean isExternalDataOk(String pointer) {
+	public boolean isExternalDataOk(String pointer) {
 		Identity pointerIdentity = new Identity(pointer);
 		Identity externalDataStatusIdentity = new Identity(pointerIdentity.getTeleonomeName(), pointerIdentity.getNucleusName(), pointerIdentity.getDenechainName(),pointerIdentity.getDeneName(),TeleonomeConstants.EXTERNAL_DATA_STATUS);
 		boolean toReturn=false;
