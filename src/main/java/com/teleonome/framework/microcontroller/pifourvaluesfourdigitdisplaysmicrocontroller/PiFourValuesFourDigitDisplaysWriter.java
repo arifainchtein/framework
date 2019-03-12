@@ -57,12 +57,17 @@ public class PiFourValuesFourDigitDisplaysWriter extends BufferedWriter {
 					//
 					if(valuePointer.contains(TeleonomeConstants.DENECHAIN_EXTERNAL_DATA)) {
 						if(aDenomeManager.isExternalDataOk(valuePointer)) {
-							value = (double) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-							
+							Object o=  aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							if(o instanceof Double) {
+								value=(double)o;
+							}else if(o instanceof Integer) {
+								value=((Integer)o).doubleValue();
+							}else {
+								value=999.9;
+							}
 						}else {
 							value=999.9;
 						}
-						value = (double) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						
 					}else {
 						value = (double) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
