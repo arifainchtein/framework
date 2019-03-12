@@ -63,10 +63,10 @@ public class PiFourValuesFourDigitDisplaysWriter extends BufferedWriter {
 							}else if(o instanceof Integer) {
 								value=((Integer)o).doubleValue();
 							}else {
-								value=999.9;
+								value=9999;
 							}
 						}else {
-							value=999.9;
+							value=9999;
 						}
 						
 					}else {
