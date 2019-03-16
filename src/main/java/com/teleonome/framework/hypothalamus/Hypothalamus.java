@@ -41,6 +41,7 @@ import org.zeromq.ZMQ.Context;
 import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.Socket;
 
+import com.teleonome.framework.LifeCycleEventListener;
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.denome.DenomeUtils;
@@ -282,7 +283,13 @@ public abstract class Hypothalamus {
 					microcontrollerProcessingClassName = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(microcontrollerJSONObject, TeleonomeConstants.DENEWORD_TYPE_MICROCONTROLLER_PROCESSING_CLASSNAME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					logger.debug("reading microcontroller classname=" + microcontrollerProcessingClassName);
 					aProcessingClass = Class.forName(microcontrollerProcessingClassName);
+					
 					aMicroController = (MicroController)aProcessingClass.getDeclaredConstructor(new Class[]{DenomeManager.class, String.class}).newInstance(aDenomeManager, aMicroControllerName);
+					
+					if(aProcessingClass.isAssignableFrom(LifeCycleEventListener.class)) {
+						aDenomeManager.addLifeCycleEventListener(aMicroController);
+					}
+
 					aMicroController.init(microControllerParams);
 					logger.debug("invoked init in  microcontroller " + microcontrollerProcessingClassName);
 					

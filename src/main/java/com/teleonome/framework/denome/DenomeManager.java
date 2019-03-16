@@ -54,8 +54,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject; 
+import org.json.JSONObject;
 
+import com.teleonome.framework.LifeCycleEventListener;
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager.MutationActionsExecutionResult;
 import com.teleonome.framework.exception.InvalidDeneStructureRequestException;
@@ -102,7 +103,7 @@ public class DenomeManager {
 	String ssidConnectedTo="";
 
 	Hashtable microControllerNameMicroControllerParamsIndex = new Hashtable();
-
+	ArrayList<LifeCycleEventListener> lifeCycleEventListeners = new ArrayList();
 	Vector sensorDenesVector = new Vector();
 	Vector actuatorDenesVector = new Vector();
 	public Hashtable pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex = new Hashtable();
@@ -5161,7 +5162,21 @@ public class DenomeManager {
 	}
 
 
+	public void addLifeCycleEventListener(MicroController aMicroController) {
+		if(!lifeCycleEventListeners.contains(aMicroController)) {
+			lifeCycleEventListeners.add((LifeCycleEventListener)aMicroController);
+		}
+	}
+	
 	public boolean storeLifeCycleEvent(String eventType, long eventTimeMillis, int value) {
+		//
+		// loop over all the microcontrollers that need to be notified
+		//
+		LifeCycleEventListener aLifeCycleEventListener;
+		for(int i=0;i<lifeCycleEventListeners.size();i++) {
+			aLifeCycleEventListener = (LifeCycleEventListener)lifeCycleEventListeners.get(i);
+			aLifeCycleEventListener.processLifeCycleEvent(eventType);
+		}
 		return aDBManager.storeLifeCycleEvent(eventType,eventTimeMillis, value);
 	}
 

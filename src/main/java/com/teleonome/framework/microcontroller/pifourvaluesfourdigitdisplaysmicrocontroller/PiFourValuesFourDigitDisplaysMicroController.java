@@ -5,17 +5,21 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 
+import com.teleonome.framework.LifeCycleEventListener;
+import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.sftppublisher.SFTPPublisherReader;
 import com.teleonome.framework.microcontroller.sftppublisher.SFTPPublisherWriter;
+import com.teleonome.framework.utils.Utils;
 
-public class PiFourValuesFourDigitDisplaysMicroController  extends MicroController{
+public class PiFourValuesFourDigitDisplaysMicroController  extends MicroController implements LifeCycleEventListener{
 
 	
 	PiFourValuesFourDigitDisplaysWriter aPiFourValuesFourDigitDisplaysWriter;
@@ -61,5 +65,30 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 		@Override
 		public BufferedReader getReader() throws IOException {
 			return aPiFourValuesFourDigitDisplaysReader;
+		}
+
+		@Override
+		public void processLifeCycleEvent(String lifeCycleEvent) {
+			// TODO Auto-generated method stub
+			if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE)) {
+				String command = "neouart -i ff0000";
+				try {
+					ArrayList<String> results  = Utils.executeCommand(command);
+					logger.debug("processing life cycle event start pulse produced=" + results);
+				} catch (IOException | InterruptedException e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
+				}
+				
+			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE)) {
+				String command = "neouart -i 00ff00";
+				try {
+					ArrayList<String> results  = Utils.executeCommand(command);
+					logger.debug("processing life cycle event start pulse produced=" + results);
+				} catch (IOException | InterruptedException e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
+				}
+			}
 		}
 	}
