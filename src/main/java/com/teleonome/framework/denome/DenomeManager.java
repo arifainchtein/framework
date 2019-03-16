@@ -5176,6 +5176,7 @@ public class DenomeManager {
 		LifeCycleEventListener aLifeCycleEventListener;
 		for(int i=0;i<lifeCycleEventListeners.size();i++) {
 			aLifeCycleEventListener = (LifeCycleEventListener)lifeCycleEventListeners.get(i);
+			logger.info("line 5178 eventType=" + eventType + " aLifeCycleEventListener=" + aLifeCycleEventListener);
 			aLifeCycleEventListener.processLifeCycleEvent(eventType);
 		}
 		return aDBManager.storeLifeCycleEvent(eventType,eventTimeMillis, value);

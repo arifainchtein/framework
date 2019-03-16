@@ -285,7 +285,7 @@ public abstract class Hypothalamus {
 					aProcessingClass = Class.forName(microcontrollerProcessingClassName);
 					
 					aMicroController = (MicroController)aProcessingClass.getDeclaredConstructor(new Class[]{DenomeManager.class, String.class}).newInstance(aDenomeManager, aMicroControllerName);
-					logger.info("line 287 aProcessingClass=" + aProcessingClass + " is assig "  +  aProcessingClass.isAssignableFrom(LifeCycleEventListener.class) );
+					logger.info("line 287 aProcessingClass=" + aProcessingClass + " is assig "  +  LifeCycleEventListener.class.isAssignableFrom(aProcessingClass) );
 					if(LifeCycleEventListener.class.isAssignableFrom(aProcessingClass)) {
 						aDenomeManager.addLifeCycleEventListener(aMicroController);
 					}
