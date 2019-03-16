@@ -72,7 +72,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 			// TODO Auto-generated method stub
 			logger.debug("processing life cycle even=t=" + lifeCycleEvent);
 			if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE)) {
-				String command = "neouart -i 00ff0000";
+				String command = "neouart -i 00ff0000 00ff0000";
 				try {
 					ArrayList<String> results  = Utils.executeCommand(command);
 					logger.debug("processing life cycle event start pulse produced=" + results);
@@ -82,7 +82,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 				}
 				
 			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE)) {
-				String command = "neouart -i 0000ff00";
+				String command = "neouart -i 0000ff00 0000ff00";
 				try {
 					ArrayList<String> results  = Utils.executeCommand(command);
 					logger.debug("processing life cycle event end pulse produced=" + results);
@@ -91,7 +91,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 					logger.warn(Utils.getStringException(e));
 				}
 			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE)) {
-				String command = "neouart -i 0000ff00";
+				String command = "neouart -i 0000ff00 0000ff00";
 				try {
 					ArrayList<String> results  = Utils.executeCommand(command);
 					logger.debug("processing life cycle event LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE produced=" + results);
@@ -100,7 +100,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 					logger.warn(Utils.getStringException(e));
 				}
 			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE)) {
-				String command = "neouart -i 00ff0000";
+				String command = "neouart -i 00ff0000 00ff0000";
 				try {
 					ArrayList<String> results  = Utils.executeCommand(command);
 					logger.debug("processing life cycle event LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE produced=" + results);
