@@ -5163,6 +5163,7 @@ public class DenomeManager {
 
 
 	public void addLifeCycleEventListener(MicroController aMicroController) {
+		logger.info("adding lifecycleevnetlistern=" + aMicroController);
 		if(!lifeCycleEventListeners.contains(aMicroController)) {
 			lifeCycleEventListeners.add((LifeCycleEventListener)aMicroController);
 		}

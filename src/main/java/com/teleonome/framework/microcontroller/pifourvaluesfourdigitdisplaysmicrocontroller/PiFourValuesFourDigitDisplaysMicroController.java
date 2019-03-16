@@ -70,6 +70,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 		@Override
 		public void processLifeCycleEvent(String lifeCycleEvent) {
 			// TODO Auto-generated method stub
+			logger.debug("processing life cycle even=t=" + lifeCycleEvent);
 			if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE)) {
 				String command = "neouart -i ff0000";
 				try {
