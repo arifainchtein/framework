@@ -113,7 +113,7 @@ public class TeleonomeConstants {
 	// the different types of Denes
 	//
 	public static final String DENE_TYPE_SENSOR = "Sensor";
-	
+	public static final String DENE_TYPE_TELEPATHON = "Telepathon";
 	public static final String DENE_TYPE_SENSOR_VALUE = "Sensor Value";
 	public static final String DENE_TYPE_SENSOR_VALUE_DEFINITION = "Sensor Value Definition";
 	public static final String SENSOR_VALUE_RANGE_MAXIMUM = "Range Maximum";
@@ -157,6 +157,12 @@ public class TeleonomeConstants {
 	public static final String DENE_TYPE_CONDITION_DENOMIC_OPERATION="Condition Denomic Operation";
 	public static final String DENE_TYPE_DENOMIC_OPERATION="Denomic Operation";
 
+	public static final String DENEWORD_TYPE_EVENT_DATA_STRUCTURE="Event Data Structure";
+	public static final String DENEWORD_TYPE_EVENT_MNEMOSYNE_DESTINATION="Event Mnemosyne Destination";
+	
+	public static final String EVENT_DATA_STRUCTURE_FLOWMETER="FlowMeter";
+	
+	
 	//
 	// the different types of Denomic Operatins
 	public static final String DENOMIC_ELEMENT_EXISTS="Denomic Element Exists";
@@ -186,6 +192,7 @@ public class TeleonomeConstants {
 	public static final String DENECHAIN_OPERONS = "Operons";
 	public static final String DENECHAIN_ACTUATORS = "Actuators";
 	public static final String DENECHAIN_SENSORS = "Sensors";	
+	public static final String DENECHAIN_TELEPATHONS = "Telepathons";    
 	public static final String DENECHAIN_DESCRIPTIVE = "Descriptive";
 	public static final String DENECHAIN_COMPONENTS = "Components";
 	public static final String DENECHAIN_ANALYTICONS = "Analyticons";
@@ -389,6 +396,16 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_FIRMWARE_COMMAND_POINTER = "Firmware Command Pointer";
 	public static final String DENEWORD_TYPE_FIRMWARE_COMMAND = "Firmware Command";
 	public static final String DENEWORD_TYPE_SENSOR_MICROCONTROLLER_POINTER = "Sensor Microcontroller Pointer";
+	public static final String DENEWORD_TYPE_TELEPATHON_MICROCONTROLLER_POINTER = "Telepathon Microcontroller Pointer";
+	public static final String DENEWORD_TYPE_TELEPATHON_EVENT_LIST_POINTER = "Event List Pointer";
+	public static final String DENEWORD_TYPE_EVENT_DEFINITION = "Event Definition";
+	public static final String DENEWORD_TYPE_EVENT_DATA_STRUCTURE_VALUE_LIST = "Event Data Structure Value List";
+	public static final String DENEWORD_TYPE_EVENT_VALUE_DEFINITION = "Event Value Definition";
+	public static final String DENEWORD_EVENT_STRING_QUEUE_POSITION = "Event String Queue Position";
+	public static final String DENEWORD_NUMBER_OF_SAMPLES_IN_EVENT="Number Of Samples In Event";
+	
+	
+	public static final String DENEWORD_TYPE_TELEPATHON_TYPE = "Telepathon Type";
 	
 	public static final String DENEWORD_TYPE_MICROCONTROLLER_PORT="Microcontroller Port";
 	public static final String DENEWORD_TYPE_MICROCONTROLLER_PORT_TYPE="Microcontroller Port Type";
@@ -1041,6 +1058,7 @@ public class TeleonomeConstants {
 	public static final int LIFE_CYCLE_EVENT_ALERT_WPS_VALUE=3;
 	public static final int LIFE_CYCLE_EVENT_WPS_VALUE=2;
 	public static final int LIFE_CYCLE_EVENT_COMMA_VALUE=1;
+	
 	
 	public static final String WPS_ALERT="WPS Alert";
 	

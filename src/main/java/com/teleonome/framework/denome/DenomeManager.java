@@ -68,6 +68,16 @@ import com.teleonome.framework.hypothalamus.CommandRequest;
 import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.mnemosyne.MnemosyneManager;
+import com.teleonome.framework.mnemosyne.operations.AddDeneWordToDeneOperation;
+import com.teleonome.framework.mnemosyne.operations.ConvertDeneWordsToJSONArrayOperation;
+import com.teleonome.framework.mnemosyne.operations.CopyDeneOperation;
+import com.teleonome.framework.mnemosyne.operations.CopyTimeseriesElementToTimeseriesOperation;
+import com.teleonome.framework.mnemosyne.operations.CreateDeneOperation;
+import com.teleonome.framework.mnemosyne.operations.ListFileInfoOp;
+import com.teleonome.framework.mnemosyne.operations.ResetCounterOperation;
+import com.teleonome.framework.mnemosyne.operations.UpdateCounterOperation;
+import com.teleonome.framework.mnemosyne.operations.UpdateTimeSeriesCounterOperation;
+import com.teleonome.framework.mnemosyne.operations.UpdateValueOperation;
 import com.teleonome.framework.network.NetworkUtilities;
 import com.teleonome.framework.persistence.PostgresqlPersistenceManager;
 import com.teleonome.framework.utils.Utils;
@@ -108,20 +118,28 @@ public class DenomeManager {
 	Vector actuatorDenesVector = new Vector();
 	public Hashtable pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex = new Hashtable();
 	public Hashtable pointerToMicroControllerActuatorExecutionPositionDeneIndex = new Hashtable();
-
+	public Hashtable pointerToMicroControllerTelepathonExecutionPositionIndex = new Hashtable();
+	Hashtable<String,ArrayList<Map.Entry<JSONObject, Integer>>> eventDataStructureValueListPointerEventStringQueuePositionDeneWordIndex = new Hashtable();
+	
 
 	ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordForInitialIndex = new ArrayList(); 
 	ArrayList<Map.Entry<JSONObject, Integer>> actuatorExecutionPositionDeneForInitialIndex = new ArrayList();
 
 	ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex = new ArrayList(); 
+	ArrayList<Map.Entry<JSONObject, Integer>> telepathonExecutionPositionDeneWordIndex = new ArrayList(); 
+	
 	ArrayList<Map.Entry<JSONObject, Integer>> actuatorExecutionPositionDeneIndex = new ArrayList();
 	JSONArray analyticonDenesJSONArray = new JSONArray();
 	JSONArray mnemosyconDenesJSONArray = new JSONArray();
 	JSONArray rememeberedDeneWordsMnemosyconDenesJSONArray = new JSONArray();
 	Hashtable pointerToMicroControllerSensorsDeneWordsForInitialBySensorRequestQueuePositionIndex = new Hashtable();
 	Hashtable pointerToMicroControllerActuatorExecutionPositionForInitialDeneIndex  = new Hashtable();
-
-
+	//
+	// Telephatons related variables
+	//
+	Hashtable <String, Vector> microControllerPointerTelepathonsIndex = new Hashtable();
+	Hashtable<String, Hashtable<String,Vector>>  microControllerPointerTelepathonTypeTelepathonsIndex = new Hashtable();
+	Hashtable<String,Integer> eventDataStructureValueListPointerNumberOfSamplesPositionIndex = new Hashtable();
 
 	ArrayList<Map.Entry<String, Integer>> microControllerPointerProcessingQueuePositionIndex = new ArrayList();
 
@@ -305,6 +323,10 @@ public class DenomeManager {
 			pointerToMicroControllerSensorsDeneWordsForInitialBySensorRequestQueuePositionIndex= new Hashtable();
 			microControllerPointerProcessingQueuePositionIndex = new ArrayList();
 
+			microControllerPointerTelepathonsIndex = new Hashtable();
+			microControllerPointerTelepathonTypeTelepathonsIndex = new Hashtable();
+			
+			
 			//
 			// end of variable initialization
 			//
@@ -396,7 +418,7 @@ public class DenomeManager {
 
 			JSONArray internalNucleusDeneChains = (JSONArray) internalNucleus.get("DeneChains");
 			JSONObject aDeneChainJSONObject, aDeneValueJSONObject, actuatorActionJSONObject = null;
-			JSONArray sensorDenesJSONArray;
+			JSONArray sensorDenesJSONArray, telepathonsDenesJSONArray;
 			JSONArray sensorValuesJSONArray, actuatorActionConditionsJSONArray;
 
 			JSONArray onStartActionsDenesJSONArray, actuatorInitialDenesJSONArray, actuatorDenesJSONArray, actuatorActionsJSONArray, descriptiveDenesJSONArray;
@@ -437,7 +459,8 @@ public class DenomeManager {
 			//
 			// process the chains in the order
 			// descriptive
-			// compoents
+			// components
+			// Telepathons
 			// sensors
 			// actuators
 			// Analyticons
@@ -542,9 +565,162 @@ public class DenomeManager {
 				}
 
 			}
-
-			boolean isSensor=false;
 			Vector v;
+			Hashtable h;
+			String telepathonType, eventListPointer, eventValueDefinitionsPointer;
+			JSONObject eventListJSONObject, eventJSONObject;
+			JSONArray allEventsJSONArray;
+			String eventDataStructureValueListPointer, eventValueDefinitionName;
+			JSONObject eventDataStructureValueJSONObject, eventValueDefinitionJSONObject;
+			JSONArray allEventValueDefinitionsPointersJSONArray;
+			ArrayList<Map.Entry<JSONObject, Integer>> eventStringQueuePositionDeneWordIndex = new ArrayList(); 
+			
+			//
+			// Telepathons
+			//
+			JSONObject aTelepathonsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_TELEPATHONS);
+			 eventDataStructureValueListPointerEventStringQueuePositionDeneWordIndex = new Hashtable();
+			
+			//
+			// Cant assume that all teleonomes will have telepathons
+			if(aTelepathonsDeneChainJSONObject!=null){
+				telepathonsDenesJSONArray = getDenesByDeneType(aTelepathonsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_TELEPATHON);
+				microControllerPointerTelepathonsIndex = new Hashtable();
+				eventDataStructureValueListPointerNumberOfSamplesPositionIndex = new Hashtable();
+				for(int j=0;j<telepathonsDenesJSONArray.length();j++){
+					aDeneJSONObject = (JSONObject) telepathonsDenesJSONArray.get(j);
+					//logger.debug("line 516 aDeneJSONObject=" + aDeneJSONObject.toString(4));
+					pointerToMicroController =  (String) getDeneWordAttributeByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_TELEPATHON_MICROCONTROLLER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					telepathonType =  (String) getDeneWordAttributeByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_TELEPATHON_MICROCONTROLLER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+					//logger.debug("line 516 aDeneJSONObject=" + aDeneJSONObject.toString(4));
+					v = (Vector)microControllerPointerTelepathonsIndex.get(pointerToMicroController);
+					if(v==null)v = new Vector();
+					v.addElement(aDeneJSONObject);
+					microControllerPointerTelepathonsIndex.put(pointerToMicroController,v);
+					
+					
+					h = (Hashtable)microControllerPointerTelepathonTypeTelepathonsIndex.get(pointerToMicroController);
+					if(h==null) {
+						h = new Hashtable();
+						v = new Vector();
+					}else {
+						v = (Vector) h.get(telepathonType);
+						if(v==null)v=new Vector();
+					}
+					v.add(aDeneJSONObject);
+					h.put(telepathonType, aDeneJSONObject);
+					microControllerPointerTelepathonTypeTelepathonsIndex.put(pointerToMicroController,h);
+					//
+					// for this telepathon, process all the events
+					//
+					eventListPointer =  (String) getDeneWordAttributeByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_TELEPATHON_EVENT_LIST_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					try {
+						eventListJSONObject = getDeneByIdentity(new Identity(eventListPointer));
+						allEventsJSONArray = this.getAllDeneWordAttributeByDeneWordTypeFromDene(eventListJSONObject, TeleonomeConstants.DENEWORD_TYPE_EVENT_DEFINITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						for(int k=0;k<allEventsJSONArray.length();k++) {
+							eventJSONObject = allEventsJSONArray.getJSONObject(k);
+							eventDataStructureValueListPointer =  (String) getDeneWordAttributeByDeneWordTypeFromDene(eventJSONObject, TeleonomeConstants.DENEWORD_TYPE_EVENT_DATA_STRUCTURE_VALUE_LIST, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							eventDataStructureValueJSONObject = getDeneByIdentity(new Identity(eventDataStructureValueListPointer));
+							allEventValueDefinitionsPointersJSONArray = this.getAllDeneWordAttributeByDeneWordTypeFromDene(eventDataStructureValueJSONObject, TeleonomeConstants.DENEWORD_TYPE_EVENT_VALUE_DEFINITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							 eventStringQueuePositionDeneWordIndex = new ArrayList();
+							
+							for(int m=0;m<allEventValueDefinitionsPointersJSONArray.length();m++){
+								eventValueDefinitionsPointer = allEventValueDefinitionsPointersJSONArray.getString(m);
+								eventValueDefinitionJSONObject = getDeneByIdentity(new Identity(eventValueDefinitionsPointer));
+								eventValueDefinitionName = eventValueDefinitionJSONObject.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+								I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(eventValueDefinitionJSONObject, TeleonomeConstants.DENEWORD_EVENT_STRING_QUEUE_POSITION , TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+								
+								if(eventValueDefinitionName.equals(TeleonomeConstants.DENEWORD_NUMBER_OF_SAMPLES_IN_EVENT)) {
+									//
+									// store this value in another hashtable for easy access
+									eventDataStructureValueListPointerNumberOfSamplesPositionIndex.put(eventDataStructureValueListPointer, I);
+								}
+								
+								eventStringQueuePositionDeneWordIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(eventValueDefinitionJSONObject, I));
+								Collections.sort(eventStringQueuePositionDeneWordIndex, new Comparator<Map.Entry<?, Integer>>(){
+								public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
+									return o1.getValue().compareTo(o2.getValue());
+								}});
+							}
+							eventDataStructureValueListPointerEventStringQueuePositionDeneWordIndex.put(eventDataStructureValueListPointer, eventStringQueuePositionDeneWordIndex);
+							
+//								aDeneJSONObject = (JSONObject) v.elementAt(j);
+//								sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//								sensorValuesJSONArray = this.loadDenesFromPointers(sensorValuesPointersJSONArray);
+//								logger.debug("sensorValuesJSONArray.length=" + sensorValuesJSONArray.length());
+//								for(int k=0;k<sensorValuesJSONArray.length();k++){
+//									aDeneValueJSONObject = (JSONObject) sensorValuesJSONArray.get(k);
+//									logger.debug("k="+ k + " aDeneValueJSONObject:" + aDeneValueJSONObject);
+//									I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneValueJSONObject, "Sensor Request Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//									sensorRequestQueuePositionDeneWordIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(aDeneValueJSONObject, I));
+//									Collections.sort(sensorRequestQueuePositionDeneWordIndex, new Comparator<Map.Entry<?, Integer>>(){
+//										public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
+//											return o1.getValue().compareTo(o2.getValue());
+//										}});
+//								}
+//							}
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+						}
+					} catch (InvalidDenomeException e) {
+						// TODO Auto-generated catch block
+						logger.warn(Utils.getStringException(e));
+					}
+					
+				}
+			}
+			pointerToMicroControllerTelepathonExecutionPositionIndex = new Hashtable();
+			
+			for(Enumeration<String> en = microControllerPointerTelepathonsIndex.keys();en.hasMoreElements();){
+				pointerToMicroController = en.nextElement();
+				v = (Vector)microControllerPointerTelepathonsIndex.get(pointerToMicroController);
+				telepathonExecutionPositionDeneWordIndex = new ArrayList();
+				for(int j=0;j<v.size();j++){
+					aDeneJSONObject = (JSONObject) v.elementAt(j);
+					I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_EXECUTION_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					telepathonExecutionPositionDeneWordIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(aDeneJSONObject, I));
+					Collections.sort(telepathonExecutionPositionDeneWordIndex, new Comparator<Map.Entry<?, Integer>>(){
+						public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
+							return o1.getValue().compareTo(o2.getValue());
+						}});
+				}
+				
+				pointerToMicroControllerTelepathonExecutionPositionIndex.put(pointerToMicroController, telepathonExecutionPositionDeneWordIndex);
+				
+				
+//				for(int j=0;j<v.size();j++){
+//					aDeneJSONObject = (JSONObject) v.elementAt(j);
+//					sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					sensorValuesJSONArray = this.loadDenesFromPointers(sensorValuesPointersJSONArray);
+//					logger.debug("sensorValuesJSONArray.length=" + sensorValuesJSONArray.length());
+//					for(int k=0;k<sensorValuesJSONArray.length();k++){
+//						aDeneValueJSONObject = (JSONObject) sensorValuesJSONArray.get(k);
+//						logger.debug("k="+ k + " aDeneValueJSONObject:" + aDeneValueJSONObject);
+//						I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneValueJSONObject, "Sensor Request Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//						sensorRequestQueuePositionDeneWordIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(aDeneValueJSONObject, I));
+//						Collections.sort(sensorRequestQueuePositionDeneWordIndex, new Comparator<Map.Entry<?, Integer>>(){
+//							public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
+//								return o1.getValue().compareTo(o2.getValue());
+//							}});
+//					}
+//				}
+			}
+
+
+				//
+				// Sensors
+				//
+				boolean isSensor=false;
+			
 			JSONObject aSensorsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_SENSORS);
 			//
 			// Cant assume that all teleonomes will have sensors
@@ -3243,871 +3419,896 @@ public class DenomeManager {
 			deneType = mnemosyneDene.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
 			logger.info("line 3231 deneType =" + deneType);
 			if(deneType.equals(TeleonomeConstants.MNEMOSYNE_COPY_DENE_OPERATION)){
-				//
-				// get the source dene
-				//
-				String copySourceDeneIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_DENE_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				logger.info("line 3237 copySourceDeneIdentityPointer =" + copySourceDeneIdentityPointer);
-				copySourceDene = getDenomicElementByIdentity(new Identity(copySourceDeneIdentityPointer));
-				clonedSourceDene  = new JSONObject(copySourceDene, JSONObject.getNames(copySourceDene));
-				clonedSourceDene.put("Timestamp", formatedCurrentTimestamp);
-				clonedSourceDene.put("Timestamp Milliseconds", currentTimeMillis);
-
-				String targetMnemosyneDeneChainIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				targetMnemosyneDeneChain = getDenomicElementByIdentity(new Identity(targetMnemosyneDeneChainIdentityPointer));
-				targetMnemosyneDeneChainDenesJSONArray = targetMnemosyneDeneChain.getJSONArray("Denes");
-
-				newDenePosition=0;
-				if(targetMnemosyneDeneChainDenesJSONArray==null){
-					targetMnemosyneDeneChainDenesJSONArray=new JSONArray();
-					targetMnemosyneDeneChain.put("Denes", targetMnemosyneDeneChainDenesJSONArray);
-					newDenePosition=1;
-				}
-
-				newDenePosition = getNextPostionForDeneInMnemosyneChain(targetMnemosyneDeneChain, clonedSourceDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
-				logger.info("line 3255 newDenePosition =" + newDenePosition);
-				clonedSourceDene.put("Position", newDenePosition);
-				targetMnemosyneDeneChainDenesJSONArray.put(clonedSourceDene);
+				CopyDeneOperation copyDeneOp = new CopyDeneOperation(mnemosyneDene);
+				copyDeneOp.process(this,  currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime, currentTimeZone.toZoneId());
+//				//
+//				// get the source dene
+//				//
+//				String copySourceDeneIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_DENE_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				logger.info("line 3237 copySourceDeneIdentityPointer =" + copySourceDeneIdentityPointer);
+//				copySourceDene = getDenomicElementByIdentity(new Identity(copySourceDeneIdentityPointer));
+//				clonedSourceDene  = new JSONObject(copySourceDene, JSONObject.getNames(copySourceDene));
+//				clonedSourceDene.put("Timestamp", formatedCurrentTimestamp);
+//				clonedSourceDene.put("Timestamp Milliseconds", currentTimeMillis);
+//
+//				String targetMnemosyneDeneChainIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				targetMnemosyneDeneChain = getDenomicElementByIdentity(new Identity(targetMnemosyneDeneChainIdentityPointer));
+//				targetMnemosyneDeneChainDenesJSONArray = targetMnemosyneDeneChain.getJSONArray("Denes");
+//
+//				newDenePosition=0;
+//				if(targetMnemosyneDeneChainDenesJSONArray==null){
+//					targetMnemosyneDeneChainDenesJSONArray=new JSONArray();
+//					targetMnemosyneDeneChain.put("Denes", targetMnemosyneDeneChainDenesJSONArray);
+//					newDenePosition=1;
+//				}
+//
+//				newDenePosition = getNextPostionForDeneInMnemosyneChain(targetMnemosyneDeneChain, clonedSourceDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
+//				logger.info("line 3255 newDenePosition =" + newDenePosition);
+//				clonedSourceDene.put("Position", newDenePosition);
+//				targetMnemosyneDeneChainDenesJSONArray.put(clonedSourceDene);
 
 
 			}else if(deneType.equals(TeleonomeConstants.MNEMOSYNE_CREATE_DENE_OPERATION)){
-				//
-				// list the files and create a dene for each one
-				// there can be multiple targets, ie you can add a dene to 
-				// the current hour, current day etc
-				// so first get the targets, which are identity pointers that point to the chain where this new dene
-				//needs to be created
-				//
-				targetsJSONArray = getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				//
-				// ok, now we have the targets, and we know we need to create a Dene, so first create a Dene
-				// add all the DeneWords and then add the Dene to the Target
-				// each target looks like:
-				//   "@MonoNanny:Mnemosyne:Mnemosyne Today",
-				//
+				
+				CreateDeneOperation createDeneOp = new CreateDeneOperation(mnemosyneDene);
+				createDeneOp.process(this,  currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime,currentTimeZone.toZoneId());
+
+				
+//				//
+//				// list the files and create a dene for each one
+//				// there can be multiple targets, ie you can add a dene to 
+//				// the current hour, current day etc
+//				// so first get the targets, which are identity pointers that point to the chain where this new dene
+//				//needs to be created
+//				//
+//				targetsJSONArray = getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				//
+//				// ok, now we have the targets, and we know we need to create a Dene, so first create a Dene
+//				// add all the DeneWords and then add the Dene to the Target
+//				// each target looks like:
+//				//   "@MonoNanny:Mnemosyne:Mnemosyne Today",
+//				//
 
 
-				for(int j=0;j<targetsJSONArray.length();j++){
-					destinationIdentityPointer = targetsJSONArray.getString(j);
-					logger.info("destinationIdentityPointer=" + destinationIdentityPointer);
-					destinationDeneChain = getDenomicElementByIdentity(new Identity(destinationIdentityPointer));
-					destinationDenes = destinationDeneChain.getJSONArray("Denes");
-					newDenePosition=0;
-					if(destinationDenes==null){
-						destinationDenes=new JSONArray();
-						destinationDeneChain.put("Denes", destinationDenes);
-						newDenePosition=1;
-					}
-
-					newDene = new JSONObject();
-					newDeneDeneWords = new JSONArray();
-					newDene.put("DeneWords", newDeneDeneWords);
-					//
-					// the name of this new dene is a deneword where the name is "New Dene Name'
-					newDeneName = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_NEW_DENE_NAME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					newDene.put("Name", newDeneName);
-					//
-					// now that we have the name, look for the next position, this means, go to the chain
-					// and see what is the position of the last copy of that dene that we have in the chain
-					// destinationDenes could have several copies of the same dene
-					// for example, if this is a daily, and you are running the process every hour
-					// and is 8am, by the time you are adding a new dene, there are already 7 denes with the same
-					//name, but what distinguish them is that each dene has a an attribute called "Position"
-					// that way when we want to make reports or operationswe know which is the last value
-
-					newDenePosition = getNextPostionForDeneInMnemosyneChain(destinationDeneChain, newDeneName);
-					newDene.put("Position", newDenePosition);
-					//
-					//
-					// also add when this dene was created
-
-
-					newDene.put("Timestamp", formatedCurrentTime);
-					newDene.put("Timestamp Milliseconds", currentTimeMillis);
-
-
-
-					// Now add denewords to this new dene, you can either copy an existing deneword or create a new one from scratch
-					copyDeneWordPointersJSONArray = getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_COPY_DENEWORD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					//
-					// the above array will contain pointers to areas in the denome, we want the whole DenWord so
-
-
-					for(int i=0;i<copyDeneWordPointersJSONArray.length();i++){
-						deneWordPointer = copyDeneWordPointersJSONArray.getString(i);
-						deneWordToCopy  = this.getDeneWordByIdentity(new Identity(deneWordPointer));
-						//
-						// as an added attribute, store the pointer as a "Source" Attribute
-						deneWordToCopy.put("Source", deneWordPointer);
-						//
-						// now add this deneword to the new dene
-						//
-						newDeneDeneWords.put(deneWordToCopy);
-					}
-
-					//
-					// finally add the new dene to the chain
-					logger.info("adding new dene =" + newDene.getString("Name"));
-					destinationDenes.put(newDene);
-				}
+//				for(int j=0;j<targetsJSONArray.length();j++){
+//					destinationIdentityPointer = targetsJSONArray.getString(j);
+//					logger.info("destinationIdentityPointer=" + destinationIdentityPointer);
+//					destinationDeneChain = getDenomicElementByIdentity(new Identity(destinationIdentityPointer));
+//					destinationDenes = destinationDeneChain.getJSONArray("Denes");
+//					newDenePosition=0;
+//					if(destinationDenes==null){
+//						destinationDenes=new JSONArray();
+//						destinationDeneChain.put("Denes", destinationDenes);
+//						newDenePosition=1;
+//					}
+//
+//					newDene = new JSONObject();
+//					newDeneDeneWords = new JSONArray();
+//					newDene.put("DeneWords", newDeneDeneWords);
+//					//
+//					// the name of this new dene is a deneword where the name is "New Dene Name'
+//					newDeneName = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_NEW_DENE_NAME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					newDene.put("Name", newDeneName);
+//					//
+//					// now that we have the name, look for the next position, this means, go to the chain
+//					// and see what is the position of the last copy of that dene that we have in the chain
+//					// destinationDenes could have several copies of the same dene
+//					// for example, if this is a daily, and you are running the process every hour
+//					// and is 8am, by the time you are adding a new dene, there are already 7 denes with the same
+//					//name, but what distinguish them is that each dene has a an attribute called "Position"
+//					// that way when we want to make reports or operationswe know which is the last value
+//
+//					newDenePosition = getNextPostionForDeneInMnemosyneChain(destinationDeneChain, newDeneName);
+//					newDene.put("Position", newDenePosition);
+//					//
+//					//
+//					// also add when this dene was created
+//
+//
+//					newDene.put("Timestamp", formatedCurrentTime);
+//					newDene.put("Timestamp Milliseconds", currentTimeMillis);
+//					//
+//					// Now add denewords to this new dene, you can either copy an existing deneword or create a new one from scratch
+//					//
+//					copyDeneWordPointersJSONArray = getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_COPY_DENEWORD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					//
+//					// the above array will contain pointers to areas in the denome, we want the whole DenWord so
+//					//
+//					for(int i=0;i<copyDeneWordPointersJSONArray.length();i++){
+//						deneWordPointer = copyDeneWordPointersJSONArray.getString(i);
+//						deneWordToCopy  = this.getDeneWordByIdentity(new Identity(deneWordPointer));
+//						//
+//						// as an added attribute, store the pointer as a "Source" Attribute
+//						deneWordToCopy.put("Source", deneWordPointer);
+//						//
+//						// now add this deneword to the new dene
+//						//
+//						newDeneDeneWords.put(deneWordToCopy);
+//					}
+//
+//					//
+//					// finally add the new dene to the chain
+//					logger.info("adding new dene =" + newDene.getString("Name"));
+//					destinationDenes.put(newDene);
+//				}
 
 			}else if(deneType.equals(TeleonomeConstants.MNEMOSYNE_LIST_FILE_INFO_OPERATION)){	
-				//
-				// we are going to create a new Dene andd it to the mnemosyne
-				// there can be multiple targets, ie you can add a dene to 
-				// the current hour, current day etc
-				// so first get the targets, which are identity pointers that point to the chain where this new dene
-				//needs to be created
-				//
-				targetsJSONArray = getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				//
-				// ok, now we have the targets, and we know we need to create a Dene, so first create a Dene
-				// add all the DeneWords and then add the Dene to the Target
-				// each target looks like:
-				//   "@MonoNanny:Mnemosyne:Mnemosyne Today",
-				//
-				JSONObject fileLastModifiedOnDeneWord, fileSizeDeneWord,fileNameDeneWord;
-
-				String pathToFiles = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_FILE_LIST_PATH, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				//
-				// the name of this new dene is a deneword where the name is "New Dene Name'
-				newDeneName = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_NEW_DENE_NAME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				File pathToFilesDir = new File(pathToFiles);
-				File[] files=pathToFilesDir.listFiles();
-				File aFile;
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TeleonomeConstants.MNEMOSYNE_TIMESTAMP_FORMAT);
-				Instant fileInstant;
-				String formatedFileLastModifiedOnTime;
-				for(int j=0;j<targetsJSONArray.length();j++){
-					destinationIdentityPointer = targetsJSONArray.getString(j);
-					logger.debug("destinationIdentityPointer=" + destinationIdentityPointer);
-					destinationDeneChain = getDenomicElementByIdentity(new Identity(destinationIdentityPointer));
-					destinationDenes = destinationDeneChain.getJSONArray("Denes");
-					newDenePosition=0;
-					if(destinationDenes==null){
-						destinationDenes=new JSONArray();
-						destinationDeneChain.put("Denes", destinationDenes);
-						newDenePosition=1;
-					}
-
-					//
-					// for this target list the files and create a dene for each one
-					//
-					for(int k=0;k<files.length;k++){
-						aFile = files[k];
-						newDene = new JSONObject();
-						newDeneDeneWords = new JSONArray();
-						newDene.put("DeneWords", newDeneDeneWords);
-						newDene.put("Name", newDeneName);
-						//
-						// now that we have the name, look for the next position, this means, go to the chain
-						// and see what is the position of the last copy of that dene that we have in the chain
-						// destinationDenes could have several copies of the same dene
-						// for example, if this is a daily, and you are running the process every hour
-						// and is 8am, by the time you are adding a new dene, there are already 7 denes with the same
-						//name, but what distinguish them is that each dene has a an attribute called "Position"
-						// that way when we want to make reports or operationswe know which is the last value
-
-						newDenePosition = getNextPostionForDeneInMnemosyneChain(destinationDeneChain, newDeneName);
-						newDene.put("Position", newDenePosition);
-						//
-						//
-						// also add when this dene was created
-
-
-						newDene.put("Timestamp", formatedCurrentTime);
-						newDene.put("Timestamp Milliseconds", currentTimeMillis);
-
-						//
-						// now add the following 3 denewords to this dene
-						//
-						// 1)The deneword that represents the file name
-						//
-						fileNameDeneWord = Utils.createDeneWordJSONObject("File Name", aFile.getName() ,null,"String",true);
-						newDeneDeneWords.put(fileNameDeneWord);
-						//
-						// 2)The deneword that represents the file size
-						//
-						fileSizeDeneWord = Utils.createDeneWordJSONObject("File Size", aFile.length()/1024 ,"kb","String",true);
-						newDeneDeneWords.put(fileSizeDeneWord);
-						//
-						// 3)The deneword that represents the file last modified date
-						//
-						fileInstant = Instant.ofEpochMilli(aFile.lastModified());
-						LocalDateTime fileLastMofiedOnLocalDateTime = LocalDateTime.ofInstant(fileInstant, currentTimeZone.toZoneId());
-						formatedFileLastModifiedOnTime = fileLastMofiedOnLocalDateTime.format(formatter);
-						fileLastModifiedOnDeneWord = Utils.createDeneWordJSONObject("Last Modified On", formatedFileLastModifiedOnTime ,null,"String",true);
-						newDeneDeneWords.put(fileLastModifiedOnDeneWord);
-						//
-						// finally add the new dene to the chain
-						destinationDenes.put(newDene);
-
-					}
-				} // for targets
+				ListFileInfoOp aListFileInfoOp = new ListFileInfoOp(mnemosyneDene);
+				aListFileInfoOp.process(this, currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime, currentTimeZone.toZoneId());
+//				//
+//				// we are going to create a new Dene andd it to the mnemosyne
+//				// there can be multiple targets, ie you can add a dene to 
+//				// the current hour, current day etc
+//				// so first get the targets, which are identity pointers that point to the chain where this new dene
+//				//needs to be created
+//				//
+//				targetsJSONArray = getAllDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				//
+//				// ok, now we have the targets, and we know we need to create a Dene, so first create a Dene
+//				// add all the DeneWords and then add the Dene to the Target
+//				// each target looks like:
+//				//   "@MonoNanny:Mnemosyne:Mnemosyne Today",
+//				//
+//				JSONObject fileLastModifiedOnDeneWord, fileSizeDeneWord,fileNameDeneWord;
+//
+//				String pathToFiles = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_FILE_LIST_PATH, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				//
+//				// the name of this new dene is a deneword where the name is "New Dene Name'
+//				newDeneName = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_NEW_DENE_NAME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				File pathToFilesDir = new File(pathToFiles);
+//				File[] files=pathToFilesDir.listFiles();
+//				File aFile;
+//				DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TeleonomeConstants.MNEMOSYNE_TIMESTAMP_FORMAT);
+//				Instant fileInstant;
+//				String formatedFileLastModifiedOnTime;
+//				for(int j=0;j<targetsJSONArray.length();j++){
+//					destinationIdentityPointer = targetsJSONArray.getString(j);
+//					logger.debug("destinationIdentityPointer=" + destinationIdentityPointer);
+//					destinationDeneChain = getDenomicElementByIdentity(new Identity(destinationIdentityPointer));
+//					destinationDenes = destinationDeneChain.getJSONArray("Denes");
+//					newDenePosition=0;
+//					if(destinationDenes==null){
+//						destinationDenes=new JSONArray();
+//						destinationDeneChain.put("Denes", destinationDenes);
+//						newDenePosition=1;
+//					}
+//
+//					//
+//					// for this target list the files and create a dene for each one
+//					//
+//					for(int k=0;k<files.length;k++){
+//						aFile = files[k];
+//						newDene = new JSONObject();
+//						newDeneDeneWords = new JSONArray();
+//						newDene.put("DeneWords", newDeneDeneWords);
+//						newDene.put("Name", newDeneName);
+//						//
+//						// now that we have the name, look for the next position, this means, go to the chain
+//						// and see what is the position of the last copy of that dene that we have in the chain
+//						// destinationDenes could have several copies of the same dene
+//						// for example, if this is a daily, and you are running the process every hour
+//						// and is 8am, by the time you are adding a new dene, there are already 7 denes with the same
+//						//name, but what distinguish them is that each dene has a an attribute called "Position"
+//						// that way when we want to make reports or operationswe know which is the last value
+//
+//						newDenePosition = getNextPostionForDeneInMnemosyneChain(destinationDeneChain, newDeneName);
+//						newDene.put("Position", newDenePosition);
+//						//
+//						//
+//						// also add when this dene was created
+//
+//
+//						newDene.put("Timestamp", formatedCurrentTime);
+//						newDene.put("Timestamp Milliseconds", currentTimeMillis);
+//
+//						//
+//						// now add the following 3 denewords to this dene
+//						//
+//						// 1)The deneword that represents the file name
+//						//
+//						fileNameDeneWord = Utils.createDeneWordJSONObject("File Name", aFile.getName() ,null,"String",true);
+//						newDeneDeneWords.put(fileNameDeneWord);
+//						//
+//						// 2)The deneword that represents the file size
+//						//
+//						fileSizeDeneWord = Utils.createDeneWordJSONObject("File Size", aFile.length()/1024 ,"kb","String",true);
+//						newDeneDeneWords.put(fileSizeDeneWord);
+//						//
+//						// 3)The deneword that represents the file last modified date
+//						//
+//						fileInstant = Instant.ofEpochMilli(aFile.lastModified());
+//						LocalDateTime fileLastMofiedOnLocalDateTime = LocalDateTime.ofInstant(fileInstant, currentTimeZone.toZoneId());
+//						formatedFileLastModifiedOnTime = fileLastMofiedOnLocalDateTime.format(formatter);
+//						fileLastModifiedOnDeneWord = Utils.createDeneWordJSONObject("Last Modified On", formatedFileLastModifiedOnTime ,null,"String",true);
+//						newDeneDeneWords.put(fileLastModifiedOnDeneWord);
+//						//
+//						// finally add the new dene to the chain
+//						destinationDenes.put(newDene);
+//
+//					}
+//				} // for targets
 
 			}else if(deneType.equals(TeleonomeConstants.MNEMOSYNE_ADD_DENEWORD_TO_DENE_OPERATION)){
-				//
-				// get the operation to see what we are doing
-				// 
-				JSONObject selectedDene=null; 
-				String operation = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_OPERATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				//
-				// the next few lines are common to all the different
-				// type of operations in the add_deneword_to_dene
-				//
-				// we are adding a new deneword to an existing dene
-				// get that existing dene first.  the address of the dene is
-				// located as a value in the deneword of type Mnemosyne Target
-				logger.debug("mnemosyneDene=" + mnemosyneDene.toString(4));
-
-				String targetDeneIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				logger.debug("line 2576 targetDeneIdentityPointer=" + targetDeneIdentityPointer);
-				Identity identity = new Identity(targetDeneIdentityPointer);
-				Identity deneChainIdentity = new Identity(identity.getTeleonomeName(), identity.getNucleusName(), identity.getDenechainName());
-				String deneName = identity.getDeneName();
-				JSONObject deneChain = this.getDenomicElementByIdentity(deneChainIdentity);
-				//
-				// The potentialDenes is an array with all the denes, so now identity which is the dene we want
-				// besides the actuall dene, we need which copy of the dene, since there could be many denes with the same name
-				// if we are storing one every hour, at noon there would be 12 copies of the same dene in the today chain
-				// so we need to specify which copy of the dene we want to use.  for this we use need to get the 
-				// deneword called MNEMOSYNE_DENEWORD_TARGET_POSITION, which could be a number or a variable like 
-				// COMMAND_MNEMOSYNE_LAST_DENE_POSITION
-				String targetPosition= (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_TARGET_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				JSONArray denes = deneChain.getJSONArray("Denes");
-				selectedDene = getDeneFromDeneJSONArrayByPostion(denes,  deneName, targetPosition);
-				//
-				// at this point, selectedDene is the one we need to add a deneword to
-				// To simplify the code, as part o the standard, the dene that is being used
-				// already contains a deneword which will be used as a template
-				// this deneword has the type of Create DeneWord Source
-				//
-				// so we need to get it and replace the value attribute of this deneword
-				// with that value that is calculated by aggregation.  so first get the deneword
-				JSONObject createDeneWordSource = (JSONObject) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_CREATE_DENEWORD_SOURCE, TeleonomeConstants.COMPLETE);
-				//
-				// use that deneword to create a new one that will be inserted, the source has all the data except the actuall value
-				// that needs to be calculated
-				//
-				JSONObject newDeneWord = new JSONObject();
-				newDeneWord.put("Name", createDeneWordSource.getString("Name"));
-				newDeneWord.put("Required", createDeneWordSource.getBoolean("Required"));
-				newDeneWord.put("Value Type", createDeneWordSource.getString("Value Type"));
-				//
-				// and add this word to the DeneWords of the selectedDene
-				JSONArray selectedDeneDeneWords = selectedDene.getJSONArray("DeneWords");
-				selectedDeneDeneWords.put(newDeneWord);
-
-				//
-				// the value will change according to the operation type
-				//
-				logger.debug("operation=" + operation);
-				if(operation.equals(TeleonomeConstants.MNEMOSYNE_CREATE_DENEWORD_ADD_TO_DENE_OPERATION)){
-
-					Object o = createDeneWordSource.get("Value");
-					if((o instanceof String) ) {
-						String ov = (String)o;
-						if(ov.equals(TeleonomeConstants.COMMANDS_CURRENT_DATE)) {
-							newDeneWord.put("Value", formatedCurrentDate);
-							logger.debug("formatedCurrentDate=" + formatedCurrentDate);
-						}else if(ov.equals(TeleonomeConstants.COMMANDS_CURRENT_HOUR)) {
-							newDeneWord.put("Value", formatedCurrentTime);
-							logger.debug("formatedCurrentHour=" + formatedCurrentTime);
-						}else if(ov.equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP)) {
-							newDeneWord.put("Value", formatedCurrentTimestamp);
-							logger.debug("formatedCurrentTimestamp=" + formatedCurrentTimestamp);
-						}else if(ov.equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP_MILLIS)) {
-							newDeneWord.put("Value", currentTimeMillis);
-							logger.debug("formatedCurrentTimestamp=" + formatedCurrentTimestamp);
-						}else if(ov.startsWith("@")) {
-							newDeneWord.put("Value", getDeneWordAttributeByIdentity(new Identity(ov), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
-							logger.debug("formatedCurrentHour=" + formatedCurrentTime);
-						}else {
-							newDeneWord.put("Value", o);
-						}
-					}
-
-
-				}else if(operation.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION)){
-
-					//
-					// finally, calculated the value this is done by taking a source and adding a value to it
-					// both the source and the value  can be from the mnemosyne and therefore can be more than one dene with the 
-					// same name, but it can also be from the rest of the denome in which case you will only
-					// have one dene. the source data is dound in "Aggregate From" and is a pointer which points 
-					// all the way to the DeneWord, so we need to first extract the address of the Dene, to discover
-					// which dene to use
-					//
-					// source
-					//
-					String aggregateFromDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Aggregate From", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("aggregateFromDeneWordIdentityPointer=" + aggregateFromDeneWordIdentityPointer );
-
-					Identity aggregateFromDeneWordIdentity = new Identity(aggregateFromDeneWordIdentityPointer);
-					logger.debug( " aggregateFromDeneWordIdentity=" + aggregateFromDeneWordIdentity);
-					Identity aggregateFromDeneIdentity = new Identity(aggregateFromDeneWordIdentity.getTeleonomeName(),aggregateFromDeneWordIdentity.getNucleusName(),aggregateFromDeneWordIdentity.getDenechainName(),aggregateFromDeneWordIdentity.getDeneName());
-
-					logger.debug("aggregateFromDeneIdentity=" + aggregateFromDeneIdentity);
-
-					JSONArray allAggregateFromDenes = getAllDenesByIdentity(aggregateFromDeneIdentity);
-					//
-					// first check to see if there is none, only one or more than one
-					// if this is the first aggregation there will be none therefore get the
-					// default attribute.  if we are starting, allAggregateFromDenes will
-					// have dene ,since it could have been created in a previous operation
-					// in the same cycle, but it will not have an actual value which is calculated
-					// by this operatin, for this reason, get the default value
-					JSONObject aggregateFromDeneWord = (JSONObject) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Aggregate From", TeleonomeConstants.COMPLETE);
-					Double defaultValue = aggregateFromDeneWord.getDouble("Default");
-					logger.debug("defaultValue=" + defaultValue );
-					//
-					logger.debug("allAggregateFromDenes.klength=" + allAggregateFromDenes.length());
-
-					JSONObject deneToAggregateFrom=null;
-					double sourceValue=0;
-					//
-					// if this is the first time we do this, then we just created a dene
-					// therefore there will not be something to aggreagete from
-					//
-					if(allAggregateFromDenes.length()<=1){
-						//
-						// get the default value
-						//
-						sourceValue = defaultValue;
-
-					}else{
-						//
-						// there is more than one, therefore get the deneword called "Aggregate From Dene Position" that will tell you
-						// which dene to use 
-						String aggregateFromDenePosition = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene,  "Aggregate From Dene Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						//
-						// now use that variable to get the actual dene we are going to use
-						//
-						deneToAggregateFrom = getDeneFromDeneJSONArrayByPostion(allAggregateFromDenes,  aggregateFromDeneWordIdentity.getDeneName(), aggregateFromDenePosition);
-
-						Object o = getDeneWordAttributeByDeneWordNameFromDene(deneToAggregateFrom, aggregateFromDeneWordIdentity.getDeneWordName(), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-						if(o==null){
-							sourceValue=defaultValue;
-						}else if (o instanceof String){
-							sourceValue = Double.parseDouble((String)o);
-						}else if(o instanceof Double){
-							sourceValue=((Double)o).doubleValue();
-						}else if(o instanceof Integer){
-							sourceValue=((Integer)o).doubleValue();
-						}
-
-					}
-					//
-					// assume is a double since we are aggregating
-					//
-
-					//
-					// value
-					// 
-					String aggregateValueDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Aggregate Value", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					Identity aggregateValueDeneWordIdentity = new Identity(aggregateValueDeneWordIdentityPointer);
-					Identity aggregateValueDeneIdentity = new Identity(aggregateValueDeneWordIdentity.getTeleonomeName(),aggregateValueDeneWordIdentity.getNucleusName(),aggregateValueDeneWordIdentity.getDenechainName(),aggregateValueDeneWordIdentity.getDeneName());
-
-					JSONArray allAggregateValueDenes = getAllDenesByIdentity(aggregateValueDeneWordIdentity);
-					//
-					// 
-					//
-					JSONObject deneToAggregateValue=null;
-					if(allAggregateValueDenes.length()==1){
-						deneToAggregateValue = allAggregateValueDenes.getJSONObject(0);
-					}else{
-						//
-						// there is more than one, therefore get the deneword called "Aggregate From Dene Position" that will tell you
-						// which dene to use 
-						String aggregateValueDenePosition = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene,  "Aggregate Value Dene Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						//
-						// now use that variable to get the actual dene we are going to use
-						//
-						deneToAggregateValue = getDeneFromDeneJSONArrayByPostion(allAggregateValueDenes,  aggregateValueDeneWordIdentity.getDeneName(), aggregateValueDenePosition);
-					}
-					//
-					// asume is a double since we are aggregating
-					// but because it can be a deneword from purpose
-					// receive it as an object
-
-					Object o = getDeneWordAttributeByDeneWordNameFromDene(deneToAggregateValue, aggregateValueDeneWordIdentity.getDeneWordName(), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-					double value=0;
-
-					if(o==null){
-						value=0;
-					}else if (o instanceof String){
-						value = Double.parseDouble((String)o);
-					}else if(o instanceof Double){
-						value=((Double)o).doubleValue();
-					}else if(o instanceof Integer){
-						value=((Integer)o).doubleValue();
-					}
-
-					//
-					// finally, add these two values and set the resulting as the value for the newDeneWord
-					//
-					double total= sourceValue + value;
-					logger.debug("sourceValue=" + sourceValue + " value=" + value);
-					newDeneWord.put("Value", total);
-
-				}
+				AddDeneWordToDeneOperation addDW = new AddDeneWordToDeneOperation(mnemosyneDene);
+				addDW.process(this, currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime, currentTimeZone.toZoneId());
+//				//
+//				// get the operation to see what we are doing
+//				// 
+//				JSONObject selectedDene=null; 
+//				String operation = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_OPERATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				//
+//				// the next few lines are common to all the different
+//				// type of operations in the add_deneword_to_dene
+//				//
+//				// we are adding a new deneword to an existing dene
+//				// get that existing dene first.  the address of the dene is
+//				// located as a value in the deneword of type Mnemosyne Target
+//				logger.debug("mnemosyneDene=" + mnemosyneDene.toString(4));
+//
+//				String targetDeneIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				logger.debug("line 2576 targetDeneIdentityPointer=" + targetDeneIdentityPointer);
+//				Identity identity = new Identity(targetDeneIdentityPointer);
+//				Identity deneChainIdentity = new Identity(identity.getTeleonomeName(), identity.getNucleusName(), identity.getDenechainName());
+//				String deneName = identity.getDeneName();
+//				JSONObject deneChain = this.getDenomicElementByIdentity(deneChainIdentity);
+//				//
+//				// The potentialDenes is an array with all the denes, so now identity which is the dene we want
+//				// besides the actuall dene, we need which copy of the dene, since there could be many denes with the same name
+//				// if we are storing one every hour, at noon there would be 12 copies of the same dene in the today chain
+//				// so we need to specify which copy of the dene we want to use.  for this we use need to get the 
+//				// deneword called MNEMOSYNE_DENEWORD_TARGET_POSITION, which could be a number or a variable like 
+//				// COMMAND_MNEMOSYNE_LAST_DENE_POSITION
+//				String targetPosition= (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_TARGET_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				JSONArray denes = deneChain.getJSONArray("Denes");
+//				selectedDene = getDeneFromDeneJSONArrayByPostion(denes,  deneName, targetPosition);
+//				//
+//				// at this point, selectedDene is the one we need to add a deneword to
+//				// To simplify the code, as part o the standard, the dene that is being used
+//				// already contains a deneword which will be used as a template
+//				// this deneword has the type of Create DeneWord Source
+//				//
+//				// so we need to get it and replace the value attribute of this deneword
+//				// with that value that is calculated by aggregation.  so first get the deneword
+//				JSONObject createDeneWordSource = (JSONObject) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_CREATE_DENEWORD_SOURCE, TeleonomeConstants.COMPLETE);
+//				//
+//				// use that deneword to create a new one that will be inserted, the source has all the data except the actuall value
+//				// that needs to be calculated
+//				//
+//				JSONObject newDeneWord = new JSONObject();
+//				newDeneWord.put("Name", createDeneWordSource.getString("Name"));
+//				newDeneWord.put("Required", createDeneWordSource.getBoolean("Required"));
+//				newDeneWord.put("Value Type", createDeneWordSource.getString("Value Type"));
+//				//
+//				// and add this word to the DeneWords of the selectedDene
+//				JSONArray selectedDeneDeneWords = selectedDene.getJSONArray("DeneWords");
+//				selectedDeneDeneWords.put(newDeneWord);
+//
+//				//
+//				// the value will change according to the operation type
+//				//
+//				logger.debug("operation=" + operation);
+//				if(operation.equals(TeleonomeConstants.MNEMOSYNE_CREATE_DENEWORD_ADD_TO_DENE_OPERATION)){
+//
+//					Object o = createDeneWordSource.get("Value");
+//					if((o instanceof String) ) {
+//						String ov = (String)o;
+//						if(ov.equals(TeleonomeConstants.COMMANDS_CURRENT_DATE)) {
+//							newDeneWord.put("Value", formatedCurrentDate);
+//							logger.debug("formatedCurrentDate=" + formatedCurrentDate);
+//						}else if(ov.equals(TeleonomeConstants.COMMANDS_CURRENT_HOUR)) {
+//							newDeneWord.put("Value", formatedCurrentTime);
+//							logger.debug("formatedCurrentHour=" + formatedCurrentTime);
+//						}else if(ov.equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP)) {
+//							newDeneWord.put("Value", formatedCurrentTimestamp);
+//							logger.debug("formatedCurrentTimestamp=" + formatedCurrentTimestamp);
+//						}else if(ov.equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP_MILLIS)) {
+//							newDeneWord.put("Value", currentTimeMillis);
+//							logger.debug("formatedCurrentTimestamp=" + formatedCurrentTimestamp);
+//						}else if(ov.startsWith("@")) {
+//							newDeneWord.put("Value", getDeneWordAttributeByIdentity(new Identity(ov), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+//							logger.debug("formatedCurrentHour=" + formatedCurrentTime);
+//						}else {
+//							newDeneWord.put("Value", o);
+//						}
+//					}
+//
+//
+//				}else if(operation.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION)){
+//
+//					//
+//					// finally, calculated the value this is done by taking a source and adding a value to it
+//					// both the source and the value  can be from the mnemosyne and therefore can be more than one dene with the 
+//					// same name, but it can also be from the rest of the denome in which case you will only
+//					// have one dene. the source data is dound in "Aggregate From" and is a pointer which points 
+//					// all the way to the DeneWord, so we need to first extract the address of the Dene, to discover
+//					// which dene to use
+//					//
+//					// source
+//					//
+//					String aggregateFromDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Aggregate From", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					logger.debug("aggregateFromDeneWordIdentityPointer=" + aggregateFromDeneWordIdentityPointer );
+//
+//					Identity aggregateFromDeneWordIdentity = new Identity(aggregateFromDeneWordIdentityPointer);
+//					logger.debug( " aggregateFromDeneWordIdentity=" + aggregateFromDeneWordIdentity);
+//					Identity aggregateFromDeneIdentity = new Identity(aggregateFromDeneWordIdentity.getTeleonomeName(),aggregateFromDeneWordIdentity.getNucleusName(),aggregateFromDeneWordIdentity.getDenechainName(),aggregateFromDeneWordIdentity.getDeneName());
+//
+//					logger.debug("aggregateFromDeneIdentity=" + aggregateFromDeneIdentity);
+//
+//					JSONArray allAggregateFromDenes = getAllDenesByIdentity(aggregateFromDeneIdentity);
+//					//
+//					// first check to see if there is none, only one or more than one
+//					// if this is the first aggregation there will be none therefore get the
+//					// default attribute.  if we are starting, allAggregateFromDenes will
+//					// have dene ,since it could have been created in a previous operation
+//					// in the same cycle, but it will not have an actual value which is calculated
+//					// by this operatin, for this reason, get the default value
+//					JSONObject aggregateFromDeneWord = (JSONObject) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Aggregate From", TeleonomeConstants.COMPLETE);
+//					Double defaultValue = aggregateFromDeneWord.getDouble("Default");
+//					logger.debug("defaultValue=" + defaultValue );
+//					//
+//					logger.debug("allAggregateFromDenes.klength=" + allAggregateFromDenes.length());
+//
+//					JSONObject deneToAggregateFrom=null;
+//					double sourceValue=0;
+//					//
+//					// if this is the first time we do this, then we just created a dene
+//					// therefore there will not be something to aggreagete from
+//					//
+//					if(allAggregateFromDenes.length()<=1){
+//						//
+//						// get the default value
+//						//
+//						sourceValue = defaultValue;
+//
+//					}else{
+//						//
+//						// there is more than one, therefore get the deneword called "Aggregate From Dene Position" that will tell you
+//						// which dene to use 
+//						String aggregateFromDenePosition = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene,  "Aggregate From Dene Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//						//
+//						// now use that variable to get the actual dene we are going to use
+//						//
+//						deneToAggregateFrom = getDeneFromDeneJSONArrayByPostion(allAggregateFromDenes,  aggregateFromDeneWordIdentity.getDeneName(), aggregateFromDenePosition);
+//
+//						Object o = getDeneWordAttributeByDeneWordNameFromDene(deneToAggregateFrom, aggregateFromDeneWordIdentity.getDeneWordName(), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//						if(o==null){
+//							sourceValue=defaultValue;
+//						}else if (o instanceof String){
+//							sourceValue = Double.parseDouble((String)o);
+//						}else if(o instanceof Double){
+//							sourceValue=((Double)o).doubleValue();
+//						}else if(o instanceof Integer){
+//							sourceValue=((Integer)o).doubleValue();
+//						}
+//
+//					}
+//					//
+//					// assume is a double since we are aggregating
+//					//
+//
+//					//
+//					// value
+//					// 
+//					String aggregateValueDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Aggregate Value", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					Identity aggregateValueDeneWordIdentity = new Identity(aggregateValueDeneWordIdentityPointer);
+//					Identity aggregateValueDeneIdentity = new Identity(aggregateValueDeneWordIdentity.getTeleonomeName(),aggregateValueDeneWordIdentity.getNucleusName(),aggregateValueDeneWordIdentity.getDenechainName(),aggregateValueDeneWordIdentity.getDeneName());
+//
+//					JSONArray allAggregateValueDenes = getAllDenesByIdentity(aggregateValueDeneWordIdentity);
+//					//
+//					// 
+//					//
+//					JSONObject deneToAggregateValue=null;
+//					if(allAggregateValueDenes.length()==1){
+//						deneToAggregateValue = allAggregateValueDenes.getJSONObject(0);
+//					}else{
+//						//
+//						// there is more than one, therefore get the deneword called "Aggregate From Dene Position" that will tell you
+//						// which dene to use 
+//						String aggregateValueDenePosition = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene,  "Aggregate Value Dene Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//						//
+//						// now use that variable to get the actual dene we are going to use
+//						//
+//						deneToAggregateValue = getDeneFromDeneJSONArrayByPostion(allAggregateValueDenes,  aggregateValueDeneWordIdentity.getDeneName(), aggregateValueDenePosition);
+//					}
+//					//
+//					// asume is a double since we are aggregating
+//					// but because it can be a deneword from purpose
+//					// receive it as an object
+//
+//					Object o = getDeneWordAttributeByDeneWordNameFromDene(deneToAggregateValue, aggregateValueDeneWordIdentity.getDeneWordName(), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//					double value=0;
+//
+//					if(o==null){
+//						value=0;
+//					}else if (o instanceof String){
+//						value = Double.parseDouble((String)o);
+//					}else if(o instanceof Double){
+//						value=((Double)o).doubleValue();
+//					}else if(o instanceof Integer){
+//						value=((Integer)o).doubleValue();
+//					}
+//
+//					//
+//					// finally, add these two values and set the resulting as the value for the newDeneWord
+//					//
+//					double total= sourceValue + value;
+//					logger.debug("sourceValue=" + sourceValue + " value=" + value);
+//					newDeneWord.put("Value", total);
+//
+//				}
 			}else if(deneType.equals(TeleonomeConstants.MNEMOSYNE_UPDATE_VALUE_OPERATION)){
-				//
-				// get the operation to see what we are doing
-				// 
-				JSONObject selectedDene=null; 
-				String operation = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_OPERATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				if(operation.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION)){
-
-					logger.debug("line 2765 mnemosyneDene=" + mnemosyneDene.toString(4));
-					//
-					// the process to follow is:
-					// 1)Get the function used to transform
-					// 2)Get the source of the data, this would be a number
-					// 3)get the Target Deneword which is where the result of the operation is stored, this is adeneword
-					// 4)transform the source data and store it in the target
-					// 5) Update Time fields
-
-					//
-					// 1)Function
-					//
-					String function = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Function", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("transofrm function=" + function );
-
-
-
-					//
-					//2) get the data source
-					//
-					String dataSourceIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_TYPE_TRANSFORMATION_DATA_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("line 2751 targetDeneWordIdentityPointer=" + dataSourceIdentityPointer);
-					Identity aggregateValueDeneWordIdentity = new Identity(dataSourceIdentityPointer);
-					Object aggregateValueObject = this.getDeneWordAttributeByIdentity(aggregateValueDeneWordIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("line 2778 aggregateValueObject=" + aggregateValueObject + " class=" + aggregateValueObject.getClass().toString());
-
-
-
-					//
-					// 3)target 
-					//
-					String targetDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("line 2751 targetDeneWordIdentityPointer=" + targetDeneWordIdentityPointer);
-					Identity targetDeneWordIdentity = new Identity(targetDeneWordIdentityPointer);
-					JSONObject targetDeneWord = (JSONObject) getDeneWordAttributeByIdentity(targetDeneWordIdentity,  TeleonomeConstants.COMPLETE);
-					//
-					// now use the identity of the deneword to get the dene, we need this because we need to update the 
-					// timestamp
-					Identity targetDeneIdentity  = new Identity(targetDeneWordIdentity.getTeleonomeName(),targetDeneWordIdentity.getNucleusName(), targetDeneWordIdentity.getDenechainName(), targetDeneWordIdentity.getDeneName());
-					JSONObject targetDene = getDeneByIdentity(targetDeneIdentity);
-					//
-					// 4)Transform the value
-					//
-					if(function.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION_FUNCTION_ELAPSED_TIME)) {
-						int value = ((Double)aggregateValueObject).intValue();				
-						String resultingValue = Utils.getElapsedSecondsToHoursMinutesSecondsString(value);
-						logger.debug("line 3372 value=" + value + " resultingValue=" + resultingValue );
-						targetDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, resultingValue);
-					}
-					//
-					//
-					//5) Update times values
-					//
-					logger.debug("line 3380 About to set the time for the dene in the update,"+  formatedCurrentTime);
-					targetDene.put("Timestamp", formatedCurrentTime);
-					targetDene.put("Timestamp Milliseconds", currentTimeMillis);
-
-				}else if(operation.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION)){
-
-					logger.debug("line 2765 mnemosyneDene=" + mnemosyneDene.toString(4));
-					//
-					// the process to follow is:
-					// 1)Get the source of the data, this would be a number
-					// 2)Gete the value to add this is also a number
-					// 3)get the Target Deneword which is where the result of the operation is stored, this is adeneword
-					// 4)Add the source to the value and store it in the target
-					// 5) Update Time fields
-
-
-					//
-					// 1)source
-					//
-					String aggregateFromDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Aggregate From", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("aggregateFromDeneWordIdentityPointer=" + aggregateFromDeneWordIdentityPointer );
-
-					Identity aggregateFromDeneWordIdentity = new Identity(aggregateFromDeneWordIdentityPointer);
-					Object aggregateFromValueObject =  this.getDeneWordAttributeByIdentity(aggregateFromDeneWordIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					double aggregateFromValue=0;
-					if(aggregateFromValueObject instanceof Integer) {
-						aggregateFromValue = ((Integer)aggregateFromValueObject).doubleValue();				
-					}else if(aggregateFromValueObject instanceof Double) {
-						aggregateFromValue = (double)aggregateFromValueObject;				
-					}else if(aggregateFromValueObject instanceof String) {
-						aggregateFromValue = Double.parseDouble((String)aggregateFromValueObject);				
-					}
-
-
-					//
-					//2) get the value
-					//
-					String aggregateValueDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Aggregate Value", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					Identity aggregateValueDeneWordIdentity = new Identity(aggregateValueDeneWordIdentityPointer);
-					Object aggregateValueObject = this.getDeneWordAttributeByIdentity(aggregateValueDeneWordIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("line 2778 aggregateValueObject=" + aggregateValueObject + " class=" + aggregateValueObject.getClass().toString());
-
-					double aggregateValue=0;
-
-					if(aggregateValueObject instanceof Integer) {
-						aggregateValue = ((Integer)aggregateValueObject).doubleValue();				
-					}else if(aggregateValueObject instanceof Double) {
-						aggregateValue = (double)aggregateValueObject;				
-					}else if(aggregateValueObject instanceof String) {
-						aggregateValue = Double.parseDouble((String)aggregateValueObject);				
-					}
-
-
-					//
-					// 3)target 
-					//
-					String targetDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("line 2751 targetDeneWordIdentityPointer=" + targetDeneWordIdentityPointer);
-					Identity targetDeneWordIdentity = new Identity(targetDeneWordIdentityPointer);
-					JSONObject targetDeneWord = (JSONObject) getDeneWordAttributeByIdentity(targetDeneWordIdentity,  TeleonomeConstants.COMPLETE);
-					//
-					// now use the identity of the deneword to get the dene, we need this because we need to update the 
-					// timestamp
-					Identity targetDeneIdentity  = new Identity(targetDeneWordIdentity.getTeleonomeName(),targetDeneWordIdentity.getNucleusName(), targetDeneWordIdentity.getDenechainName(), targetDeneWordIdentity.getDeneName());
-					JSONObject targetDene = getDeneByIdentity(targetDeneIdentity);
-					//
-					// 4)Add source to value and store
-					//
-					double total= aggregateValue + aggregateFromValue;
-					logger.debug("line 2781 aggregateValue=" + aggregateValue + " aggregateFromValue=" + aggregateFromValue + " targetDeneWord=" + targetDeneWord);
-					targetDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, total);
-					//
-					//
-					//5) Update times values
-					//
-					logger.debug("line 2830 About to set the time for the dene in the update,"+  formatedCurrentTime);
-					targetDene.put("Timestamp", formatedCurrentTime);
-					targetDene.put("Timestamp Milliseconds", currentTimeMillis);
-
-				}
+				
+				UpdateValueOperation anUpdateValueOperation= new UpdateValueOperation(mnemosyneDene);
+				anUpdateValueOperation.process(this, currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime, currentTimeZone.toZoneId());
+//				//
+//				// get the operation to see what we are doing
+//				// 
+//				JSONObject selectedDene=null; 
+//				String operation = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_OPERATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				if(operation.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION)){
+//
+//					logger.debug("line 2765 mnemosyneDene=" + mnemosyneDene.toString(4));
+//					//
+//					// the process to follow is:
+//					// 1)Get the function used to transform
+//					// 2)Get the source of the data, this would be a number
+//					// 3)get the Target Deneword which is where the result of the operation is stored, this is adeneword
+//					// 4)transform the source data and store it in the target
+//					// 5) Update Time fields
+//
+//					//
+//					// 1)Function
+//					//
+//					String function = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Function", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					logger.debug("transofrm function=" + function );
+//
+//
+//
+//					//
+//					//2) get the data source
+//					//
+//					String dataSourceIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_TYPE_TRANSFORMATION_DATA_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					logger.debug("line 2751 targetDeneWordIdentityPointer=" + dataSourceIdentityPointer);
+//					Identity aggregateValueDeneWordIdentity = new Identity(dataSourceIdentityPointer);
+//					Object aggregateValueObject = this.getDeneWordAttributeByIdentity(aggregateValueDeneWordIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					logger.debug("line 2778 aggregateValueObject=" + aggregateValueObject + " class=" + aggregateValueObject.getClass().toString());
+//
+//
+//
+//					//
+//					// 3)target 
+//					//
+//					String targetDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					logger.debug("line 2751 targetDeneWordIdentityPointer=" + targetDeneWordIdentityPointer);
+//					Identity targetDeneWordIdentity = new Identity(targetDeneWordIdentityPointer);
+//					JSONObject targetDeneWord = (JSONObject) getDeneWordAttributeByIdentity(targetDeneWordIdentity,  TeleonomeConstants.COMPLETE);
+//					//
+//					// now use the identity of the deneword to get the dene, we need this because we need to update the 
+//					// timestamp
+//					Identity targetDeneIdentity  = new Identity(targetDeneWordIdentity.getTeleonomeName(),targetDeneWordIdentity.getNucleusName(), targetDeneWordIdentity.getDenechainName(), targetDeneWordIdentity.getDeneName());
+//					JSONObject targetDene = getDeneByIdentity(targetDeneIdentity);
+//					//
+//					// 4)Transform the value
+//					//
+//					if(function.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_TRANSFORMATION_OPERATION_FUNCTION_ELAPSED_TIME)) {
+//						int value = ((Double)aggregateValueObject).intValue();				
+//						String resultingValue = Utils.getElapsedSecondsToHoursMinutesSecondsString(value);
+//						logger.debug("line 3372 value=" + value + " resultingValue=" + resultingValue );
+//						targetDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, resultingValue);
+//					}
+//					//
+//					//
+//					//5) Update times values
+//					//
+//					logger.debug("line 3380 About to set the time for the dene in the update,"+  formatedCurrentTime);
+//					targetDene.put("Timestamp", formatedCurrentTime);
+//					targetDene.put("Timestamp Milliseconds", currentTimeMillis);
+//
+//				}else if(operation.equals(TeleonomeConstants.MNEMOSYNE_DENEWORD_AGGREGATION_OPERATION)){
+//
+//					logger.debug("line 2765 mnemosyneDene=" + mnemosyneDene.toString(4));
+//					//
+//					// the process to follow is:
+//					// 1)Get the source of the data, this would be a number
+//					// 2)Gete the value to add this is also a number
+//					// 3)get the Target Deneword which is where the result of the operation is stored, this is adeneword
+//					// 4)Add the source to the value and store it in the target
+//					// 5) Update Time fields
+//
+//
+//					//
+//					// 1)source
+//					//
+//					String aggregateFromDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Aggregate From", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					logger.debug("aggregateFromDeneWordIdentityPointer=" + aggregateFromDeneWordIdentityPointer );
+//
+//					Identity aggregateFromDeneWordIdentity = new Identity(aggregateFromDeneWordIdentityPointer);
+//					Object aggregateFromValueObject =  this.getDeneWordAttributeByIdentity(aggregateFromDeneWordIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					double aggregateFromValue=0;
+//					if(aggregateFromValueObject instanceof Integer) {
+//						aggregateFromValue = ((Integer)aggregateFromValueObject).doubleValue();				
+//					}else if(aggregateFromValueObject instanceof Double) {
+//						aggregateFromValue = (double)aggregateFromValueObject;				
+//					}else if(aggregateFromValueObject instanceof String) {
+//						aggregateFromValue = Double.parseDouble((String)aggregateFromValueObject);				
+//					}
+//
+//
+//					//
+//					//2) get the value
+//					//
+//					String aggregateValueDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, "Aggregate Value", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					Identity aggregateValueDeneWordIdentity = new Identity(aggregateValueDeneWordIdentityPointer);
+//					Object aggregateValueObject = this.getDeneWordAttributeByIdentity(aggregateValueDeneWordIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					logger.debug("line 2778 aggregateValueObject=" + aggregateValueObject + " class=" + aggregateValueObject.getClass().toString());
+//
+//					double aggregateValue=0;
+//
+//					if(aggregateValueObject instanceof Integer) {
+//						aggregateValue = ((Integer)aggregateValueObject).doubleValue();				
+//					}else if(aggregateValueObject instanceof Double) {
+//						aggregateValue = (double)aggregateValueObject;				
+//					}else if(aggregateValueObject instanceof String) {
+//						aggregateValue = Double.parseDouble((String)aggregateValueObject);				
+//					}
+//
+//
+//					//
+//					// 3)target 
+//					//
+//					String targetDeneWordIdentityPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					logger.debug("line 2751 targetDeneWordIdentityPointer=" + targetDeneWordIdentityPointer);
+//					Identity targetDeneWordIdentity = new Identity(targetDeneWordIdentityPointer);
+//					JSONObject targetDeneWord = (JSONObject) getDeneWordAttributeByIdentity(targetDeneWordIdentity,  TeleonomeConstants.COMPLETE);
+//					//
+//					// now use the identity of the deneword to get the dene, we need this because we need to update the 
+//					// timestamp
+//					Identity targetDeneIdentity  = new Identity(targetDeneWordIdentity.getTeleonomeName(),targetDeneWordIdentity.getNucleusName(), targetDeneWordIdentity.getDenechainName(), targetDeneWordIdentity.getDeneName());
+//					JSONObject targetDene = getDeneByIdentity(targetDeneIdentity);
+//					//
+//					// 4)Add source to value and store
+//					//
+//					double total= aggregateValue + aggregateFromValue;
+//					logger.debug("line 2781 aggregateValue=" + aggregateValue + " aggregateFromValue=" + aggregateFromValue + " targetDeneWord=" + targetDeneWord);
+//					targetDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, total);
+//					//
+//					//
+//					//5) Update times values
+//					//
+//					logger.debug("line 2830 About to set the time for the dene in the update,"+  formatedCurrentTime);
+//					targetDene.put("Timestamp", formatedCurrentTime);
+//					targetDene.put("Timestamp Milliseconds", currentTimeMillis);
+//
+//				}
 			}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_MNEMOSYNE_OPERATION_UPDATE_TIMESERIES_COUNTER)){
-				//
-				// in this case we need first get the data source
-
-				//
-				// the source of the data
-				String dataSourcePointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_DATA_SOURCE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-				String dataSourceValueType = (String) getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
-
-				//
-				// the new object that willgo into the timeseries
-				//
-				JSONObject newValueJSONObject=new JSONObject();
-				newValueJSONObject.put(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, getcurrentlyCreatingPulseTimestampMillis());
-				Object o = this.getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				logger.debug("line 3476 dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + o);
-				if(o instanceof Integer) {
-					int dataSourceValue = (int)o;
-					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
-				}else if (o instanceof Double) {
-					double dataSourceValue = (double) o;
-					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
-				}else if (o instanceof Long) {
-					long dataSourceValue = (long) o;
-					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
-				}
-
-
-				logger.debug("newValueJSONObject=" + newValueJSONObject.toString(4));
-
-				int counterLimit = (int) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_COUNTER_LIMIT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-				String dataPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_DATA_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				JSONObject dataDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(dataPointer), TeleonomeConstants.COMPLETE);
-				//
-				// the datJSONArray contains the actual timeseries array
-				//
-				JSONArray dataJSONArray =  dataDeneWord.getJSONArray(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-
-				String counterPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_COUNTER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				JSONObject counterDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(counterPointer), TeleonomeConstants.COMPLETE);
-
-				int counterCurrentValue = counterDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-				if(counterCurrentValue<(counterLimit-1)) {
-					counterCurrentValue++;
-				}else {
-					counterCurrentValue=0;
-				}
-				counterDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, counterCurrentValue);
-
-				//
-				// if the array has less than the limit just add the new one
-				// if it already has the limit then create a new JSONArray
-				if(dataJSONArray.length()<counterLimit) {
-					dataJSONArray.put(newValueJSONObject);
-					dataDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataJSONArray);
-				}else {
-					JSONArray newDataJSONArray = new JSONArray();
-					//
-					// put the new object in the first position
-					newDataJSONArray.put(newValueJSONObject);
-					//
-					// now put all the other elements except the last one into the new array
-					JSONObject jobj;
-					for(int i=0;i<counterLimit-1;i++) {
-						newDataJSONArray.put(dataJSONArray.get(i));
-					}
-					//
-					// and store the new array
-					//
-					dataDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, newDataJSONArray);
-				}
+				UpdateTimeSeriesCounterOperation anUpdateTimeSeriesCounterOperation= new UpdateTimeSeriesCounterOperation(mnemosyneDene);
+				anUpdateTimeSeriesCounterOperation.process(this, currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime, currentTimeZone.toZoneId());
+//				
+				
+//				//
+//				// in this case we need first get the data source
+//
+//				//
+//				// the source of the data
+//				String dataSourcePointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_DATA_SOURCE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//				String dataSourceValueType = (String) getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+//
+//				//
+//				// the new object that willgo into the timeseries
+//				//
+//				JSONObject newValueJSONObject=new JSONObject();
+//				newValueJSONObject.put(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, getcurrentlyCreatingPulseTimestampMillis());
+//				Object o = this.getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				logger.debug("line 3476 dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + o);
+//				if(o instanceof Integer) {
+//					int dataSourceValue = (int)o;
+//					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
+//				}else if (o instanceof Double) {
+//					double dataSourceValue = (double) o;
+//					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
+//				}else if (o instanceof Long) {
+//					long dataSourceValue = (long) o;
+//					newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
+//				}
+//
+//
+//				logger.debug("newValueJSONObject=" + newValueJSONObject.toString(4));
+//
+//				int counterLimit = (int) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_COUNTER_LIMIT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//				String dataPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_DATA_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				JSONObject dataDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(dataPointer), TeleonomeConstants.COMPLETE);
+//				//
+//				// the datJSONArray contains the actual timeseries array
+//				//
+//				JSONArray dataJSONArray =  dataDeneWord.getJSONArray(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//
+//				String counterPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_COUNTER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				JSONObject counterDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(counterPointer), TeleonomeConstants.COMPLETE);
+//
+//				int counterCurrentValue = counterDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//				if(counterCurrentValue<(counterLimit-1)) {
+//					counterCurrentValue++;
+//				}else {
+//					counterCurrentValue=0;
+//				}
+//				counterDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, counterCurrentValue);
+//
+//				//
+//				// if the array has less than the limit just add the new one
+//				// if it already has the limit then create a new JSONArray
+//				if(dataJSONArray.length()<counterLimit) {
+//					dataJSONArray.put(newValueJSONObject);
+//					dataDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataJSONArray);
+//				}else {
+//					JSONArray newDataJSONArray = new JSONArray();
+//					//
+//					// put the new object in the first position
+//					newDataJSONArray.put(newValueJSONObject);
+//					//
+//					// now put all the other elements except the last one into the new array
+//					JSONObject jobj;
+//					for(int i=0;i<counterLimit-1;i++) {
+//						newDataJSONArray.put(dataJSONArray.get(i));
+//					}
+//					//
+//					// and store the new array
+//					//
+//					dataDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, newDataJSONArray);
+//				}
 
 			}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_MNEMOSYNE_OPERATION_CONVERT_DENEWORDS_TO_JSONARRAY)) {
+				ConvertDeneWordsToJSONArrayOperation anConvertDeneWordsToJSONArrayOperation= new ConvertDeneWordsToJSONArrayOperation(mnemosyneDene);
+				anConvertDeneWordsToJSONArrayOperation.process(this, currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime, currentTimeZone.toZoneId());
 
 
-				//
-				// the destination is a deneword
-				String dataDestinationPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_OPERATION_DESTINATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				JSONObject dataDestinationDeneWord = (JSONObject)getDeneWordAttributeByIdentity(new Identity(dataDestinationPointer), TeleonomeConstants.COMPLETE);
-				logger.debug("dataDestinationPointer="+dataDestinationPointer+ " dataDestinationDeneWord=" + dataDestinationDeneWord);
-				//
-				// if the destination is in the Mnemosyne Pulse, it would  have gotten erased at the beginning of the pulse
-				// therefore you must add it
-				if(dataDestinationDeneWord==null) {
-					Identity destIdentity =new Identity(dataDestinationPointer);
-					if(destIdentity.getDenechainName().equals(TeleonomeConstants.DENECHAIN_MNEMOSYNE_PULSE)) {
-						//
-						// if we are here we need to create a Dene that looks like:
-						//						{
-						//                            "Name":"Ra Disk Usage",
-						//                            "DeneWords":[
-						//                                {
-						//                                    "Value": [],
-						//                                    "Name": "Ra Disk Usage",
-						//                                    "Value Type": "JSON Array",
-						//                                    "Required":true
-						//                                        
-						//                                }
-						//                            ]
-						//                        }
-						JSONObject destDeneChain= this.getDeneChainByIdentity(destIdentity);
-						JSONArray destDenes= destDeneChain.getJSONArray("Denes");
-						JSONObject destDene = new JSONObject();
-						destDenes.put(destDene);
-						destDene.put(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, destIdentity.getDeneName());
-						JSONArray deneWords = new JSONArray();
-						destDene.put("DeneWords", deneWords);
-						dataDestinationDeneWord = new JSONObject();
-						deneWords.put(dataDestinationDeneWord);
-						dataDestinationDeneWord.put(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, destIdentity.getDeneWordName());
-						dataDestinationDeneWord.put(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, destIdentity.getDeneWordName());
-						dataDestinationDeneWord.put(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE, TeleonomeConstants.DATATYPE_JSONARRAY);
-					}
-				}
-				//
-				//the source is a dene
-				String dataSourcePointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_DATA_SOURCE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				JSONObject dataSourceDene = (JSONObject)getDeneByIdentity(new Identity(dataSourcePointer));
-				logger.debug("dataSourcePointer="+dataSourcePointer+ " dataDestinationDeneWord=" + dataSourceDene);
-
-				//
-				// create an array og jsonobects and set it as a value in the destination
-				JSONArray deneWords = dataSourceDene.getJSONArray("DeneWords");
-				dataDestinationDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, deneWords);
+//				//
+//				// the destination is a deneword
+//				String dataDestinationPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_OPERATION_DESTINATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				JSONObject dataDestinationDeneWord = (JSONObject)getDeneWordAttributeByIdentity(new Identity(dataDestinationPointer), TeleonomeConstants.COMPLETE);
+//				logger.debug("dataDestinationPointer="+dataDestinationPointer+ " dataDestinationDeneWord=" + dataDestinationDeneWord);
+//				//
+//				// if the destination is in the Mnemosyne Pulse, it would  have gotten erased at the beginning of the pulse
+//				// therefore you must add it
+//				if(dataDestinationDeneWord==null) {
+//					Identity destIdentity =new Identity(dataDestinationPointer);
+//					if(destIdentity.getDenechainName().equals(TeleonomeConstants.DENECHAIN_MNEMOSYNE_PULSE)) {
+//						//
+//						// if we are here we need to create a Dene that looks like:
+//						//						{
+//						//                            "Name":"Ra Disk Usage",
+//						//                            "DeneWords":[
+//						//                                {
+//						//                                    "Value": [],
+//						//                                    "Name": "Ra Disk Usage",
+//						//                                    "Value Type": "JSON Array",
+//						//                                    "Required":true
+//						//                                        
+//						//                                }
+//						//                            ]
+//						//                        }
+//						JSONObject destDeneChain= this.getDeneChainByIdentity(destIdentity);
+//						JSONArray destDenes= destDeneChain.getJSONArray("Denes");
+//						JSONObject destDene = new JSONObject();
+//						destDenes.put(destDene);
+//						destDene.put(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, destIdentity.getDeneName());
+//						JSONArray deneWords = new JSONArray();
+//						destDene.put("DeneWords", deneWords);
+//						dataDestinationDeneWord = new JSONObject();
+//						deneWords.put(dataDestinationDeneWord);
+//						dataDestinationDeneWord.put(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, destIdentity.getDeneWordName());
+//						dataDestinationDeneWord.put(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE, destIdentity.getDeneWordName());
+//						dataDestinationDeneWord.put(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE, TeleonomeConstants.DATATYPE_JSONARRAY);
+//					}
+//				}
+//				//
+//				//the source is a dene
+//				String dataSourcePointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_DATA_SOURCE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				JSONObject dataSourceDene = (JSONObject)getDeneByIdentity(new Identity(dataSourcePointer));
+//				logger.debug("dataSourcePointer="+dataSourcePointer+ " dataDestinationDeneWord=" + dataSourceDene);
+//
+//				//
+//				// create an array og jsonobects and set it as a value in the destination
+//				JSONArray deneWords = dataSourceDene.getJSONArray("DeneWords");
+//				dataDestinationDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, deneWords);
 
 			}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_MNEMOSYNE_OPERATION_COPY_TIMESERIES_ELEMENT_TO_TIMESERIES)){
 				//
 				// in this case we need first get the data source
+				CopyTimeseriesElementToTimeseriesOperation aCopyTimeseriesElementToTimeseriesOperation= new CopyTimeseriesElementToTimeseriesOperation(mnemosyneDene);
+				aCopyTimeseriesElementToTimeseriesOperation.process(this, currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime, currentTimeZone.toZoneId());
 
-				//
-				// the source of the data
-				String dataSourcePointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_DATA_SOURCE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				JSONArray dataSourceValue = (JSONArray)getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				//
-				// get the selector
-				String selector = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_ELEMENT_SELECTOR, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-				logger.debug("copy timeseries dataSourceValue.length()=" + dataSourceValue.length() + " selector=" + selector+ " dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + dataSourceValue);
-
-
-				double valueToCopyJSONObject=0;
-				JSONObject anyJSONObject=null;
-				Object aValue=0;
-				JSONObject selectedJSONObject=null;
-				if(dataSourceValue.length()>0) {
-					for(int i=0;i<dataSourceValue.length();i++) {
-						anyJSONObject = dataSourceValue.getJSONObject(i);
-
-						aValue = anyJSONObject.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-						if(selector.equals(TeleonomeConstants.DENE_TYPE_MNEMOSYNE_OPERATION_COPY_TIMESERIES_ELEMENT_SELECTOR_MAXIMUM_VALUE)) {
-							if(aValue instanceof Integer) {
-								int v = (int)aValue;
-								if(v>=valueToCopyJSONObject) {
-									valueToCopyJSONObject=v;
-									selectedJSONObject=anyJSONObject;
-								}
-							}else if(aValue instanceof Double) {
-								double v = (double)aValue;
-								if(v>=valueToCopyJSONObject) {
-									valueToCopyJSONObject=v;
-									selectedJSONObject=anyJSONObject;
-								}
-							}else if(aValue instanceof Long) {
-								long v = (long)aValue;
-								if(v>=valueToCopyJSONObject) {
-									valueToCopyJSONObject=v;
-									selectedJSONObject=anyJSONObject;
-								}
-							}
-
-
-						}else if(selector.equals(TeleonomeConstants.DENE_TYPE_MNEMOSYNE_OPERATION_COPY_TIMESERIES_ELEMENT_SELECTOR_MINIMUM_VALUE)) {
-							if(aValue instanceof Integer) {
-								int v = (int)aValue;
-								if(v<=valueToCopyJSONObject) {
-									valueToCopyJSONObject=v;
-									selectedJSONObject=anyJSONObject;
-								}
-							}else if(aValue instanceof Double) {
-								double v = (double)aValue;
-								if(v<=valueToCopyJSONObject) {
-									valueToCopyJSONObject=v;
-									selectedJSONObject=anyJSONObject;
-								}
-							}else if(aValue instanceof Long) {
-								long v = (long)aValue;
-								if(v<=valueToCopyJSONObject) {
-									valueToCopyJSONObject=v;
-									selectedJSONObject=anyJSONObject;
-								}
-							}
-						}
-					}
-				}
-
-
-
-
-				if(selectedJSONObject!=null)logger.debug("selectedJSONObject=" + selectedJSONObject.toString(4));
-				else logger.debug("selectedJSONObjectis null=" );
-				int counterLimit = (int) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_COUNTER_LIMIT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-				String dataPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_DATA_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				JSONObject dataDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(dataPointer), TeleonomeConstants.COMPLETE);
-				//
-				// the datJSONArray contains the actual timeseries array
-				//
-				JSONArray dataJSONArray =  dataDeneWord.getJSONArray(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-
-				String counterPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_COUNTER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				JSONObject counterDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(counterPointer), TeleonomeConstants.COMPLETE);
-
-				int counterCurrentValue = counterDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-				if(counterCurrentValue<(counterLimit-1)) {
-					counterCurrentValue++;
-				}else {
-					counterCurrentValue=0;
-				}
-				counterDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, counterCurrentValue);
-
-				//
-				// if the array has less than the limit just add the new one
-				// if it already has the limit then create a new JSONArray
-				if(dataJSONArray.length()<counterLimit) {
-					dataJSONArray.put(selectedJSONObject);
-					dataDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataJSONArray);
-				}else {
-					JSONArray newDataJSONArray = new JSONArray();
-					//
-					// put the new object in the first position
-					newDataJSONArray.put(selectedJSONObject);
-					//
-					// now put all the other elements except the last one into the new array
-					JSONObject jobj;
-					for(int i=0;i<counterLimit-1;i++) {
-						newDataJSONArray.put(dataJSONArray.get(i));
-					}
-					//
-					// and store the new array
-					//
-					dataDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, newDataJSONArray);
-				}
+//				//
+//				// the source of the data
+//				String dataSourcePointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_DATA_SOURCE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				JSONArray dataSourceValue = (JSONArray)getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				//
+//				// get the selector
+//				String selector = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_ELEMENT_SELECTOR, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//				logger.debug("copy timeseries dataSourceValue.length()=" + dataSourceValue.length() + " selector=" + selector+ " dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + dataSourceValue);
+//
+//
+//				double valueToCopyJSONObject=0;
+//				JSONObject anyJSONObject=null;
+//				Object aValue=0;
+//				JSONObject selectedJSONObject=null;
+//				if(dataSourceValue.length()>0) {
+//					for(int i=0;i<dataSourceValue.length();i++) {
+//						anyJSONObject = dataSourceValue.getJSONObject(i);
+//
+//						aValue = anyJSONObject.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//						if(selector.equals(TeleonomeConstants.DENE_TYPE_MNEMOSYNE_OPERATION_COPY_TIMESERIES_ELEMENT_SELECTOR_MAXIMUM_VALUE)) {
+//							if(aValue instanceof Integer) {
+//								int v = (int)aValue;
+//								if(v>=valueToCopyJSONObject) {
+//									valueToCopyJSONObject=v;
+//									selectedJSONObject=anyJSONObject;
+//								}
+//							}else if(aValue instanceof Double) {
+//								double v = (double)aValue;
+//								if(v>=valueToCopyJSONObject) {
+//									valueToCopyJSONObject=v;
+//									selectedJSONObject=anyJSONObject;
+//								}
+//							}else if(aValue instanceof Long) {
+//								long v = (long)aValue;
+//								if(v>=valueToCopyJSONObject) {
+//									valueToCopyJSONObject=v;
+//									selectedJSONObject=anyJSONObject;
+//								}
+//							}
+//
+//
+//						}else if(selector.equals(TeleonomeConstants.DENE_TYPE_MNEMOSYNE_OPERATION_COPY_TIMESERIES_ELEMENT_SELECTOR_MINIMUM_VALUE)) {
+//							if(aValue instanceof Integer) {
+//								int v = (int)aValue;
+//								if(v<=valueToCopyJSONObject) {
+//									valueToCopyJSONObject=v;
+//									selectedJSONObject=anyJSONObject;
+//								}
+//							}else if(aValue instanceof Double) {
+//								double v = (double)aValue;
+//								if(v<=valueToCopyJSONObject) {
+//									valueToCopyJSONObject=v;
+//									selectedJSONObject=anyJSONObject;
+//								}
+//							}else if(aValue instanceof Long) {
+//								long v = (long)aValue;
+//								if(v<=valueToCopyJSONObject) {
+//									valueToCopyJSONObject=v;
+//									selectedJSONObject=anyJSONObject;
+//								}
+//							}
+//						}
+//					}
+//				}
+//
+//
+//
+//
+//				if(selectedJSONObject!=null)logger.debug("selectedJSONObject=" + selectedJSONObject.toString(4));
+//				else logger.debug("selectedJSONObjectis null=" );
+//				int counterLimit = (int) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_COUNTER_LIMIT, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//				String dataPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_DATA_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				JSONObject dataDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(dataPointer), TeleonomeConstants.COMPLETE);
+//				//
+//				// the datJSONArray contains the actual timeseries array
+//				//
+//				JSONArray dataJSONArray =  dataDeneWord.getJSONArray(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//
+//				String counterPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_COUNTER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				JSONObject counterDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(counterPointer), TeleonomeConstants.COMPLETE);
+//
+//				int counterCurrentValue = counterDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//				if(counterCurrentValue<(counterLimit-1)) {
+//					counterCurrentValue++;
+//				}else {
+//					counterCurrentValue=0;
+//				}
+//				counterDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, counterCurrentValue);
+//
+//				//
+//				// if the array has less than the limit just add the new one
+//				// if it already has the limit then create a new JSONArray
+//				if(dataJSONArray.length()<counterLimit) {
+//					dataJSONArray.put(selectedJSONObject);
+//					dataDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataJSONArray);
+//				}else {
+//					JSONArray newDataJSONArray = new JSONArray();
+//					//
+//					// put the new object in the first position
+//					newDataJSONArray.put(selectedJSONObject);
+//					//
+//					// now put all the other elements except the last one into the new array
+//					JSONObject jobj;
+//					for(int i=0;i<counterLimit-1;i++) {
+//						newDataJSONArray.put(dataJSONArray.get(i));
+//					}
+//					//
+//					// and store the new array
+//					//
+//					dataDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, newDataJSONArray);
+//				}
 
 			}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_MNEMOSYNE_OPERATION_UPDATE_COUNTER)) {
 				//
 				// the counter limit can either be directly an int or it can point to another deneword that contains an int
 				//
+				UpdateCounterOperation anUpdateCounterOperation= new UpdateCounterOperation(mnemosyneDene);
+				anUpdateCounterOperation.process(this, currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime, currentTimeZone.toZoneId());
 
-				JSONObject counterLimitDeneWord = (JSONObject) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_COUNTER_LIMIT, TeleonomeConstants.COMPLETE);
-				String counterLimitDeneWordValueType = counterLimitDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
-				int counterLimit=-1;
-				if(counterLimitDeneWordValueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER)) {
-					//
-					// this is a pointer so render it
-					String counterLimitDeneWordPointer = counterLimitDeneWord.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					counterLimit = (int)getDeneWordAttributeByIdentity(new Identity(counterLimitDeneWordPointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				}else {
-					//
-					// is just an int so get it directly
-					counterLimit = counterLimitDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				}
-
-
-				JSONObject counterIncrementDeneWord = (JSONObject) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_COUNTER_INCREMENT, TeleonomeConstants.COMPLETE);
-				String counterIncrementDeneWordValueType = counterIncrementDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
-				int counterIncrement=-1;
-				if(counterIncrementDeneWordValueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER)) {
-					//
-					// this is a pointer so render it
-					String counterIncrementDeneWordPointer = counterIncrementDeneWord.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					counterIncrement = (int)getDeneWordAttributeByIdentity(new Identity(counterIncrementDeneWordPointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				}else {
-					//
-					// is just an int so get it directly
-					counterIncrement = counterIncrementDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				}
-
-
-				String counterPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_OPERATION_COUNTER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
-				JSONObject counterDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(counterPointer), TeleonomeConstants.COMPLETE);
-				int counterCurrentValue = counterDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				logger.debug("line 2933, counterPointer=" + counterPointer + " counterIncrement=" + counterIncrement + " counterCurrentValue=" + counterCurrentValue + " counterLimit=" + counterLimit);
-
-				if(counterCurrentValue<counterLimit) {
-					counterCurrentValue++;
-					logger.debug("line 3216, increasing the currentcounter to  " + counterCurrentValue );
-				}else {
-					counterCurrentValue=0;
-					logger.debug("line 3218, reseting the currentcounter to  0"  );
-				}
-
-
-				counterDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, counterCurrentValue);
+//				JSONObject counterLimitDeneWord = (JSONObject) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_COUNTER_LIMIT, TeleonomeConstants.COMPLETE);
+//				String counterLimitDeneWordValueType = counterLimitDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+//				int counterLimit=-1;
+//				if(counterLimitDeneWordValueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER)) {
+//					//
+//					// this is a pointer so render it
+//					String counterLimitDeneWordPointer = counterLimitDeneWord.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					counterLimit = (int)getDeneWordAttributeByIdentity(new Identity(counterLimitDeneWordPointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				}else {
+//					//
+//					// is just an int so get it directly
+//					counterLimit = counterLimitDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				}
+//
+//
+//				JSONObject counterIncrementDeneWord = (JSONObject) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_COUNTER_INCREMENT, TeleonomeConstants.COMPLETE);
+//				String counterIncrementDeneWordValueType = counterIncrementDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+//				int counterIncrement=-1;
+//				if(counterIncrementDeneWordValueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER)) {
+//					//
+//					// this is a pointer so render it
+//					String counterIncrementDeneWordPointer = counterIncrementDeneWord.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					counterIncrement = (int)getDeneWordAttributeByIdentity(new Identity(counterIncrementDeneWordPointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				}else {
+//					//
+//					// is just an int so get it directly
+//					counterIncrement = counterIncrementDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				}
+//
+//
+//				String counterPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_OPERATION_COUNTER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//				JSONObject counterDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(counterPointer), TeleonomeConstants.COMPLETE);
+//				int counterCurrentValue = counterDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				logger.debug("line 2933, counterPointer=" + counterPointer + " counterIncrement=" + counterIncrement + " counterCurrentValue=" + counterCurrentValue + " counterLimit=" + counterLimit);
+//
+//				if(counterCurrentValue<counterLimit) {
+//					counterCurrentValue++;
+//					logger.debug("line 3216, increasing the currentcounter to  " + counterCurrentValue );
+//				}else {
+//					counterCurrentValue=0;
+//					logger.debug("line 3218, reseting the currentcounter to  0"  );
+//				}
+//
+//
+//				counterDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, counterCurrentValue);
 
 
 			}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_MNEMOSYNE_OPERATION_RESET_COUNTER)) {
 
-				String counterPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_OPERATION_COUNTER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				ResetCounterOperation aResetCounterOperation= new ResetCounterOperation(mnemosyneDene);
+				aResetCounterOperation.process(this, currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime, currentTimeZone.toZoneId());
 
-				JSONObject counterDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(counterPointer), TeleonomeConstants.COMPLETE);
-				int counterCurrentValue = counterDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				logger.debug("line 2933, reset counter counterPointer=" + counterPointer );
-
-				counterCurrentValue=0;
-
-				counterDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, counterCurrentValue);
+//				String counterPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_OPERATION_COUNTER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//
+//				JSONObject counterDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(counterPointer), TeleonomeConstants.COMPLETE);
+//				int counterCurrentValue = counterDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//				logger.debug("line 2933, reset counter counterPointer=" + counterPointer );
+//
+//				counterCurrentValue=0;
+//
+//				counterDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, counterCurrentValue);
 
 
 			}
@@ -4115,7 +4316,7 @@ public class DenomeManager {
 		}
 	}
 
-	private int getNextPostionForDeneInMnemosyneChain(JSONObject destinationDeneChain, String deneName) throws JSONException{
+	public int getNextPostionForDeneInMnemosyneChain(JSONObject destinationDeneChain, String deneName) throws JSONException{
 		JSONArray denes = destinationDeneChain.getJSONArray("Denes");
 		int currentMaximum=0;
 		int aDenePosition=0;
@@ -4139,7 +4340,7 @@ public class DenomeManager {
 	 * @return
 	 * @throws JSONException
 	 */
-	private JSONObject getDeneFromDeneJSONArrayByPostion(JSONArray denes, String deneName, String position) throws JSONException{
+	public JSONObject getDeneFromDeneJSONArrayByPostion(JSONArray denes, String deneName, String position) throws JSONException{
 		logger.debug("denes=" + denes + " deneName=" + deneName + " position=" + position);
 		ArrayList<Map.Entry<JSONObject, Integer>> deneByPositionIndex = new ArrayList();
 		int currentMaximum=0;
@@ -8122,6 +8323,65 @@ public class DenomeManager {
 		currentPulseStatusMessage=s;
 	}
 
+	//
+	// telepathons
+	//
+	
+	
+	public int getPositionNumberOfSamplesByEventDataStructureValueListPointer(String eventDataStructureValueListPointer) {
+		// TODO Auto-generated method stub
+		int toReturn=-1;
+		if(eventDataStructureValueListPointerNumberOfSamplesPositionIndex.containsKey(eventDataStructureValueListPointer)){
+			toReturn = (Integer)eventDataStructureValueListPointerNumberOfSamplesPositionIndex.get(eventDataStructureValueListPointer);
+		}
+		return toReturn;
+	}
+	
+	public ArrayList<Map.Entry<JSONObject,Integer>> getEventStringQueuePositionDeneWordIndexByEventDataStructureValueListPointer(String eventDataStructureValueListPointer) {
+		// TODO Auto-generated method stub
+		ArrayList<Map.Entry<JSONObject,Integer>> toReturn = new ArrayList();
+		if(eventDataStructureValueListPointerEventStringQueuePositionDeneWordIndex.containsKey(eventDataStructureValueListPointer)){
+			toReturn = eventDataStructureValueListPointerEventStringQueuePositionDeneWordIndex.get(eventDataStructureValueListPointer);
+		}
+		return toReturn;
+	}
+	
+	public Vector getTelepathonsByMicroControllerPointerByExecutionPosition(String aMicroControllerPointer) {
+		// TODO Auto-generated method stub
+		if(pointerToMicroControllerTelepathonExecutionPositionIndex.containsKey(aMicroControllerPointer)){
+			//
+			//telepathonExecutionPositionDeneWordIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(aDeneJSONObject, I));
+			
+			return (Vector)pointerToMicroControllerTelepathonExecutionPositionIndex.get(aMicroControllerPointer);
+		}else{
+			return new Vector();
+		}
+	}
+	
+	public Vector getTelepathonsByMicroControllerPointer(String aMicroControllerPointer) {
+		// TODO Auto-generated method stub
+		if(microControllerPointerTelepathonsIndex.containsKey(aMicroControllerPointer)){
+			return (Vector)microControllerPointerTelepathonsIndex.get(aMicroControllerPointer);
+		}else{
+			return new Vector();
+		}
+	}
+	
+	public Vector getTelepathonsByMicroControllerPointerByType(String aMicroControllerPointer, String telepathonType) {
+		// TODO Auto-generated method stub
+		Vector toReturn = new Vector();
+		if(microControllerPointerTelepathonTypeTelepathonsIndex.containsKey(aMicroControllerPointer)){
+			Hashtable telepathonTypeTelepathonIndex = (Hashtable) microControllerPointerTelepathonTypeTelepathonsIndex.get(aMicroControllerPointer);
+			if(telepathonTypeTelepathonIndex.contains(telepathonType)) {
+				toReturn= (Vector)telepathonTypeTelepathonIndex.get(telepathonType);
+			}
+		}
+		return toReturn;
+	}
+	//
+	// End of Telepathons
+	//
+	
 	public JSONObject generatePulse(){
 		logger.debug("entering generate pulse");
 

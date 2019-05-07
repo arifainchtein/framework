@@ -2139,9 +2139,7 @@ public class DenomeUtils {
 		return sourceData;
 	}
 
-	// **********************************sdhfkjsdfldjfklsdjflksdjfsdkljflsdkjf
-
-	// * ****************************
+	
 	public static ArrayList generateDenomePhysiologyReportHTMLTable(JSONObject pulse) throws MissingDenomeException, TeleonomeValidationException {
 		ArrayList<String> reportLines = new ArrayList();
 		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss Z");
@@ -2272,28 +2270,49 @@ public class DenomeUtils {
 		
 		reportLines.add("	a:hover, a:visited, a:link, a:active {");
 		reportLines.add("		text-decoration: none;");
-		reportLines.add("		}");
+		reportLines.add("	}");
 
-		reportLines.add("		.controls {");
-		reportLines.add("			margin-bottom: 10px;");
-		reportLines.add("		}");
+		reportLines.add("	.controls {");
+		reportLines.add("		margin-bottom: 10px;");
+		reportLines.add("	}");
 
-		reportLines.add("		.collapse-group {");
-		reportLines.add("	padding: 10px;");
-		reportLines.add("	border: 1px solid darkgrey;");
-		reportLines.add("	margin-bottom: 10px;");
-		reportLines.add("		}");
+		reportLines.add("	.collapse-group {");
+		reportLines.add("		padding: 10px;");
+		reportLines.add("		border: 1px solid darkgrey;");
+		reportLines.add("		margin-bottom: 10px;");
+		reportLines.add("	}");
 
-		reportLines.add("		.panel-title .trigger:before {");
+		reportLines.add("	.panel-title .trigger:before {");
 		reportLines.add("		content: '\\e082';");
 		reportLines.add("		font-family: 'Glyphicons Halflings';");
-		reportLines.add("	vertical-align: text-bottom;");
-		reportLines.add("		}");
+		reportLines.add("		vertical-align: text-bottom;");
+		reportLines.add("	}");
 
-		reportLines.add("		.panel-title .trigger.collapsed:before {");
-		reportLines.add("	content: '\\e081';");
-		reportLines.add("		}");
-			
+		reportLines.add("	.panel-title .trigger.collapsed:before {");
+		reportLines.add("		content: '\\e081';");
+		reportLines.add("	}");
+		reportLines.add("	#MainDiagram{");
+		reportLines.add("		display: block;");
+		reportLines.add("		margin: auto;");
+		reportLines.add("	}");
+		
+		reportLines.add("	.Microcontroller{");
+		reportLines.add("		fill: rgb(185, 240, 174);");
+		reportLines.add("		stroke: black;");
+		reportLines.add("		stroke-width: 4px;");
+		reportLines.add("	}");
+		
+		reportLines.add("	.MicrocontrollerSelected{");
+		reportLines.add("		stroke: red;");
+		reportLines.add("		stroke-width: 6px;");
+		reportLines.add("	}");
+
+		reportLines.add("	#mnemosycons{");
+		reportLines.add("		fill: rgb(241, 159, 223);");
+		reportLines.add("		stroke: black;");
+		reportLines.add("		stroke-width: 4px;");
+		reportLines.add("	}");
+		
 			
 		reportLines.add("</style>");
 		reportLines.add("</head>");
@@ -2301,14 +2320,18 @@ public class DenomeUtils {
 		int microControllerLabelNameMaxLenth=24;
 		int startingX = 400;
 		int startingY = 30;
-		int mainHeight= 500;
+		int mainHeight= 350;
 		int arrowHeadHeight=10;
 		int arrowHeadWidth=10;
 		int lineArrowLength=50;
-		int mcuBoxWidth=180;
+		int mcuBoxWidth=220;
 		//      250                 180           50                  20
 		int mcuBoxTotalWidth=mcuBoxWidth+ lineArrowLength + 2*arrowHeadWidth;
 		int mcuBoxHeight=50;
+		
+		int nonMCUBoxWidth=180;
+		//      250                 180           50                  20
+		int nonMCUBoxTotalWidth=mcuBoxWidth+ lineArrowLength + 2*arrowHeadWidth;
 		
 		
 		int startYValueForMCUBox=100;
@@ -2323,25 +2346,57 @@ public class DenomeUtils {
 		int externalDataX=100;
 		int externalDataY=100;
 		int externalDataText=50;
-		int externalDataLineX1=externalDataX + mcuBoxWidth;
+		int externalDataLineX1=externalDataX + nonMCUBoxWidth;
 		int arrowGoingDownLength=50;
 		
 		int boundingRectangleX=50;
 		int boundingRectangleY=50;
-		 //                                                   250
-		int boundingRectangleWidth= 20 + mcuBoxTotalWidth* (numberOfMCU + 1) ;
+		//
+		// the boundingRectangleWidth can have two cases,
+		// the first case is when the top line is longer than the bottom one, this is the case
+		// where there many microcontrollers
+		//
+		// the second case is when the bottom line is longer than the top line,
+		// this can happens if there are not a lot of microcontrollers 
+		//   250
+		
+		//
+		// calculate line length
+		// the bottom line will always have 3 elements, the analyticons, the mnemosycons and the asynchronous
+		int minimumAsynchronousWidth=250;
+		int bottomLineLength = 20 + minimumAsynchronousWidth + 2*nonMCUBoxTotalWidth ;
+		int topLineLength = 20 + mcuBoxTotalWidth*numberOfMCU +  nonMCUBoxTotalWidth;
+		//
+		
+		int boundingRectangleWidth= 0 ;
+		if(topLineLength>bottomLineLength) {
+			boundingRectangleWidth= topLineLength ;
+		}else {
+			boundingRectangleWidth= bottomLineLength ;
+			//
+			// recalculate the totalmcuboxwidth and mcuBoxWidth by taking the bottom line length, substrct
+			// the margin and the size of the external data box
+			// the result is the total space for MCU, so to get the total lenght
+			// divided by numberOfMCU
+			mcuBoxTotalWidth=(bottomLineLength-20-nonMCUBoxTotalWidth)/numberOfMCU;
+			mcuBoxWidth = mcuBoxTotalWidth-lineArrowLength - 2*arrowHeadWidth;
+			//      250                 180           50                  20
+			mcuBoxTotalWidth=mcuBoxWidth+ lineArrowLength + 2*arrowHeadWidth;
+			logger.info("using lower line as base, boundingRectangleWidth=" + boundingRectangleWidth + " mcuBoxWidth=" + mcuBoxWidth);
+		}
+
 		int boundingRectangleHeight=boundingRectangleY + 2*mcuBoxHeight + arrowGoingDownLength +  boundingRectangleY;
 		
 		
 		int mainWidth=2*boundingRectangleWidth + 20;
-		
-		int startXValueForMCUBox=externalDataLineX1+lineArrowLength;
+		int externalDataLineX2 = externalDataLineX1+lineArrowLength+arrowHeadWidth;
+		int startXValueForMCUBox=externalDataLineX2+2*arrowHeadWidth;
 		
 		//                100                    50                50                    20
 		int secondRowY= startYValueForMCUBox + mcuBoxHeight + arrowGoingDownLength + arrowHeadHeight;
 		//                    220           25             
 		int secondRowTextY = 5+secondRowY + mcuBoxHeight/2 ;
-
+		reportLines.add("<div class=\"container\" >");
 		reportLines.add("<svg  id=\"MainDiagram\" height=\""+ mainHeight+"\" width=\""+ mainWidth+"\">");
 		reportLines.add("<defs>");
 		reportLines.add("<marker id=\"arrow\" markerWidth=\"10\" markerHeight=\"10\" refX=\"0\" refY=\"3\" orient=\"auto\" markerUnits=\"strokeWidth\" viewBox=\"0 0 10 10\">");
@@ -2354,9 +2409,9 @@ public class DenomeUtils {
 
 		reportLines.add("<rect x=\""+boundingRectangleX+"\" y=\""+boundingRectangleY+"\" width=\""+boundingRectangleWidth +"\" height=\""+boundingRectangleHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(232, 237, 238);; stroke: black; stroke-width: 4px;\"/>");
 
-		reportLines.add("<rect  x=\""+externalDataX+"\" y=\""+externalDataY+"\" width=\""+mcuBoxWidth +"\" height=\""+mcuBoxHeight+" \" rx=\"11\" ry=\"11\" style=\"fill: rgb(174, 235, 240);; stroke: black; stroke-width: 4px;\"/>");
+		reportLines.add("<rect  x=\""+externalDataX+"\" y=\""+externalDataY+"\" width=\""+nonMCUBoxWidth +"\" height=\""+mcuBoxHeight+" \" rx=\"11\" ry=\"11\" style=\"fill: rgb(174, 235, 240);; stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+(externalDataX+nameMargin)+"\" y=\""+textY+"\" font-family=\"Verdana\" font-size=\"12\" >External Data</text>");
-		reportLines.add("<line x1=\""+externalDataLineX1+"\" y1=\""+mcuLineYPos+"\" x2=\""+startXValueForMCUBox+"\" y2=\""+ mcuLineYPos +"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+		reportLines.add("<line x1=\""+externalDataLineX1+"\" y1=\""+mcuLineYPos+"\" x2=\""+externalDataLineX2+"\" y2=\""+ mcuLineYPos +"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 
 		Integer queuePosition=null;
 		String microControllerPointer;
@@ -2369,6 +2424,7 @@ public class DenomeUtils {
 			microControllerPointer = (String)entry.getKey();
 			queuePosition = (Integer)entry.getValue();
 			microControllerName = microControllerPointer.split(":")[microControllerPointer.split(":").length-1];
+			microControllerNameNoSpaces= microControllerName.replace(" ", "");
 			if(microControllerName.length()>microControllerLabelNameMaxLenth) {
 				microControllerLabelName=microControllerName.substring(0,(microControllerLabelNameMaxLenth+1)) + "...";
 			}else {
@@ -2378,8 +2434,8 @@ public class DenomeUtils {
 			lineX1=currentX + mcuBoxWidth;
 			lineX2=lineX1+lineArrowLength;
 
-			reportLines.add("<rect class=\"Microcontroller\" data-name=\""+ microControllerName +"\"  x=\""+currentX+"\" y=\""+startYValueForMCUBox+"\" width=\""+mcuBoxWidth +"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(185, 240, 174); stroke: black; stroke-width: 4px;\"/>");
-			reportLines.add("<text class=\"Microcontroller\" data-name=\""+ microControllerName +"\"  x=\""+ (currentX +nameMargin) +"\" y=\""+textY+"\" font-family=\"Verdana\" font-size=\"12\" >"+microControllerLabelName+"</text>");
+			reportLines.add("<rect id=\"" +microControllerNameNoSpaces +"\" class=\"Microcontroller\" data-name=\""+ microControllerName +"\"  x=\""+currentX+"\" y=\""+startYValueForMCUBox+"\" width=\""+mcuBoxWidth +"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" />");
+			reportLines.add("<text class=\"MicrocontrollerText\" data-name=\""+ microControllerName +"\"  x=\""+ (currentX +nameMargin) +"\" y=\""+textY+"\" font-family=\"Verdana\" font-size=\"12\" >"+microControllerLabelName+"</text>");
 			counter++;
 			//
 			// increment the counter first, because the line for the last mcu does not go to the end and moves to the right
@@ -2387,7 +2443,7 @@ public class DenomeUtils {
 			if(counter<numberOfMCU) {
 				reportLines.add("<line x1=\""+lineX1+"\" y1=\""+mcuLineYPos+"\" x2=\""+lineX2+"\" y2=\""+mcuLineYPos+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 			}else {
-				lineX1=currentX + mcuBoxWidth/2;
+				lineX1=currentX + (mcuBoxWidth-20);
 				lineX2=lineX1;
 				int lastLineY1=startYValueForMCUBox + mcuBoxHeight;
 				int lastLineY2=lastLineY1 + arrowGoingDownLength;
@@ -2398,45 +2454,62 @@ public class DenomeUtils {
 
 		//
 		// at this point currentX is the beginning of the last box of the first row
-		// and the beginning of the first box f the second row
+		// because this can have a different shape, we need to find out the end point
+		// f that last box in the top row, that will become the end point f the first box on the 
+		// lower line
+		int analyticonsBoxEndXPos =currentX + mcuBoxWidth;
+		int analyticonsBoxXPos =analyticonsBoxEndXPos -  nonMCUBoxWidth;
+		logger.info("analyticonsBoxXPos=" + analyticonsBoxXPos);
+		reportLines.add("<rect x=\""+analyticonsBoxXPos + "\" y=\""+ secondRowY +"\" width=\""+nonMCUBoxWidth +"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 220, 159); stroke: black; stroke-width: 4px;\"/>");
+		reportLines.add("<text x=\""+( analyticonsBoxXPos + nameMargin)+"\" y=\""+secondRowTextY + "\" font-family=\"Verdana\" font-size=\"12\" >Analyticons</text>");
+		reportLines.add("<line x1=\""+ analyticonsBoxXPos +"\" y1=\""+ secondRowTextY+"\" x2=\""+(analyticonsBoxXPos-lineArrowLength) +"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+
+
+		int mnemosyconsBoxXPos = analyticonsBoxXPos-arrowHeadWidth -lineArrowLength - arrowHeadWidth  - nonMCUBoxWidth ;
+		logger.info("mnemosyconsBoxXPos=" + mnemosyconsBoxXPos);
+		reportLines.add("<rect x=\""+mnemosyconsBoxXPos+ "\" y=\""+secondRowY+"\" width=\""+nonMCUBoxWidth +"\" height=\""+ mcuBoxHeight + "\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 159, 223); stroke: black; stroke-width: 4px;\"/>");
+		reportLines.add("<text x=\""+ (mnemosyconsBoxXPos+nameMargin) + "\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Mnemosycons</text>");
+		//      520 = 500-40
+		int endOfArrowToAsyncBoxX = mnemosyconsBoxXPos-lineArrowLength;
+
+		reportLines.add("<line x1=\""+mnemosyconsBoxXPos+"\" y1=\""+ secondRowTextY +"\" x2=\""+ endOfArrowToAsyncBoxX +"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 
 		
-		reportLines.add("<rect x=\""+currentX + "\" y=\""+ secondRowY +"\" width=\""+mcuBoxWidth +"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 220, 159); stroke: black; stroke-width: 4px;\"/>");
-		reportLines.add("<text x=\""+( currentX + nameMargin)+"\" y=\""+secondRowTextY + "\" font-family=\"Verdana\" font-size=\"12\" >Analyticons</text>");
-		reportLines.add("<line x1=\""+ currentX +"\" y1=\""+ secondRowTextY+"\" x2=\""+(currentX-lineArrowLength) +"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
-
-
-		currentX -= mcuBoxTotalWidth;
-		reportLines.add("<rect x=\""+currentX+ "\" y=\""+secondRowY+"\" width=\""+mcuBoxWidth +"\" height=\""+ mcuBoxHeight + "\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 159, 223); stroke: black; stroke-width: 4px;\"/>");
-		reportLines.add("<text x=\""+ (currentX+nameMargin) + "\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Mnemosycons</text>");
-		//      520 = 500-40
-		int endOfArrowToAsyncBoxX = currentX-lineArrowLength;
-
-		reportLines.add("<line x1=\""+currentX+"\" y1=\""+ secondRowTextY +"\" x2=\""+ endOfArrowToAsyncBoxX +"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
-
+		//  asyncBoxStartingX is always the same as externalDataX so as the two boxzes line up on the left
+		
+		int asyncBoxStartingX =externalDataX;
+			
+			
 		//
 		// the asynchrnous is the last box of the second row
-		// its length will be the length needed to return to the middle of the external data to make the return up arrow
+		// its length will be the length needed to get to the mnemosycon box
+		
 		// that point is defined by
 		///           190                     100          180/2
 		int middleOfExternalDataBoxX = externalDataX  + mcuBoxWidth/2; // 100+75
 		//    270=520-190-50-10
-		int asyncBoxWidth = endOfArrowToAsyncBoxX - middleOfExternalDataBoxX-lineArrowLength-arrowHeadWidth;
+		int asyncBoxWidth = endOfArrowToAsyncBoxX - asyncBoxStartingX-2*arrowHeadWidth;
+		if(minimumAsynchronousWidth>asyncBoxWidth)asyncBoxWidth=minimumAsynchronousWidth;
 		//     230               190 +                                                                  520                         270 -20
-		int asyncBoxStartingX =middleOfExternalDataBoxX+lineArrowLength;//endOfArrowToAsyncBoxX-asyncBoxWidth-2*lineArrowLength;
+		//
+		
+		
+		logger.info("asyncBoxWidth=" + asyncBoxWidth);
+		
 		reportLines.add("<rect x=\""+asyncBoxStartingX+"\" y=\""+secondRowY+"\" width=\""+asyncBoxWidth+"\" height=\""+mcuBoxHeight+"\" rx=\"11\" ry=\"11\" style=\"fill: rgb(241, 192, 159); stroke: black; stroke-width: 4px;\"/>");
 		reportLines.add("<text x=\""+(asyncBoxStartingX + nameMargin)+"\" y=\""+secondRowTextY+"\" font-family=\"Verdana\" font-size=\"12\" >Asynchronous Period (60 seconds)</text>");
 
-		reportLines.add("<line x1=\""+ asyncBoxStartingX +"\" y1=\""+ secondRowTextY +"\" x2=\""+middleOfExternalDataBoxX+"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+		//reportLines.add("<line x1=\""+ asyncBoxStartingX +"\" y1=\""+ secondRowTextY +"\" x2=\""+middleOfExternalDataBoxX+"\" y2=\""+secondRowTextY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 		//
 		//back up to external data
 		// 170
 		int bottomOfExternalDataY = externalDataY + mcuBoxHeight+2*arrowHeadHeight;
-		
-		reportLines.add("<line x1=\""+(middleOfExternalDataBoxX-arrowHeadWidth)+"\" y1=\""+ secondRowTextY +"\" x2=\""+ (middleOfExternalDataBoxX-arrowHeadWidth)+"\" y2=\""+bottomOfExternalDataY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
+		int upArrowX = asyncBoxStartingX + nonMCUBoxWidth/2;
+		reportLines.add("<line x1=\""+upArrowX+"\" y1=\""+ secondRowY +"\" x2=\""+ upArrowX+"\" y2=\""+bottomOfExternalDataY+"\" style=\"stroke:#000; stroke-width:2\" marker-end=\"url(#arrow)\" />");
 		reportLines.add("</g>");
 		reportLines.add("</svg>");
-
+		reportLines.add("</div>");
+		
 		reportLines.add("<div class=\"container\" id=\"Detail-Area\">"); 
 		//
 		// now loop over the microcontrollers to render every one
@@ -2477,7 +2550,7 @@ public class DenomeUtils {
 
 			microControllerName = microControllerPointer.split(":")[microControllerPointer.split(":").length-1];
 			microControllerNameNoSpaces= microControllerName.replace(" ", "");
-			logger.info("line 2414,pointerToMicroController=" + microControllerPointer );
+			//logger.info("line 2414,pointerToMicroController=" + microControllerPointer );
 			sensorRequestQueuePositionDeneWordIndex = (ArrayList)pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex.get( microControllerPointer);
 
 			allSensorDenesForMicroController = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get(microControllerPointer);
@@ -2532,7 +2605,7 @@ public class DenomeUtils {
 				for(int j=0;j<allSensorDenesForMicroController.size();j++){
 					aSensorDeneJSONObject = (JSONObject) allSensorDenesForMicroController.elementAt(j);
 					isSensor = DenomeUtils.isDeneOfType(aSensorDeneJSONObject, TeleonomeConstants.DENE_TYPE_SENSOR);
-					logger.info("line 491 aDeneJSONObject.=" + aSensorDeneJSONObject.getString("Name") + " isSensor="+isSensor);
+					logger.debug("line 491 aDeneJSONObject.=" + aSensorDeneJSONObject.getString("Name") + " isSensor="+isSensor);
 					if(isSensor){
 						reportLines.add("						<div class=\"col-sm-3 sensor\">");
 						reportLines.add("							<button class=\"btn btn-primary dropdown-toggle sensor\" type=\"button\">"+aSensorDeneJSONObject.getString("Name") +" </button>");
@@ -2974,6 +3047,7 @@ public class DenomeUtils {
 		reportLines.add("	    });");
 
 		reportLines.add("	    $(\".action-detail-close-button\").on(\"click\", function() {");
+		
 		reportLines.add("	    	$(this).closest('.collapse-group').find('.collapse').collapse('hide');");
 		reportLines.add("	    });");
 			
@@ -2994,21 +3068,27 @@ public class DenomeUtils {
 
 
 		reportLines.add("	   $(\".Microcontroller\").on('click',function(){");
+		reportLines.add("	   		var id = $(this).attr('id');");
+		reportLines.add("	   		var rect = document.getElementById(id);");
+		reportLines.add("	   		rect.setAttribute('style', 'stroke:red;stroke-width: 6px');");
 		reportLines.add("	   		$('.Microcontroller-Details').hide();");
-
+		
+		reportLines.add("	   		$('.Microcontroller-Details').hide();");
 		reportLines.add("	   		var microName = $(this).data(\"name\");");
-		reportLines.add("	   		$(\"#MainDiagram\").hide();");
+		//reportLines.add("	   		$(\"#MainDiagram\").hide();");
 		reportLines.add("	   		$('.ActionDetailSection').hide();");
 		       
 		reportLines.add("	   		$(\"#\" + microName.replace(/ /g,'') +\"-Details\").show();");
 		reportLines.add("	    });");
 
 		reportLines.add("	    $(\".CloseDetail\").on('click',function(){");
-		reportLines.add("	    $('.ActionDetailSection').hide();");
-		reportLines.add("	    $('.SensorDetail').hide();");
+		reportLines.add("	   		$('.Microcontroller').attr('style', 'stroke:black;stroke-width: 4px');");
+		
+		reportLines.add("	    	$('.ActionDetailSection').hide();");
+		reportLines.add("	    	$('.SensorDetail').hide();");
 
-		reportLines.add("	    $('.Microcontroller-Details').hide();");
-		reportLines.add("	    $(\"#MainDiagram\").show();");
+		reportLines.add("	    	$('.Microcontroller-Details').hide();");
+		reportLines.add("	    	$(\"#MainDiagram\").show();");
 		reportLines.add("	    });");
 		reportLines.add("	});");    
 		reportLines.add("</script>");
