@@ -406,6 +406,12 @@ public class TeleonomeConstants {
 	
 	
 	public static final String DENEWORD_TYPE_TELEPATHON_TYPE = "Telepathon Type";
+	public static final String DENEWORD_TYPE_TELEPATHON_COMMUNCATION_PROFILE = "Communication Profile Pointer";
+	
+	public static final String TELEPATHON_TYPE_I2C = "I2C Telepathon";
+	public static final String TELEPATHON_TYPE_XBEE = "XBee Telepathon";
+	public static final String TELEPATHON_TYPE_RS485 = "RS485 Telepathon";
+	public static final String TELEPATHON_TYPE_SPI = "SPI Telepathon";
 	
 	public static final String DENEWORD_TYPE_MICROCONTROLLER_PORT="Microcontroller Port";
 	public static final String DENEWORD_TYPE_MICROCONTROLLER_PORT_TYPE="Microcontroller Port Type";

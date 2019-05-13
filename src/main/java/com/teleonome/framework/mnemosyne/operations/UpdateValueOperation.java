@@ -3,6 +3,7 @@ package com.teleonome.framework.mnemosyne.operations;
 import java.time.ZoneId;
 
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -135,7 +136,62 @@ public class UpdateValueOperation extends MnemosyneOperation {
 				}else if(aggregateValueObject instanceof Double) {
 					aggregateValue = (double)aggregateValueObject;				
 				}else if(aggregateValueObject instanceof String) {
-					aggregateValue = Double.parseDouble((String)aggregateValueObject);				
+					String aggregateValueObjectPointer = (String)aggregateValueObject;
+					JSONObject aggregateValueObjectDeneWordJSONObject;
+					
+					if(aggregateValueObjectPointer.startsWith("@")) {
+						//
+						// it is a pointer, so check t see if it point to a deneword in the mnemosyne
+
+						Identity aggregateValueObjectIdentity = new Identity(aggregateValueObjectPointer);
+						if(aggregateValueObjectIdentity.getNucleusName().equals(TeleonomeConstants.NUCLEI_MNEMOSYNE)) {
+							//
+							// in this case we have two posibilities, the deneword value we want is a dene in the mnemsoyne
+							// that is unique, like "Aggregate Value For Today"
+							// or it can be a multiple dene like Bore Pump Run Completed" or Flow Event
+							// at which case we need to knw which dene in particular of the 
+							// in my opinoin, most cases, the last value will be used and this is why
+							// is set a default here
+							String position = TeleonomeConstants.COMMAND_MNEMOSYNE_LAST_DENE_POSITION;
+							Identity deneChainIdentity = new Identity(aggregateValueObjectIdentity.getTeleonomeName(), aggregateValueObjectIdentity.getNucleusName(), aggregateValueObjectIdentity.getDenechainName());
+							JSONObject valueDeneChain = denomeManager.getDeneChainByIdentity(deneChainIdentity);
+							//
+							// now check if there is a target denewordd
+							Object targetPositionObject =  denomeManager.getDeneWordAttributeByDeneWordNameFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENEWORD_TARGET_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							if(targetPositionObject!=null && targetPositionObject instanceof String) {
+								if(((String)targetPositionObject).startsWith("$")) {
+									position=(String)targetPositionObject;
+								}
+							}
+							JSONArray denes = valueDeneChain.getJSONArray("Denes");
+							 aggregateValueObjectDeneWordJSONObject = denomeManager.getDeneFromDeneJSONArrayByPostion(denes,  aggregateValueObjectIdentity.getDeneName(), position);
+						}else {
+							 aggregateValueObjectDeneWordJSONObject = denomeManager.getDenomicElementByIdentity(aggregateValueObjectIdentity);
+							
+						}
+
+						String dataTargetDeneWordValueType = aggregateValueObjectDeneWordJSONObject.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+
+						if(dataTargetDeneWordValueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
+							aggregateValue = new Double(aggregateValueObjectDeneWordJSONObject.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+
+						}else if(dataTargetDeneWordValueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
+							aggregateValue=aggregateValueObjectDeneWordJSONObject.getDouble(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+
+						}else if(dataTargetDeneWordValueType.equals(TeleonomeConstants.DATATYPE_LONG)) {
+							aggregateValue = new Double(aggregateValueObjectDeneWordJSONObject.getLong(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+
+						}else if(dataTargetDeneWordValueType.equals(TeleonomeConstants.DATATYPE_BOOLEAN)) {
+							boolean b = aggregateValueObjectDeneWordJSONObject.getBoolean(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							if(b)aggregateValue=1.0;
+							else aggregateValue=0.0;
+						}
+						logger.info("Update Value operation, aggregateValue=" + aggregateValue );
+					}else {
+						aggregateValue = Double.parseDouble((String)aggregateValueObject);	
+					}
+
+
 				}
 
 
