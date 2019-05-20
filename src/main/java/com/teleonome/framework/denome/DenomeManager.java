@@ -3417,7 +3417,7 @@ public class DenomeManager {
 		for (Map.Entry<JSONObject, Integer> entry : mnemosyneOperationsExecutionPositionIndex) {
 			mnemosyneDene = entry.getKey();
 			deneType = mnemosyneDene.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
-			logger.info("line 3231 deneType =" + deneType);
+			logger.debug("line 3231 deneType =" + deneType);
 			if(deneType.equals(TeleonomeConstants.MNEMOSYNE_COPY_DENE_OPERATION)){
 				CopyDeneOperation copyDeneOp = new CopyDeneOperation(mnemosyneDene);
 				copyDeneOp.process(this,  currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime, currentTimeZone.toZoneId());
@@ -7349,6 +7349,8 @@ public class DenomeManager {
 						variableIdentityPointer = actionVariableValueJSONObject.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 						resolvedVariablePointerJSONObject = (JSONObject) getDeneWordAttributeByIdentity(new Identity(variableIdentityPointer), TeleonomeConstants.COMPLETE);
+						logger.info("resolvedVariablePointerJSONObject=" + resolvedVariablePointerJSONObject);
+
 						if(resolvedVariablePointerJSONObject!=null){
 							resolvedVariablePointerValueType = resolvedVariablePointerJSONObject.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
 
