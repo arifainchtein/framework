@@ -49,7 +49,7 @@ public class CSVReader extends BufferedReader{
 			//
 			// read the last line of the file
 			//
-			
+			if(selectedFile.exists()) {
 			 r = new ReversedLinesFileReader(selectedFile);
 			String line = r.readLine();
 			logger.debug("selectedFile=" + selectedFile + " r=" + r + " line=" + line);
@@ -61,6 +61,9 @@ public class CSVReader extends BufferedReader{
 				lastLine = line.replace(",", "#");
 			}
 			logger.debug("lastLine=" + lastLine);
+			}else {
+				logger.warn("selectedFile=" + selectedFile + " is missing");
+			}
 		}catch (NullPointerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -1,5 +1,8 @@
 package com.teleonome.framework.persistence;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -18,6 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.Vector;
 
@@ -37,7 +41,7 @@ import com.teleonome.framework.utils.Utils;
 public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 	private static PostgresqlPersistenceManager aPostgresqlPersistenceManager;
-	private final String DATABASE_URL = "postgres://postgres:sazirac@localhost:5432/teleonome";
+	//private final String DATABASE_URL = "postgres://postgres:sazirac@localhost:5432/teleonome";
 	private TeleonomeConnectionPool connectionPool;
 	private Logger logger;  
 	private static DecimalFormat twoDecimalsFormat = new DecimalFormat(".##");
@@ -61,7 +65,35 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	public void init(){
 
 		URI dbUri;
+		int port=-1;
 		try {
+			InputStream input=null;
+			try{
+				 input = new FileInputStream("lib/app.properties");
+
+				Properties prop = new Properties();
+
+				// load a properties file
+				prop.load(input);
+
+				// get the property value and print it out
+				port = Integer.parseInt(prop.getProperty("port"));
+			}catch(IOException e) {
+				logger.warn(Utils.getStringException(e));
+			}finally {
+				if(input!=null) {
+					try {
+						input.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						logger.warn(Utils.getStringException(e));
+					}
+				}
+			}
+	            System.out.println("port=" + port);
+	            		
+	            
+			String DATABASE_URL = "postgres://postgres:sazirac@localhost:"+ port +"/teleonome";
 			dbUri = new URI(DATABASE_URL);
 			String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() +  dbUri.getPath() ;
 			System.out.println("dbUrl=" + dbUrl);

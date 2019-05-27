@@ -4,7 +4,9 @@ package com.teleonome.framework.microcontroller.sftppublisher;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -36,10 +38,10 @@ import com.teleonome.framework.utils.Utils;
 
 public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressMonitor{
 
-	
+
 	private String publishingResults="";
 	private String mqttBrokerAddress;
-	
+
 	private Category logger;
 	private  int localPort = 8888;
 	private int remotePort = 8888;
@@ -94,13 +96,27 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 		// after writing the message
 		// this is because otherwise you run the risk of floding the serial bus
 		// so to make it standards all microcontrollers do this
-		
+
 		if(command.equals("Publish Via SFTP")) {			
 			boolean createdTunnel = createTunnel();
 			logger.debug("create tunnel returned" + createdTunnel);
 
 			if(createdTunnel) {
 				boolean publishToSFTP = publishToSFTP();
+				if(publishToSFTP)publishingResults="Ok-publishing SFTP";
+				session.disconnect();
+			}
+		}else if(command.startsWith("Download Via SFTP")){
+			String[] tokens = command.split("#");
+
+			String localDestinationFilename = tokens[1];
+			String remoteSourceFileName=tokens[2];
+
+			boolean createdTunnel = createTunnel();
+			logger.debug("create tunnel returned" + createdTunnel);
+
+			if(createdTunnel) {
+				boolean publishToSFTP = getFromSFTP(localDestinationFilename, remoteSourceFileName);
 				if(publishToSFTP)publishingResults="Ok-publishing SFTP";
 				session.disconnect();
 			}
@@ -206,8 +222,8 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			//
 			boolean found=false;
 			Vector files = sftp.ls(".");
-			 ChannelSftp.LsEntry fileName=null;
-					 
+			ChannelSftp.LsEntry fileName=null;
+
 			Iterator itFiles = files.iterator();
 			while (itFiles.hasNext()) {
 				try{
@@ -239,7 +255,58 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 
 	}
 
-	
+	private boolean getFromSFTP(String localDestinationFilename, String remoteSourceFileName) {
+		OutputStream output=null;
+		boolean b=false;
+		// command = "scp -p -t \"" + destFilename + "\"";
+		Channel channel = null;
+		try {
+			channel = session.openChannel("sftp");
+		} catch (JSchException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		ChannelSftp sftp = (ChannelSftp) channel;
+
+		try {
+			sftp.connect();
+		} catch (JSchException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		//send the contents of the source file
+
+		try {
+			output = new FileOutputStream(localDestinationFilename);
+			sftp.get(remoteSourceFileName,output);
+
+		} catch (IOException ee) {
+		} catch (SftpException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (output != null) {
+				try {
+					output.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+
+		if(channel!=null) {
+			channel.disconnect();
+		}
+		// session.disconnect();
+
+		b= true;
+
+
+		return b;
+	}
+
 	private boolean publishToSFTP() {
 
 
@@ -247,7 +314,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 		String  dataString="dataString"; 
 		JSONObject dene;
 		String value="", deneName;
-		
+
 		//
 		// to start the transaction, upload and empty file called start
 		//
@@ -308,7 +375,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 				dene = configParams.getJSONObject(i);
 				deneName = dene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
 				logger.debug("publishToSFTP deneName=" + deneName );
-				
+
 				if(deneName.startsWith("SFTP Upload Image")) {
 					String imagePointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "Upload Image", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
@@ -336,48 +403,48 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 					// then you need to add /home/pi/Teleonome/tomcat/webapps/ROOT/
 					// because the images will be there, if audio in the audio folder an video in the video folder
 					if(value.endsWith(".jpg") || value.endsWith(".png") || value.endsWith(".gif")){
-						 sourceFilename = "/home/pi/Teleonome/tomcat/webapps/ROOT/images/" + value;
+						sourceFilename = "/home/pi/Teleonome/tomcat/webapps/ROOT/images/" + value;
 					}else if(value.endsWith(".wav") || value.endsWith(".mp3") ){
-						 sourceFilename = "/home/pi/Teleonome/tomcat/webapps/ROOT/audio/" + value;
+						sourceFilename = "/home/pi/Teleonome/tomcat/webapps/ROOT/audio/" + value;
 					}else if(value.endsWith(".mpg")  ){
-						 sourceFilename = "/home/pi/Teleonome/tomcat/webapps/ROOT/video/" + value;
+						sourceFilename = "/home/pi/Teleonome/tomcat/webapps/ROOT/video/" + value;
 					}
-					 destinationDir="/home/pi/Teleonome/" + teleonomeName;
-						
+					destinationDir="/home/pi/Teleonome/" + teleonomeName;
+
 					if(new File(sourceFilename).isFile()) {
 						uploadFile( destinationDir, sourceFilename,   value);
 					}else {
 						logger.debug("Did not upload " + sourceFilename + " because it could not be found");
 					}
-					
+
 				}else if(deneName.equals("SFTP Publish Contents")) {
 					String contentsPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "SFTP Publish Contents", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 					if(contentsPointer.equals(TeleonomeConstants.COMMANDS_PUBLISH_TELEONOME_PULSE)) {
-						
+
 						//
 						// compress the file and save it to upload it and then delete it
 						//
 						//byte[] messageBytes = StringCompressor.compress(fileInString);
-						 sourceFilename = Utils.getLocalDirectory() + "DGPubTemp";
+						sourceFilename = Utils.getLocalDirectory() + "DGPubTemp";
 						File sourceFile = new File(sourceFilename);
-						
+
 						try {
 							FileUtils.writeStringToFile(sourceFile, tempPulseJSONObject.toString(4), "UTF8");
 							//FileUtils.writeByteArrayToFile(tempFile, messageBytes);
-							 destinationDir="/home/pi/Teleonome/" + teleonomeName;
+							destinationDir="/home/pi/Teleonome/" + teleonomeName;
 							//sourceFilename = Utils.getLocalDirectory() + "Teleonome.denome";
 							// logger.debug("sending the denome file");
-						//	uploadFile( destinationDir, sourceFilename,   "Teleonome.denome");
+							//	uploadFile( destinationDir, sourceFilename,   "Teleonome.denome");
 							String destinationFileName = Utils.getLocalDirectory() + "DGPubTemp.zip";
-							
+
 							File destinationFile = new File(destinationFileName);
-							
-							 Utils.zipFile(sourceFile, destinationFile);
-							 logger.debug("sending the zip file, destinationFileName=" + destinationFileName);
-								
-							 uploadFile( destinationDir, destinationFileName,   "Teleonome.zip");
-							
+
+							Utils.zipFile(sourceFile, destinationFile);
+							logger.debug("sending the zip file, destinationFileName=" + destinationFileName);
+
+							uploadFile( destinationDir, destinationFileName,   "Teleonome.zip");
+
 							sourceFile.delete();
 							destinationFile.delete();
 						} catch (IOException e) {
@@ -400,8 +467,8 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 		//
 		// to end the transaction, upload and empty file called complete
 		//
-		 destinationDir="/home/pi/Teleonome/" + teleonomeName;
-		 sourceFilename = Utils.getLocalDirectory() + "complete";
+		destinationDir="/home/pi/Teleonome/" + teleonomeName;
+		sourceFilename = Utils.getLocalDirectory() + "complete";
 		try {
 			FileUtils.writeStringToFile(new File(sourceFilename), "");
 		} catch (IOException e) {
@@ -409,9 +476,11 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			e.printStackTrace();
 		}
 		uploadFile( destinationDir, sourceFilename,   "complete");
-		
+
 		return true;
 	}
+
+	
 
 	private boolean uploadFile(String destinationDir,String sourceFilename,  String destFilename) {
 		FileInputStream fis = null;
@@ -426,7 +495,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			//send the contents of the source file
 			fis = new FileInputStream(sourceFilename);
 			String currentRemoteDir = sftp.pwd();
-			
+
 			sftp.cd(destinationDir);
 			currentRemoteDir = sftp.pwd();
 			sftp.put(sourceFilename, destFilename, this,ChannelSftp.OVERWRITE);

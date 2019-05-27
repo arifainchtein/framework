@@ -2,9 +2,12 @@ package com.teleonome.framework.tools;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -31,6 +34,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
@@ -45,22 +50,33 @@ import javax.crypto.spec.SecretKeySpec;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.Vector;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Category;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.SftpProgressMonitor;
 import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
 import com.luckycatlabs.sunrisesunset.dto.Location;
 import com.teleonome.framework.TeleonomeConstants;
+import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.denome.DenomeUtils;
+import com.teleonome.framework.microcontroller.sftppublisher.SFTPPublisherWriter.MyLogger;
 import com.teleonome.framework.network.NetworkUtilities;
 import com.teleonome.framework.security.totp.TOTP;
 import com.teleonome.framework.utils.Utils;
 
-public class MethodTester {
+public class MethodTester implements SftpProgressMonitor{
 	Logger logger;
 	public MethodTester(){
 		//boolean l = NetworkUtilities.isNetworkStatusOk();
@@ -74,22 +90,170 @@ public class MethodTester {
 //	System.out.println(s);
 		//recognizeImages();generateTOTPString()
 	
-		TOTP totp = new TOTP();
-		String code;
-		try {
-			code = totp.generateCurrentNumberFromUnencodedString("SecretCode");
-			System.out.println("code = " + code);
-		} catch (GeneralSecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		TOTP totp = new TOTP();
+//		String code;
+//		try {
+//			code = totp.generateCurrentNumberFromUnencodedString("SecretCode");
+//			System.out.println("code = " + code);
+//		} catch (GeneralSecurityException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
-		
+		createTunnel();
+		String localDestinationFilename = "/Users/arifainchtein/Downloads/mydownload.sql";
+		String remoteSourceFileName="/home/arifainchtein/db_backups/casete_backup.sql";
+		downloadFile( remoteSourceFileName, localDestinationFilename) ;
 	}
 
+	private String publishingResults="";
+	private String mqttBrokerAddress;
 	
-	 
-	 
+	int sshPort=22;
+	String userName="arifainchtein";
+	JSONArray configParams;
+	String host="104.197.177.120";
+	String privateKey="/Users/arifainchtein/.ssh/google_compute_engine";
+	JSch jsch=new JSch();
+	Session session=null;
+	long downloadStartTime;
+	private boolean createTunnel() {
+
+		JSch.setLogger(new MyLogger());
+		File privateKeyFile = new File(privateKey);
+		logger.debug("creating tunnel privateKeyFile is File=" + privateKeyFile.isFile());
+
+		if(!privateKeyFile.isFile()) {
+			publishingResults="Fault#DigitalGeppettoPublisher#Missing Key";
+			return false;
+		}
+		logger.debug("creating tunnel about to read key=" );
+		byte[] prvkey=null;
+		try {
+			prvkey = FileUtils.readFileToByteArray(new File(privateKey));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+			publishingResults="Fault#DigitalGeppettoPublisher#Error Reading Key File";
+			return false;
+
+		}
+		logger.debug("creating tunnel about to read passphrase, prvkey="  + prvkey );
+
+		String passphrase="";
+		final byte[] emptyPassPhrase = passphrase.getBytes();
+		try {
+			jsch.addIdentity(
+					userName,    // String userName 
+					prvkey,          // byte[] privateKey 
+					null,            // byte[] publicKey
+					emptyPassPhrase  // byte[] passPhrase
+					);
+		} catch (JSchException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+			publishingResults="Fault#DigitalGeppettoPublisher#Error Adding Identity to JSch";
+			return false;
+		}
+		logger.debug("creating tunnel about to get session" );
+
+		try {
+			session=jsch.getSession(userName, host, sshPort);
+		} catch (JSchException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+			publishingResults="Fault#DigitalGeppettoPublisher#Error Reading Getting Session";
+			return false;
+		}
+
+		try {
+			jsch.addIdentity(privateKey);
+		} catch (JSchException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+			publishingResults="Fault#DigitalGeppettoPublisher#Error Adding Identity";
+			return false;
+		}
+		logger.debug("identity added, abut to connect ");
+		final Properties config = new Properties();  
+		config.put("StrictHostKeyChecking", "no");
+		session.setConfig(config);
+		try {
+			session.connect();
+		} catch (JSchException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+			publishingResults="Fault#DigitalGeppettoPublisher#Error Connecting";
+			return false;
+		}
+		int assinged_port=0;
+
+		//
+		// this is to create a tunnel if you want to run a heart publisher
+
+		logger.debug(" connected" );
+
+		
+
+		return true;
+
+	}
+	
+	private boolean downloadFile(String remoteSourceFileName,String localDestinationFilename) {
+		OutputStream output=null;
+		boolean b=false;
+			// command = "scp -p -t \"" + destFilename + "\"";
+			Channel channel = null;
+			try {
+				channel = session.openChannel("sftp");
+			} catch (JSchException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			ChannelSftp sftp = (ChannelSftp) channel;
+
+			try {
+				sftp.connect();
+			} catch (JSchException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			//send the contents of the source file
+			
+			try {
+				output = new FileOutputStream(localDestinationFilename);
+				int mode=ChannelSftp.OVERWRITE;
+			    //  if(cmd.equals("get-resume")){ mode=ChannelSftp.RESUME; }
+			   //   else if(cmd.equals("get-append")){ mode=ChannelSftp.APPEND; } 
+				downloadStartTime = System.currentTimeMillis();
+				sftp.get(remoteSourceFileName,output, this);
+
+			} catch (IOException ee) {
+			} catch (SftpException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				if (output != null) {
+					try {
+						output.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+
+			if(channel!=null) {
+				channel.disconnect();
+			}
+			// session.disconnect();
+
+			b= true;
+		
+
+		return b;
+	}
 	
 	
 	
@@ -833,5 +997,36 @@ public class MethodTester {
 	public static void main(String[] args) {
 		new MethodTester();
 	}
+
+	long count=0;
+    long max=0;
+    public void init(int op, String   src, String   dest, long m){
+      this.max=m;
+      count=0;
+      percent=0;
+     
+    }
+    
+    private long percent=-1;
+    
+    public boolean count(long c){
+      this.count+=c;
+      SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
+       long elapsed = System.currentTimeMillis() - downloadStartTime;
+       long totalsec = max*elapsed/count;
+       long remaining = totalsec-elapsed;
+      String etaString= Utils.getElapsedTimeHoursMinutesSecondsString(remaining);
+      String startedTime = sdf.format(downloadStartTime);
+      String elaspedTime = Utils.getElapsedTimeHoursMinutesSecondsString(elapsed);
+      
+      percent = (count*100)/max;
+      //System.out.println("started:" + startedTime + " etaString=" + etaString + " max=" + max + " count=" + count + " " + percent + "% downloaded");
+      System.out.println("started:" + startedTime + " elasped:" + elaspedTime + " remaining=" + etaString+ " " + percent + "% downloaded");
+      return true;
+     
+    }
+    public void end(){
+     
+    }
 
 }
