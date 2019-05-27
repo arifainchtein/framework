@@ -66,6 +66,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 		URI dbUri;
 		int port=-1;
+		String pwd="";
 		try {
 			InputStream input=null;
 			try{
@@ -78,6 +79,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 				// get the property value and print it out
 				port = Integer.parseInt(prop.getProperty("port"));
+				pwd = prop.getProperty("pwd");
 			}catch(IOException e) {
 				logger.warn(Utils.getStringException(e));
 			}finally {
@@ -93,7 +95,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	            System.out.println("port=" + port);
 	            		
 	            
-			String DATABASE_URL = "postgres://postgres:sazirac@localhost:"+ port +"/teleonome";
+			String DATABASE_URL = "postgres://postgres:"+pwd+"@localhost:"+ port +"/teleonome";
 			dbUri = new URI(DATABASE_URL);
 			String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() +  dbUri.getPath() ;
 			System.out.println("dbUrl=" + dbUrl);
