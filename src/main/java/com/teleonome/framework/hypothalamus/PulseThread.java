@@ -489,7 +489,7 @@ public class PulseThread extends Thread{
 						if(input.ready()) {
 							String inputLine = input.readLine();
 							logger.info("received 2 inputLine=" + inputLine);
-							if(inputLine.equals("Ok-PulseStart"){
+							if(inputLine.equals("Ok-PulseStart")){
 								waitingForMama=false;
 							}
 						}
