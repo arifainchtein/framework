@@ -122,6 +122,13 @@ public class PulseThread extends Thread{
 								eventType = tokens[1];
 								eventValue = Integer.parseInt(tokens[2]);
 								aDenomeManager.storeLifeCycleEvent(eventType, eventTimeMillis,eventValue);
+							}else {
+								try {
+									Thread.sleep(2000);
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
 							}
 							//
 						}while(!inputLine.startsWith("Ok") && !inputLine.startsWith("Failure"));
