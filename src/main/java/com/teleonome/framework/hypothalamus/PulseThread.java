@@ -86,7 +86,7 @@ public class PulseThread extends Thread{
 
 				output.write(commandToSend,0,commandToSend.length());
 				output.flush();
-				logger.info("line 89 waiting for mama to respond1 wait 5000");
+				logger.debug("line 89 waiting for mama to respond1 wait 5000");
 				Thread.sleep(5000);
 
 			} catch (IOException e2) {
@@ -103,7 +103,7 @@ public class PulseThread extends Thread{
 			long eventTimeMillis=0;
 			int eventValue=0;
 			while(waitingForMama) {
-				logger.info("line 106");
+				logger.debug("line 106");
 				try {
 					if(input.ready()) {
 						String inputLine = "";
@@ -185,7 +185,7 @@ public class PulseThread extends Thread{
 					try {
 						if(input.ready()) {
 							String inputLine = "";
-							logger.info("line 188");
+							logger.debug("line 188");
 							do{
 								inputLine = input.readLine();
 								if(inputLine.length()>5 && !inputLine.startsWith("Ok-")&& !inputLine.startsWith("Failure-")) {
@@ -262,7 +262,7 @@ public class PulseThread extends Thread{
 					if(input.ready()) {
 						String inputLine = "";
 						do{
-							logger.info("line 265");
+							logger.debug("line 265");
 							inputLine = input.readLine();
 							if(inputLine.length()>5 && !inputLine.startsWith("Ok-")&& !inputLine.startsWith("Failure-")) {
 								logger.info("GetRememberedValueData received inputLine=" + inputLine);
@@ -302,7 +302,7 @@ public class PulseThread extends Thread{
 //			}
 			
 			
-			logger.info("abut to create an end awke");
+			logger.info("abut to create an end awake life cycle event");
 		aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_END_AWAKE, System.currentTimeMillis(),TeleonomeConstants.LIFE_CYCLE_EVENT_AWAKE_VALUE);
 	}
 	
