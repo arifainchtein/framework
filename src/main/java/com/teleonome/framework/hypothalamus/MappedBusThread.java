@@ -213,7 +213,7 @@ class MappedBusThread extends Thread{
 										String inputLine = "";
 										do {
 											inputLine = input.readLine();
-											logger.info(aMicroController.getName()  + " was sent=" + mutationCommands[k] + " received=" + inputLine);
+											logger.info(aMicroController.getName()  + " was sent=" + messageToSend + " received=" + inputLine);
 											try {
 												Thread.sleep(500);
 											} catch (InterruptedException e) {
@@ -287,7 +287,7 @@ class MappedBusThread extends Thread{
 									String inputLine = "";
 									do {
 										inputLine = input.readLine();
-										logger.info(aMicroController.getName()  + " was sent=" + mutationCommands[k] + " received=" + inputLine);
+										logger.info(aMicroController.getName()  + " was sent=" + mutationCommands.get(k) + " received=" + inputLine);
 										try {
 											Thread.sleep(500);
 										} catch (InterruptedException e) {
