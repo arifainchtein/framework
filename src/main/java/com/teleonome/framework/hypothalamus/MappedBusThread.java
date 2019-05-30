@@ -254,7 +254,7 @@ class MappedBusThread extends Thread{
 
 								input = aMicroController.getReader();
 								//String inputLine=getInputLine( input);
-								boolean ready = true;//input.ready();
+								boolean ready = input.ready();
 								logger.debug("line 136 input.ready()=" + ready);
 								keepGoing=true;
 								if(ready){
