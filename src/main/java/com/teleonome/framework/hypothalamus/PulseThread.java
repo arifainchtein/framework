@@ -124,6 +124,7 @@ public class PulseThread extends Thread{
 								aDenomeManager.storeLifeCycleEvent(eventType, eventTimeMillis,eventValue);
 							}else {
 								try {
+									logger.info("waiting 2 sec");
 									Thread.sleep(2000);
 								} catch (InterruptedException e) {
 									// TODO Auto-generated catch block
