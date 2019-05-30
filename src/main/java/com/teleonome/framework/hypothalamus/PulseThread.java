@@ -103,10 +103,12 @@ public class PulseThread extends Thread{
 			long eventTimeMillis=0;
 			int eventValue=0;
 			while(waitingForMama) {
+				logger.info("line 106");
 				try {
 					if(input.ready()) {
 						String inputLine = "";
 						do{
+							
 							inputLine = input.readLine();
 							if(inputLine.length()>5 && !inputLine.startsWith("Ok")&& !inputLine.startsWith("Failure")) {
 								logger.info("GetLifeCycleData received inputLine=" + inputLine);
