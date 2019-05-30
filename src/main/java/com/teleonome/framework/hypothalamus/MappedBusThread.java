@@ -274,7 +274,7 @@ class MappedBusThread extends Thread{
 											// TODO Auto-generated catch block
 											e.printStackTrace();
 										}
-										if(inputLine.startsWith("Ok")  || inputLine.startsWith("Failure")) {
+										if(inputLine.startsWith("Ok")|| inputLine.startsWith("Fault") || inputLine.startsWith("Failure")) {
 											keepGoing=false;
 										}else {
 											keepGoing=true;
