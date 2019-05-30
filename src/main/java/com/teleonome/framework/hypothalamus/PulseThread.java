@@ -163,7 +163,7 @@ public class PulseThread extends Thread{
 				try {
 					output.write(commandToSend,0,commandToSend.length());
 					output.flush();
-					logger.info("waiting for mama to respond2 wait 5000");
+					logger.info("waiting for mama to respond to GetWPSSensorData wait 5000");
 					Thread.sleep(5000);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
@@ -185,6 +185,7 @@ public class PulseThread extends Thread{
 					try {
 						if(input.ready()) {
 							String inputLine = "";
+							logger.info("line 188");
 							do{
 								inputLine = input.readLine();
 								if(inputLine.length()>5 && !inputLine.startsWith("Ok-")&& !inputLine.startsWith("Failure-")) {
