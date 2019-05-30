@@ -185,7 +185,7 @@ class MappedBusThread extends Thread{
 
 									input = aMicroController.getReader();
 									//String inputLine=getInputLine( input);
-									boolean ready = true;//input.ready();
+									boolean ready = input.ready();
 									logger.debug("line 84 input.ready()=" + ready);
 									keepGoing=true;
 									if(ready){
@@ -244,14 +244,14 @@ class MappedBusThread extends Thread{
 								output = aMicroController.getWriter();
 								logger.debug("requesting " + messageToSend);
 								output.write(messageToSend,0,messageToSend.length());
+								
+								output.flush();
 								try {
 									Thread.sleep(1000);
 								} catch (InterruptedException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
-								output.flush();
-
 								input = aMicroController.getReader();
 								//String inputLine=getInputLine( input);
 								boolean ready = input.ready();
