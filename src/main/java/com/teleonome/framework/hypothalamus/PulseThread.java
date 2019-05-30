@@ -213,7 +213,7 @@ public class PulseThread extends Thread{
 									}
 								}
 								//
-							}while(!inputLine.startsWith("Ok"));
+							}while(!inputLine.startsWith("Ok") && !inputLine.startsWith("Failure"));
 							waitingForMama=false;
 					}
 
@@ -262,6 +262,7 @@ public class PulseThread extends Thread{
 					if(input.ready()) {
 						String inputLine = "";
 						do{
+							logger.info("line 265");
 							inputLine = input.readLine();
 							if(inputLine.length()>5 && !inputLine.startsWith("Ok-")&& !inputLine.startsWith("Failure-")) {
 								logger.info("GetRememberedValueData received inputLine=" + inputLine);
@@ -273,7 +274,7 @@ public class PulseThread extends Thread{
 								aDenomeManager.storeMotherRememberedValue( now,  recordMillis,  label,  value,  unit);
 							}
 							//
-						}while(!inputLine.startsWith("Ok"));
+						}while(!inputLine.startsWith("Ok") && !inputLine.startsWith("Failure"));
 
 
 						waitingForMama=false;
