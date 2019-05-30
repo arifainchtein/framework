@@ -246,15 +246,19 @@ class MappedBusThread extends Thread{
 								output.write(messageToSend,0,messageToSend.length());
 								
 								output.flush();
-								try {
-									Thread.sleep(1000);
-								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
+								
 								input = aMicroController.getReader();
 								//String inputLine=getInputLine( input);
-								boolean ready = input.ready();
+								boolean ready = false;
+								do{
+									try {
+										Thread.sleep(1000);
+									} catch (InterruptedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									ready = input.ready();
+								}while(!ready);
 								logger.debug("line 136 input.ready()=" + ready);
 								keepGoing=true;
 								if(ready){
