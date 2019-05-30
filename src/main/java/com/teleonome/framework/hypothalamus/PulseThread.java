@@ -479,15 +479,19 @@ public class PulseThread extends Thread{
 				output.write(commandToSend,0,commandToSend.length());
 				output.flush();
 				logger.info("waiting for mama to respond2 wait 5000");
-				Thread.sleep(5000);
+				
 
 				boolean waitingForMama=true;
-				while(waitingForMama) {
+				do {
 					try {
+						Thread.sleep(2000);
+						
 						if(input.ready()) {
 							String inputLine = input.readLine();
 							logger.info("received 2 inputLine=" + inputLine);
-							waitingForMama=false;
+							if(inputLine.equals("Ok-PulseStart"){
+								waitingForMama=false;
+							}
 						}
 
 					}catch(IOException e) {
@@ -496,7 +500,7 @@ public class PulseThread extends Thread{
 						Thread.sleep(2000);
 					}
 
-				}
+				}while(waitingForMama);
 
 
 				input.close();
