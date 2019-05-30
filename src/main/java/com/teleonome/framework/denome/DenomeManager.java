@@ -2302,6 +2302,7 @@ public class DenomeManager {
 	public JSONObject getDeneWordByIdentity(Identity identity) throws InvalidDenomeException{
 		//
 		// if we are pointing at itself return the default
+		logger.debug("identity.isCommand()=" + identity.isCommand());
 		if(identity.isCommand()){
 			if(identity.getCommandValue().equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP_MILLIS)){
 				try {
@@ -2411,7 +2412,7 @@ public class DenomeManager {
 	public JSONObject getDeneWordByPointer(String nucleusName,String deneChainName, String deneName, String deneWordName) throws InvalidDenomeException{
 		JSONArray deneChainsArray=null;
 		try {
-			//logger.debug("getDeneWordByPointer, nucleusName="  + nucleusName +" deneChainName=" + deneChainName + " deneName=" + deneName  + " deneWordName="  + deneWordName);
+			logger.debug("getDeneWordByPointer, nucleusName="  + nucleusName +" deneChainName=" + deneChainName + " deneName=" + deneName  + " deneWordName="  + deneWordName);
 			//
 			// now parse them
 			JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
@@ -2452,25 +2453,22 @@ public class DenomeManager {
 			Object object;
 			for(int i=0;i<deneChainsArray.length();i++){
 				aJSONObject = (JSONObject) deneChainsArray.get(i);
-				//	logger.debug("getDeneWordByPointer inside denechain, " + aJSONObject.getString("Name") +" " + deneChainName);
+					logger.debug("getDeneWordByPointer inside denechain, " + aJSONObject.getString("Name") +" " + deneChainName);
 
 
 				//logger.debug(aJSONObject);
 
 				if(aJSONObject.getString("Name").equals(deneChainName)){
 					denesJSONArray = aJSONObject.getJSONArray("Denes");
-					//logger.debug("getDeneWordByPointer1 , deneChainName " + deneChainName + " has " + denesJSONArray.length() + " denes");
-
-
-
+					logger.debug("getDeneWordByPointer1 , deneChainName " + deneChainName + " has " + denesJSONArray.length() + " denes");
 					for(int j=0;j<denesJSONArray.length();j++){
 						aDeneJSONObject = (JSONObject) denesJSONArray.get(j);
-						//	logger.debug("getDeneWordByPointer inside denes, aDeneJSONObject.getString(Name)=" + aDeneJSONObject.getString("Name"));
+							logger.debug("1-getDeneWordByPointer inside denes, aDeneJSONObject.getString(Name)=" + aDeneJSONObject.getString("Name"));
 						if(aDeneJSONObject.getString("Name").equals(deneName)){
 							deneWordsJSONArray = aDeneJSONObject.getJSONArray("DeneWords");
-							//	logger.debug("getDeneWordByPointer found dene,");
+								logger.debug("getDeneWordByPointer found dene,");
 							for(int k=0;k<deneWordsJSONArray.length();k++){
-								//	logger.debug("getDeneWordByPointer inside denewords");
+									logger.debug("getDeneWordByPointer inside denewords");
 								aDeneWordJSONObject = (JSONObject) deneWordsJSONArray.get(k);
 								if(aDeneWordJSONObject.getString("Name").equals(deneWordName)){
 									return aDeneWordJSONObject;
@@ -5518,7 +5516,11 @@ public class DenomeManager {
 						// then add a new one
 						actuatorLogicProcessingDeneChain = new JSONObject();
 						deneChains.put(actuatorLogicProcessingDeneChain);
+						JSONArray actuatorLogicProcessingDenes = new JSONArray();
 						actuatorLogicProcessingDeneChain.put("Name", TeleonomeConstants.DENECHAIN_ACTUATOR_LOGIC_PROCESSING);
+						actuatorLogicProcessingDeneChain.put("Denes", actuatorLogicProcessingDenes);
+						logger.debug("added DENECHAIN_ACTUATOR_LOGIC_PROCESSING");
+
 					}
 					//
 					// only add the mnemotyconProcessingDeneChain if there are mnemotycons that are active
@@ -5742,7 +5744,7 @@ public class DenomeManager {
 
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						logger.warn(Utils.getStringException(e1));
 					}
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Hypothalamus Build Number",""+hypothalamusBuildNumber,null,"String",true);
 					systemDataDeneWords.put(deneWord);
@@ -5755,7 +5757,7 @@ public class DenomeManager {
 
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						logger.warn(Utils.getStringException(e1));
 					}
 
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Medula Build Number",""+medulaBuildNumber,null,"String",true);	
@@ -5769,7 +5771,7 @@ public class DenomeManager {
 
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						logger.warn(Utils.getStringException(e1));
 					}
 
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Heart Build Number",""+heartBuildNumber,null,"String",true);	
@@ -7347,6 +7349,7 @@ public class DenomeManager {
 
 					if(variableValueType.equals(TeleonomeConstants.DENEWORD_TYPE_POINTER)){
 						variableIdentityPointer = actionVariableValueJSONObject.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.info("variableIdentityPointer=" + variableIdentityPointer);
 
 						resolvedVariablePointerJSONObject = (JSONObject) getDeneWordAttributeByIdentity(new Identity(variableIdentityPointer), TeleonomeConstants.COMPLETE);
 						logger.info("resolvedVariablePointerJSONObject=" + resolvedVariablePointerJSONObject);
@@ -8837,7 +8840,7 @@ public class DenomeManager {
 				try {
 					toDoDeneWordJSONObject = actionSuccessTaskUpdateDeneWords.getJSONObject(i);
 					logger.debug("toDoDeneWordJSONObject=" + toDoDeneWordJSONObject);
-
+  
 					//
 					//the target is what variable and the value is what to set it at
 					valueType = toDoDeneWordJSONObject.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
@@ -8866,7 +8869,7 @@ public class DenomeManager {
 						// because if its does, the value would be a long since it would have been 
 						// converted to long when storing it
 						JSONObject sourceDataJSONObject = getDeneWordByIdentity(new Identity((String)value));
-						logger.debug("value=" + value + " sourceDataJSONObject=" + sourceDataJSONObject);
+						logger.debug("3-value=" + value + " sourceDataJSONObject=" + sourceDataJSONObject);
 						if(valueType.equals(TeleonomeConstants.DENEWORD_TIMESTRING_VALUE)){
 							renderedValue ="" +  (Long)sourceDataJSONObject.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						}else{

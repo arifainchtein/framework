@@ -124,6 +124,13 @@ public class PulseThread extends Thread{
 
 
 						waitingForMama=false;
+					}else {
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e));
+						}
 					}
 
 				}catch(IOException e) {

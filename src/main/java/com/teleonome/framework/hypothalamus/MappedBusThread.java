@@ -591,7 +591,7 @@ class MappedBusThread extends Thread{
 							commandCode = aCommandRequest.getCommandCode();
 							commandCodeType = aCommandRequest.getCommandCodeType();
 							logger.info("command=" + command  +  " commandCode=" + commandCode + " commandCodeType=" + commandCodeType);
-							if(commandCodeType.equals(TeleonomeConstants.TELEONOME_SECURITY_CODE)) {
+							if(commandCodeType!=null && commandCodeType.equals(TeleonomeConstants.TELEONOME_SECURITY_CODE)) {
 								clientIp = aCommandRequest.getClientIp();
 								commandCodeVerified=false;
 								try {

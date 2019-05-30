@@ -3248,9 +3248,11 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 
 				preparedStatement.setDouble(5, d);
 			}else if(valueType.equals(TeleonomeConstants.DATATYPE_INTEGER)) {
-
-				if(value instanceof String) {
-					d = Integer.getInteger((String)value).doubleValue();
+				logger.debug("line 3251, value=" + value );
+				if(value instanceof Integer) {
+					d = ((Integer)value).doubleValue();
+				}else if(value instanceof String) {
+					d = new Double(Integer.parseInt((String)value));
 				}else {
 					d = ((Integer)value).doubleValue();
 				}

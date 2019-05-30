@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Map.Entry;
 import java.util.Vector;
 
@@ -33,6 +34,201 @@ import com.teleonome.framework.utils.Utils;
 public class DenomeUtils {
 
 	private static Logger logger = Logger.getLogger(com.teleonome.framework.denome.DenomeUtils.class);
+	
+	public static TimeZone getTeleonomeTimeZone(JSONObject pulseJSONObject) throws InvalidDenomeException {
+		String timeZoneId = "UTC";
+		int basePulseFrequency=60;
+		String currentIdentityMode="";
+		JSONObject internalDescriptiveDeneChain = getDeneChainByName(pulseJSONObject,TeleonomeConstants.NUCLEI_INTERNAL,  TeleonomeConstants.DENECHAIN_DESCRIPTIVE);
+		JSONObject internalVitalDene = DenomeUtils.getDeneByName(internalDescriptiveDeneChain, "Vital");
+		timeZoneId = (String) getDeneWordAttributeByDeneWordNameFromDene(internalVitalDene, "Timezone", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		//// System.out.println("AsyncServlet, timeZoneId=" + timeZoneId);
+		TimeZone currentTimeZone = null;
+		if(timeZoneId!=null && !timeZoneId.equals("")){
+			currentTimeZone = TimeZone.getTimeZone(timeZoneId);
+		}else{
+			currentTimeZone = TimeZone.getDefault();
+		}
+		return currentTimeZone;
+	}
+	//
+	// remembereddenewords
+	//
+	public static Hashtable<String,ArrayList> getDeneChainsToRemember(JSONObject pulseJSONObject) throws InvalidDenomeException {
+
+		JSONObject anMnemosyconsDeneChainJSONObject = getDeneChainByName( pulseJSONObject, TeleonomeConstants.NUCLEI_INTERNAL,  TeleonomeConstants.DENECHAIN_MNEMOSYCONS);
+		Hashtable<String,ArrayList> deneChainsToRememberByTeleonome = new Hashtable();
+
+		if(anMnemosyconsDeneChainJSONObject!=null) {
+			// then get all the denes of type DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER 
+			//
+			// Hashtable<String,ArrayList> deneWordsToRememberByTeleonome
+
+			
+			JSONObject rememberedWordsMnemosyconJSONObject;
+			boolean active=false;
+			JSONArray rememberedDeneWordsJSONArray,rememberedDenesJSONArray, rememberedDeneChainsJSONArray;
+			String rememberedDeneWordTeleonomeName,rememberedDeneTeleonomeName, rememberedDeneChainTeleonomeName,rememberedDeneWordPointer, rememberedDeneChainPointer, rememberedDenePointer;
+			Identity rememberedDeneWordIdentity, rememberedDeneIdentity, rememberedDeneChainIdentity;
+			ArrayList teleonomeRememeberedWordsArrayList, teleonomeRememberedDenesArrayList, teleonomeRememberedDeneChainsArrayList;
+
+			logger.debug("in denomemagager anMnemosyconsDeneChainJSONObject= " + anMnemosyconsDeneChainJSONObject);
+			JSONArray mnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON);
+			JSONArray rememeberedDeneWordsMnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER);
+			for(int i=0;i<rememeberedDeneWordsMnemosyconDenesJSONArray.length();i++) {
+				rememberedWordsMnemosyconJSONObject = rememeberedDeneWordsMnemosyconDenesJSONArray.getJSONObject(i);
+				active = (boolean) getDeneWordAttributeByDeneWordNameFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				if(active) {
+					//
+					// the denechainstoremember
+					//
+					rememberedDeneChainsJSONArray = getAllDeneWordsFromDeneByDeneWordType(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENECHAIN, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("rememberedDeneChainsJSONArray= " + rememberedDeneChainsJSONArray);
+
+					//
+					// this array will contain elements that are actually pointers, 
+					//
+					// "@Tlaloc:Purpose:Sensor Data:Solar Radiation:Solar Radiation Data","@Tlaloc:Purpose:Sensor Data:Ambient Temperature:Ambient Temperature Data"
+					//
+					// get the name of the teleonome and use to get the vector of all the other remembered words, and stored the identity in the vector
+
+					if(rememberedDeneChainsJSONArray!=null && rememberedDeneChainsJSONArray.length()>0) {
+						for(int j=0;j<rememberedDeneChainsJSONArray.length();j++) {
+							rememberedDeneChainPointer= rememberedDeneChainsJSONArray.getString(j);
+							rememberedDeneChainIdentity = new Identity(rememberedDeneChainPointer);
+							rememberedDeneChainTeleonomeName = rememberedDeneChainIdentity.getTeleonomeName();
+							logger.debug("rememberedDeneChainTeleonomeName=" + rememberedDeneChainTeleonomeName + " rememberedDeneChainPointer= " + rememberedDeneChainPointer);
+							teleonomeRememberedDeneChainsArrayList = deneChainsToRememberByTeleonome.get(rememberedDeneChainTeleonomeName);
+							if(teleonomeRememberedDeneChainsArrayList==null)teleonomeRememberedDeneChainsArrayList = new ArrayList();
+							teleonomeRememberedDeneChainsArrayList.add(rememberedDeneChainPointer);
+							logger.debug("adding to remembered denechains= " + rememberedDeneChainPointer);
+							deneChainsToRememberByTeleonome.put(rememberedDeneChainTeleonomeName, teleonomeRememberedDeneChainsArrayList);
+						}
+					}
+				}
+			}
+		}
+		return deneChainsToRememberByTeleonome;
+	}
+	
+	public static Hashtable<String,ArrayList> getDenesToRemember(JSONObject pulseJSONObject) throws InvalidDenomeException {
+
+		JSONObject anMnemosyconsDeneChainJSONObject = getDeneChainByName( pulseJSONObject, TeleonomeConstants.NUCLEI_INTERNAL,  TeleonomeConstants.DENECHAIN_MNEMOSYCONS);
+		Hashtable denesToRememberByTeleonome = new Hashtable();
+
+		if(anMnemosyconsDeneChainJSONObject!=null) {
+			// then get all the denes of type DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER 
+			//
+			// Hashtable<String,ArrayList> deneWordsToRememberByTeleonome
+
+
+			JSONObject rememberedWordsMnemosyconJSONObject;
+			boolean active=false;
+			JSONArray rememberedDeneWordsJSONArray,rememberedDenesJSONArray, rememberedDeneChainsJSONArray;
+			String rememberedDeneWordTeleonomeName,rememberedDeneTeleonomeName, rememberedDeneChainTeleonomeName,rememberedDeneWordPointer, rememberedDeneChainPointer, rememberedDenePointer;
+			Identity rememberedDeneWordIdentity, rememberedDeneIdentity, rememberedDeneChainIdentity;
+			ArrayList teleonomeRememeberedWordsArrayList, teleonomeRememberedDenesArrayList, teleonomeRememberedDeneChainsArrayList;
+
+			logger.debug("in denomemagager anMnemosyconsDeneChainJSONObject= " + anMnemosyconsDeneChainJSONObject);
+			JSONArray mnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON);
+			JSONArray	rememeberedDeneWordsMnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER);
+			for(int i=0;i<rememeberedDeneWordsMnemosyconDenesJSONArray.length();i++) {
+				rememberedWordsMnemosyconJSONObject = rememeberedDeneWordsMnemosyconDenesJSONArray.getJSONObject(i);
+				active = (boolean) getDeneWordAttributeByDeneWordNameFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				if(active) {
+
+					//
+					// the denestoremember
+					//
+					rememberedDenesJSONArray = getAllDeneWordsFromDeneByDeneWordType(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					//logger.debug("rememberedDenesJSONArray= " + rememberedDenesJSONArray);
+
+					if(rememberedDenesJSONArray!=null && rememberedDenesJSONArray.length()>0) {
+						for(int j=0;j<rememberedDenesJSONArray.length();j++) {
+							rememberedDenePointer= rememberedDenesJSONArray.getString(j);
+
+							rememberedDeneIdentity = new Identity(rememberedDenePointer);
+							rememberedDeneTeleonomeName = rememberedDeneIdentity.getTeleonomeName();
+
+							logger.debug("rememberedDeneTeleonomeName=" + rememberedDeneTeleonomeName + " rememberedDenePointer= " + rememberedDenePointer);
+
+							teleonomeRememberedDenesArrayList = (ArrayList) denesToRememberByTeleonome.get(rememberedDeneTeleonomeName);
+							if(teleonomeRememberedDenesArrayList==null)teleonomeRememberedDenesArrayList = new ArrayList();
+							teleonomeRememberedDenesArrayList.add(rememberedDenePointer);
+							logger.debug("adding to remembered dene= " + rememberedDenePointer);
+							denesToRememberByTeleonome.put(rememberedDeneTeleonomeName, teleonomeRememberedDenesArrayList);
+
+						}
+					}
+
+
+				}
+
+			}
+		}
+		return denesToRememberByTeleonome;
+	}
+	public static Hashtable<String,ArrayList>  getDeneWordsToRemember(JSONObject pulseJSONObject) throws InvalidDenomeException {
+		
+		JSONObject anMnemosyconsDeneChainJSONObject = getDeneChainByName( pulseJSONObject, TeleonomeConstants.NUCLEI_INTERNAL,  TeleonomeConstants.DENECHAIN_MNEMOSYCONS);
+		Hashtable deneWordsToRememberByTeleonome = new Hashtable();
+
+		if(anMnemosyconsDeneChainJSONObject!=null) {
+
+			JSONObject rememberedWordsMnemosyconJSONObject;
+			boolean active=false;
+			JSONArray rememberedDeneWordsJSONArray,rememberedDenesJSONArray, rememberedDeneChainsJSONArray;
+			String rememberedDeneWordTeleonomeName,rememberedDeneTeleonomeName, rememberedDeneChainTeleonomeName,rememberedDeneWordPointer, rememberedDeneChainPointer, rememberedDenePointer;
+			Identity rememberedDeneWordIdentity, rememberedDeneIdentity, rememberedDeneChainIdentity;
+			ArrayList teleonomeRememeberedWordsArrayList, teleonomeRememberedDenesArrayList, teleonomeRememberedDeneChainsArrayList;
+
+			logger.debug("in DenomeUtils anMnemosyconsDeneChainJSONObject= " + anMnemosyconsDeneChainJSONObject);
+			JSONArray mnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON);
+			JSONArray rememeberedDeneWordsMnemosyconDenesJSONArray = getDenesByDeneType(anMnemosyconsDeneChainJSONObject, TeleonomeConstants.DENE_TYPE_MNEMOSYCON_DENEWORDS_TO_REMEMBER);
+			for(int i=0;i<rememeberedDeneWordsMnemosyconDenesJSONArray.length();i++) {
+				rememberedWordsMnemosyconJSONObject = rememeberedDeneWordsMnemosyconDenesJSONArray.getJSONObject(i);
+				active = (boolean) getDeneWordAttributeByDeneWordNameFromDene(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				if(active) {
+
+					//
+					// the denewords to remember
+					//
+					rememberedDeneWordsJSONArray = getAllDeneWordsFromDeneByDeneWordType(rememberedWordsMnemosyconJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_REMEMBERED_DENEWORD, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					logger.debug("rememberedDeneWordsJSONArray= " + rememberedDeneWordsJSONArray);
+
+					//
+					// this array will contain elements that are actually pointers, 
+					//
+					// "@Tlaloc:Purpose:Sensor Data:Solar Radiation:Solar Radiation Data","@Tlaloc:Purpose:Sensor Data:Ambient Temperature:Ambient Temperature Data"
+					//
+					// get the name of the teleonome and use to get the vector of all the other remembered words, and stored the identity in the vector
+					for(int j=0;j<rememberedDeneWordsJSONArray.length();j++) {
+						rememberedDeneWordPointer= rememberedDeneWordsJSONArray.getString(j);
+
+						rememberedDeneWordIdentity = new Identity(rememberedDeneWordPointer);
+						rememberedDeneWordTeleonomeName = rememberedDeneWordIdentity.getTeleonomeName();
+
+						logger.debug("rememberedDeneWordTeleonomeName=" + rememberedDeneWordTeleonomeName + " rememberedDeneWordPointer= " + rememberedDeneWordPointer);
+
+						teleonomeRememeberedWordsArrayList = (ArrayList) deneWordsToRememberByTeleonome.get(rememberedDeneWordTeleonomeName);
+						if(teleonomeRememeberedWordsArrayList==null)teleonomeRememeberedWordsArrayList = new ArrayList();
+						teleonomeRememeberedWordsArrayList.add(rememberedDeneWordPointer);
+						logger.debug("adding to remembered denewords= " + rememberedDeneWordPointer);
+						deneWordsToRememberByTeleonome.put(rememberedDeneWordTeleonomeName, teleonomeRememeberedWordsArrayList);
+
+					}
+				}
+
+			}
+		}
+		return deneWordsToRememberByTeleonome;
+	}
+	
+	//
+	// endo of remembered denewords
+	//
+	
+	
 	/**
 	 * this methods returns the memory status dene
 	 * which contains the first 5 lines of the top command
