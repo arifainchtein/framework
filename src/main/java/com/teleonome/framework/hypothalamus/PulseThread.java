@@ -677,7 +677,7 @@ public class PulseThread extends Thread{
 				}
 				sensorRequestQueuePositionDeneWordIndex = this.aDenomeManager.getSensorsDeneWordsBySensorRequestQueuePositionByMicroControllerPointer( microControllerPointer);
 				actuatorExecutionPositionDeneIndex = this.aDenomeManager.getActuatorExecutionPositionDeneByMicroControllerPointerIndex(microControllerPointer);
-				logger.debug("line 1871 processing microcontroller normal sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex + " actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
+				//logger.debug("line 1871 processing microcontroller normal sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex + " actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
 				logger.info("starting to process MicroController  " + aMicroController.getName());
 
 				processMicroProcessor(aMicroController, teleonomeName,sensorRequestQueuePositionDeneWordIndex, actuatorExecutionPositionDeneIndex, input, output, false);
@@ -775,7 +775,7 @@ public class PulseThread extends Thread{
 			boolean mnemosyconsOperonActive=false;
 			Identity mnemosyconsOperonActiveIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_OPERONS,TeleonomeConstants.DENE_OPERON_CONTROL, TeleonomeConstants.DENEWORD_MNEMOSYCONS_ACTIVE);
 			try {
-				logger.debug("aDenomeManager=" + this.aDenomeManager + " mnemosyconsOperonActiveIdentity=" + mnemosyconsOperonActiveIdentity);
+				//logger.debug("aDenomeManager=" + this.aDenomeManager + " mnemosyconsOperonActiveIdentity=" + mnemosyconsOperonActiveIdentity);
 				mnemosyconsOperonActive = (boolean) this.aDenomeManager.getDeneWordAttributeByIdentity(mnemosyconsOperonActiveIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			} catch (InvalidDenomeException | JSONException e1) {
 				// TODO Auto-generated catch block
@@ -1126,13 +1126,13 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 		// TODO Auto-generated catch block
 		e1.printStackTrace();
 	}
-	logger.debug("line 871 actuatorOperonActive=" + actuatorOperonActive + " actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
+	//logger.debug("line 871 actuatorOperonActive=" + actuatorOperonActive + " actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
 	if(actuatorOperonActive && actuatorExecutionPositionDeneIndex!=null && actuatorExecutionPositionDeneIndex.size()>0){
 
 		for (Map.Entry<JSONObject, Integer> entry4 : actuatorExecutionPositionDeneIndex) {
 
 			anActuatorDeneJSONObject = entry4.getKey();
-			logger.debug("line 2359 anActuatorDeneJSONObject=" + anActuatorDeneJSONObject);
+			logger.debug("line 2359 anActuatorDeneJSONObject=" + anActuatorDeneJSONObject.getString("Name"));
 
 			try {
 				String deneWordOperationPointer="";
@@ -1157,7 +1157,7 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 					for (Map.Entry<JSONObject, Integer> action : actuatorActionEvaluationPositionActionIndex) {
 						actuatorActionJSONObject = action.getKey();
 						entry = aDenomeManager.evaluateAction(teleonomeName, actuatorActionJSONObject);
-						logger.debug(" line 2231 actuatorAction=" + actuatorActionJSONObject.getString("Name") + " returns " + entry);
+						//logger.debug(" line 2231 actuatorAction=" + actuatorActionJSONObject.getString("Name") + " returns " + entry);
 						//
 						// if the action is not active, ie the Active DeneWord is set to false
 						//it will return a null, so only add them if they are not null
@@ -1280,7 +1280,7 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 										String mnemosyneOperationPointer="";
 										try {
 											mnemosyneOperationsDene = aDenomeManager.getDeneByIdentity(new Identity(mnemosyneOperationIndexPointer));
-											logger.debug("mnemosyneOperationIndexPointer=" + mnemosyneOperationIndexPointer + " mnemosyneOperationsDene=" + mnemosyneOperationsDene);
+											logger.debug("mnemosyneOperationIndexPointer=" + mnemosyneOperationIndexPointer);// + " mnemosyneOperationsDene=" + mnemosyneOperationsDene);
 											if(mnemosyneOperationsDene!=null ) {
 												JSONArray mnemosyneOperationPointers = DenomeUtils.getAllDeneWordsFromDeneByDeneWordType(mnemosyneOperationsDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_OPERATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 												logger.debug("mnemosyneOperationPointers=" + mnemosyneOperationPointers);

@@ -151,7 +151,7 @@ class MappedBusThread extends Thread{
 					// Process Events
 					//
 					telepathons  = hypothalamus.aDenomeManager.getTelepathonsByMicroControllerPointerByExecutionPosition(microControllerPointer);
-					logger.debug("Checking for " + telepathons.size()+ " events coming from  " + aMicroController.getName());
+					logger.debug("Checking for " + telepathons.size()+ " telepathns events coming from  " + aMicroController.getName());
 					//	hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, "Checking for faults coming from  " + aMicroController.getName());
 					if(telepathons.size()>0) {
 						//
@@ -238,6 +238,7 @@ class MappedBusThread extends Thread{
 						//
 						// now do the mutation commands
 						//
+					logger.debug("starting the mutation commands" );
 						for(int k=0;k<mutationCommands.length;k++) {
 							try {
 								messageToSend = mutationCommands[k];
