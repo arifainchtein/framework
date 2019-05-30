@@ -113,7 +113,21 @@ class MappedBusThread extends Thread{
 		// Third it get AsyncData
 		//
 		//
-
+		ArrayList<String> mutationCommands;
+		
+		JSONArray mcuEvents;
+		Vector telepathons;
+		JSONObject eventJSONObject, telepathon, mcuEventsJSONObject;
+		String eventDataStructure;
+		int adjustedIndex;
+		DateTimeFormatter timeStampformatter = DateTimeFormatter.ofPattern(TeleonomeConstants.MNEMOSYNE_TIMESTAMP_FORMAT);
+		LocalDateTime currentTime = LocalDateTime.now();
+		currentTime.format(timeStampformatter);
+		DateTimeFormatter timeformatter = DateTimeFormatter.ofPattern(TeleonomeConstants.MNEMOSYNE_TIME_FORMAT);
+		currentTime.format(timeformatter);
+		String eventListPointer;
+		JSONObject microControllerDene;
+		Object o;
 		stop:
 			while(keepRunning){
 
@@ -131,22 +145,28 @@ class MappedBusThread extends Thread{
 					break stop;
 				}
 
-				String[] mutationCommands= {"FaultData","TimerStatus", "UserCommands"};
 
-				JSONArray mcuEvents;
-				Vector telepathons;
-				JSONObject eventJSONObject, telepathon, mcuEventsJSONObject;
-				String eventDataStructure;
-				int adjustedIndex;
-				DateTimeFormatter timeStampformatter = DateTimeFormatter.ofPattern(TeleonomeConstants.MNEMOSYNE_TIMESTAMP_FORMAT);
-				LocalDateTime currentTime = LocalDateTime.now();
-				currentTime.format(timeStampformatter);
-				DateTimeFormatter timeformatter = DateTimeFormatter.ofPattern(TeleonomeConstants.MNEMOSYNE_TIME_FORMAT);
-				currentTime.format(timeformatter);
-				String eventListPointer;
+				
 				for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
 					microControllerPointer = (String)en.nextElement();
 					aMicroController = (MicroController)hypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
+					mutationCommands = new ArrayList();
+					
+					try {
+						microControllerDene = hypothalamus.aDenomeManager.getDeneByIdentity(new Identity(microControllerPointer));
+						o = hypothalamus.aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(microControllerDene, "Has FaultData", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						if(o !=null && o instanceof Boolean && ((Boolean)o))mutationCommands.add("FaultData");
+						
+						o = hypothalamus.aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(microControllerDene, "Has TimerStatus", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						if(o !=null && o instanceof Boolean && ((Boolean)o))mutationCommands.add("TimerStatus");
+						
+						o = hypothalamus.aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(microControllerDene, "Has UserCommands", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						if(o !=null && o instanceof Boolean && ((Boolean)o))mutationCommands.add("UserCommands");
+					
+					} catch (InvalidDenomeException e3) {
+						// TODO Auto-generated catch block
+						logger.warn(Utils.getStringException(e3));
+					}
 					//
 					// Process Events
 					//
@@ -239,9 +259,9 @@ class MappedBusThread extends Thread{
 						// now do the mutation commands
 						//
 					logger.debug("starting the mutation commands" );
-						for(int k=0;k<mutationCommands.length;k++) {
+						for(int k=0;k<mutationCommands.size();k++) {
 							try {
-								messageToSend = mutationCommands[k];
+								messageToSend = mutationCommands.get(k);
 								output = aMicroController.getWriter();
 								logger.debug("requesting " + messageToSend);
 								output.write(messageToSend,0,messageToSend.length());
