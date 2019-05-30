@@ -110,6 +110,8 @@ public class PulseThread extends Thread{
 						do{
 							
 							inputLine = input.readLine();
+							logger.info("inputLine=" + inputLine);
+							
 							if(inputLine.length()>5 && !inputLine.startsWith("Ok")&& !inputLine.startsWith("Failure")) {
 								logger.info("GetLifeCycleData received inputLine=" + inputLine);
 								tokens = inputLine.split("#");
