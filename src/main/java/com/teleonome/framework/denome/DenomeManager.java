@@ -7211,7 +7211,7 @@ public class DenomeManager {
 			JSONObject evaluationDeneJSONObject = getDeneByIdentity( new Identity(deneWordOperationPointer));
 			if(evaluationDeneJSONObject.has(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE)) {
 				String deneType = evaluationDeneJSONObject.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
-				logger.info("evaluateDeneWordOperation, deneType=" + deneType );
+				logger.info("evaluateDeneWordOperation, deneType=" + deneType	 );
 				if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_EVALUATION)) {
 					return evaluateExpressionDeneWordOperation( deneWordOperationPointer);
 				}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_DATA_TRANSFORMATION)) {
@@ -7244,9 +7244,9 @@ public class DenomeManager {
 
 		public  boolean secondsToFractionalTime(String dataTransformationValuePointer,String destinationPointer) { 
 			boolean toReturn=false;
-			long seconds;
+			int seconds;
 			try {
-				seconds = (long)this.getDeneWordAttributeByIdentity(new Identity(dataTransformationValuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				seconds = (int)this.getDeneWordAttributeByIdentity(new Identity(dataTransformationValuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 				double fractionalTime =  Utils.getTimeFractionalHourMinutesFromSeconds( seconds);
 				JSONObject destinationJSONObject = this.getDeneWordByIdentity(new Identity(destinationPointer));
 				logger.info("line 7250 secondsToFractionalTime destinationPointer=" + destinationPointer + " seconds=" + seconds + " fractionalTime=" + fractionalTime);
