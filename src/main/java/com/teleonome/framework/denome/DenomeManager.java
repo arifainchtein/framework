@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -7210,6 +7212,8 @@ public class DenomeManager {
 				String deneType = evaluationDeneJSONObject.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
 				if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_EVALUATION)) {
 					return evaluateExpressionDeneWordOperation( deneWordOperationPointer);
+				}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_DATA_TRANSFORMATION)) {
+					return dataTransformationDeneWordOperation( deneWordOperationPointer);
 				}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_SWITCH)) {
 					return evaluateSwitchDeneWordOperation(deneWordOperationPointer);
 				}else if(deneType.equals("Action")) {
@@ -7236,8 +7240,69 @@ public class DenomeManager {
 		return toReturn;
 	}
 
+		public  boolean secondsToFractionalTime(String dataTransformationValuePointer,String destinationPointer) { 
+			boolean toReturn=false;
+			long seconds;
+			try {
+				seconds = (long)this.getDeneWordAttributeByIdentity(new Identity(dataTransformationValuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				double fractionalTime =  Utils.getTimeFractionalHourMinutesFromSeconds( seconds);
+				JSONObject destinationJSONObject = this.getDeneWordByIdentity(new Identity(destinationPointer));
+				logger.info("line 7250 secondsToFractionalTime destinationPointer=" + destinationPointer + " seconds=" + seconds + " fractionalTime=" + fractionalTime);
+				destinationJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, fractionalTime); 
+				toReturn=true;
+			} catch (InvalidDenomeException | JSONException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+			return toReturn;
+		} 
+	
+	public boolean dataTransformationDeneWordOperation(String deneWordOperationPointer){
+		boolean toReturn=false;
+		try {
+			logger.info("Data Transformation Deneword operation,deneWordOperationPointer=" + deneWordOperationPointer);
+
+			JSONObject dataTransformationParametersJSONObject = getDeneByIdentity( new Identity(deneWordOperationPointer));
+			//***************
+			boolean active = (Boolean)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dataTransformationParametersJSONObject,"Active",TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			if(!active)return toReturn;
+			String transformationFunction =  (String) getDeneWordAttributeByDeneWordTypeFromDene(dataTransformationParametersJSONObject,TeleonomeConstants.DENEWORD_TYPE_TRANSFORMATION_FUNCTION,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			String dataTransformationValuePointer =  (String) getDeneWordAttributeByDeneWordTypeFromDene(dataTransformationParametersJSONObject,TeleonomeConstants.DENEWORD_TYPE_OPERATION_VARIABLE,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			String destinationPointer =  (String) getDeneWordAttributeByDeneWordTypeFromDene(dataTransformationParametersJSONObject,TeleonomeConstants.DENEWORD_TYPE_OPERATION_DESTINATION,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			Object[] parameters =  {dataTransformationValuePointer,destinationPointer};
+			Method transformationMethod = getClass().getMethod(transformationFunction,String.class, String.class);
+			logger.debug("transformationMethod=" + transformationMethod);
+
+			Object result = transformationMethod.invoke(this,parameters);
+			if(result instanceof Boolean && (Boolean)result) {
+				toReturn=true;
+			}
+			//****************
+		} catch (InvalidDenomeException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}
+		logger.info("Evaluate Deneword operation,returning " + toReturn );
 
 
+
+		return toReturn;
+	}
 	/**
 	 * 
 	 *  this method evaluates a deneword operation, this means that the actuator commmand code

@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -596,6 +598,24 @@ public class Utils {
 		return time;  
 	} 
 
+	public static double getTimeFractionalHourMinutesFromSeconds1(long seconds) { 
+		
+		double time =  (seconds - (seconds % 3600))/3600 +  ((seconds % 3600) / 60)/100 ;  
+		return time;  
+	} 
+
+	public static double getTimeFractionalHourMinutesFromSeconds(long seconds) { 
+		
+		double minutes =  ((seconds % 3600) / 60); 
+		int hours =(int) (seconds - (seconds % 3600))/3600;
+		//int hours = seconds / 3600;  
+		double time =  hours +  minutes/100 ;  
+		BigDecimal bd = new BigDecimal(time).setScale(2, RoundingMode.HALF_UP);
+        double newInput = bd.doubleValue();
+		return newInput;  
+	} 
+
+	
 	public static String getElapsedTimeHoursMinutesSecondsString(long e) {       
 		String format = String.format("%%0%dd", 2);  
 		long elapsedTime = e / 1000;  

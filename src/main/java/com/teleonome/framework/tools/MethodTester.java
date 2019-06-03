@@ -99,11 +99,12 @@ public class MethodTester implements SftpProgressMonitor{
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-		
-		createTunnel();
-		String localDestinationFilename = "/Users/arifainchtein/Downloads/mydownload.sql";
-		String remoteSourceFileName="/home/arifainchtein/db_backups/casete_backup.sql";
-		downloadFile( remoteSourceFileName, localDestinationFilename) ;
+		double time = Utils.getTimeFractionalHourMinutesFromSeconds(8253);
+		System.out.println(time);
+//		createTunnel();
+//		String localDestinationFilename = "/Users/arifainchtein/Downloads/mydownload.sql";
+//		String remoteSourceFileName="/home/arifainchtein/db_backups/casete_backup.sql";
+//		downloadFile( remoteSourceFileName, localDestinationFilename) ;
 	}
 
 	private String publishingResults="";

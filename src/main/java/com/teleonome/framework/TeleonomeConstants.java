@@ -58,7 +58,7 @@ public class TeleonomeConstants {
 	//
 	public static final String DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_EVALUATION = "Expression Evaluation";
 	public static final String DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_SWITCH = "Expression Switch";
-	
+	public static final String DENE_TYPE_DENEWORD_OPERATION_DATA_TRANSFORMATION = "Data Transformation";
 	//
 	// the types of microcontrolers
 	//
@@ -467,6 +467,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_ON_START_ACTION_LIST= "On Start Action List";
 	public static final String DENEWORD_TYPE_OPERATION_VARIABLE= "DeneWord Operation Variable";
 	public static final String DENEWORD_TYPE_OPERATION_DESTINATION= "DeneWord Operation Destination";
+	public static final String DENEWORD_TYPE_TRANSFORMATION_FUNCTION= "Transformation Function";
 	public static final String DENEWORD_MOTHER_MICROCONTROLER="Mother Microcontroller";
 	public static final String DENEWORD_ACTION_EXECUTION_POINT= "Execution Point";
 	public static final String DENEWORD_ACTION_EXECUTION_POINT_IMMEDIATE= "Execution Point Immediate";
