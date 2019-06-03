@@ -55,6 +55,7 @@ public class PiFourValuesFourDigitDisplaysWriter extends BufferedWriter {
 					//
 					// check if the pointer is in external data,if so, check t see if the data is stale
 					//
+					logger.debug("clockPin=" + clockPin + " dataPin=" + dataPin + " valuePointer=" + valuePointer + " isext=" + valuePointer.contains(TeleonomeConstants.DENECHAIN_EXTERNAL_DATA));;
 					if(valuePointer.contains(TeleonomeConstants.DENECHAIN_EXTERNAL_DATA)) {
 						if(aDenomeManager.isExternalDataOk(valuePointer)) {
 							Object o=  aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
