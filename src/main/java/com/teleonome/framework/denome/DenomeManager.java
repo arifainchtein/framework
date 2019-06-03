@@ -7207,9 +7207,11 @@ public class DenomeManager {
 		boolean toReturn=false;
 
 		try {
+			logger.info("evaluateDeneWordOperation=" + deneWordOperationPointer );
 			JSONObject evaluationDeneJSONObject = getDeneByIdentity( new Identity(deneWordOperationPointer));
 			if(evaluationDeneJSONObject.has(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE)) {
 				String deneType = evaluationDeneJSONObject.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
+				logger.info("evaluateDeneWordOperation, deneType=" + deneType );
 				if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_EVALUATION)) {
 					return evaluateExpressionDeneWordOperation( deneWordOperationPointer);
 				}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_DATA_TRANSFORMATION)) {
