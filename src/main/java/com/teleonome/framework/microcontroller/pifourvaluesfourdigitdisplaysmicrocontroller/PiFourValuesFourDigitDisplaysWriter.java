@@ -55,10 +55,11 @@ public class PiFourValuesFourDigitDisplaysWriter extends BufferedWriter {
 					//
 					// check if the pointer is in external data,if so, check t see if the data is stale
 					//
+					Object o;
 					logger.debug("clockPin=" + clockPin + " dataPin=" + dataPin + " valuePointer=" + valuePointer + " isext=" + valuePointer.contains(TeleonomeConstants.DENECHAIN_EXTERNAL_DATA));;
 					if(valuePointer.contains(TeleonomeConstants.DENECHAIN_EXTERNAL_DATA)) {
 						if(aDenomeManager.isExternalDataOk(valuePointer)) {
-							Object o=  aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							o=  aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							if(o instanceof Double) {
 								value=(double)o;
 							}else if(o instanceof Integer) {
@@ -71,8 +72,14 @@ public class PiFourValuesFourDigitDisplaysWriter extends BufferedWriter {
 						}
 						
 					}else {
-						value = (double) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						
+						o=  aDenomeManager.getDeneWordAttributeByIdentity(new Identity(valuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						if(o instanceof Double) {
+							value=(double)o;
+						}else if(o instanceof Integer) {
+							value=((Integer)o).doubleValue();
+						}else {
+							value=9999;
+						}
 					}
 					
 					command = "python single.py " + clockPin + " " + dataPin + " " + value;

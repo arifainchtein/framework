@@ -191,6 +191,8 @@ public class TeleonomeConstants {
 	//
 	public static final String DENECHAIN_OPERONS = "Operons";
 	public static final String DENECHAIN_ACTUATORS = "Actuators";
+	public static final String DENECHAIN_ANALYSIS = "Analysis";
+	
 	public static final String DENECHAIN_SENSORS = "Sensors";	
 	public static final String DENECHAIN_TELEPATHONS = "Telepathons";    
 	public static final String DENECHAIN_DESCRIPTIVE = "Descriptive";
