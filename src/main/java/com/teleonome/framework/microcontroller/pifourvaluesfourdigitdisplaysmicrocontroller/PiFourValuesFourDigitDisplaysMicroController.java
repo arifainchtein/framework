@@ -94,10 +94,12 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 	@Override
 	public void processLifeCycleEvent(String lifeCycleEvent) {
 		// TODO Auto-generated method stub
-		logger.debug("processing life cycle even=t=" + lifeCycleEvent);
+		logger.debug("1-processing life cycle even=t=" + lifeCycleEvent);
 		if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE)) {
 			//String command = "neouart -i 00ff0000 00ff0000";
 			synchronousCyclePin.toggle();
+			logger.debug("2-synchronousCyclePin.isHigh=" + synchronousCyclePin.isHigh());
+			
 			//ledColorSet(0x00FF00);
 //			try {
 //				ArrayList<String> results  = Utils.executeCommand(command);
@@ -120,6 +122,8 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 //			}
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE)) {
 			aSynchronousCyclePin.toggle();
+			logger.debug("3-aSynchronousCyclePin.isHigh=" + aSynchronousCyclePin.isHigh());
+			
 //			String command = "neouart -i 0000ff00 0000ff00";
 //			try {
 //				ArrayList<String> results  = Utils.executeCommand(command);
@@ -128,7 +132,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 //				// TODO Auto-generated catch block
 //				logger.warn(Utils.getStringException(e));
 //			}
-			ledColorSet(0x000FF);
+			//ledColorSet(0x000FF);
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE)) {
 			aSynchronousCyclePin.toggle();
 //			String command = "neouart -i 00ff0000 00ff0000";
