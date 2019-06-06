@@ -33,7 +33,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 //	 private static int colors[] = {  0x00FF00, 0x0000FF };
 
 	 final GpioController gpio = GpioFactory.getInstance();
-	 final GpioPinDigitalOutput heartBeatPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_04,PinState.HIGH);
+	 final GpioPinDigitalOutput heartBeatPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_07,PinState.HIGH);
 	 
 	 final GpioPinDigitalOutput synchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_00,PinState.LOW);
 	 final GpioPinDigitalOutput aSynchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, PinState.LOW);
