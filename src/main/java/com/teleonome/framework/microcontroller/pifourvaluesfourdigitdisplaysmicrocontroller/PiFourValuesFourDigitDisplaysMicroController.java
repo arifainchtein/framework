@@ -27,14 +27,16 @@ import com.teleonome.framework.microcontroller.sftppublisher.SFTPPublisherWriter
 import com.teleonome.framework.utils.Utils;
 
 public class PiFourValuesFourDigitDisplaysMicroController  extends MicroController implements LifeCycleEventListener{
-	private static int PIN_NUMBER_RED = 4;
-	private static int PIN_NUMBER_GREEN = 17;
-	private static int PIN_NUMBER_BLUE = 18;
-	 private static int colors[] = {  0x00FF00, 0x0000FF };
+//	private static int PIN_NUMBER_RED = 4;
+//	private static int PIN_NUMBER_GREEN = 17;
+//	private static int PIN_NUMBER_BLUE = 18;
+//	 private static int colors[] = {  0x00FF00, 0x0000FF };
 
 	 final GpioController gpio = GpioFactory.getInstance();
-	 final GpioPinDigitalOutput synchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_17,PinState.LOW);
-	 final GpioPinDigitalOutput aSynchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_18, PinState.LOW);
+	 final GpioPinDigitalOutput heartBeatPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_04,PinState.HIGH);
+	 
+	 final GpioPinDigitalOutput synchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_17,PinState.HIGH);
+	 final GpioPinDigitalOutput aSynchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_18, PinState.HIGH);
 	    
 	PiFourValuesFourDigitDisplaysWriter aPiFourValuesFourDigitDisplaysWriter;
 	PiFourValuesFourDigitDisplaysReader aPiFourValuesFourDigitDisplaysReader;
