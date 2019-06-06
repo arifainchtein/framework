@@ -112,7 +112,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE)) {
 			//synchronousCyclePin.toggle();
-			synchronousCyclePin.setState(false);
+			synchronousCyclePin.setState(true);
 			//ledColorSet(0x00FF00);
 //			String command = "neouart -i 0000ff00 0000ff00";
 //			try {
@@ -125,7 +125,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE)) {
 			//aSynchronousCyclePin.toggle();
 			aSynchronousCyclePin.setState(true);
-			logger.debug("3a-aSynchronousCyclePin.isHigh=" + aSynchronousCyclePin.isHigh());
+			logger.debug("3b-aSynchronousCyclePin.isHigh=" + aSynchronousCyclePin.isHigh());
 			
 //			String command = "neouart -i 0000ff00 0000ff00";
 //			try {
@@ -138,7 +138,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 			//ledColorSet(0x000FF);
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE)) {
 			//aSynchronousCyclePin.toggle();
-			aSynchronousCyclePin.setState(false);
+			aSynchronousCyclePin.setState(true);
 //			String command = "neouart -i 00ff0000 00ff0000";
 //			try {
 //				ArrayList<String> results  = Utils.executeCommand(command);
