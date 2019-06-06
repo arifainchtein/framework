@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.wiringpi.Gpio;
 import com.pi4j.wiringpi.SoftPwm;
@@ -32,8 +33,8 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 	 private static int colors[] = {  0x00FF00, 0x0000FF };
 
 	 final GpioController gpio = GpioFactory.getInstance();
-	 final GpioPinDigitalOutput synchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_17);
-	 final GpioPinDigitalOutput aSynchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_18);
+	 final GpioPinDigitalOutput synchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_17,PinState.LOW);
+	 final GpioPinDigitalOutput aSynchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_18, PinState.LOW);
 	    
 	PiFourValuesFourDigitDisplaysWriter aPiFourValuesFourDigitDisplaysWriter;
 	PiFourValuesFourDigitDisplaysReader aPiFourValuesFourDigitDisplaysReader;
@@ -97,7 +98,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 		logger.debug("1-processing life cycle even=t=" + lifeCycleEvent);
 		if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE)) {
 			//String command = "neouart -i 00ff0000 00ff0000";
-			synchronousCyclePin.toggle();
+			synchronousCyclePin.setState(true);
 			logger.debug("2-synchronousCyclePin.isHigh=" + synchronousCyclePin.isHigh());
 			
 			//ledColorSet(0x00FF00);
@@ -110,7 +111,8 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 //			}
 
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE)) {
-			synchronousCyclePin.toggle();
+			//synchronousCyclePin.toggle();
+			synchronousCyclePin.setState(false);
 			//ledColorSet(0x00FF00);
 //			String command = "neouart -i 0000ff00 0000ff00";
 //			try {
@@ -121,8 +123,9 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 //				logger.warn(Utils.getStringException(e));
 //			}
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE)) {
-			aSynchronousCyclePin.toggle();
-			logger.debug("3-aSynchronousCyclePin.isHigh=" + aSynchronousCyclePin.isHigh());
+			//aSynchronousCyclePin.toggle();
+			aSynchronousCyclePin.setState(true);
+			logger.debug("3a-aSynchronousCyclePin.isHigh=" + aSynchronousCyclePin.isHigh());
 			
 //			String command = "neouart -i 0000ff00 0000ff00";
 //			try {
@@ -134,7 +137,8 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 //			}
 			//ledColorSet(0x000FF);
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE)) {
-			aSynchronousCyclePin.toggle();
+			//aSynchronousCyclePin.toggle();
+			aSynchronousCyclePin.setState(false);
 //			String command = "neouart -i 00ff0000 00ff0000";
 //			try {
 //				ArrayList<String> results  = Utils.executeCommand(command);
