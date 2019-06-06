@@ -101,6 +101,7 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 		if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE)) {
 			//String command = "neouart -i 00ff0000 00ff0000";
 			synchronousCyclePin.high();
+			
 			logger.debug("2-synchronousCyclePin.isHigh=" + synchronousCyclePin.isHigh());
 			
 			//ledColorSet(0x00FF00);
