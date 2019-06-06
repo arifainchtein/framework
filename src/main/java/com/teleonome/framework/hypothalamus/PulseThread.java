@@ -1000,7 +1000,6 @@ public class PulseThread extends Thread{
 				}while(!inputLine.equals("Ok-PulseFinished"));
 
 
-				aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE, System.currentTimeMillis(), TeleonomeConstants.LIFE_CYCLE_EVENT_SYNCHRONOUS_VALUE);
 				if(motherInputStream!=null) {
 					logger.info("about to close motherInputStream,="+ motherInputStream);	
 					motherInputStream.close();
@@ -1012,6 +1011,8 @@ public class PulseThread extends Thread{
 				}
 			}
 
+			aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE, System.currentTimeMillis(), TeleonomeConstants.LIFE_CYCLE_EVENT_SYNCHRONOUS_VALUE);
+			
 			logger.info("starting mappbus thread, pulse is going to sleep for " + anHypothalamus.currentPulseInMilliSeconds);  
 
 			anHypothalamus.aMappedBusThread= new MappedBusThread(anHypothalamus);
