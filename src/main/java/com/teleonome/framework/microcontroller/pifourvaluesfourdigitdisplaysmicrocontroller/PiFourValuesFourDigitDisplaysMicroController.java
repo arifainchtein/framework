@@ -35,8 +35,8 @@ public class PiFourValuesFourDigitDisplaysMicroController  extends MicroControll
 	 final GpioController gpio = GpioFactory.getInstance();
 	 final GpioPinDigitalOutput heartBeatPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_04,PinState.HIGH);
 	 
-	 final GpioPinDigitalOutput synchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_17,PinState.HIGH);
-	 final GpioPinDigitalOutput aSynchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_18, PinState.HIGH);
+	 final GpioPinDigitalOutput synchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_00,PinState.HIGH);
+	 final GpioPinDigitalOutput aSynchronousCyclePin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, PinState.HIGH);
 	    
 	PiFourValuesFourDigitDisplaysWriter aPiFourValuesFourDigitDisplaysWriter;
 	PiFourValuesFourDigitDisplaysReader aPiFourValuesFourDigitDisplaysReader;
