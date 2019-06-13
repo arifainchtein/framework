@@ -771,8 +771,14 @@ public class TeleonomeConstants {
 	public static final String TIME_UNIT_WEEK="Week";
 	public static final String TIME_UNIT_MONTH="Month";
 	public static final String TIME_UNIT_YEAR="Year";
-	public static final String PULSE_TABLE="Pulse";
-	public static final String ORGANISMPULSE_TABLE="OrganismPulse";
+	public static final String PULSE_TABLE="pulse";
+	public static final String ORGANISMPULSE_TABLE="organismpulse";
+	
+	public static final String MOTHER_REMEMBERED_VALUES_TABLE="motherrememberedvalues";
+	public static final String REMEMBERED_DENEWORDS_TABLE="remembereddenewords";
+	public static final String MUTATION_EVENT_TABLE="MutationEvent";
+	public static final String COMMAND_REQUESTS_TABLE="CommandRequests";
+	
 	public static final String MNEMOSYCON_RULE_TEAM_PARAMETER="Team Parameter";
 	public static final String MNEMOSYCON_TEAM_MEMBER="Mnemosycon Team Member";
 	public static final String DENE_MNEMOSYCON_TEAM_DEFINITION="Mnemosycon Team Definition";
