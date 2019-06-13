@@ -1615,7 +1615,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(timestampInMills);
-		String tableName = getTableNameByCalendar("Pulse",  cal);
+		String tableName = getTableNameByCalendar(TeleonomeConstants.PULSE_TABLE,  cal);
 		
 		String sql="";
 		Connection connection=null;
