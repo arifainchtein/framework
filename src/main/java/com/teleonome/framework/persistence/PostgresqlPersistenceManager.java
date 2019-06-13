@@ -1561,6 +1561,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		//
 		// Create
 		String sql="SELECT EXISTS (SELECT 1 FROM   information_schema.tables WHERE  table_schema = 'public'  AND    table_name = '"+tableName+"');";
+		logger.debug("tableExists sql=" + sql );
 		Connection connection=null;
 		Statement statement=null;
 		ResultSet rs=null;
@@ -1572,6 +1573,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			JSONObject data=null;
 			while(rs.next()){
 				toReturn=rs.getBoolean(1);
+				logger.debug("tableExists toReturn=" + toReturn );
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
