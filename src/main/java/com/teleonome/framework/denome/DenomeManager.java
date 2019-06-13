@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
@@ -5370,6 +5371,65 @@ public class DenomeManager {
 		}
 	}
 	
+
+		
+	public boolean storeExtenderdOperationEvent(String eventType, long eventTimeMillis, int value,String operonType, String operationName, int currentStep, int totalSteps ) {
+		File extendedOperonFile =  new File(Utils.getLocalDirectory() + TeleonomeConstants.EXTENDED_OPERON_EXECUTION_PROGRESS_FILE_NAME);
+				
+		if(eventType.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_EXTENDED_OPERON_EXECUTION)) {
+			try{
+				JSONObject extendedOperonFileJSNObject = new JSONObject();
+				JSONArray progressJSONrray = new JSONArray();
+				extendedOperonFileJSNObject.put("Operon Type", value);
+				FileUtils.deleteQuietly(extendedOperonFile);
+				extendedOperonFileJSNObject.put(TeleonomeConstants.EXTENDED_OPERON_EXECUTION_OPERON_TYPE, operonType);
+				extendedOperonFileJSNObject.put(TeleonomeConstants.EXTENDED_OPERON_EXECUTION_OPERON_NAME, operationName);
+				extendedOperonFileJSNObject.put(TeleonomeConstants.EXTENDED_OPERON_EXECUTION_START_TIME, System.currentTimeMillis());
+				extendedOperonFileJSNObject.put(TeleonomeConstants.EXTENDED_OPERON_EXECUTION_PROGRESS, progressJSONrray);
+
+				FileUtils.write(extendedOperonFile, extendedOperonFileJSNObject.toString());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+		}
+
+		if(eventType.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_UPDATE_EXTENDED_OPERON_EXECUTION)) {
+			String stringFile;
+			try {
+				stringFile = FileUtils.readFileToString(extendedOperonFile, Charset.defaultCharset());
+				JSONObject extendedOperonFileJSNObject = new JSONObject(stringFile);
+				JSONArray progressJSONrray = extendedOperonFileJSNObject.getJSONArray(TeleonomeConstants.EXTENDED_OPERON_EXECUTION_PROGRESS);
+				JSONObject progressJSONObject = new JSONObject();
+				progressJSONObject.put(TeleonomeConstants.EXTENDED_OPERON_PROGRESS_TIME, System.currentTimeMillis());
+				progressJSONObject.put(TeleonomeConstants.EXTENDED_OPERON_PROGRESS_CURRENT_STEP, currentStep);
+				progressJSONObject.put(TeleonomeConstants.EXTENDED_OPERON_PROGRESS_TOTAL_STEPS, totalSteps);
+				progressJSONrray.put(progressJSONObject);
+				FileUtils.write(extendedOperonFile, extendedOperonFileJSNObject.toString());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+
+
+		}
+
+
+		if(eventType.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_EXTENDED_OPERON_EXECUTION)) {
+			try {
+				String stringFile = FileUtils.readFileToString(extendedOperonFile, Charset.defaultCharset());
+				JSONObject extendedOperonFileJSNObject = new JSONObject(stringFile);
+				extendedOperonFileJSNObject.put(TeleonomeConstants.EXTENDED_OPERON_EXECUTION_END_TIME, System.currentTimeMillis());
+				FileUtils.write(extendedOperonFile, extendedOperonFileJSNObject.toString());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+		}
+
+		return storeLifeCycleEvent(eventType,eventTimeMillis, value);
+	}
+
 	public boolean storeLifeCycleEvent(String eventType, long eventTimeMillis, int value) {
 		//
 		// loop over all the microcontrollers that need to be notified

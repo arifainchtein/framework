@@ -838,6 +838,12 @@ public abstract class Hypothalamus {
 							
 						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_IP_ADDRESS_FOR_LCD)){
 							actuatorCommand="IPAddr#" + primaryIpAddress;
+						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_CREATE_DAILY_PARTITIONS)){
+							actuatorCommand="IPAddr#" + primaryIpAddress;
+							Calendar cal = Calendar.getInstance();
+							cal.add(Calendar.DATE, 1);
+							logger.debug("Creating table partion for " + cal.get(Calendar.YEAR) + "/"+ cal.get(Calendar.MONTH)+ "/"+ cal.get(Calendar.DATE));
+							aDBManager.createDailyPartitions(cal);
 						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_DO_NOTHING)){
 							actuatorCommand=TeleonomeConstants.COMMANDS_DO_NOTHING;
 						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_SET_MICROCONTROLLER_RTC)){

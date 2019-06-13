@@ -828,7 +828,32 @@ public class MnemosyneManager {
 				logger.debug("mnemosyconRuleSource=" + mnemosyconRuleSource + " mnemosyconRuleLocation=" + mnemosyconRuleLocation);
 				if(mnemosyconRuleSource.equals(TeleonomeConstants.MNEMOSYCON_DATA_SOURCE_DATABASE)) {
 					if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_PULSE)) {
-						rowsDeleted = aDBManager.deleteByPeriodFromPulse(millisToDeleteFrom);
+						//
+						// break the delete into pieces so as to be able to monitor it
+						// first get the oldest pulse
+						long oldestPulseMillis = aDBManager.getOldestPulseMillis();
+						//
+						// calculate how long is the period to delete 
+						long milliSecondsToSpan = millisToDeleteFrom - oldestPulseMillis;
+						//
+						// divide it by ten to create ten iteration
+						//
+						long iterationSize= milliSecondsToSpan/10;
+						//
+						// now iterate over every period and update the extended task file
+						// delete from the oldest first
+						//
+						long currentDeleteFrom;
+						aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_START_EXTENDED_OPERON_EXECUTION,System.currentTimeMillis(), TeleonomeConstants.LIFE_CYCLE_EVENT_SYNCHRONOUS_VALUE);
+
+						
+						for(int i=9;i>-1;i--) {
+							currentDeleteFrom = oldestPulseMillis +  (i*iterationSize);
+							rowsDeleted = aDBManager.deleteByPeriodFromPulse(millisToDeleteFrom);
+							aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_UPDATE_EXTENDED_OPERON_EXECUTION,System.currentTimeMillis(), TeleonomeConstants.LIFE_CYCLE_EVENT_SYNCHRONOUS_VALUE);
+						}
+						aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_END_EXTENDED_OPERON_EXECUTION,System.currentTimeMillis(), TeleonomeConstants.LIFE_CYCLE_EVENT_SYNCHRONOUS_VALUE);
+
 					}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_REMEMBERED_DENEWORDS)) {
 						mnemosyconRuleDatabaseFieldJSON = (JSONObject) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_DATABASE_FIELD, TeleonomeConstants.COMPLETE);
 						//

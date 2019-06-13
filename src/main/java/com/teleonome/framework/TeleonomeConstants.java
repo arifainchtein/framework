@@ -238,6 +238,7 @@ public class TeleonomeConstants {
 	//
 	// the command embedded as values
 	//
+	public static final String COMMANDS_CREATE_DAILY_PARTITIONS="$CreateDailyPartitions";
 	public static final String COMMANDS_ELAPSED_TIME_STRING = "$ElapsedTimeString";
 	public static final String COMMANDS_PUBLISH_TELEONOME_PULSE="$Teleonome_Pulse";
 	public static final String COMMANDS_CURRENT_HOUR = "$Current_Hour";
@@ -1049,6 +1050,19 @@ public class TeleonomeConstants {
 	//
 	// life cycle events
 	//
+	public static final String EXTENDED_OPERON_EXECUTION_OPERON_TYPE="Extended Operon Execution Operon Type";
+	public static final String EXTENDED_OPERON_EXECUTION_OPERON_NAME="Extended Operon Execution Name";
+	public static final String EXTENDED_OPERON_EXECUTION_START_TIME="Extended Operon Execution Start Time";
+	public static final String EXTENDED_OPERON_PROGRESS_TIME="Extended Operon Progress Time";
+	public static final String EXTENDED_OPERON_PROGRESS_CURRENT_STEP="Extended Operon Progress Current Step";
+	public static final String EXTENDED_OPERON_PROGRESS_TOTAL_STEPS="Extended Operon Progress Total Steps";
+	public static final String EXTENDED_OPERON_EXECUTION_END_TIME="Extended Operon Execution End Time";
+	public static final String EXTENDED_OPERON_EXECUTION_PROGRESS_FILE_NAME = "Extended Operon Execution Progress File Name";
+	public static final String LIFE_CYCLE_EVENT_START_EXTENDED_OPERON_EXECUTION="Start Extended Operon Execution";
+	public static final String LIFE_CYCLE_EVENT_END_EXTENDED_OPERON_EXECUTION="End Extended Operon Execution";
+	public static final String LIFE_CYCLE_EVENT_UPDATE_EXTENDED_OPERON_EXECUTION="Update Extended Operon Execution";
+	public static final String  EXTENDED_OPERON_EXECUTION_PROGRESS="ExtendedOperonExecutionProgress.json";
+	
 	public static final String LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE="Start Synchronous Cycle";
 	public static final String LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE="End Synchronous Cycle";
 	public static final String LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE="Start Asynchronous Cycle";

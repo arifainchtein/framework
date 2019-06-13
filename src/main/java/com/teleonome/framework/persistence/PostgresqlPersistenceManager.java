@@ -175,6 +175,69 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 
 	}
+	/**
+	 * this method will create the partitions in the database
+	 * for all partitioned tables.  Currently, these are
+	 * the tables:
+	 * 	Pulse 
+		Organism Pulse 
+		Remembered DeneWords 
+		Command Requests 
+		Mutation Event 
+
+	 * @param cal it contains the valid year, month and date 
+	 *        note that the time fields are ignored
+	 * @return
+	 */
+	public boolean createDailyPartitions(Calendar cal) {
+		boolean toReturn=false;
+		int year = cal.get(Calendar.YEAR);
+		int month = cal.get(Calendar.MONTH) + 1;
+		int date = cal.get(Calendar.DATE);
+		//
+		// add one day for the end range
+		cal.add(Calendar.DATE, 1);
+		int nextYear = cal.get(Calendar.YEAR);
+		int nextMonth = cal.get(Calendar.MONTH) + 1;
+		int nextDate = cal.get(Calendar.DATE);
+		
+		String[] tableNames = {"Pulse","Organism Pulse","Remembered DeneWords","Command Requests","Mutation Event"};
+		String sql = "";
+		
+	    
+		Statement statement=null;
+		Connection connection=null;
+		ResultSet rs=null;
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			int value;
+			for(int i=0;i<tableNames.length;i++) {
+				sql = "CREATE TABLE "+tableNames[i]+"_"+year + "_"+ month + "_"+ date + " PARTITION OF "+tableNames[i]+" FOR VALUES FROM ('"+year +"-"+month +"_"+ date +"') TO ('"+nextYear +"-"+nextMonth +"_"+ nextDate +"')";
+				logger.debug("createDayPartitions, sql=" +sql);
+				value = statement.executeUpdate(sql);
+				logger.debug("createDayPartitions, value=" +value);
+			}
+
+			toReturn=true;
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		}finally{
+			try {
+				rs.close();
+				statement.close();
+				connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+
+		}
+		
+		return toReturn;
+	}
 
 	public JSONArray vacuum() {
 
@@ -2057,6 +2120,46 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		return lastPulseIndex;
 	}
 
+	public long getOldestPulseMillis(){
+		return getOldestRecordMillis(TeleonomeConstants.PULSE_TABLE, "pulsetimemillis");
+	}
+	
+	
+	public long getOldestRecordMillis(String tableName, String columnName){
+
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs =null;
+		long oldestPulseMillis = 0;
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			String sql = "select "+columnName +" from "+tableName + " order by createdOn asc limit 1";
+			logger.debug("getLastPulse, sql=" + sql);
+			rs = statement.executeQuery(sql);
+			while(rs.next()){
+				oldestPulseMillis = rs.getLong(1);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		}finally{
+			try {
+				rs.close();
+				statement.close();
+				connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+		}
+		logger.debug("getOldestPulseMillis, oldestPulseMillis=" + oldestPulseMillis);
+		return oldestPulseMillis;
+	}
+	
 	public JSONObject getLastPulse(String teleonomeName){
 
 		Connection connection = null;
