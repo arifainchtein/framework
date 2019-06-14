@@ -283,7 +283,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	private ArrayList<String> getAllTableNamesForManagedTable(String prefix) {
 		ArrayList<String> toReturn = new ArrayList();
 		ArrayList<AbstractMap.SimpleEntry<String,Date>> arrayList = new ArrayList();
-		String sql = "SELECT table_name FROM information_schema.tables  WHERE table_schema='public'  AND table_type='BASE TABLE' and table_name like " + prefix + "'_%'";
+		String sql = "SELECT table_name FROM information_schema.tables  WHERE table_schema='public'  AND table_type='BASE TABLE' and table_name like '" + prefix + "_%'";
 		logger.debug("getAllTableNamesForManagedTable,sql=" + sql);
 		Connection connection = null;
 		Statement statement = null;
