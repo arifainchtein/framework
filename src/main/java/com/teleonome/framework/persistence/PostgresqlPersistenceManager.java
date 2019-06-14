@@ -3462,7 +3462,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		try {
 			connection = connectionPool.getConnection();
 			for(int i=0;i<allTables.size();i++) {
-				command = "SELECT timemillis, value FROM "+allTables.get(i) + "  where identitystring=?  and timeMillis>=? and timeMillis<=? order by "+ direction + " limit 1";
+				command = "SELECT timemillis, value FROM "+allTables.get(i) + "  where identitystring=?  and timeMillis>=? and timeMillis<=? order by timeMillis "+ direction + " limit 1";
 				logger.info("getRemeberedDeneWordStatByPeriod command=" + command);
 				preparedStatement = connection.prepareStatement(command);
 				preparedStatement.setString(1, identityPointer);
