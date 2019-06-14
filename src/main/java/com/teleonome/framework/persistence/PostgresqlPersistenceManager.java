@@ -296,7 +296,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			String tableName;
 			while(rs.next()){
 				tableName = rs.getString(1);
-				tableDate = this.getDateForManagedTable(tableName);
+				tableDate = this.getDateForManagedTable(prefix, tableName);
 				arrayList.add(new AbstractMap.SimpleEntry<String,Date>(tableName, tableDate));
 				Collections.sort(arrayList, new Comparator<Map.Entry<?, Date>>(){
 					public int compare(Map.Entry<?, Date> o1, Map.Entry<?, Date> o2) {
@@ -367,10 +367,10 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	
 	
 	
-	private Date getDateForManagedTable(String dailyTableName) {
+	private Date getDateForManagedTable(String prefix, String dailyTableName) {
 		DateFormat df = new SimpleDateFormat("YYYY_MM_dd");
 		// dailyTableName would be something like OrganismPulse_YYYY_MM_dd
-		 String dateString = dailyTableName.substring(dailyTableName.length()+1);
+		 String dateString = dailyTableName.substring(prefix.length()+1);
 		 Date date=null;
 		try {
 			date = df.parse(dateString);
@@ -399,7 +399,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		 for(int i=0;i<allTables.size();i++) {
 			 //Pulse_ 
 			 dailyTableName = ((String)allTables.get(i));
-			 date = getDateForManagedTable(dailyTableName);
+			 date = getDateForManagedTable(tableName,dailyTableName);
 			 if(limitDate.after(date)) {
 				deleteResult = dropTable(dailyTableName);
 				if(deleteResult)deleteCounter++;
