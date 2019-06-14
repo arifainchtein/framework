@@ -324,10 +324,10 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		String tableName;
 		for (Map.Entry<String, Date> entry2 : arrayList) {
 			tableName = entry2.getKey();
-			logger.debug("getAllTableNamesForManagedTable returning table=" + tableName);
+			
 			toReturn.add(tableName);
 		}
-		
+		logger.debug("getAllTableNamesForManagedTable returning =" + toReturn);
 		return toReturn;
 	}
 	
@@ -1011,8 +1011,10 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			 //Pulse_ 
 			 dailyTableName = ((String)allTables.get(i));
 			 dateString = dailyTableName.substring(tableName.length() + 1);
+			 logger.debug("getAllManagedTablesForAPeriod, dateString=" + dateString + " dailyTableName " + dailyTableName);
 			 try {
 				date = df.parse(dateString);
+				 logger.debug("date=" + date + " startDate " + startDate + " endDate=" + endDate);
 				if(date.compareTo(startDate) >=0  && date.compareTo(endDate) <=0 ) {
 					toReturn.add(dailyTableName);
 					logger.debug("getAllManagedTablesForAPeriod, adding " + dailyTableName);
