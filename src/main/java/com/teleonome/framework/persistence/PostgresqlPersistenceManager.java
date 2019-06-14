@@ -1010,7 +1010,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		 for(int i=0;i<allTables.size();i++) {
 			 //Pulse_ 
 			 dailyTableName = ((String)allTables.get(i));
-			 dateString = dailyTableName.substring(6);
+			 dateString = dailyTableName.substring(tableName.length() + 1);
 			 try {
 				date = df.parse(dateString);
 				if(date.compareTo(startDate) >=0  && date.compareTo(endDate) <=0 ) {
@@ -1215,7 +1215,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		 for(int i=0;i<allTables.size();i++) {
 			 //Pulse_ 
 			 dailyTableName = ((String)allTables.get(i));
-			 dateString = dailyTableName.substring(6);
+			 dateString = dailyTableName.substring(tableName.length()+1);
 			 try {
 				date = df.parse(dateString);
 				logger.debug("getManagedTablesByRange, date=" + date);
