@@ -776,8 +776,8 @@ public class TeleonomeConstants {
 	
 	public static final String MOTHER_REMEMBERED_VALUES_TABLE="motherrememberedvalues";
 	public static final String REMEMBERED_DENEWORDS_TABLE="remembereddenewords";
-	public static final String MUTATION_EVENT_TABLE="MutationEvent";
-	public static final String COMMAND_REQUESTS_TABLE="CommandRequests";
+	public static final String MUTATION_EVENT_TABLE="mutationevent";
+	public static final String COMMAND_REQUESTS_TABLE="commandrequests";
 	
 	public static final String MNEMOSYCON_RULE_TEAM_PARAMETER="Team Parameter";
 	public static final String MNEMOSYCON_TEAM_MEMBER="Mnemosycon Team Member";

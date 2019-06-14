@@ -3804,6 +3804,11 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				statement = connection.createStatement();
 				int result = statement.executeUpdate(sql);
 				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
+				
+				
+				sql = "alter table " + tableName + " add CONSTRAINT pk_tbl_"+ tableName+" PRIMARY KEY (timeMillis,teleonomename, identitystring)";
+				 result = statement.executeUpdate(sql);
+				logger.debug("created primary key command executed, result=" + result);
 			}
 			
 			
