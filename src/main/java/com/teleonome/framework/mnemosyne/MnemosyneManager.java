@@ -155,7 +155,7 @@ public class MnemosyneManager {
 
 			
 			logger.debug("rstartTimeMillis:" + startTimeMillis + " endTimeMillis=" + endTimeMillis);
-			JSONArray values = aDBManager.getRemeberedDeneWordStatByPeriod( identityPointer,   startTimeMillis,   endTimeMillis,  kind);
+			JSONArray values11 = aDBManager.getRemeberedDeneWordStatByPeriod( identityPointer,   startTimeMillis,   endTimeMillis,  kind);
 			logger.debug("returning values:" + values.toString());
 			//
 			// Create the new dene
@@ -2462,11 +2462,11 @@ public class MnemosyneManager {
 	//
 	// end of Denome embedded functions
 	//
-	public ArrayList<Map.Entry<Object, Long>> getDeneWordByPeriodFromOrganismPulse(Identity identity, String startPulseTimestampString, String endPulseTimestampString) {
+	public ArrayList<Map.Entry<Object, Long>> getDeneWordByPeriodFromOrganismPulse(Identity identity, long startPulseMillis, long endPulseMillis) {
 		if(identity.getDeneWordName()==null || identity.getDeneWordName().equals("")){
 			return null;
 		}
-		ArrayList<Map.Entry<JSONObject, Long>> array = aDBManager.getPulseForRangeForOrganism(identity.getTeleonomeName(), startPulseTimestampString,  endPulseTimestampString);	
+		ArrayList<Map.Entry<JSONObject, Long>> array = aDBManager.getPulseForRangeForOrganism(identity.getTeleonomeName(), startPulseMillis,  endPulseMillis);	
 		JSONObject denomePulse;
 		long pulseTimestamp;
 		ArrayList<Map.Entry<Object, Long>> toReturn = new ArrayList();
