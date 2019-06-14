@@ -994,10 +994,20 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		ArrayList<String> toReturn = new ArrayList();
 		
 		String dailyTableName, dateString;
+		//
+		// because this is daily set the time to 00:00:00 for the start
+		// and 23:59:00 for the end
 		Calendar startCalendar = Calendar.getInstance();
 		startCalendar.setTimeInMillis(startTimeMillis);
+		startCalendar.set(Calendar.HOUR_OF_DAY, 0);
+		startCalendar.set(Calendar.MINUTE, 0);
+		startCalendar.set(Calendar.SECOND, 0);
+		
 		Calendar endCalendar = Calendar.getInstance();
 		endCalendar.setTimeInMillis(endTimeMillis);
+		endCalendar.set(Calendar.HOUR_OF_DAY, 23);
+		endCalendar.set(Calendar.MINUTE, 59);
+		endCalendar.set(Calendar.SECOND, 0);
 		
 		Date startDate = startCalendar.getTime();
 		Date endDate = endCalendar.getTime();
@@ -1006,21 +1016,27 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		
 		 boolean deleteResult=false;
 		 int deleteCounter=0;
+		 String[] tokens;
+		 Calendar aCal = Calendar.getInstance();
+		 
 		 for(int i=0;i<allTables.size();i++) {
 			 //Pulse_ 
 			 dailyTableName = ((String)allTables.get(i));
 			 dateString = dailyTableName.substring(tableName.length() + 1);
 			 logger.debug("getAllManagedTablesForAPeriod, dateString=" + dateString + " dailyTableName " + dailyTableName);
-			 try {
-				date = managedTableDateFormat.parse(dateString);
-				 logger.debug("date=" + date + " startDate " + startDate + " endDate=" + endDate);
-				if(date.compareTo(startDate) >=0  && date.compareTo(endDate) <=0 ) {
-					toReturn.add(dailyTableName);
-					logger.debug("getAllManagedTablesForAPeriod, adding " + dailyTableName);
-				}
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
+			 tokens=dateString.split("_");
+			 aCal.set(Calendar.YEAR, Integer.parseInt(tokens[0]));
+			 aCal.set(Calendar.MONTH, Integer.parseInt(tokens[1])-1);
+			 aCal.set(Calendar.DATE, Integer.parseInt(tokens[2]));
+			 //
+			// date=Mon Dec 31 00:00:00 AEDT 2018 startDate Fri Jun 14 14:02:09 AEST 2019 endDate=Fri Jun 14 15:02:09 AEST 2019
+			 
+			 
+			date = aCal.getTime();// managedTableDateFormat.parse(dateString);
+			 logger.debug("date=" + date + " startDate " + startDate + " endDate=" + endDate);
+			if(date.compareTo(startDate) >=0  && date.compareTo(endDate) <=0 ) {
+				toReturn.add(dailyTableName);
+				logger.debug("getAllManagedTablesForAPeriod, adding " + dailyTableName);
 			}
 		 }
 		 return toReturn;
