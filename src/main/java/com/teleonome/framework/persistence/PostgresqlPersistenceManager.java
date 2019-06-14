@@ -567,28 +567,32 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		Statement statement=null;
 		ResultSet rs=null;
 		double size=-1;
+		double totalSize=0;
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
-			String command = "SELECT pg_size_pretty(pg_total_relation_size(relid))   FROM pg_catalog.pg_statio_user_tables where relname='"+ tableName+"'";
+			String command = "SELECT pg_size_pretty(pg_total_relation_size(relid))   FROM pg_catalog.pg_statio_user_tables where relname like '"+ tableName+"'";
+			logger.debug("getTableSizeMB, sql=" + command);
 			rs = statement.executeQuery(command);
 			String sizeString="";
 			while(rs.next()){
 				sizeString=rs.getString(1);
-			}
-			//
-			// if there are no rows, sizeString will be empty
-			if(sizeString.length()>1) {
-				String[] tokens = sizeString.split(" ");
-				size = Double.parseDouble(tokens[0]);
-				String units = tokens[1];
-				if(units.equalsIgnoreCase("bytes"))size= size/1000000;
-				else if(units.equalsIgnoreCase("KB"))size= size/1000;
-				else if(units.equalsIgnoreCase("MB"))size= size;
-				else if(units.equalsIgnoreCase("GB"))size= size*1000;
-				else if(units.equalsIgnoreCase("TB"))size= size*1000000;
-			}else {
-				size=0;
+				//
+				// if there are no rows, sizeString will be empty
+				if(sizeString.length()>1) {
+					String[] tokens = sizeString.split(" ");
+					size = Double.parseDouble(tokens[0]);
+					String units = tokens[1];
+					if(units.equalsIgnoreCase("bytes"))size= size/1000000;
+					else if(units.equalsIgnoreCase("KB"))size= size/1000;
+					else if(units.equalsIgnoreCase("MB"))size= size;
+					else if(units.equalsIgnoreCase("GB"))size= size*1000;
+					else if(units.equalsIgnoreCase("TB"))size= size*1000000;
+				}else {
+					size=0;
+				}
+				logger.debug("getTableSizeMB, adding size=" + size);
+				totalSize+=size;
 			}
 			
 
@@ -612,7 +616,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			if(connection!=null)closeConnection(connection);
 		}
 
-		return size;
+		return totalSize;
 
 	}
 
