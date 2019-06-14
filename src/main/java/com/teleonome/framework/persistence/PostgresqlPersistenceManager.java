@@ -571,7 +571,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
-			String command = "SELECT pg_size_pretty(pg_total_relation_size(relid))   FROM pg_catalog.pg_statio_user_tables where relname like '"+ tableName+"'";
+			String command = "SELECT pg_size_pretty(pg_total_relation_size(relid))   FROM pg_catalog.pg_statio_user_tables where relname like '"+ tableName+"%'";
 			logger.debug("getTableSizeMB, sql=" + command);
 			rs = statement.executeQuery(command);
 			String sizeString="";
