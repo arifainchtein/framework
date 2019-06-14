@@ -3514,6 +3514,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	}
 	
 	public JSONArray getRemeberedDeneWordStart( String identityPointer,  long startTimeMillis, long  endTimeMillis){
+		logger.info("enter getRemeberedDeneWordStart identityPointer="+ identityPointer );
 		Connection connection=null;
 		PreparedStatement preparedStatement = null; 
 		ResultSet rs=null;
@@ -3523,18 +3524,14 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		Timestamp time=null;
 		JSONObject j;
 		double value;
+		
 		try {
+			connection = connectionPool.getConnection();
 			for(int i=0;i<allTables.size();i++) {
 				command = "SELECT time, value from "+ allTables.get(i)+" where timeMillis>=? and timeMillis<=? and  identityString=? order by time asc";
 				logger.info("command=" + command);
-				connection = connectionPool.getConnection();
+				
 				preparedStatement = connection.prepareStatement(command);
-				//			java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(startTimeMillis);
-				//			java.sql.Timestamp untilTimeValue = new java.sql.Timestamp(endTimeMillis);
-				//			
-				//			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
-				//			preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
-				//			preparedStatement.setTimestamp(2, untilTimeValue, calendarTimeZone);
 				preparedStatement.setLong(1, startTimeMillis);
 				preparedStatement.setLong(2, endTimeMillis);
 				preparedStatement.setString(3, identityPointer);
