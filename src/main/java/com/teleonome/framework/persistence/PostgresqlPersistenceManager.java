@@ -324,7 +324,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		String tableName;
 		for (Map.Entry<String, Date> entry2 : arrayList) {
 			tableName = entry2.getKey();
-			logger.debug("getAllTableNamesForManagedTable table=" + tableName);
+			logger.debug("getAllTableNamesForManagedTable returning table=" + tableName);
 			toReturn.add(tableName);
 		}
 		
@@ -3524,10 +3524,11 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		Timestamp time=null;
 		JSONObject j;
 		double value;
-		
+		logger.debug("allTables="+ allTables.size() );
 		try {
 			connection = connectionPool.getConnection();
 			for(int i=0;i<allTables.size();i++) {
+				logger.debug("allTables.get(i)="+ allTables.get(i) );
 				command = "SELECT time, value from "+ allTables.get(i)+" where timeMillis>=? and timeMillis<=? and  identityString=? order by time asc";
 				logger.info("command=" + command);
 				
