@@ -49,7 +49,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	private TeleonomeConnectionPool connectionPool;
 	private Logger logger;  
 	private static DecimalFormat twoDecimalsFormat = new DecimalFormat(".##");
-	
+	DateFormat managedTableDateFormat = new SimpleDateFormat("yyyy_M_d");
 	
 	private PostgresqlPersistenceManager(){
 		logger = Logger.getLogger(getClass());
@@ -368,12 +368,12 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	
 	
 	private Date getDateForManagedTable(String prefix, String dailyTableName) {
-		DateFormat df = new SimpleDateFormat("YYYY_MM_dd");
+		
 		// dailyTableName would be something like OrganismPulse_YYYY_MM_dd
 		 String dateString = dailyTableName.substring(prefix.length()+1);
 		 Date date=null;
 		try {
-			date = df.parse(dateString);
+			date = managedTableDateFormat.parse(dateString);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
@@ -888,10 +888,9 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		String organismTeleonomeName = identity.getTeleonomeName();
 		String order="asc";
 		if(last)order="desc";
-		SimpleDateFormat df = new SimpleDateFormat("YYYY-mm-dd HH:mm:ss");
 		ArrayList<String> allTables = getAllManagedTablesForAPeriod(TeleonomeConstants.ORGANISMPULSE_TABLE,startTime.getTime(), endTime.getTime());
-		String createdOnStart = df.format(startTime);
-		String createdOnEnd = df.format(endTime);
+		String createdOnStart = managedTableDateFormat.format(startTime);
+		String createdOnEnd = managedTableDateFormat.format(endTime);
 		String sql ="";
 		Connection connection = null;
 		Statement statement = null;
@@ -1004,7 +1003,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		Date endDate = endCalendar.getTime();
 		
 		 Date date;
-		 DateFormat df = new SimpleDateFormat("YYYY_MM_dd");
+		
 		 boolean deleteResult=false;
 		 int deleteCounter=0;
 		 for(int i=0;i<allTables.size();i++) {
@@ -1013,7 +1012,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			 dateString = dailyTableName.substring(tableName.length() + 1);
 			 logger.debug("getAllManagedTablesForAPeriod, dateString=" + dateString + " dailyTableName " + dailyTableName);
 			 try {
-				date = df.parse(dateString);
+				date = managedTableDateFormat.parse(dateString);
 				 logger.debug("date=" + date + " startDate " + startDate + " endDate=" + endDate);
 				if(date.compareTo(startDate) >=0  && date.compareTo(endDate) <=0 ) {
 					toReturn.add(dailyTableName);
@@ -1213,13 +1212,13 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		ArrayList<String> allTables = getAllTableNamesForManagedTable(tableName);
 		 String dailyTableName, dateString;
 		 Date date;
-		 DateFormat df = new SimpleDateFormat("YYYY_MM_dd");
+		 
 		 for(int i=0;i<allTables.size();i++) {
 			 //Pulse_ 
 			 dailyTableName = ((String)allTables.get(i));
 			 dateString = dailyTableName.substring(tableName.length()+1);
 			 try {
-				date = df.parse(dateString);
+				date = managedTableDateFormat.parse(dateString);
 				logger.debug("getManagedTablesByRange, date=" + date);
 				if(date.after(fromDate) && date.before(untilDate)) {
 					toReturn.add(dailyTableName);
