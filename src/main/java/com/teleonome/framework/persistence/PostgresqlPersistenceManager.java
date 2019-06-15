@@ -3542,7 +3542,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		ResultSet rs=null;
 		JSONArray toReturn = new JSONArray();
 		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE, startTimeMillis, endTimeMillis);
-		String command = "";
+		String command = "", units="";
 		Timestamp time=null;
 		JSONObject j;
 		double value;
@@ -3551,7 +3551,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			connection = connectionPool.getConnection();
 			for(int i=0;i<allTables.size();i++) {
 				logger.debug("allTables.get(i)="+ allTables.get(i) );
-				command = "SELECT time, value from "+ allTables.get(i)+" where timeMillis>=? and timeMillis<=? and  identityString=? order by time asc";
+				command = "SELECT time, value, units from "+ allTables.get(i)+" where timeMillis>=? and timeMillis<=? and  identityString=? order by time asc";
 				logger.info("command=" + command);
 				
 				preparedStatement = connection.prepareStatement(command);
@@ -3562,9 +3562,11 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				while(rs.next()){
 					time=rs.getTimestamp(1);
 					value = rs.getDouble(2);
+					units = rs.getString(3);
 					j = new JSONObject();
 					j.put("Pulse Timestamp in Milliseconds", time.getTime());
 					j.put("Value", value);
+					j.put("Units", units);
 					toReturn.put(j);
 				}
 			}
