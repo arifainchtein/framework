@@ -643,14 +643,14 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		ResultSet rs=null;
 		JSONObject data=null;
 		long pulseTimestampMillis;
-		String valueType;
+		String valueType, units;
 		Object value;
 		
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
 			for(int i=0;i<tables.size();i++) {
-				sql = "select data->>'Pulse Timestamp in Milliseconds', DeneWord -> 'Value Type' As valuetype, DeneWord -> 'Value' As Value from "+ tables.get(i) +"  p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where  Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' and cast(data->>'Pulse Timestamp in Milliseconds' as BIGINT) > "+ fromMillis+" and cast(data->>'Pulse Timestamp in Milliseconds' as BIGINT)< "+ untilMillis+" order by data->>'Pulse Timestamp in Milliseconds' asc";
+				sql = "select data->>'Pulse Timestamp in Milliseconds', DeneWord -> 'Value Type' As valuetype, DeneWord -> 'Value' As Value, DeneWord -> 'Units' As units, from "+ tables.get(i) +"  p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where  Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' and cast(data->>'Pulse Timestamp in Milliseconds' as BIGINT) > "+ fromMillis+" and cast(data->>'Pulse Timestamp in Milliseconds' as BIGINT)< "+ untilMillis+" order by data->>'Pulse Timestamp in Milliseconds' asc";
 				logger.debug("extractOrganismDeneWordAttributeValueByIdentityByPeriod,sql=" + sql);
 				rs = statement.executeQuery(sql);
 				
@@ -658,7 +658,8 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 					pulseTimestampMillis =  rs.getLong(1);
 					valueType=rs.getString(2);
 					value = rs.getObject(3);
-					unwrap(organismTeleonomeName, pulseTimestampMillis, identityString, valueType, value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE);
+					units = rs.getString(4);
+					unwrap(organismTeleonomeName, pulseTimestampMillis, identityString, valueType, value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE, units);
 				}
 			}
 
@@ -3400,7 +3401,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				}else if(stat.equals(TeleonomeConstants.DENEWORD_AVERAGE_ATTRIBUTE)) {
 					command = "SELECT avg(value) from "+allTables.get(i) +" where timeMillis>=? and timeMillis<=? and  identityString=?";
 				}
-				logger.info("command=" + command);
+				logger.debug("command=" + command);
 				preparedStatement = connection.prepareStatement(command);
 				preparedStatement.setLong(1, startTimeMillis);
 				preparedStatement.setLong(2, endTimeMillis);
@@ -3805,7 +3806,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		return toReturn;
 	}
 	
-	public boolean unwrap( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value, String source) {
+	public boolean unwrap( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value, String source, String units) {
 		String sql="";
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;

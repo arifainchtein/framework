@@ -185,7 +185,7 @@ public class PulseThread extends Thread{
 				
 				int adjustedIndex;					
 				JSONObject currentlyProcessingSensorValueDene;
-				String reportingAddress, unit, valueType, sensorValueString;
+				String reportingAddress, unit, valueType,units, sensorValueString;
 				waitingForMama=true;
 				String[] sensorDataTokens;
 				ArrayList<Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex = this.aDenomeManager.getSensorsDeneWordsBySensorRequestQueuePositionByMicroControllerPointer( anHypothalamus.aMotherMicroControllerPointer);
@@ -208,6 +208,7 @@ public class PulseThread extends Thread{
 										currentlyProcessingSensorValueDene = entry2.getKey();
 										reportingAddress = (String) aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,"Reporting Address");
 										valueType = (String) aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+										units = (String) aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDene,TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE);
 
 										if(teleonomeRememberedWordsArrayList.contains(reportingAddress)) {
 											//
@@ -218,7 +219,7 @@ public class PulseThread extends Thread{
 											adjustedIndex = ((Integer)entry2.getValue()).intValue();
 											logger.info("processing sensor token:" + adjustedIndex );   
 											sensorValueString = sensorDataTokens[adjustedIndex];
-											anHypothalamus.aMnemosyneManager.unwrap( aDenomeManager.getDenomeName()	, wpsRecordTimeMillis, reportingAddress, valueType,sensorValueString, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_WPS);			
+											anHypothalamus.aMnemosyneManager.unwrap( aDenomeManager.getDenomeName()	, wpsRecordTimeMillis, reportingAddress, valueType,sensorValueString, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_WPS, units);			
 										}	
 									}
 								}

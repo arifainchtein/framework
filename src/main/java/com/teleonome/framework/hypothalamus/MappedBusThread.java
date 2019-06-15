@@ -1246,7 +1246,7 @@ class MappedBusThread extends Thread{
 			Hashtable<String,ArrayList> deneChainsToRememberByTeleonome = aDenomeManager.getDeneChainsToRememberByTeleonome();
 			String rememberedeneChainPointer;
 
-			String valueType;
+			String valueType, units;
 			aDenomeManager.getTeleonomeTimeZone();
 			String teleonomeName = aDenomeManager.getDenomeName();
 			ArrayList teleonomeRememberedDeneChainsArrayList = deneChainsToRememberByTeleonome.get(teleonomeName);
@@ -1272,8 +1272,9 @@ class MappedBusThread extends Thread{
 							includedRememberedIdentity = new Identity(deneChainIdentity.getTeleonomeName(), deneChainIdentity.getNucleusName(), deneChainIdentity.getDenechainName(), dene.getString(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE),deneWord.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
 							value = getDeneWordByIdentity(currentPulse,includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							valueType = (String) getDeneWordByIdentity(currentPulse, includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+							units = (String) getDeneWordByIdentity(currentPulse, includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
 							logger.debug("about to unwrap " + includedRememberedIdentity.toString() + " with value:" + value  + " and valueType=" + valueType);
-							aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), valueType,value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE);			
+							aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), valueType,value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE, units);			
 						}
 					}
 				}
@@ -1304,8 +1305,9 @@ class MappedBusThread extends Thread{
 						includedRememberedIdentity = new Identity(deneIdentity.getTeleonomeName(), deneIdentity.getNucleusName(), deneIdentity.getDenechainName(), deneJSONObject.getString(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE),deneWord.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
 						value = getDeneWordByIdentity(currentPulse,includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						valueType = (String) getDeneWordByIdentity(currentPulse, includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+						units = (String) getDeneWordByIdentity(currentPulse, includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
 						logger.debug("about to unwrap " + includedRememberedIdentity.toString() + " with value:" + value  + " and valueType=" + valueType);
-						aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), valueType,value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE);			
+						aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), valueType,value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE,units);			
 					}
 
 				}
@@ -1329,9 +1331,11 @@ class MappedBusThread extends Thread{
 					rememberedWordPointer = (String) teleonomeRememberedWordsArrayList.get(i);
 					value = getDeneWordByIdentity(currentPulse,new Identity(rememberedWordPointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					valueType = (String) getDeneWordByIdentity(currentPulse, new Identity(rememberedWordPointer), TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
+					units = (String) getDeneWordByIdentity(currentPulse, new Identity(rememberedWordPointer), TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE);
+					
 					logger.debug("about to unwrap " + rememberedWordPointer + " with value:" + value  + " and valueType=" + valueType);
 					if(value!=null && valueType!=null) {
-						aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, rememberedWordPointer, valueType,value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE);
+						aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, rememberedWordPointer, valueType,value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE, units);
 					}else {
 						logger.warn("Unwrap of " + rememberedWordPointer + " FAILED because value:" + value  + " and valueType=" + valueType);
 
