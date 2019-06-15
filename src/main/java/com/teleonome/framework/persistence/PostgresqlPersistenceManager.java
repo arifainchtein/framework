@@ -3834,7 +3834,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			}
 			
 			
-			sql = "insert into "+ tableName +" (time,timeMillis, teleonomeName,identityString,value, source) values(?,?,?,?,?,?) ON CONFLICT(timeMillis, teleonomeName,identityString) DO NOTHING";
+			sql = "insert into "+ tableName +" (time,timeMillis, teleonomeName,identityString,value, source, units) values(?,?,?,?,?,?,?) ON CONFLICT(timeMillis, teleonomeName,identityString) DO NOTHING";
 			logger.debug("unwrap=" + sql);
 			//Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
 
@@ -3844,6 +3844,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			
 			preparedStatement.setString(3, teleonomeName);
 			preparedStatement.setString(4, identityString);
+			
 			
 			double d = 0;
 			if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
@@ -3877,7 +3878,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			}
 			logger.debug("source=" + source);
 			preparedStatement.setString(6, source);
-			
+			preparedStatement.setString(7, units);
 			int result = preparedStatement.executeUpdate();
 			preparedStatement.close();
 			connectionPool.closeConnection(connection);
