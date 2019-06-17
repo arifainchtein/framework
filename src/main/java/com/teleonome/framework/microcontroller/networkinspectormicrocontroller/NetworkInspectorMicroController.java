@@ -1,6 +1,4 @@
-package com.teleonome.framework.microcontroller.raspberrypicameracontroller;
-
-
+package com.teleonome.framework.microcontroller.networkinspectormicrocontroller;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,13 +13,13 @@ import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.microcontroller.MicroController;
 
-public class RaspberryPiCameraController  extends MicroController{
+public class NetworkInspectorMicroController extends MicroController{
 	StringWriter sw = new StringWriter();
-	RaspberryPiCameraWriter aRaspberryPiCameraWriter;
-	RaspberryPiCameraReader aRaspberryPiCameraReader;
+	NetworkInspectorWriter aNetworkInspectorWriter;
+	NetworkInspectorReader aNetworkInspectorReader;
 	Logger logger;
 	
-	public RaspberryPiCameraController(DenomeManager d, String n) {
+	public NetworkInspectorMicroController(DenomeManager d, String n) {
 		super(d, n);
 		logger = Logger.getLogger(getClass());
 		// TODO Auto-generated constructor stub
@@ -61,26 +59,26 @@ public class RaspberryPiCameraController  extends MicroController{
 		
 		
 		
-		aRaspberryPiCameraReader  =new RaspberryPiCameraReader(new StringReader(""));
-		aRaspberryPiCameraWriter = new RaspberryPiCameraWriter(sw,aRaspberryPiCameraReader);
-       	logger.info(" completed init for RaspberryPiCameraController");
+		aNetworkInspectorReader  =new NetworkInspectorReader(new StringReader(""));
+		aNetworkInspectorWriter = new NetworkInspectorWriter(sw,aNetworkInspectorReader);
+       	logger.info(" completed init for NetworkInspectorController");
        	
 	}
 	
 	@Override
 	public BufferedWriter getWriter() throws IOException {
 		// TODO Auto-generated method stub
-		aRaspberryPiCameraReader  =new RaspberryPiCameraReader(new StringReader(""));
-		aRaspberryPiCameraWriter = new RaspberryPiCameraWriter(sw,aRaspberryPiCameraReader);
-       
-         return aRaspberryPiCameraWriter;
+		aNetworkInspectorReader  =new NetworkInspectorReader(new StringReader(""));
+		aNetworkInspectorWriter = new NetworkInspectorWriter(sw,aNetworkInspectorReader);
+	       
+         return aNetworkInspectorWriter;
 	}
 
 
 	@Override
 	public BufferedReader getReader() throws IOException {
 		String  dataString="dataString";
-		return aRaspberryPiCameraReader;
+		return aNetworkInspectorReader;
 		
 	}
 }

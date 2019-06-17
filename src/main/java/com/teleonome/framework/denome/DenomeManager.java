@@ -6270,6 +6270,9 @@ public class DenomeManager {
 		return null;
 	}
 
+	public JSONObject getPreviousPulseJSONObject() {
+		return previousPulseJSONObject;
+	}
 	public JSONObject getCurrentlyCreatingPulseJSONObject(){
 		return currentlyCreatingPulseJSONObject;
 	}

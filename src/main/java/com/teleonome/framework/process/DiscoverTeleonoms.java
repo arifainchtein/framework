@@ -27,48 +27,48 @@ public class DiscoverTeleonoms extends Thread {
 	private Hashtable knownTeleonoms = new Hashtable();
 	private Hashtable presentTeleonoms = new Hashtable();
 	private Hashtable notPresentTeleonoms = new Hashtable();
-	
+
 	static JmDNS bonjourService=null;
 	//String bonjourServiceType = "_workstation._tcp.local.";
 	String bonjourServiceType = "_teleonome._tcp.local.";
 	static Logger logger=null;
 	static Logger sampleListenerLogger= Logger.getLogger(SampleListener.class);
-	
-	
+
+
 	public DiscoverTeleonoms() {
 		logger = Logger.getLogger(getClass());
 	}
 	public void setDiscoveryFrequency(int i){
 		discoveryFrequency=i;
 	}
-	
+
 	public int setDiscoveryFrequency(){
 		return discoveryFrequency;
 	}
-	
+
 	public Hashtable getKnownTeleonoms(){
 		return knownTeleonoms;
 	}
-	
+
 	public Hashtable getPresentTeleonoms(){
 		return presentTeleonoms;
 	}
-	
+
 	public Hashtable getNotPresentTeleonoms(){
 		return notPresentTeleonoms;
 	}
-	
+
 	public void run(){
 		while(true){
-					
+
 			try {
 				InetAddress ipToBindToZeroMQ = NetworkUtilities.getExoZeroNetworkAddress();
 				InetAddress addr = InetAddress.getLocalHost();
-				  
+
 				String hostname = InetAddress.getByName(ipToBindToZeroMQ.getHostName()).toString();
 				logger.debug("ipToBindToZeroMQ=" + ipToBindToZeroMQ + " hostname=" + hostname + " addr=" + addr);
-				
-				
+
+
 				bonjourService = JmDNS.create(ipToBindToZeroMQ,hostname);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -89,14 +89,14 @@ public class DiscoverTeleonoms extends Thread {
 			presentTeleonoms = new Hashtable();
 			for (ServiceInfo info : serviceInfos) {
 				logger.debug("DiscoverTeleonoms  resolve service " + info.getName()  + " : " + info.getURL());
-			  addresses = info.getInet4Addresses();
-			  for(int i=0;i<addresses.length;i++){
-				  address = addresses[i];
-				  name = info.getName().split("\\[")[0].trim();
-				 logger.debug("DiscoverTeleonoms hostName" + name  + ", address: " + address.getHostAddress());
-				  knownTeleonoms.put(name, address.getHostAddress());
-				  presentTeleonoms.put(name, address.getHostAddress());
-			  }
+				addresses = info.getInet4Addresses();
+				for(int i=0;i<addresses.length;i++){
+					address = addresses[i];
+					name = info.getName().split("\\[")[0].trim();
+					logger.debug("DiscoverTeleonoms hostName" + name  + ", address: " + address.getHostAddress());
+					knownTeleonoms.put(name, address.getHostAddress());
+					presentTeleonoms.put(name, address.getHostAddress());
+				}
 			}
 			//
 			// now populate the notPresentTeleonoms
@@ -106,7 +106,7 @@ public class DiscoverTeleonoms extends Thread {
 				if(presentTeleonoms.get(name)==null){
 					notPresentTeleonoms.put(name, knownTeleonoms.get(name));
 				}
-				
+
 			}
 			try {
 				bonjourService.close();
@@ -114,10 +114,10 @@ public class DiscoverTeleonoms extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			 
-	        
-			
+
+
+
+
 			try {
 				logger.debug("DiscoverTeleonoms about to sleep for " +discoveryFrequency + " seconds");
 				Thread.sleep(discoveryFrequency*1000);
@@ -125,10 +125,10 @@ public class DiscoverTeleonoms extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 	}
-	
+
 	public InetAddress getIpAddress1() throws SocketException, UnknownHostException{
 		NetworkInterface networkInterface;
 		InetAddress inetAddr, potential=null;
@@ -143,30 +143,30 @@ public class DiscoverTeleonoms extends Thread {
 						potential=inetAddr;
 					}
 				}
-				
+
 			}
 		}
 		return potential;
 	}
 
-	 static class SampleListener implements ServiceListener {
-	        @Override
-	        public void serviceAdded(ServiceEvent event) {
-	        	logger.debug("Service added   : " + event.getName() + "." + event.getType());
-	        	 bonjourService.requestServiceInfo(event.getType(), event.getName());
-	            
-	        }
+	static class SampleListener implements ServiceListener {
+		@Override
+		public void serviceAdded(ServiceEvent event) {
+			logger.debug("Service added   : " + event.getName() + "." + event.getType());
+			bonjourService.requestServiceInfo(event.getType(), event.getName());
 
-	        @Override
-	        public void serviceRemoved(ServiceEvent event) {
-	        	logger.debug("Service removed : " + event.getName() + "." + event.getType());
-	        }
+		}
 
-	        @Override
-	        public void serviceResolved(ServiceEvent ev) {
-	        	logger.debug("Service resolved: " + ev.getInfo().getQualifiedName() + " port:" + ev.getInfo().getPort());
-	        	        
-	        }
-	    }
-	 
+		@Override
+		public void serviceRemoved(ServiceEvent event) {
+			logger.debug("Service removed : " + event.getName() + "." + event.getType());
+		}
+
+		@Override
+		public void serviceResolved(ServiceEvent ev) {
+			logger.debug("Service resolved: " + ev.getInfo().getQualifiedName() + " port:" + ev.getInfo().getPort());
+
+		}
+	}
+
 }

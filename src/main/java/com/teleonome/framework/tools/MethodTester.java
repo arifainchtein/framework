@@ -99,14 +99,72 @@ public class MethodTester implements SftpProgressMonitor{
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-		double time = Utils.getTimeFractionalHourMinutesFromSeconds(8253);
-		System.out.println(time);
+//		double time = Utils.getTimeFractionalHourMinutesFromSeconds(8253);
+//		System.out.println(time);
 //		createTunnel();
 //		String localDestinationFilename = "/Users/arifainchtein/Downloads/mydownload.sql";
 //		String remoteSourceFileName="/home/arifainchtein/db_backups/casete_backup.sql";
 //		downloadFile( remoteSourceFileName, localDestinationFilename) ;
+		
+		generateNetworkSensorData();
 	}
 
+	
+	private void generateNetworkSensorData() {
+		String command = "sudo arp-scan --retry=8 --ignoredups --n -I wlan1 --localnet";
+		try {
+			ArrayList<String> results = Utils.executeCommand(command);
+			String[] tokens, portInfoTokens;
+			ArrayList<String> nmapResults;
+			String ipAddress, macAddress, deviceName, nmapLine,remainder, port, state, service;
+			boolean foundPortLine=false;
+			for(int i=0;i<results.size();i++) {
+				if(i<2) {
+					System.out.println(results.get(i));
+				}else {
+					tokens = results.get(i).split("\t");
+					if(tokens.length>1) {
+						ipAddress = tokens[0];
+						macAddress = tokens[1];
+						deviceName = tokens[2];
+						System.out.println("ipAddress=" + ipAddress + " macAddress=" + macAddress + " deviceName=" + deviceName);
+						nmapResults = Utils.executeCommand("nmap + " + ipAddress);
+						foundPortLine=false;
+						for(int j=0;j<nmapResults.size();j++) {
+							nmapLine = nmapResults.get(j);
+							if(nmapLine.startsWith("Nmap scan report for ")) {
+								remainder = nmapLine.substring(22);
+								if(remainder.contains("(")) {
+									deviceName = remainder.substring(0,remainder.indexOf("(")).trim();
+									System.out.println("setting devicename by nmap " + deviceName);
+								}
+							}else if(nmapLine.startsWith("PORT")) {
+								foundPortLine=true;
+							}else if(nmapLine.startsWith("Nmap done")) {
+								
+							}else {
+								if(foundPortLine) {
+									//22/tcp open  ssh
+									portInfoTokens = nmapLine.split(" ");
+									port = portInfoTokens[0].trim();
+									state = portInfoTokens[1].trim();
+									service = portInfoTokens[2].trim();
+									System.out.println("port=" + port + " state=" + state + " service=" + service);
+								}
+							}
+							
+						}
+					}
+				}
+			}
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}
+		
+	}
+	
+	
 	private String publishingResults="";
 	private String mqttBrokerAddress;
 	

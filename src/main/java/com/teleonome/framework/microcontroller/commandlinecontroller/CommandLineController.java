@@ -1,4 +1,4 @@
-package com.teleonome.framework.microcontroller.raspberrypicameracontroller;
+package com.teleonome.framework.microcontroller.commandlinecontroller;
 
 
 
@@ -15,13 +15,13 @@ import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.microcontroller.MicroController;
 
-public class RaspberryPiCameraController  extends MicroController{
+public class CommandLineController extends MicroController{
 	StringWriter sw = new StringWriter();
-	RaspberryPiCameraWriter aRaspberryPiCameraWriter;
-	RaspberryPiCameraReader aRaspberryPiCameraReader;
+	CommandLineWriter aCommandLineWriter;
+	CommandLineReader aCommandLineReader;
 	Logger logger;
 	
-	public RaspberryPiCameraController(DenomeManager d, String n) {
+	public CommandLineController(DenomeManager d, String n) {
 		super(d, n);
 		logger = Logger.getLogger(getClass());
 		// TODO Auto-generated constructor stub
@@ -61,26 +61,26 @@ public class RaspberryPiCameraController  extends MicroController{
 		
 		
 		
-		aRaspberryPiCameraReader  =new RaspberryPiCameraReader(new StringReader(""));
-		aRaspberryPiCameraWriter = new RaspberryPiCameraWriter(sw,aRaspberryPiCameraReader);
-       	logger.info(" completed init for RaspberryPiCameraController");
+		aCommandLineReader  =new CommandLineReader(new StringReader(""));
+		aCommandLineWriter = new CommandLineWriter(sw,aCommandLineReader);
+       	logger.info(" completed init for CommandLineController");
        	
 	}
 	
 	@Override
 	public BufferedWriter getWriter() throws IOException {
 		// TODO Auto-generated method stub
-		aRaspberryPiCameraReader  =new RaspberryPiCameraReader(new StringReader(""));
-		aRaspberryPiCameraWriter = new RaspberryPiCameraWriter(sw,aRaspberryPiCameraReader);
-       
-         return aRaspberryPiCameraWriter;
+		aCommandLineReader  =new CommandLineReader(new StringReader(""));
+		aCommandLineWriter = new CommandLineWriter(sw,aCommandLineReader);
+	       
+         return aCommandLineWriter;
 	}
 
 
 	@Override
 	public BufferedReader getReader() throws IOException {
 		String  dataString="dataString";
-		return aRaspberryPiCameraReader;
+		return aCommandLineReader;
 		
 	}
 }
