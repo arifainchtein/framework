@@ -558,7 +558,7 @@ public class DenomeManager {
 					//
 					// Process the Queue Position
 					//
-					I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(microProcessorDene, "Processing Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(microProcessorDene, TeleonomeConstants.PROCESSING_QUEUE_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					logger.debug("Processing Queue Position=" + I);
 					microControllerPointerProcessingQueuePositionIndex.add(new AbstractMap.SimpleEntry<String, Integer>(pointerToMicroController, I));
 					Collections.sort(microControllerPointerProcessingQueuePositionIndex, new Comparator<Map.Entry<?, Integer>>(){

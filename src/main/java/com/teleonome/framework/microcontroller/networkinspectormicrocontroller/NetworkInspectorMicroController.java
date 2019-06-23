@@ -12,13 +12,13 @@ import org.json.JSONException;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.microcontroller.MicroController;
-
+// com.teleonome.framework.microcontroller.networkinspectormicrocontroller.NetworkInspectorMicroController
 public class NetworkInspectorMicroController extends MicroController{
 	StringWriter sw = new StringWriter();
 	NetworkInspectorWriter aNetworkInspectorWriter;
 	NetworkInspectorReader aNetworkInspectorReader;
 	Logger logger;
-	
+	int arpScanRetry=8;
 	public NetworkInspectorMicroController(DenomeManager d, String n) {
 		super(d, n);
 		logger = Logger.getLogger(getClass());
@@ -57,10 +57,10 @@ public class NetworkInspectorMicroController extends MicroController{
 			e1.printStackTrace();
 		}
 		
-		
+		arpScanRetry=8;
 		
 		aNetworkInspectorReader  =new NetworkInspectorReader(new StringReader(""));
-		aNetworkInspectorWriter = new NetworkInspectorWriter(sw,aNetworkInspectorReader);
+		aNetworkInspectorWriter = new NetworkInspectorWriter(sw,aNetworkInspectorReader, arpScanRetry);
        	logger.info(" completed init for NetworkInspectorController");
        	
 	}
@@ -69,7 +69,7 @@ public class NetworkInspectorMicroController extends MicroController{
 	public BufferedWriter getWriter() throws IOException {
 		// TODO Auto-generated method stub
 		aNetworkInspectorReader  =new NetworkInspectorReader(new StringReader(""));
-		aNetworkInspectorWriter = new NetworkInspectorWriter(sw,aNetworkInspectorReader);
+		aNetworkInspectorWriter = new NetworkInspectorWriter(sw,aNetworkInspectorReader, arpScanRetry);
 	       
          return aNetworkInspectorWriter;
 	}

@@ -199,7 +199,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		int month = cal.get(Calendar.MONTH) + 1;
 		int date = cal.get(Calendar.DATE);
 		
-		String[] tableNames = {"Pulse","OrganismPulse","RememberedDeneWords","CommandRequests","MutationEvent"};
+		String[] tableNames = {TeleonomeConstants.PULSE_TABLE,TeleonomeConstants.ORGANISMPULSE_TABLE,TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE,TeleonomeConstants.COMMAND_REQUESTS_TABLE,TeleonomeConstants.MUTATION_EVENT_TABLE};
 		String sql = "";
 		Statement statement=null;
 		Connection connection=null;

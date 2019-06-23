@@ -33,20 +33,24 @@ public class NetworkSensorTester {
 			startingTime = System.currentTimeMillis();
 			arpScanRetry = Integer.parseInt(args[0]);
 		}
+		
 		int numDevices, prevNumDevices=-1;
 		JSONArray deviceListJSONArray, previousDeviceListJSONArray = null;
 		String[] tokens;
+		long arpScanDuration,  diffAnalysisDuration;
 		JSONObject diffAnalysisJSNArray = new JSONObject();
 		while(true) {
 			//
 			// 1 Get the current device list
 			//
+			System.out.println("Starting again at " + new Date());
+			startingTime = System.currentTimeMillis();
 			sensorDataString = performAnalysis(arpScanRetry);
 			tokens =  sensorDataString.split("#");
 			numDevices = Integer.parseInt(tokens[0]);
 			deviceListJSONArray = new JSONArray(tokens[1]);
-			System.out.println("Starting again at " + new Date());
-			
+			long arpScanEndTime= System.currentTimeMillis();
+			arpScanDuration = arpScanEndTime - startingTime;
 			//
 			// 2 perform the differential analysis
 			//
@@ -62,6 +66,9 @@ public class NetworkSensorTester {
 				prevNumDevices = numDevices;
 				previousDeviceListJSONArray = new JSONArray(tokens[1]);	
 			}
+			long diffAnalysisEndTime= System.currentTimeMillis();
+			diffAnalysisDuration = System.currentTimeMillis()- diffAnalysisEndTime;
+			
 			//
 			// 3- get the connection speed
 			//
@@ -84,6 +91,7 @@ public class NetworkSensorTester {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+			long connectionSpeedDuration = System.currentTimeMillis()- diffAnalysisEndTime;
 			
 			//
 			// generate the 	
@@ -91,6 +99,13 @@ public class NetworkSensorTester {
 				String finalSensorDataString =sensorDataString + "#" + diffAnalysisJSNArray.toString()+"#" + twoDecimalFormat.format(downloadSpeed)+"#"+twoDecimalFormat.format(uploadSpeed)+"#" +twoDecimalFormat.format(pingTime);
 				System.out.println(finalSensorDataString);
 				FileUtils.writeStringToFile(new File("NetworkSensor.json"), finalSensorDataString + System.lineSeparator() , true);
+				long totalTime = System.currentTimeMillis()-startingTime;
+				
+				System.out.println("arpScanDuration=" + Utils.getElapsedTimeHoursMinutesSecondsString(arpScanDuration));
+				System.out.println("diffAnalysisDuration=" + Utils.getElapsedTimeHoursMinutesSecondsString(diffAnalysisDuration));
+				System.out.println("connectionSpeedDuration=" + Utils.getElapsedTimeHoursMinutesSecondsString(connectionSpeedDuration));
+				
+				System.out.println(" Total time=" + Utils.getElapsedTimeHoursMinutesSecondsString(totalTime));
 				System.out.println("about to sleep 60 at " + new Date());
 				Thread.sleep(60000);
 			} catch (InterruptedException e) {
@@ -163,7 +178,7 @@ public class NetworkSensorTester {
 	public static String performAnalysis(int arpScanRetry) {
 		long startingTime=System.currentTimeMillis();
 		Hashtable<String, JSONObject> arpScanInfo =  getArpScanInfo(arpScanRetry);
-		System.out.println("got getArpScanInfos");
+		//System.out.println("got getArpScanInfos");
 		JSONObject nmapDetail,infoObj;
 		JSONArray sensorDataStringJSONArray = new JSONArray();
 		JSONObject sensorDataJSONObject;
@@ -181,9 +196,9 @@ public class NetworkSensorTester {
 			 }
 			sensorDataStringJSONArray.put(sensorDataJSONObject);
 		}
-		System.out.println("ArpScanInfo found # of devices=" + arpScanInfo.size());
+		//System.out.println("ArpScanInfo found # of devices=" + arpScanInfo.size());
 		long totalTime = System.currentTimeMillis()-startingTime;
-		System.out.println(" Total time=" + Utils.getElapsedTimeHoursMinutesSecondsString(totalTime));
+		//System.out.println(" Total time=" + Utils.getElapsedTimeHoursMinutesSecondsString(totalTime));
 		String getSensorDataString =  arpScanInfo.size() + "#"+ sensorDataStringJSONArray.toString();
 		return getSensorDataString;
 	}
