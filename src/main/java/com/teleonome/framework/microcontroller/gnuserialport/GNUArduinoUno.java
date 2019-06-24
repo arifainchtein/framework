@@ -10,11 +10,16 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.teleonome.framework.TeleonomeConstants;
@@ -58,7 +63,7 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 	
 	
 	@Override
-	public void init(JSONArray params) throws MicrocontrollerCommunicationException {
+	public void init(JSONArray configParams) throws MicrocontrollerCommunicationException {
 		// TODO Auto-generated method stub
 		CommPortIdentifier portId = null;
 		try {
@@ -152,11 +157,27 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 			}catch(Exception e) {
 				logger.warn(Utils.getStringException(e));
 			}
-			String pointerToCommParamsDene =  (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(arduinoUnoMicrocontrollerDene, TeleonomeConstants.DENEWORD_MICROCONTROLLER_COMMUNICATION_PROTOCOL, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-			logger.debug("using pointerToCommParamsDene=" + pointerToCommParamsDene);
+//			String pointerToCommParamsDene =  (String)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(arduinoUnoMicrocontrollerDene, TeleonomeConstants.DENEWORD_MICROCONTROLLER_COMMUNICATION_PROTOCOL, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//			logger.debug("using pointerToCommParamsDene=" + pointerToCommParamsDene);
+//			JSONObject commParamsDene = aDenomeManager.getDeneByIdentity(new Identity(pointerToCommParamsDene));
+//			DATA_RATE = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(commParamsDene, "Serial Data Rate", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).intValue();
 			
-			JSONObject commParamsDene = aDenomeManager.getDeneByIdentity(new Identity(pointerToCommParamsDene));
-			DATA_RATE = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(commParamsDene, "Serial Data Rate", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).intValue();
+			JSONObject configDene;
+			for(int i=0;i<configParams.length();i++){
+				try {
+					configDene = configParams.getJSONObject(i);
+					if(configDene.getString("Name").equals("Serial Data Rate")) {
+						DATA_RATE = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(configDene, "Serial Data Rate", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).intValue();
+						logger.debug(" gnu arduino microcontroller DATA_RATE " + DATA_RATE);
+
+					}
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+			
 			logger.debug("using datarate=" + DATA_RATE);
 		    counter=0;
 			boolean openAndTested=false;
