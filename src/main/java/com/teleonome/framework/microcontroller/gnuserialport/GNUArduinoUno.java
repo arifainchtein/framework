@@ -163,6 +163,8 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 //			DATA_RATE = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(commParamsDene, "Serial Data Rate", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).intValue();
 			
 			JSONObject configDene;
+			logger.debug(" configParams.size= " + configParams.length());
+			
 			for(int i=0;i<configParams.length();i++){
 				try {
 					configDene = configParams.getJSONObject(i);
