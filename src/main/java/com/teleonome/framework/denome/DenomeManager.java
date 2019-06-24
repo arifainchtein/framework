@@ -533,12 +533,14 @@ public class DenomeManager {
 						try {
 							//
 							// get the dene that has the list
-							logger.debug("microControllerConfigParameterListPointer=" + microControllerConfigParameterListPointer);
 							microControllerConfigParameterListDene = this.getDeneByIdentity(new Identity(microControllerConfigParameterListPointer));
+							logger.debug("microControllerConfigParameterListDene=" + microControllerConfigParameterListDene.toString(4));
 							//
 							// get just the value for each deneword in the list, this is a pointer to the actual dene
 							// 
 							microControllerParamsPointers = getAllDeneWordAttributeByDeneWordTypeFromDene(microControllerConfigParameterListDene, TeleonomeConstants.DENE_TYPE_MICROCONTROLLER_CONFIG_PARAMETER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							logger.debug("microControllerParamsPointers=" + microControllerParamsPointers.toString(4));
+							
 							//
 							// now loop over every pointer to get the dene
 							//
