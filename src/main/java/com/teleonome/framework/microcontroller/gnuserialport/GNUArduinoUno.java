@@ -166,14 +166,14 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 			for(int i=0;i<configParams.length();i++){
 				try {
 					configDene = configParams.getJSONObject(i);
+					logger.debug(" configDene.getString(Name)= " + configDene.getString("Name"));
 					if(configDene.getString("Name").equals("Serial Data Rate")) {
 						DATA_RATE = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(configDene, "Serial Data Rate", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).intValue();
 						logger.debug(" gnu arduino microcontroller DATA_RATE " + DATA_RATE);
-
 					}
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.warn(Utils.getStringException(e));
 				}
 				
 			}
