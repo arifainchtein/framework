@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -119,7 +121,10 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			//
 			// generate the 	
 			try {
-				String finalSensorDataString =sensorDataString + "#" + diffAnalysisJSNArray.toString()+"#" + twoDecimalFormat.format(downloadSpeed)+"#"+twoDecimalFormat.format(uploadSpeed)+"#" +twoDecimalFormat.format(pingTime);
+				long sampleTimeMillis = System.currentTimeMillis();
+				SimpleDateFormat simpleFormatter = new SimpleDateFormat("dd/MM/yy HH:mm");
+				String sampleTimeString = simpleFormatter.format(new Timestamp(sampleTimeMillis));
+				String finalSensorDataString =sensorDataString + "#" + diffAnalysisJSNArray.toString()+"#" + twoDecimalFormat.format(downloadSpeed)+"#"+twoDecimalFormat.format(uploadSpeed)+"#" +twoDecimalFormat.format(pingTime) + "#" + sampleTimeMillis + "#" + sampleTimeString;
 				logger.debug("finalSensorDataString=" +finalSensorDataString);
 				FileUtils.writeStringToFile(new File("NetworkSensor.json"), finalSensorDataString ,  Charset.defaultCharset(),false);
 				long totalTime = System.currentTimeMillis()-startingTime;
@@ -221,7 +226,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			long totalTime = System.currentTimeMillis()-startingTime;
 			//System.out.println(" Total time=" + Utils.getElapsedTimeHoursMinutesSecondsString(totalTime));
 			String getSensorDataString =  arpScanInfo.size() + "#"+ sensorDataStringJSONArray.toString();
-			logger.debug("getSensorDataString=" + getSensorDataString);
+			//logger.debug("getSensorDataString=" + getSensorDataString);
 			
 			return getSensorDataString;
 		}
