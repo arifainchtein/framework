@@ -119,7 +119,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			long connectionSpeedDuration = System.currentTimeMillis()- diffAnalysisEndTime;
 
 			//
-			// generate the 	
+			// generate the string
 			try {
 				long sampleTimeMillis = System.currentTimeMillis();
 				SimpleDateFormat simpleFormatter = new SimpleDateFormat("dd/MM/yy HH:mm");
