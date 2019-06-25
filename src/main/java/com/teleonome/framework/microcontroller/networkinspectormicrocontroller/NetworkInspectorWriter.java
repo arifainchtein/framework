@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,7 +64,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			//
 			// 1 Get the current device list
 			//
-			System.out.println("Starting again at " + new Date());
+			logger.debug("Starting again at " + new Date());
 			startingTime = System.currentTimeMillis();
 			sensorDataString = performAnalysis(arpScanRetry);
 			tokens =  sensorDataString.split("#");
@@ -75,6 +76,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			// 2 perform the differential analysis
 			//
 			diffAnalysisJSNArray = new JSONObject();
+			logger.debug("prevNumDevices=" + prevNumDevices);
 			if(prevNumDevices==-1) {
 				prevNumDevices = numDevices;
 				previousDeviceListJSONArray = new JSONArray(tokens[1]);	
@@ -82,8 +84,9 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				//
 				//perform analysis
 				diffAnalysisJSNArray = performDiffAnalaysis(previousDeviceListJSONArray, deviceListJSONArray);
-				System.out.println(diffAnalysisJSNArray.toString(4));
+				logger.debug(diffAnalysisJSNArray.toString(4));
 				prevNumDevices = numDevices;
+				logger.debug("setting prevNumDevices=" + prevNumDevices);
 				previousDeviceListJSONArray = new JSONArray(tokens[1]);	
 			}
 			long diffAnalysisEndTime= System.currentTimeMillis();
@@ -117,8 +120,8 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			// generate the 	
 			try {
 				String finalSensorDataString =sensorDataString + "#" + diffAnalysisJSNArray.toString()+"#" + twoDecimalFormat.format(downloadSpeed)+"#"+twoDecimalFormat.format(uploadSpeed)+"#" +twoDecimalFormat.format(pingTime);
-				System.out.println(finalSensorDataString);
-				FileUtils.writeStringToFile(new File("NetworkSensor.json"), finalSensorDataString , false);
+				logger.debug("finalSensorDataString=" +finalSensorDataString);
+				FileUtils.writeStringToFile(new File("NetworkSensor.json"), finalSensorDataString ,  Charset.defaultCharset(),false);
 				long totalTime = System.currentTimeMillis()-startingTime;
 
 				logger.debug("arpScanDuration=" + Utils.getElapsedTimeHoursMinutesSecondsString(arpScanDuration));
@@ -189,6 +192,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 
 			}
 
+			logger.debug("performdiffanalysis returning=" +toReturn.toString(4));
 
 			return toReturn;
 		}
