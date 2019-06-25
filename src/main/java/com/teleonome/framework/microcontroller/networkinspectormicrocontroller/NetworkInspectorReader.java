@@ -21,13 +21,17 @@ public class NetworkInspectorReader extends BufferedReader{
 	public String readLine(){
 		logger.info("NetworkInspectorReader currentCommand=" + currentCommand);
 		String toReturn="Ok";
-		if(!currentCommand.equals("GetSensorData")) {
+		if(currentCommand.equals("GetSensorData")) {
 			String sensorString="-1#[]#{}#0#0#0";
 			try {
 				toReturn = FileUtils.readFileToString(new File("NetworkSensor.json"));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e));
+			}
+			logger.debug("network info file=" + toReturn);
+			if(toReturn==null || toReturn.split("#").length!=6) {
+				toReturn ="-1#[]#{}#0#0#0";
 			}
 		}else {
 			toReturn= "Ok";	
