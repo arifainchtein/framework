@@ -6499,7 +6499,10 @@ public class DenomeManager {
 														valueType.equals(TeleonomeConstants.DATATYPE_VIDEO_FILE) 
 														) {
 													jsonObjectDeneWord.put("Value", inputLine);
-												}else if(valueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER)) {
+												}else if(valueType.equals(TeleonomeConstants.DATATYPE_JSONARRAY)) {
+
+													jsonObjectDeneWord.put("Value", inputLine);
+												}else if(valueType.equals(TeleonomeConstants.DATATYPE_JSONOBJECT)) {
 
 													jsonObjectDeneWord.put("Value", inputLine);
 												}
