@@ -17,6 +17,8 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.teleonome.framework.TeleonomeConstants;
+import com.teleonome.framework.network.NetworkUtilities;
 import com.teleonome.framework.utils.Utils;
 
 public class NetworkInspectorWriter  extends BufferedWriter{
@@ -222,50 +224,62 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 
 		public Hashtable<String, JSONObject> getArpScanInfo(int arpScanRetry) {
 			// TODO Auto-generated method stub
+			long startingTime = System.currentTimeMillis();
 			boolean detailed=false;
 			Hashtable<String, JSONObject> toReturn = new Hashtable();
 
+			// toReturn.put(adapter, ipAddress);
+			JSONObject networkInfoJSONObject = NetworkUtilities.getAvailableAdapters();
+			String scanningWlan="";
+			if(networkInfoJSONObject.has("wlan0")) {
+				if(!networkInfoJSONObject.getString("wlan0").equals(TeleonomeConstants.ADA_INTERNAL_HOST_IPADDRESS)){
+					scanningWlan = networkInfoJSONObject.getString("wlan0");
+				}
+			}
+			logger.debug("scanningWlan=" + scanningWlan);
+			if(!scanningWlan.equals("")) {
+				String command = "sudo arp-scan --retry="+ arpScanRetry+" --ignoredups --n -I "+ scanningWlan +" --localnet";
+				
+				int deviceCount=0;
+				JSONObject itemJSNObject;
+				try {
+					ArrayList<String> results = Utils.executeCommand(command);
+					logger.debug("results=" + results.toString());
+					String[] tokens, portInfoTokens;
+					ArrayList<String> nmapResults, getentResults;
+					String ipAddress, macAddress, deviceName, nmapLine,remainder, port, state, service;
+					boolean foundPortLine=false;
+					for(int i=0;i<results.size();i++) {
+						if(i<2) {
+							//System.out.println(results.get(i));
+						}else {
+							logger.debug(results.get(i));
+							tokens = results.get(i).split("\t");
+							if(tokens.length>1) {
+								ipAddress = tokens[0];
+								macAddress = tokens[1];
+								deviceName = tokens[2];
+								getentResults = Utils.executeCommand("getent hosts " + ipAddress);
+								if(getentResults.size()>0) {
+									//System.out.println("getentResults.get(0)=" + getentResults.get(0));
+									deviceName=getentResults.get(0).split("\\s+")[1];
+								}
+								deviceCount++;
+								//System.out.println("ipAddress=" + ipAddress + " macAddress=" + macAddress + " deviceName=" + deviceName);
+								itemJSNObject = new JSONObject();
+								itemJSNObject.put(IP_ADDRESS, ipAddress.trim());
+								itemJSNObject.put("MacAddress", macAddress);
+								itemJSNObject.put(DEVICE_NAME, deviceName);
+								toReturn.put(ipAddress.trim(), itemJSNObject);
 
-			String command = "sudo arp-scan --retry="+ arpScanRetry+" --ignoredups --n -I wlan1 --localnet";
-			long startingTime = System.currentTimeMillis();
-			int deviceCount=0;
-			JSONObject itemJSNObject;
-			try {
-				ArrayList<String> results = Utils.executeCommand(command);
-				String[] tokens, portInfoTokens;
-				ArrayList<String> nmapResults, getentResults;
-				String ipAddress, macAddress, deviceName, nmapLine,remainder, port, state, service;
-				boolean foundPortLine=false;
-				for(int i=0;i<results.size();i++) {
-					if(i<2) {
-						//System.out.println(results.get(i));
-					}else {
-						logger.debug(results.get(i));
-						tokens = results.get(i).split("\t");
-						if(tokens.length>1) {
-							ipAddress = tokens[0];
-							macAddress = tokens[1];
-							deviceName = tokens[2];
-							getentResults = Utils.executeCommand("getent hosts " + ipAddress);
-							if(getentResults.size()>0) {
-								//System.out.println("getentResults.get(0)=" + getentResults.get(0));
-								deviceName=getentResults.get(0).split("\\s+")[1];
 							}
-							deviceCount++;
-							//System.out.println("ipAddress=" + ipAddress + " macAddress=" + macAddress + " deviceName=" + deviceName);
-							itemJSNObject = new JSONObject();
-							itemJSNObject.put(IP_ADDRESS, ipAddress.trim());
-							itemJSNObject.put("MacAddress", macAddress);
-							itemJSNObject.put(DEVICE_NAME, deviceName);
-							toReturn.put(ipAddress.trim(), itemJSNObject);
-
 						}
 					}
+					//System.out.println("thre are " + deviceCount + " devices");
+				} catch (IOException | InterruptedException e) {
+					// TODO Auto-generated catch block
+					System.out.println(Utils.getStringException(e));
 				}
-				//System.out.println("thre are " + deviceCount + " devices");
-			} catch (IOException | InterruptedException e) {
-				// TODO Auto-generated catch block
-				System.out.println(Utils.getStringException(e));
 			}
 			long totalTime = System.currentTimeMillis()-startingTime;
 			//System.out.println("getArpScanInfo Total time=" + Utils.getElapsedTimeHoursMinutesSecondsString(totalTime));
