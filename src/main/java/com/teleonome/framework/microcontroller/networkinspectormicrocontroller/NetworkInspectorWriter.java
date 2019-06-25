@@ -122,7 +122,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			// generate the string
 			try {
 				long sampleTimeMillis = System.currentTimeMillis();
-				SimpleDateFormat simpleFormatter = new SimpleDateFormat("dd/MM/yy HH:mm");
+				SimpleDateFormat simpleFormatter = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
 				String sampleTimeString = simpleFormatter.format(new Timestamp(sampleTimeMillis));
 				String finalSensorDataString =sensorDataString + "#" + diffAnalysisJSNArray.toString()+"#" + twoDecimalFormat.format(downloadSpeed)+"#"+twoDecimalFormat.format(uploadSpeed)+"#" +twoDecimalFormat.format(pingTime) + "#" + sampleTimeMillis + "#" + sampleTimeString;
 				logger.debug("finalSensorDataString=" +finalSensorDataString);
