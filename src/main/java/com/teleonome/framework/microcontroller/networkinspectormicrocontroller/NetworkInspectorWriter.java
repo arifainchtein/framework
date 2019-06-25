@@ -233,7 +233,11 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			String scanningWlan="";
 			if(networkInfoJSONObject.has("wlan0")) {
 				if(!networkInfoJSONObject.getString("wlan0").equals(TeleonomeConstants.ADA_INTERNAL_HOST_IPADDRESS)){
-					scanningWlan = networkInfoJSONObject.getString("wlan0");
+					scanningWlan = "wlan0";
+				}
+			}else if(networkInfoJSONObject.has("wlan1")) {
+				if(!networkInfoJSONObject.getString("wlan1").equals(TeleonomeConstants.ADA_INTERNAL_HOST_IPADDRESS)){
+					scanningWlan ="wlan1";
 				}
 			}
 			logger.debug("scanningWlan=" + scanningWlan);
