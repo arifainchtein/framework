@@ -193,7 +193,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 		private  String performAnalysis(int arpScanRetry) {
 			long startingTime=System.currentTimeMillis();
 			Hashtable<String, JSONObject> arpScanInfo =  getArpScanInfo(arpScanRetry);
-			//System.out.println("got getArpScanInfos");
+			logger.debug("got getArpScanInfos, arpScanInfo=" + arpScanInfo.size());
 			JSONObject nmapDetail,infoObj;
 			JSONArray sensorDataStringJSONArray = new JSONArray();
 			JSONObject sensorDataJSONObject;
@@ -215,6 +215,8 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			long totalTime = System.currentTimeMillis()-startingTime;
 			//System.out.println(" Total time=" + Utils.getElapsedTimeHoursMinutesSecondsString(totalTime));
 			String getSensorDataString =  arpScanInfo.size() + "#"+ sensorDataStringJSONArray.toString();
+			logger.debug("getSensorDataString=" + getSensorDataString);
+			
 			return getSensorDataString;
 		}
 
@@ -238,7 +240,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 					if(i<2) {
 						//System.out.println(results.get(i));
 					}else {
-						//System.out.println(results.get(i));
+						logger.debug(results.get(i));
 						tokens = results.get(i).split("\t");
 						if(tokens.length>1) {
 							ipAddress = tokens[0];
