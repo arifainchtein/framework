@@ -58,7 +58,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			long startingTime = System.currentTimeMillis();
 
 
-			int numDevices, prevNumDevices=-1;
+			int numDevices;
 			JSONArray deviceListJSONArray, previousDeviceListJSONArray = null;
 			String[] tokens;
 			long arpScanDuration,  diffAnalysisDuration;
@@ -93,14 +93,12 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			// 2 perform the differential analysis
 			//
 			diffAnalysisJSNArray = new JSONObject();
-			logger.debug("prevNumDevices=" + prevNumDevices);
+			logger.debug("previousDeviceListJSONArray=" + previousDeviceListJSONArray);
 			if(previousDeviceListJSONArray!=null) {
 				//
 				//perform analysis
 				diffAnalysisJSNArray = performDiffAnalaysis(previousDeviceListJSONArray, deviceListJSONArray);
 				logger.debug(diffAnalysisJSNArray.toString(4));
-				prevNumDevices = numDevices;
-				logger.debug("setting prevNumDevices=" + prevNumDevices);
 				previousDeviceListJSONArray = new JSONArray(tokens[1]);	
 			}
 			long diffAnalysisEndTime= System.currentTimeMillis();
