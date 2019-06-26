@@ -44,7 +44,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 	public void write(String command, int off, int len) throws IOException {
 
 		aNetworkInspectorReader.setCurrentCommand(command);
-		if(command.equals("GenerateAnalysis")) {
+		if(command.equals("Generate Analysis")) {
 			logger.debug("starting generate analysis thread");
 			GenerateAnalysisThread a = new GenerateAnalysisThread();
 			a.start();
