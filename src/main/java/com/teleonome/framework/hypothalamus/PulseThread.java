@@ -694,7 +694,8 @@ public class PulseThread extends Thread{
 				actuatorExecutionPositionDeneIndex = this.aDenomeManager.getActuatorExecutionPositionDeneByMicroControllerPointerIndex(microControllerPointer);
 				//logger.debug("line 1871 processing microcontroller normal sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex + " actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
 				logger.info("starting to process MicroController  " + aMicroController.getName());
-
+				logger.debug("line 697 processing microcontroller normal actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
+				
 				processMicroProcessor(aMicroController, teleonomeName,sensorRequestQueuePositionDeneWordIndex, actuatorExecutionPositionDeneIndex, input, output, false);
 
 				//output.write(TeleonomeConstants.PULSE_STATUS_FINISHED,0,TeleonomeConstants.PULSE_STATUS_FINISHED.length());
