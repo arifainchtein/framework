@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import com.teleonome.framework.utils.Utils;
@@ -20,7 +23,12 @@ public class NetworkInspectorReader extends BufferedReader{
 
 	public String readLine(){
 		logger.info("NetworkInspectorReader currentCommand=" + currentCommand);
-		String toReturn="-1#[]#{}#0#0#0";
+		long sampleTimeMillis = System.currentTimeMillis();
+		SimpleDateFormat simpleFormatter = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
+		String sampleTimeString = simpleFormatter.format(new Timestamp(sampleTimeMillis));
+		
+		String toReturn="-1#[]#{}#0#0#0#" + sampleTimeMillis + "#" + sampleTimeString;
+		
 		if(currentCommand.equals("GetSensorData")) {
 			
 			File file = new File("NetworkSensor.json");
@@ -32,7 +40,7 @@ public class NetworkInspectorReader extends BufferedReader{
 					logger.warn(Utils.getStringException(e));
 				}
 				if(toReturn==null || toReturn.split("#").length!=6) {
-					toReturn ="-1#[]#{}#0#0#0";
+					toReturn="-1#[]#{}#0#0#0#" + sampleTimeMillis + "#" + sampleTimeString;
 				}
 			}
 			
