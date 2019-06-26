@@ -39,7 +39,7 @@ public class NetworkInspectorReader extends BufferedReader{
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
 				}
-				if(toReturn==null || toReturn.split("#").length!=6) {
+				if(toReturn==null || toReturn.split("#").length!=8) {
 					toReturn="-1#[]#{}#0#0#0#" + sampleTimeMillis + "#" + sampleTimeString;
 				}
 			}
