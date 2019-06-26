@@ -51,7 +51,7 @@ public class TeleonomeConstants {
 	//
 	public static final String DENEOWRD_TYPE_PROCESSOR_POINTER = "Processor Pointer";
 	public static final String DENE_TYPE_PROCESSOR = "Processor";
-	
+	public static final String ON_LACK_OF_DATA="On Lack of Data";
 	
 	//
 	// the different kinds of deneword operations

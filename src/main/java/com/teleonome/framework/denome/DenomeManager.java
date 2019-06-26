@@ -7745,7 +7745,7 @@ public class DenomeManager {
 				actuatorLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Source", actuatorActionConditionPointer,null,"DenePointer",true);
 				actuatorLogicProcessingDeneDeneWords.put(actuatorLogicProcessingCodonDeneDeneWord);
 
-				onLackOfDataForCondition = (boolean) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorActionConditionJSONObject, "On Lack Of Data", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				onLackOfDataForCondition = (boolean) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorActionConditionJSONObject, TeleonomeConstants.ON_LACK_OF_DATA, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 
 
