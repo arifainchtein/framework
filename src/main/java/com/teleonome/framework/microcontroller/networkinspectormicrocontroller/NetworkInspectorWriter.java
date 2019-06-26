@@ -64,6 +64,21 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			long arpScanDuration,  diffAnalysisDuration;
 			JSONObject diffAnalysisJSNArray = new JSONObject();
 			//
+			// Check if there is an analysis
+			//
+			String previousData = null;
+			try {
+				previousData = FileUtils.readFileToString(new File("NetworkSensor.json") ,  Charset.defaultCharset());
+				tokens =  previousData.split("#");
+				previousDeviceListJSONArray = new JSONArray(tokens[1]);
+			} catch (IOException e2) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e2));
+			}
+			
+			
+			
+			//
 			// 1 Get the current device list
 			//
 			logger.debug("Starting again at " + new Date());
@@ -79,10 +94,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			//
 			diffAnalysisJSNArray = new JSONObject();
 			logger.debug("prevNumDevices=" + prevNumDevices);
-			if(prevNumDevices==-1) {
-				prevNumDevices = numDevices;
-				previousDeviceListJSONArray = new JSONArray(tokens[1]);	
-			}else {
+			if(previousDeviceListJSONArray!=null) {
 				//
 				//perform analysis
 				diffAnalysisJSNArray = performDiffAnalaysis(previousDeviceListJSONArray, deviceListJSONArray);
