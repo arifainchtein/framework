@@ -39,7 +39,7 @@ public class NetworkInspectorReader extends BufferedReader{
 		}else {
 			toReturn= "Ok";	
 		}
-		logger.debug("network info file=" + toReturn);
+		//logger.debug("network info file=" + toReturn);
 		return toReturn;
 	}
 
