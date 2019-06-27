@@ -1670,6 +1670,12 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	//
 	// methods related to the network sensor
 	//
+	public JSONArray getLastNetworkSensorDeviceActivity() {
+		JSONArray toReturn = new JSONArray();
+		
+		
+		return toReturn;
+	}
 	
 	public boolean removeDeviceFromWhiteList(String deviceName) {
 		String sql="";
@@ -1793,7 +1799,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			}
 			
 			sql = "insert into " + tableName + " (scanTimeMillis, scanTimeString, deviceName ,deviceIpAddress, deviceMacAddress,whiteListStatus,isPresent,isMissing,isNew" + 
-					") values("+ scanTimeMillis + ",'"+ scanTimeString+"','"+deviceName +"','" + deviceIpAddress + "','"+ deviceMacAddress +"',"+isPresent +"," + isMissing + "," +isNew +")";
+					") values("+ scanTimeMillis + ",'"+ scanTimeString+"','"+deviceName +"','" + deviceIpAddress + "','"+ deviceMacAddress +"',"+ whiteListStatus + ","+isPresent +"," + isMissing + "," +isNew +")";
 			logger.debug("update network, sql " + sql);
 			int result = statement.executeUpdate(sql);
 			
