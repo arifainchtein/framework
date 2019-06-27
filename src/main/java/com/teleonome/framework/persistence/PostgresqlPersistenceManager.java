@@ -1686,7 +1686,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();	
-			rs = statement.executeQuery(sql);
+			
 			JSONObject data=null;
 			String dataPayload;
 			boolean found=false;
@@ -1697,7 +1697,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			for(int i=0;i<allTables.size();i++) {
 				 sql="select deviceName ,deviceIpAddress, deviceMacAddress,whiteListStatus,isPresent,isMissing,isNew from "+ allTables.get(i) +" where scantimemillis in (select scantimemillis from "+ allTables.get(i)+" order by scantimemillis desc limit 1) order by whiteListStatus, scantimemillis, deviceName asc";
 				logger.debug("getLastNetworkSensorDeviceActivity, sql " + sql);
-				
+				rs = statement.executeQuery(sql);
 				while(rs.next()){
 					
 					deviceName=rs.getString(1);
