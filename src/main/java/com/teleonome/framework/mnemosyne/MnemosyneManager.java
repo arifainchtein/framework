@@ -112,6 +112,9 @@ public class MnemosyneManager {
 	//
 	// Methods related to the NetworkSensor
 	//
+	public JSONArray getLastNetworkSensorDeviceActivity( ) {
+		return aDBManager.getLastNetworkSensorDeviceActivity( );
+	}
 	public void storeNetworkStatus(JSONArray deviceList, JSONObject devicesChanges, long sampleTimeMillis, String sampleTimeString) {
 		//
 		// stre data into the networkdeviceactivity

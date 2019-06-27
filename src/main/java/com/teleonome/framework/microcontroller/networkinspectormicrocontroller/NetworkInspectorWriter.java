@@ -57,7 +57,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 
 	class GenerateAnalysisThread extends Thread{
 		public void run() {
-			String sensorDataString;
+			
 			long startingTime = System.currentTimeMillis();
 
 
@@ -86,8 +86,6 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			//
 			logger.debug("Starting again at " + new Date());
 			startingTime = System.currentTimeMillis();
-			sensorDataString = performAnalysis(arpScanRetry);
-			
 			
 			
 			Hashtable<String, JSONObject> arpScanInfo =  getArpScanInfo(arpScanRetry);
@@ -111,7 +109,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				}
 				deviceListJSONArray.put(sensorDataJSONObject);
 			}
-			
+			int numberOfDevices = deviceListJSONArray.length();
 			
 			
 			
@@ -165,10 +163,13 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				long sampleTimeMillis = System.currentTimeMillis();
 				SimpleDateFormat simpleFormatter = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
 				String sampleTimeString = simpleFormatter.format(new Timestamp(sampleTimeMillis));
-				String finalSensorDataString =sensorDataString + "#" + diffAnalysisJSONObject.toString()+"#" + twoDecimalFormat.format(downloadSpeed)+"#"+twoDecimalFormat.format(uploadSpeed)+"#" +twoDecimalFormat.format(pingTime) + "#" + sampleTimeMillis + "#" + sampleTimeString;
+				aMnemosyneManager.storeNetworkStatus(deviceListJSONArray, diffAnalysisJSONObject, sampleTimeMillis , sampleTimeString);
+				JSONArray lastNetworkActivityJSONArray = aMnemosyneManager.getLastNetworkSensorDeviceActivity();
+				
+				String finalSensorDataString =numberOfDevices + "#" + lastNetworkActivityJSONArray.toString() + "#" + diffAnalysisJSONObject.toString()+"#" + twoDecimalFormat.format(downloadSpeed)+"#"+twoDecimalFormat.format(uploadSpeed)+"#" +twoDecimalFormat.format(pingTime) + "#" + sampleTimeMillis + "#" + sampleTimeString;
 				logger.debug("finalSensorDataString=" +finalSensorDataString);
 				
-				aMnemosyneManager.storeNetworkStatus(deviceListJSONArray, diffAnalysisJSONObject, sampleTimeMillis , sampleTimeString);
+				
 				FileUtils.writeStringToFile(new File("NetworkSensor.json"), finalSensorDataString ,  Charset.defaultCharset(),false);
 				long totalTime = System.currentTimeMillis()-startingTime;
 
@@ -244,7 +245,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 
 			return toReturn;
 		}
-		private  String performAnalysis(int arpScanRetry) {
+		private  JSONArray performAnalysis(int arpScanRetry) {
 			long startingTime=System.currentTimeMillis();
 			Hashtable<String, JSONObject> arpScanInfo =  getArpScanInfo(arpScanRetry);
 			logger.debug("got getArpScanInfos, arpScanInfo=" + arpScanInfo.size());
@@ -269,10 +270,10 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			//System.out.println("ArpScanInfo found # of devices=" + arpScanInfo.size());
 			long totalTime = System.currentTimeMillis()-startingTime;
 			//System.out.println(" Total time=" + Utils.getElapsedTimeHoursMinutesSecondsString(totalTime));
-			String getSensorDataString =  arpScanInfo.size() + "#"+ sensorDataStringJSONArray.toString();
+			//String getSensorDataString =  arpScanInfo.size() + "#"+ sensorDataStringJSONArray.toString();
 			//logger.debug("getSensorDataString=" + getSensorDataString);
 			
-			return getSensorDataString;
+			return sensorDataStringJSONArray;
 		}
 
 		public Hashtable<String, JSONObject> getArpScanInfo(int arpScanRetry) {

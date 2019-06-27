@@ -1670,12 +1670,73 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	//
 	// methods related to the network sensor
 	//
-	public JSONObject getLastNetworkSensorDeviceActivity( ) {
-		JSONArray elements =  getNetworkSensorDeviceActivityByPeriod(System.currentTimeMillis(),System.currentTimeMillis());
-		JSONObject toReturn = new JSONObject();
-		if(elements.length()>0) {
-			toReturn = elements.getJSONObject(elements.length()-1); 
+	public JSONArray getLastNetworkSensorDeviceActivity( ) {
+		JSONArray toReturn = new JSONArray();
+		
+		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.NETWORK_DEVICE_ACTIVITY_TABLE,System.currentTimeMillis(), System.currentTimeMillis());
+		String sql="";
+		
+		Connection connection=null;
+		Statement statement=null;
+		ResultSet rs=null;
+
+		 	
+		 
+		try {
+
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();	
+			rs = statement.executeQuery(sql);
+			JSONObject data=null;
+			String dataPayload;
+			boolean found=false;
+			long scanTimeMillis;
+			String scanTimeString, deviceName ,deviceIpAddress, deviceMacAddress;
+			boolean whiteListStatus,isPresent,isMissing,isNew;
+			JSONObject anObject;
+			for(int i=0;i<allTables.size();i++) {
+				 sql="select deviceName ,deviceIpAddress, deviceMacAddress,whiteListStatus,isPresent,isMissing,isNew from "+ allTables.get(i) +" where scantimemillis in (select scantimemillis from "+ allTables.get(i)+" order by scantimemillis desc limit 1) order by whiteListStatus, scantimemillis, deviceName asc";
+				logger.debug("getLastNetworkSensorDeviceActivity, sql " + sql);
+				
+				while(rs.next()){
+					
+					deviceName=rs.getString(1);
+					deviceIpAddress=rs.getString(2);
+					deviceMacAddress=rs.getString(3);
+					whiteListStatus=rs.getBoolean(4);
+					isPresent=rs.getBoolean(5);
+					isMissing=rs.getBoolean(6);
+					isNew=rs.getBoolean(7);
+					
+					anObject = new JSONObject();
+					
+					anObject.put(TeleonomeConstants.DEVICE_NAME, deviceName);
+					anObject.put(TeleonomeConstants.IP_ADDRESS, deviceIpAddress);
+					anObject.put(TeleonomeConstants.MAC_ADDRESS, deviceMacAddress);
+					anObject.put("White List Status", whiteListStatus);
+					anObject.put("Is Present", isPresent);
+					anObject.put("Is Missing", isMissing);
+					anObject.put("Is New", isNew);
+					toReturn.put(anObject);
+				}
+			}
+			
+			
+		} catch (SQLException e) {
+			//System.out.println("bad sql:" + sql);
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			try {
+				if(rs!=null)rs.close();
+				if(statement!=null)statement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		}
+		
 		return toReturn;
 	}
 	
