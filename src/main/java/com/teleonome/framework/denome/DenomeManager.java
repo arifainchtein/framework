@@ -230,6 +230,9 @@ public class DenomeManager {
 		aMnemosyneManager=s;
 	}
 
+	public MnemosyneManager getMnemosyneManager( ) {
+		return aMnemosyneManager;
+	}
 	public String getSelectedDenomeFileName(){
 		return selectedDenomeFileName;
 	}

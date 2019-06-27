@@ -774,6 +774,13 @@ public class TeleonomeConstants {
 	public static final String TIME_UNIT_MONTH="Month";
 	public static final String TIME_UNIT_YEAR="Year";
 	public static final String PULSE_TABLE="pulse";
+	public static final String IP_ADDRESS="IP Address";
+	public static final String DEVICE_NAME="Device Name";
+	public static final String MAC_ADDRESS="Mac Address";
+	
+	public static final String NETWORK_DEVICE_ACTIVITY_TABLE="networkdeviceactivity";
+	public static final String NETWORK_DEVICE_WHITELIST_TABLE="networkdevicewhitelist";
+	
 	public static final String ORGANISMPULSE_TABLE="organismpulse";
 	
 	public static final String MOTHER_REMEMBERED_VALUES_TABLE="motherrememberedvalues";

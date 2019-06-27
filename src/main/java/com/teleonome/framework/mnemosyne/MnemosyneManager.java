@@ -109,6 +109,42 @@ public class MnemosyneManager {
 
 	}
 
+	//
+	// Methods related to the NetworkSensor
+	//
+	public void storeNetworkStatus(JSONArray deviceList, JSONObject devicesChanges, long sampleTimeMillis, String sampleTimeString) {
+		//
+		// stre data into the networkdeviceactivity
+		//
+		JSONObject deviceInfo;
+		boolean whiteListStatus, isPresent, isMissing, isNew;
+		JSONArray newDevices = devicesChanges.getJSONArray("New");
+		String deviceName;
+		for(int i=0;i<deviceList.length();i++){
+			deviceInfo = deviceList.getJSONObject(i);
+			deviceName = deviceInfo.getString("Device Name");
+			whiteListStatus=aDBManager.isDeviceInWhiteList(deviceInfo.getString(TeleonomeConstants.MAC_ADDRESS));
+			isPresent=true;
+			isMissing=false;
+			isNew=false;
+			for(int j=0;j<newDevices.length();j++){
+				if(deviceName.equals(newDevices.getString(j))){
+					isNew=true;
+				}
+			}
+			aDBManager.storeNetworkDeviceActivity(sampleTimeMillis,sampleTimeString,deviceName ,deviceInfo.getString("IP Address"), deviceInfo.getString("Mac Address"), whiteListStatus, isPresent, isMissing, isNew); 
+		}
+	}
+	
+	//
+	// End of Methods related to the NetworkSensor
+	//
+	
+	/**
+	 * 
+	 * @param aMnemosyconForgetParameters
+	 * @param mnemosyconType
+	 */
 	public void forget(JSONObject aMnemosyconForgetParameters, String mnemosyconType) {
 
 		if(mnemosyconType.equals(TeleonomeConstants.MNEMOSYCON_TYPE_DYNAMIC)) {

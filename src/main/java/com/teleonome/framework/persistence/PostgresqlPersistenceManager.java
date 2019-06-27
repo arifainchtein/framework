@@ -1667,6 +1667,157 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		return toReturn;
 	}
 	
+	//
+	// methods related to the network sensor
+	//
+	
+	public boolean removeDeviceFromWhiteList(String deviceName) {
+		String sql="";
+		Connection connection=null;
+		Statement statement = null;
+		boolean toReturn=false;
+		ResultSet rs=null;
+		try {
+
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
+			
+			sql = "delete from NetworkDeviceWhiteList where deviceName ='"+ deviceName+"')";
+			logger.debug("delete  NetworkDeviceWhiteList, sql " + sql);
+			int result = statement.executeUpdate(sql);
+			toReturn=true;
+		} catch (SQLException e) {
+			//System.out.println("bad sql:" + sql);
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			try {
+				if(rs!=null)rs.close();
+				if(statement!=null)statement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		return toReturn;
+	}
+	
+	public boolean addDeviceToWhiteList(String deviceName, String macAddress) {
+		String sql="";
+		Connection connection=null;
+		Statement statement = null;
+		boolean toReturn=false;
+		ResultSet rs=null;
+		try {
+
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
+			
+			sql = "insert into NetworkDeviceWhiteList (deviceName , deviceMacAddress) values('"+ deviceName+"','"+macAddress +"')";
+			logger.debug("insert  NetworkDeviceWhiteList, sql " + sql);
+			int result = statement.executeUpdate(sql);
+			toReturn=true;
+		} catch (SQLException e) {
+			//System.out.println("bad sql:" + sql);
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			try {
+				if(rs!=null)rs.close();
+				if(statement!=null)statement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		return toReturn;
+	}
+	public boolean isDeviceInWhiteList(String macAddress) {
+
+		Connection connection = null;
+		Statement statement = null;
+		String sql = "select count(deviceMacAddress) from Teleonome where deviceMacAddress='"+macAddress +"'";
+		ResultSet rs = null;
+		int count=0;
+		boolean toReturn=false;
+
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(sql);
+
+			while(rs.next()){
+				count = rs.getInt(1);
+			}
+			statement.close();
+			connectionPool.closeConnection(connection);
+			if(count>0)toReturn= true;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			try {
+				if(rs!=null)rs.close();
+				if(statement!=null)statement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+
+		}
+		return toReturn;
+	}
+	
+	public boolean storeNetworkDeviceActivity(long scanTimeMillis, String scanTimeString,String  deviceName ,String deviceIpAddress, String deviceMacAddress,boolean whiteListStatus,boolean isPresent,boolean isMissing,boolean isNew) { 
+		String sql="";
+		Connection connection=null;
+		Statement statement = null;
+		boolean toReturn=false;
+		ResultSet rs=null;
+		try {
+
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
+			Calendar cal = Calendar.getInstance();
+			String tableName = getTableNameByCalendar(TeleonomeConstants.NETWORK_DEVICE_ACTIVITY_TABLE,  cal);
+			if(!tableExists(tableName)) {
+				sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.NETWORK_DEVICE_ACTIVITY_TABLE +" with no data";
+				int result = statement.executeUpdate(sql);
+				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
+			}
+			
+			sql = "insert into " + tableName + " (scanTimeMillis, scanTimeString, deviceName ,deviceIpAddress, deviceMacAddress,whiteListStatus,isPresent,isMissing,isNew" + 
+					") values("+ scanTimeMillis + ",'"+ scanTimeString+"','"+deviceName +"','" + deviceIpAddress + "','"+ deviceMacAddress +"',"+isPresent +"," + isMissing + "," +isNew +")";
+			logger.debug("update network, sql " + sql);
+			int result = statement.executeUpdate(sql);
+			
+			toReturn=true;
+		} catch (SQLException e) {
+			//System.out.println("bad sql:" + sql);
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			try {
+				if(rs!=null)rs.close();
+				if(statement!=null)statement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		return toReturn;
+	}
+	
+	//
+	// end of methods related to the network sensor
+	//
 	private String getTableNameByCalendar(String prefix, Calendar cal) {
 		String tableName = prefix + "_" + cal.get(Calendar.YEAR) +  "_" + (1+cal.get(Calendar.MONTH)) +  "_" + cal.get(Calendar.DATE);
 		return tableName;

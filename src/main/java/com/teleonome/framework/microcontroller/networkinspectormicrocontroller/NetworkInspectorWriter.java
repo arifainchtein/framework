@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.teleonome.framework.TeleonomeConstants;
+import com.teleonome.framework.mnemosyne.MnemosyneManager;
 import com.teleonome.framework.network.NetworkUtilities;
 import com.teleonome.framework.utils.Utils;
 
@@ -29,15 +30,17 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 	NetworkInspectorReader aNetworkInspectorReader;
 	Logger logger;
 	int arpScanRetry=8;
-	String IP_ADDRESS="IP Address";
-	String DEVICE_NAME="Device Name";
+	
+	
 	DecimalFormat twoDecimalFormat = new DecimalFormat("0.00");
-
-	public NetworkInspectorWriter(Writer out, NetworkInspectorReader c, int ap) {
+	MnemosyneManager aMnemosyneManager;
+	
+	public NetworkInspectorWriter(Writer out, NetworkInspectorReader c, int ap, MnemosyneManager m) {
 		super(out);
 		aNetworkInspectorReader=c;
 		logger = Logger.getLogger(getClass());
 		arpScanRetry=ap;
+		aMnemosyneManager=m;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -59,10 +62,10 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 
 
 			int numDevices;
-			JSONArray deviceListJSONArray, previousDeviceListJSONArray = null;
+			JSONArray  previousDeviceListJSONArray = null;
 			String[] tokens;
 			long arpScanDuration,  diffAnalysisDuration;
-			JSONObject diffAnalysisJSNArray = new JSONObject();
+			JSONObject diffAnalysisJSONObject = new JSONObject();
 			//
 			// Check if there is an analysis
 			//
@@ -84,22 +87,50 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			logger.debug("Starting again at " + new Date());
 			startingTime = System.currentTimeMillis();
 			sensorDataString = performAnalysis(arpScanRetry);
-			tokens =  sensorDataString.split("#");
-			numDevices = Integer.parseInt(tokens[0]);
-			deviceListJSONArray = new JSONArray(tokens[1]);
+			
+			
+			
+			Hashtable<String, JSONObject> arpScanInfo =  getArpScanInfo(arpScanRetry);
+			logger.debug("got getArpScanInfos, arpScanInfo=" + arpScanInfo.size());
+			JSONObject nmapDetail,infoObj;
+			JSONArray deviceListJSONArray = new JSONArray();
+			JSONObject sensorDataJSONObject;
+			String arpScanIpAddress;
+			for (Enumeration<String> en = arpScanInfo.keys();en.hasMoreElements();) {
+				arpScanIpAddress = en.nextElement();
+				infoObj = arpScanInfo.get(arpScanIpAddress);
+
+				sensorDataJSONObject = new JSONObject();
+				sensorDataJSONObject.put(TeleonomeConstants.IP_ADDRESS, infoObj.getString(TeleonomeConstants.IP_ADDRESS));
+				sensorDataJSONObject.put(TeleonomeConstants.MAC_ADDRESS, infoObj.getString(TeleonomeConstants.MAC_ADDRESS));
+				
+				if(infoObj.has(TeleonomeConstants.DEVICE_NAME)) {
+					sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, infoObj.getString(TeleonomeConstants.DEVICE_NAME));
+				}else {
+					sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, infoObj.getString(TeleonomeConstants.IP_ADDRESS));
+				}
+				deviceListJSONArray.put(sensorDataJSONObject);
+			}
+			
+			
+			
+			
+			
+			numDevices = arpScanInfo.size();
+			
 			long arpScanEndTime= System.currentTimeMillis();
 			arpScanDuration = arpScanEndTime - startingTime;
 			//
 			// 2 perform the differential analysis
 			//
-			diffAnalysisJSNArray = new JSONObject();
+			diffAnalysisJSONObject = new JSONObject();
 			logger.debug("previousDeviceListJSONArray=" + previousDeviceListJSONArray);
 			if(previousDeviceListJSONArray!=null) {
 				//
 				//perform analysis
-				diffAnalysisJSNArray = performDiffAnalaysis(previousDeviceListJSONArray, deviceListJSONArray);
-				logger.debug(diffAnalysisJSNArray.toString(4));
-				previousDeviceListJSONArray = new JSONArray(tokens[1]);	
+				diffAnalysisJSONObject = performDiffAnalaysis(previousDeviceListJSONArray, deviceListJSONArray);
+				logger.debug(diffAnalysisJSONObject.toString(4));
+				previousDeviceListJSONArray = new JSONArray(deviceListJSONArray.toString());	
 			}
 			long diffAnalysisEndTime= System.currentTimeMillis();
 			diffAnalysisDuration = System.currentTimeMillis()- diffAnalysisEndTime;
@@ -134,8 +165,10 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				long sampleTimeMillis = System.currentTimeMillis();
 				SimpleDateFormat simpleFormatter = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
 				String sampleTimeString = simpleFormatter.format(new Timestamp(sampleTimeMillis));
-				String finalSensorDataString =sensorDataString + "#" + diffAnalysisJSNArray.toString()+"#" + twoDecimalFormat.format(downloadSpeed)+"#"+twoDecimalFormat.format(uploadSpeed)+"#" +twoDecimalFormat.format(pingTime) + "#" + sampleTimeMillis + "#" + sampleTimeString;
+				String finalSensorDataString =sensorDataString + "#" + diffAnalysisJSONObject.toString()+"#" + twoDecimalFormat.format(downloadSpeed)+"#"+twoDecimalFormat.format(uploadSpeed)+"#" +twoDecimalFormat.format(pingTime) + "#" + sampleTimeMillis + "#" + sampleTimeString;
 				logger.debug("finalSensorDataString=" +finalSensorDataString);
+				
+				aMnemosyneManager.storeNetworkStatus(deviceListJSONArray, diffAnalysisJSONObject, sampleTimeMillis , sampleTimeString);
 				FileUtils.writeStringToFile(new File("NetworkSensor.json"), finalSensorDataString ,  Charset.defaultCharset(),false);
 				long totalTime = System.currentTimeMillis()-startingTime;
 
@@ -169,12 +202,12 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			boolean found=false;
 			for(int i=0;i<previousDeviceListJSONArray.length();i++) {
 				previousSensorDataJSONObject = previousDeviceListJSONArray.getJSONObject(i);
-				previousDeviceName =  previousSensorDataJSONObject.getString(DEVICE_NAME);
+				previousDeviceName =  previousSensorDataJSONObject.getString(TeleonomeConstants.DEVICE_NAME);
 				found=false;
 				found:
 					for(int j=0;j<deviceListJSONArray.length();j++) {
 						currentSensorDataJSONObject = deviceListJSONArray.getJSONObject(j);
-						currentDeviceName =  currentSensorDataJSONObject.getString(DEVICE_NAME);
+						currentDeviceName =  currentSensorDataJSONObject.getString(TeleonomeConstants.DEVICE_NAME);
 						if(currentDeviceName.equals(previousDeviceName)) {
 							found=true;
 							break found;
@@ -190,12 +223,12 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			//
 			for(int j=0;j<deviceListJSONArray.length();j++) {
 				currentSensorDataJSONObject = deviceListJSONArray.getJSONObject(j);
-				currentDeviceName =  currentSensorDataJSONObject.getString(DEVICE_NAME);
+				currentDeviceName =  currentSensorDataJSONObject.getString(TeleonomeConstants.DEVICE_NAME);
 				found=false;
 				found:
 					for(int i=0;i<previousDeviceListJSONArray.length();i++) {
 						previousSensorDataJSONObject = previousDeviceListJSONArray.getJSONObject(i);
-						previousDeviceName =  previousSensorDataJSONObject.getString(DEVICE_NAME);
+						previousDeviceName =  previousSensorDataJSONObject.getString(TeleonomeConstants.DEVICE_NAME);
 						if(currentDeviceName.equals(previousDeviceName)) {
 							found=true;
 							break found;
@@ -224,11 +257,12 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				infoObj = arpScanInfo.get(arpScanIpAddress);
 
 				sensorDataJSONObject = new JSONObject();
-				sensorDataJSONObject.put(IP_ADDRESS, infoObj.getString(IP_ADDRESS));
-				if(infoObj.has(DEVICE_NAME)) {
-					sensorDataJSONObject.put(DEVICE_NAME, infoObj.getString(DEVICE_NAME));
+				sensorDataJSONObject.put(TeleonomeConstants.IP_ADDRESS, infoObj.getString(TeleonomeConstants.IP_ADDRESS));
+				sensorDataJSONObject.put(TeleonomeConstants.MAC_ADDRESS, infoObj.getString(TeleonomeConstants.MAC_ADDRESS));
+				if(infoObj.has(TeleonomeConstants.DEVICE_NAME)) {
+					sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, infoObj.getString(TeleonomeConstants.DEVICE_NAME));
 				}else {
-					sensorDataJSONObject.put(DEVICE_NAME, infoObj.getString(IP_ADDRESS));
+					sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, infoObj.getString(TeleonomeConstants.IP_ADDRESS));
 				}
 				sensorDataStringJSONArray.put(sensorDataJSONObject);
 			}
@@ -290,9 +324,9 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 								deviceCount++;
 								//System.out.println("ipAddress=" + ipAddress + " macAddress=" + macAddress + " deviceName=" + deviceName);
 								itemJSNObject = new JSONObject();
-								itemJSNObject.put(IP_ADDRESS, ipAddress.trim());
-								itemJSNObject.put("MacAddress", macAddress);
-								itemJSNObject.put(DEVICE_NAME, deviceName);
+								itemJSNObject.put(TeleonomeConstants.IP_ADDRESS, ipAddress.trim());
+								itemJSNObject.put(TeleonomeConstants.MAC_ADDRESS, macAddress);
+								itemJSNObject.put(TeleonomeConstants.DEVICE_NAME, deviceName);
 								toReturn.put(ipAddress.trim(), itemJSNObject);
 
 							}
