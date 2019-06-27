@@ -1740,7 +1740,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 
 		Connection connection = null;
 		Statement statement = null;
-		String sql = "select count(deviceMacAddress) from Teleonome where deviceMacAddress='"+macAddress +"'";
+		String sql = "select count(deviceMacAddress) from NetworkDeviceWhiteList where deviceMacAddress='"+macAddress +"'";
 		ResultSet rs = null;
 		int count=0;
 		boolean toReturn=false;
