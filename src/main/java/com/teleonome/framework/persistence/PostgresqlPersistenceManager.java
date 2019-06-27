@@ -1670,11 +1670,11 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	//
 	// methods related to the network sensor
 	//
-	public JSONObject getLastNetworkSensorDeviceActivity() {
+	public JSONObject getLastNetworkSensorDeviceActivity( ) {
 		JSONArray elements =  getNetworkSensorDeviceActivityByPeriod(System.currentTimeMillis(),System.currentTimeMillis());
 		JSONObject toReturn = new JSONObject();
 		if(elements.length()>0) {
-			toReturn = elements.getJSONObject(0); 
+			toReturn = elements.getJSONObject(elements.length()-1); 
 		}
 		return toReturn;
 	}
@@ -1689,6 +1689,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		Statement statement=null;
 		ResultSet rs=null;
 
+		 	
+		 
 		try {
 
 			connection = connectionPool.getConnection();
@@ -1702,7 +1704,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			boolean whiteListStatus,isPresent,isMissing,isNew;
 			JSONObject anObject;
 			for(int i=0;i<allTables.size();i++) {
-				 sql="select scanTimeMillis, scanTimeString, deviceName ,deviceIpAddress, deviceMacAddress,whiteListStatus,isPresent,isMissing,isNew from "+ allTables.get(i) +" where scantimemillis in (select scantimemillis from "+ allTables.get(i)+" order by scantimemillis asc limit 1)";
+				 sql="select scanTimeMillis, scanTimeString, deviceName ,deviceIpAddress, deviceMacAddress,whiteListStatus,isPresent,isMissing,isNew from "+ allTables.get(i) +" where scantimemillis in (select scantimemillis from "+ allTables.get(i)+" order by scantimemillis desc) order by whiteListStatus, scantimemillis, deviceName asc";
 				logger.debug("getLastNetworkSensorDeviceActivity, sql " + sql);
 				
 				while(rs.next()){
@@ -1781,6 +1783,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
+
+	
 	
 	public boolean addDeviceToWhiteList(String deviceName, String macAddress) {
 		String sql="";
