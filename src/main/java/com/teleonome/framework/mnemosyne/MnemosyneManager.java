@@ -119,11 +119,12 @@ public class MnemosyneManager {
 		JSONObject deviceInfo;
 		boolean whiteListStatus, isPresent, isMissing, isNew;
 		JSONArray newDevices = devicesChanges.getJSONArray("New");
+		JSONArray missingDevices = devicesChanges.getJSONArray("Missing");
 		String deviceName;
 		for(int i=0;i<deviceList.length();i++){
 			deviceInfo = deviceList.getJSONObject(i);
-			deviceName = deviceInfo.getString("Device Name");
-			whiteListStatus=aDBManager.isDeviceInWhiteList(deviceInfo.getString(TeleonomeConstants.MAC_ADDRESS));
+			deviceName = deviceInfo.getString(TeleonomeConstants.DEVICE_NAME);
+			whiteListStatus=aDBManager.isDeviceInWhiteList(deviceName);
 			isPresent=true;
 			isMissing=false;
 			isNew=false;
@@ -132,7 +133,17 @@ public class MnemosyneManager {
 					isNew=true;
 				}
 			}
-			aDBManager.storeNetworkDeviceActivity(sampleTimeMillis,sampleTimeString,deviceName ,deviceInfo.getString("IP Address"), deviceInfo.getString("Mac Address"), whiteListStatus, isPresent, isMissing, isNew); 
+			aDBManager.storeNetworkDeviceActivity(sampleTimeMillis,sampleTimeString,deviceName ,deviceInfo.getString("IP Address"), deviceInfo.getString("Mac Address"), whiteListStatus, isPresent, isMissing, isNew);
+		}
+		
+		
+		
+		for(int j=0;j<missingDevices.length();j++){
+			deviceName =missingDevices.getString(j);
+			whiteListStatus=aDBManager.isDeviceInWhiteList(deviceName);
+			
+			aDBManager.storeNetworkDeviceActivity(sampleTimeMillis,sampleTimeString,deviceName ,"", "", whiteListStatus, false, true, false); 
+			
 		}
 	}
 	
