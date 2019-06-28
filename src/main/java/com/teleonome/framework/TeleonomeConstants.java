@@ -786,8 +786,8 @@ public class TeleonomeConstants {
 	public static final String NETWORK_DEVICE_WHITELIST_TABLE="networkdevicewhitelist";
 	public static final String NETWORK_SCAN_MILLIS="Scan Millis";
 	public static final String NETWORK_SCAN_TIME_STRING="Scan Time String";
-	public static final String DEVICE_LIST="Device List";
-	public static final String DEVICE_LIST_CHANGES="Device List Changes";
+	public static final String DEVICE_LIST="DeviceList";
+	public static final String DEVICE_LIST_CHANGES="DeviceListChanges";
 	public static final String ORGANISMPULSE_TABLE="organismpulse";
 	
 	public static final String MOTHER_REMEMBERED_VALUES_TABLE="motherrememberedvalues";
