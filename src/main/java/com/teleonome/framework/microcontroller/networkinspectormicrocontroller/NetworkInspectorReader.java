@@ -27,7 +27,7 @@ public class NetworkInspectorReader extends BufferedReader{
 		SimpleDateFormat simpleFormatter = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
 		String sampleTimeString = simpleFormatter.format(new Timestamp(sampleTimeMillis));
 		
-		String toReturn="-1#[]#{}#0#0#0#" + sampleTimeMillis + "#" + sampleTimeString;
+		String toReturn="-1#-1#[]#{}#0#0#0#" + sampleTimeMillis + "#" + sampleTimeString;
 		
 		if(currentCommand.equals("GetSensorData")) {
 			
@@ -39,8 +39,8 @@ public class NetworkInspectorReader extends BufferedReader{
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
 				}
-				if(toReturn==null || toReturn.split("#").length!=8) {
-					toReturn="-1#[]#{}#0#0#0#" + sampleTimeMillis + "#" + sampleTimeString;
+				if(toReturn==null || toReturn.split("#").length!=9) {
+					toReturn="-1#-1#[]#{}#0#0#0#" + sampleTimeMillis + "#" + sampleTimeString;
 				}
 			}
 			
