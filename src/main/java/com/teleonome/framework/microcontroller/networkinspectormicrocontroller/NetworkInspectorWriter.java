@@ -73,7 +73,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			try {
 				previousData = FileUtils.readFileToString(new File("NetworkSensor.json") ,  Charset.defaultCharset());
 				tokens =  previousData.split("#");
-				previousDeviceListJSONArray = new JSONArray(tokens[1]);
+				previousDeviceListJSONArray = new JSONArray(tokens[2]);
 			} catch (IOException e2) {
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e2));
