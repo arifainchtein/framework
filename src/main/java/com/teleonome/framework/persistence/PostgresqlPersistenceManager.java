@@ -1713,10 +1713,10 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					anObject.put(TeleonomeConstants.DEVICE_NAME, deviceName);
 					anObject.put(TeleonomeConstants.IP_ADDRESS, deviceIpAddress);
 					anObject.put(TeleonomeConstants.MAC_ADDRESS, deviceMacAddress);
-					anObject.put("White List Status", whiteListStatus);
-					anObject.put("Is Present", isPresent);
-					anObject.put("Is Missing", isMissing);
-					anObject.put("Is New", isNew);
+					anObject.put(TeleonomeConstants.WHITE_LIST_STATUS, whiteListStatus);
+					anObject.put(TeleonomeConstants.IS_DEVICE_PRESENT, isPresent);
+					anObject.put(TeleonomeConstants.IS_DEVICE_MISSING, isMissing);
+					anObject.put(TeleonomeConstants.IS_DEVICE_NEW, isNew);
 					toReturn.put(anObject);
 				}
 			}
@@ -1780,15 +1780,15 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					isNew=rs.getBoolean(9);
 					
 					anObject = new JSONObject();
-					anObject.put("Scan Millis", scanTimeMillis);
-					anObject.put("Scan Time String", scanTimeString);
+					anObject.put(TeleonomeConstants.NETWORK_SCAN_MILLIS, scanTimeMillis);
+					anObject.put(TeleonomeConstants.NETWORK_SCAN_TIME_STRING, scanTimeString);
 					anObject.put(TeleonomeConstants.DEVICE_NAME, deviceName);
 					anObject.put(TeleonomeConstants.IP_ADDRESS, deviceIpAddress);
 					anObject.put(TeleonomeConstants.MAC_ADDRESS, deviceMacAddress);
-					anObject.put("White List Status", whiteListStatus);
-					anObject.put("Is Present", isPresent);
-					anObject.put("Is Missing", isMissing);
-					anObject.put("Is New", isNew);
+					anObject.put(TeleonomeConstants.WHITE_LIST_STATUS, whiteListStatus);
+					anObject.put(TeleonomeConstants.IS_DEVICE_PRESENT, isPresent);
+					anObject.put(TeleonomeConstants.IS_DEVICE_MISSING, isMissing);
+					anObject.put(TeleonomeConstants.IS_DEVICE_NEW, isNew);
 					toReturn.put(anObject);
 				}
 			}

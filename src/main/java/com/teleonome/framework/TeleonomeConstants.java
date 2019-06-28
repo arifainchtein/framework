@@ -214,6 +214,7 @@ public class TeleonomeConstants {
 	public static final String DENECHAIN_OPERATIONAL_DATA ="Operational Data";
 	public static final String DENECHAIN_SENSOR_DATA ="Sensor Data";
 	
+	public static final String DENE_NETWORK_SENSOR_STATUS ="Network Status";
 	
 	
 	public static final String DENECHAIN_ORGANISM_CONFIGURATION="Organism Configuration";
@@ -777,10 +778,16 @@ public class TeleonomeConstants {
 	public static final String IP_ADDRESS="IP Address";
 	public static final String DEVICE_NAME="Device Name";
 	public static final String MAC_ADDRESS="Mac Address";
-	
+	public static final String WHITE_LIST_STATUS="White List Status";
+	public static final String IS_DEVICE_PRESENT="Is Present";
+	public static final String IS_DEVICE_MISSING = "Is Missing";
+	public static final String IS_DEVICE_NEW="Is New";
 	public static final String NETWORK_DEVICE_ACTIVITY_TABLE="networkdeviceactivity";
 	public static final String NETWORK_DEVICE_WHITELIST_TABLE="networkdevicewhitelist";
-	
+	public static final String NETWORK_SCAN_MILLIS="Scan Millis";
+	public static final String NETWORK_SCAN_TIME_STRING="Scan Time String";
+	public static final String DEVICE_LIST="Device List";
+	public static final String DEVICE_LIST_CHANGES="Device List Changes";
 	public static final String ORGANISMPULSE_TABLE="organismpulse";
 	
 	public static final String MOTHER_REMEMBERED_VALUES_TABLE="motherrememberedvalues";
@@ -996,6 +1003,9 @@ public class TeleonomeConstants {
 	//
 	// the different styles to present data
 	//
+	public static final String PANEL_VISUALIZATION_STYLE_NETWORK_SENSOR_DEVICE_STATUS_REPORT="NetworkSensorDeviceStatusReport";
+	public static final String PANEL_VISUALIZATION_STYLE_NETWORK_SENSOR_DEVICE_LIST_CHANGES_REPORT="NetworkSensorDeviceListChangesReport";
+	
 	public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_EXTERNAL_DATA="Single Value Panel External Data";
 	public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_COMPLETE_WIDTH_EXTERNAL_DATA="Single Value Panel Complete Width External Data";
 	public static final String PANEL_VISUALIZATION_COMPLETE_DENE_STYLE_SINGLE_VALUE_PANEL_EXTERNAL_DATA="Complete Dene Single Value Panel External Data";
