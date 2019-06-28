@@ -165,8 +165,8 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				String sampleTimeString = simpleFormatter.format(new Timestamp(sampleTimeMillis));
 				aMnemosyneManager.storeNetworkStatus(deviceListJSONArray, diffAnalysisJSONObject, sampleTimeMillis , sampleTimeString);
 				JSONArray lastNetworkActivityJSONArray = aMnemosyneManager.getLastNetworkSensorDeviceActivity();
-				
-				String finalSensorDataString =numberOfDevices + "#" + lastNetworkActivityJSONArray.toString() + "#" + diffAnalysisJSONObject.toString()+"#" + twoDecimalFormat.format(downloadSpeed)+"#"+twoDecimalFormat.format(uploadSpeed)+"#" +twoDecimalFormat.format(pingTime) + "#" + sampleTimeMillis + "#" + sampleTimeString;
+				int numberUnknowDevices = aMnemosyneManager.geNumberUnknowDevicesInLastSample();
+				String finalSensorDataString =numberOfDevices + "#" + numberUnknowDevices + "#" + lastNetworkActivityJSONArray.toString() + "#" + diffAnalysisJSONObject.toString()+"#" + twoDecimalFormat.format(downloadSpeed)+"#"+twoDecimalFormat.format(uploadSpeed)+"#" +twoDecimalFormat.format(pingTime) + "#" + sampleTimeMillis + "#" + sampleTimeString;
 				logger.debug("finalSensorDataString=" +finalSensorDataString);
 				
 				

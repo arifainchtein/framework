@@ -1670,6 +1670,42 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	//
 	// methods related to the network sensor
 	//
+	public int geNumberUnknowDevicesInLastSample() {
+		Connection connection = null;
+		Statement statement = null;
+		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.NETWORK_DEVICE_ACTIVITY_TABLE,System.currentTimeMillis(), System.currentTimeMillis());
+		String sql = "select count(deviceMacAddress) from "+ allTables.get(0)+" where whiteliststatus=false and scantimemillis in (select scantimemillis from "+ allTables.get(0)+" order by scantimemillis desc limit 1)";
+		ResultSet rs = null;
+		int toReturn=-1;
+		logger.debug("sql=" + sql);
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(sql);
+
+			while(rs.next()){
+				toReturn = rs.getInt(1);
+			}
+			statement.close();
+			connectionPool.closeConnection(connection);
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			try {
+				if(rs!=null)rs.close();
+				if(statement!=null)statement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+
+		}
+		return toReturn;
+	}
+	
 	public JSONArray getLastNetworkSensorDeviceActivity( ) {
 		JSONArray toReturn = new JSONArray();
 		

@@ -112,6 +112,9 @@ public class MnemosyneManager {
 	//
 	// Methods related to the NetworkSensor
 	//
+	public int geNumberUnknowDevicesInLastSample() {
+		return aDBManager.geNumberUnknowDevicesInLastSample();
+	}
 	public JSONArray getLastNetworkSensorDeviceActivity( ) {
 		return aDBManager.getLastNetworkSensorDeviceActivity( );
 	}
