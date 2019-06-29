@@ -614,7 +614,6 @@ class MappedBusThread extends Thread{
 						dataPayloadJSONObject = null;
 						if(aCommandRequest!=null){
 							command = aCommandRequest.getCommand();
-							commandCode = aCommandRequest.getCommandCode();
 							commandCodeType = aCommandRequest.getCommandCodeType();
 							logger.info("command=" + command  +  " commandCode=" + commandCode + " commandCodeType=" + commandCodeType);
 							if(commandCodeType!=null && commandCodeType.equals(TeleonomeConstants.TELEONOME_SECURITY_CODE)) {
@@ -653,6 +652,8 @@ class MappedBusThread extends Thread{
 									goodCommandCode=false;
 									commandCode=null;
 									command=null;
+									aCommandRequest=null;
+									
 								}
 							}
 
