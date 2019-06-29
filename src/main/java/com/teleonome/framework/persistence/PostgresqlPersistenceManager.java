@@ -2494,7 +2494,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	public CommandRequest getNextCommandToExecute(){
 
 		Connection connection = null;
-		Statement statement = null;d
+		Statement statement = null;
 		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.COMMAND_REQUESTS_TABLE, System.currentTimeMillis(), System.currentTimeMillis());
 		//
 		// we need the first one and the last one
