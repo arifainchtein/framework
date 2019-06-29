@@ -2494,8 +2494,13 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	public CommandRequest getNextCommandToExecute(){
 
 		Connection connection = null;
-		Statement statement = null;
-		String sql = "select id,command,commandCode,commandCodeType, payload from CommandRequests where status='"+ TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION +"'  order by createdOn asc limit 1";
+		Statement statement = null;d
+		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.COMMAND_REQUESTS_TABLE, System.currentTimeMillis(), System.currentTimeMillis());
+		//
+		// we need the first one and the last one
+		//
+		String newestTableName = allTables.get(0);
+		String sql = "select id,command,commandCode,commandCodeType, payload from "+newestTableName +" where status='"+ TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION +"'  order by createdOn asc limit 1";
 		ResultSet rs = null;
 		CommandRequest aCommandRequest = new CommandRequest();
 
