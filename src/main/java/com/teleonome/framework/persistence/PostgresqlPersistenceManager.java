@@ -2453,7 +2453,9 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		
 		Connection connection = null;;
 		Statement statement = null;
-		String sql = "select executedOn,status from CommandRequests where id="+ id;
+		ArrayList<String> allTables = getAllManagedTablesForAPeriod(TeleonomeConstants.COMMAND_REQUESTS_TABLE, System.currentTimeMillis(), System.currentTimeMillis());
+		String tableName = allTables.get(0);
+		String sql = "select executedOn,status from "+ tableName + " where id="+ id;
 		ResultSet rs = null;
 		JSONObject toReturn = new JSONObject();
 		try {
@@ -2652,7 +2654,10 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	public JSONObject markCommandAsBadCommandCode(int id, String reason){
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
-		String sql = "update CommandRequests set executedOn=?, status=?   where id=? returning  createdon, executedon, command, commandCodeType, status, commandcode, restartRequired";
+		ArrayList<String> allTables = getAllManagedTablesForAPeriod(TeleonomeConstants.COMMAND_REQUESTS_TABLE, System.currentTimeMillis(), System.currentTimeMillis());
+		String tableName = allTables.get(0);
+		String sql = "update "+tableName+" set executedOn=?, status=?   where id=? returning  createdon, executedon, command, commandCodeType, status, commandcode, restartRequired";
+		logger.debug("markCommandAsBadCommandCode, sql=" + sql);
 		ResultSet rs=null;
 		JSONObject toReturn=new JSONObject();
 		toReturn.put("id", id);
@@ -2703,7 +2708,9 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	public JSONObject markCommandCompleted(int id){
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
-		String sql = "update CommandRequests set executedOn=?, status=?   where id=? returning  createdon, executedon, command, status, commandcode, restartRequired";
+		ArrayList<String> allTables = getAllManagedTablesForAPeriod(TeleonomeConstants.COMMAND_REQUESTS_TABLE, System.currentTimeMillis(), System.currentTimeMillis());
+		String tableName = allTables.get(0);
+		String sql = "update "+tableName+" set executedOn=?, status=?   where id=? returning  createdon, executedon, command, status, commandcode, restartRequired";
 		ResultSet rs=null;
 		JSONObject toReturn=new JSONObject();
 		toReturn.put("id", id);
