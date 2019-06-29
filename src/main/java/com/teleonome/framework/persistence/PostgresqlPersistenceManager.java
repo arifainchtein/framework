@@ -2359,7 +2359,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			ArrayList<String> allTables = this.getAllTableNamesForManagedTable(TeleonomeConstants.COMMAND_REQUESTS_TABLE);
 			String sql = "";
 			for(int i=0;i<allTables.size();i++) {
-				sql = "update CommandRequests set status='"+ TeleonomeConstants.COMMAND_REQUEST_SKIPPED_AT_INIT +"'   where status ='"+ TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION +"' or status='" + TeleonomeConstants.COMMAND_REQUEST_NOT_EXECUTED +"'";
+				sql = "update "+ allTables.get(i)+" set status='"+ TeleonomeConstants.COMMAND_REQUEST_SKIPPED_AT_INIT +"'   where status ='"+ TeleonomeConstants.COMMAND_REQUEST_PENDING_EXECUTION +"' or status='" + TeleonomeConstants.COMMAND_REQUEST_NOT_EXECUTED +"'";
 				logger.debug("markAllNonExecutedAsSkipped, sql=" + sql);
 				statement.executeUpdate(sql);
 			}
