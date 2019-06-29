@@ -1670,6 +1670,41 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	//
 	// methods related to the network sensor
 	//
+	public int geNumberOfDevicesInLastSample(){
+		Connection connection = null;
+		Statement statement = null;
+		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.NETWORK_DEVICE_ACTIVITY_TABLE,System.currentTimeMillis(), System.currentTimeMillis());
+		String sql = "select count(deviceMacAddress) from "+ allTables.get(0)+" where scantimemillis in (select scantimemillis from "+ allTables.get(0)+" order by scantimemillis desc limit 1)";
+		ResultSet rs = null;
+		int toReturn=-1;
+		logger.debug("sql=" + sql);
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(sql);
+
+			while(rs.next()){
+				toReturn = rs.getInt(1);
+			}
+			statement.close();
+			connectionPool.closeConnection(connection);
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			try {
+				if(rs!=null)rs.close();
+				if(statement!=null)statement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+
+		}
+		return toReturn;
+	}
 	public int geNumberUnknowDevicesInLastSample() {
 		Connection connection = null;
 		Statement statement = null;
@@ -2518,7 +2553,10 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			whereClause = " where clientIp = '127.0.0.1'";
 		}
 		
-		String sql = "select id,createdon, executedon,command,status,payload, clientIp from CommandRequests " +  whereClause + "  order by createdOn desc limit " + limit + " offset " + offset;
+		String sql;
+		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.COMMAND_REQUESTS_TABLE,0, System.currentTimeMillis());
+		
+		
 		ResultSet rs = null;
 		ResultSet rs2 = null;
 		CommandRequest aCommandRequest = new CommandRequest();
@@ -2535,29 +2573,32 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
-			rs = statement.executeQuery(sql);
-			
-			while(rs.next()){
-				int id = rs.getInt(1);
-				long createdon = rs.getLong(2);
-				long executedon = rs.getLong(3);
-				String command = rs.getString(4);
-				
-				String status = rs.getString(5);
-				String payload = rs.getString(6);
-				String clientIp = rs.getString(7);
-				
-				o = new JSONObject();
-				o.put("id", id);
-				o.put("Createdon", createdon);
-				o.put("Executedon", executedon);
-				o.put("Command", command);
-				
-				o.put("Status", status);
-				o.put("Payload", payload);
-				o.put("ClientIp", clientIp);
-				valuesJSONArray.put(o);
+			for(int i=0;i<allTables.size();i++) {
+				 sql = "select id,createdon, executedon,command,status,payload, clientIp from "+allTables.get(i)+" " +  whereClause + "  order by createdOn desc limit " + limit + " offset " + offset;
+				 rs = statement.executeQuery(sql);
+					while(rs.next()){
+						int id = rs.getInt(1);
+						long createdon = rs.getLong(2);
+						long executedon = rs.getLong(3);
+						String command = rs.getString(4);
+						
+						String status = rs.getString(5);
+						String payload = rs.getString(6);
+						String clientIp = rs.getString(7);
+						
+						o = new JSONObject();
+						o.put("id", id);
+						o.put("Createdon", createdon);
+						o.put("Executedon", executedon);
+						o.put("Command", command);
+						
+						o.put("Status", status);
+						o.put("Payload", payload);
+						o.put("ClientIp", clientIp);
+						valuesJSONArray.put(o);
+					}
 			}
+			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.debug(Utils.getStringException(e));
