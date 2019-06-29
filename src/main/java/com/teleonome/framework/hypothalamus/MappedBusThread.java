@@ -610,6 +610,7 @@ class MappedBusThread extends Thread{
 					//
 					do {
 						aCommandRequest = hypothalamus.aDenomeManager.getNextCommandToExecute();
+						logger.debug("line 613 next command to execute= " + aCommandRequest);
 						dataPayloadJSONObject = null;
 						if(aCommandRequest!=null){
 							command = aCommandRequest.getCommand();
@@ -682,7 +683,7 @@ class MappedBusThread extends Thread{
 						e1.printStackTrace();
 					}
 					String asyncData="AsyncData";
-					logger.debug("line 105 microControllerPointerMicroControllerIndex=" + hypothalamus.microControllerPointerMicroControllerIndex);
+					logger.debug("line 685 microControllerPointerMicroControllerIndex=" + hypothalamus.microControllerPointerMicroControllerIndex);
 					long asyncRequestDelayMillis=0;
 					for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
 						microControllerPointer = (String)en.nextElement();
