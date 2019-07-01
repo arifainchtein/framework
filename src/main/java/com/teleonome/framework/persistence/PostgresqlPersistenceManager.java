@@ -2413,7 +2413,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 					"  commandCodeType character varying(20) NOT NULL,"+
 					"  requestpayload text,"+
 					"  payload text,"+
-					 " CONSTRAINT commandrequests_pkey PRIMARY KEY (id)"+
+					 " CONSTRAINT "+ tableName +"_pkey PRIMARY KEY (id)"+
 					 ")";
 
 				int result = statement.executeUpdate(sql);
