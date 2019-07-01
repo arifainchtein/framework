@@ -2397,7 +2397,25 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			String tableName = getTableNameByCalendar(TeleonomeConstants.COMMAND_REQUESTS_TABLE,  cal);
 			statement = connection.createStatement();
 			if(!tableExists(tableName)) {
-				sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.COMMAND_REQUESTS_TABLE +" with no data";
+				//
+				//dont use create table as table because the id goes from bigserial to bigint
+				//
+				//sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.COMMAND_REQUESTS_TABLE +" with no data";
+				sql="create table "+tableName+"("+
+					 "id serial NOT NULL,"+
+					  "createdon bigint,"+
+					 "executedon bigint,"+
+					 " command character varying(500) NOT NULL,"+
+					  "status character varying(500) NOT NULL,"+
+					  "clientIp character varying(20) NOT NULL,"+
+					 " restartRequired boolean not null,"+
+					  "commandCode character varying(20) NOT NULL,"+
+					"  commandCodeType character varying(20) NOT NULL,"+
+					"  requestpayload text,"+
+					"  payload text,"+
+					 " CONSTRAINT commandrequests_pkey PRIMARY KEY (id)"+
+					 ")";
+
 				int result = statement.executeUpdate(sql);
 				logger.debug("table " + tableName + " was not found so it was created, result=" + result);
 			}
@@ -2611,7 +2629,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 					orderedCommands.add(new AbstractMap.SimpleEntry<JSONObject,Long>(o, createdon));
 					Collections.sort(orderedCommands, new Comparator<Map.Entry<?, Long>>(){
 						public int compare(Map.Entry<?, Long> o1, Map.Entry<?, Long> o2) {
-							return o1.getValue().compareTo(o2.getValue());
+							return o2.getValue().compareTo(o1.getValue());
 						}});
 				}
 			}
