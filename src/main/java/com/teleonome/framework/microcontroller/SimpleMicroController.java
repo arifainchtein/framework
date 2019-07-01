@@ -31,6 +31,8 @@ import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.security.totp.TOTP;
 import com.teleonome.framework.utils.Utils;
 
+
+
 public class SimpleMicroController extends MotherMicroController {
 	StringWriter sw = new StringWriter();
 	String  dataString="dataString";

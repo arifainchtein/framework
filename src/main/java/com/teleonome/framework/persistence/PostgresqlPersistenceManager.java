@@ -50,7 +50,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	private Logger logger;  
 	private static DecimalFormat twoDecimalsFormat = new DecimalFormat(".##");
 	DateFormat managedTableDateFormat = new SimpleDateFormat("yyyy_M_d");
-	
+
 	private PostgresqlPersistenceManager(){
 		logger = Logger.getLogger(getClass());
 		logger.debug("Initiating DBManager");
@@ -74,7 +74,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		try {
 			InputStream input=null;
 			try{
-				 input = new FileInputStream("lib/app.properties");
+				input = new FileInputStream("lib/app.properties");
 
 				Properties prop = new Properties();
 
@@ -96,9 +96,9 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 					}
 				}
 			}
-	            System.out.println("port=" + port);
-	            		
-	            
+			System.out.println("port=" + port);
+
+
 			String DATABASE_URL = "postgres://postgres:"+pwd+"@localhost:"+ port +"/teleonome";
 			dbUri = new URI(DATABASE_URL);
 			String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() +  dbUri.getPath() ;
@@ -198,7 +198,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		int year = cal.get(Calendar.YEAR);
 		int month = cal.get(Calendar.MONTH) + 1;
 		int date = cal.get(Calendar.DATE);
-		
+
 		String[] tableNames = {TeleonomeConstants.PULSE_TABLE,TeleonomeConstants.ORGANISMPULSE_TABLE,TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE,TeleonomeConstants.COMMAND_REQUESTS_TABLE,TeleonomeConstants.MUTATION_EVENT_TABLE};
 		String sql = "";
 		Statement statement=null;
@@ -229,7 +229,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			}
 
 		}
-		
+
 		return toReturn;
 	}
 
@@ -278,7 +278,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}
 
-	
+
 
 	private ArrayList<String> getAllTableNamesForManagedTable(String prefix) {
 		ArrayList<String> toReturn = new ArrayList();
@@ -324,15 +324,15 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		String tableName;
 		for (Map.Entry<String, Date> entry2 : arrayList) {
 			tableName = entry2.getKey();
-			
+
 			toReturn.add(tableName);
 		}
 		logger.debug("getAllTableNamesForManagedTable returning =" + toReturn);
 		return toReturn;
 	}
-	
-	
-	
+
+
+
 	private boolean dropTable(String tableName) {
 		Connection connection=null;
 		Statement statement=null;
@@ -352,37 +352,37 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			logger.debug(s);
 
 		}finally{
-			
-				try {
-					if(statement!=null)statement.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					logger.debug(Utils.getStringException(e));
-				}
+
+			try {
+				if(statement!=null)statement.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
 			if(connection!=null)closeConnection(connection);
 		}
 
 		return toReturn;
 	}
-	
-	
-	
+
+
+
 	private Date getDateForManagedTable(String prefix, String dailyTableName) {
-		
+
 		// dailyTableName would be something like OrganismPulse_YYYY_MM_dd
-		 String dateString = dailyTableName.substring(prefix.length()+1);
-		 Date date=null;
+		String dateString = dailyTableName.substring(prefix.length()+1);
+		Date date=null;
 		try {
 			date = managedTableDateFormat.parse(dateString);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
 		}
-		 return date;
+		return date;
 	}
-	
-	
-	
+
+
+
 	private int deleteFromManagedTabledByPeriod(String tableName, long millisToDeleteFrom) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(millisToDeleteFrom);
@@ -390,59 +390,59 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		//
 		// now get a list of all the tables that exists and are older than millisToDeleteFrom, which will be deleted
 		//
-		 ArrayList allTables = getAllTableNamesForManagedTable(tableName);
-		 String dailyTableName, dateString;
-		 Date date;
-		 
-		 boolean deleteResult=false;
-		 int deleteCounter=0;
-		 for(int i=0;i<allTables.size();i++) {
-			 //Pulse_ 
-			 dailyTableName = ((String)allTables.get(i));
-			 date = getDateForManagedTable(tableName,dailyTableName);
-			 if(limitDate.after(date)) {
-				 logger.debug("dropping " + dailyTableName);
+		ArrayList allTables = getAllTableNamesForManagedTable(tableName);
+		String dailyTableName, dateString;
+		Date date;
+
+		boolean deleteResult=false;
+		int deleteCounter=0;
+		for(int i=0;i<allTables.size();i++) {
+			//Pulse_ 
+			dailyTableName = ((String)allTables.get(i));
+			date = getDateForManagedTable(tableName,dailyTableName);
+			if(limitDate.after(date)) {
+				logger.debug("dropping " + dailyTableName);
 				deleteResult = dropTable(dailyTableName);
 				if(deleteResult)deleteCounter++;
 			}
-		 }
+		}
 		return deleteCounter;
 	}
-	
+
 	public int deleteByPeriodFromOrganismPulse( long millisToDeleteFrom, String teamInfo) {
-		
+
 		return deleteFromManagedTabledByPeriod(TeleonomeConstants.ORGANISMPULSE_TABLE,  millisToDeleteFrom);
-//		String command = "with deleted as (delete from organismpulse where pulsetimemillis < " +  millisToDeleteFrom + " RETURNING *) SELECT count(*) FROM deleted";
-//		if(!teamInfo.equals("")) {
-//			command +=command + " " + teamInfo;
-//		}
+		//		String command = "with deleted as (delete from organismpulse where pulsetimemillis < " +  millisToDeleteFrom + " RETURNING *) SELECT count(*) FROM deleted";
+		//		if(!teamInfo.equals("")) {
+		//			command +=command + " " + teamInfo;
+		//		}
 		//return deleteByPeriod( command);
 	}
-	
+
 	public int deleteByPeriodFromPulse(long millisToDeleteFrom) {
 		return deleteFromManagedTabledByPeriod(TeleonomeConstants.PULSE_TABLE,  millisToDeleteFrom);
 	}
-	
+
 	public int deleteByPeriodFromRememberedDeneWords(String columnName, String columnValue, long millisToDeleteFrom) {
 		return deleteFromManagedTabledByPeriod(TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE,  millisToDeleteFrom);
-		
-//		String command = "with deleted as (delete from remembereddenewords where "+ columnName + "='" +columnValue + "' and timeMillis  < " +  millisToDeleteFrom+ " RETURNING *) SELECT count(*) FROM deleted";
-//		return deleteByPeriod( command);
+
+		//		String command = "with deleted as (delete from remembereddenewords where "+ columnName + "='" +columnValue + "' and timeMillis  < " +  millisToDeleteFrom+ " RETURNING *) SELECT count(*) FROM deleted";
+		//		return deleteByPeriod( command);
 	}
-	
+
 	public int deleteByPeriodFromCommandRequests(long millisToDeleteFrom) {
 		return deleteFromManagedTabledByPeriod(TeleonomeConstants.COMMAND_REQUESTS_TABLE,  millisToDeleteFrom);
-		
-//		String command = "with deleted as (delete from CommandRequests where createdon  < " +  millisToDeleteFrom+ " RETURNING *) SELECT count(*) FROM deleted";
-//		return deleteByPeriod( command);
+
+		//		String command = "with deleted as (delete from CommandRequests where createdon  < " +  millisToDeleteFrom+ " RETURNING *) SELECT count(*) FROM deleted";
+		//		return deleteByPeriod( command);
 	}
 
 	public int deleteByPeriodFromMutationEvent(long millisToDeleteFrom) {
 		return deleteFromManagedTabledByPeriod(TeleonomeConstants.MUTATION_EVENT_TABLE,  millisToDeleteFrom);
-//		String command = "with deleted as (delete from MutationEvent where createdonMillis  < " +  millisToDeleteFrom+ " RETURNING *) SELECT count(*) FROM deleted";
-//		return deleteByPeriod( command);
+		//		String command = "with deleted as (delete from MutationEvent where createdonMillis  < " +  millisToDeleteFrom+ " RETURNING *) SELECT count(*) FROM deleted";
+		//		return deleteByPeriod( command);
 	}
-	
+
 	private int deleteTable(String command) {
 		Connection connection=null;
 		Statement statement=null;
@@ -465,20 +465,20 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			logger.debug(s);
 
 		}finally{
-			
-				try {
-					if(rs!=null)rs.close();
-					if(statement!=null)statement.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					logger.debug(Utils.getStringException(e));
-				}
+
+			try {
+				if(rs!=null)rs.close();
+				if(statement!=null)statement.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
 			if(connection!=null)closeConnection(connection);
 		}
 
 		return numberDeleted;
 	}
-	
+
 	private int deleteByPeriod(String command) {
 		Connection connection=null;
 		Statement statement=null;
@@ -501,14 +501,14 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			logger.debug(s);
 
 		}finally{
-			
-				try {
-					if(rs!=null)rs.close();
-					if(statement!=null)statement.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					logger.debug(Utils.getStringException(e));
-				}
+
+			try {
+				if(rs!=null)rs.close();
+				if(statement!=null)statement.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
 			if(connection!=null)closeConnection(connection);
 		}
 
@@ -595,7 +595,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				logger.debug("getTableSizeMB, adding size=" + size);
 				totalSize+=size;
 			}
-			
+
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -635,9 +635,9 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		String organismTeleonomeName = identity.getTeleonomeName();
 		String identityString = identity.toString();
 		ArrayList<String> tables = getAllManagedTablesForAPeriod(TeleonomeConstants.ORGANISMPULSE_TABLE,fromMillis, untilMillis);
-		
+
 		String sql = "";
-		
+
 		Connection connection = null;
 		Statement statement = null;
 		PGobject toReturn = null;
@@ -646,7 +646,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		long pulseTimestampMillis;
 		String valueType, units;
 		Object value;
-		
+
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
@@ -654,7 +654,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				sql = "select data->>'Pulse Timestamp in Milliseconds', DeneWord -> 'Value Type' As valuetype, DeneWord -> 'Value' As Value, DeneWord -> 'Units' As units, from "+ tables.get(i) +"  p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where  Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' and cast(data->>'Pulse Timestamp in Milliseconds' as BIGINT) > "+ fromMillis+" and cast(data->>'Pulse Timestamp in Milliseconds' as BIGINT)< "+ untilMillis+" order by data->>'Pulse Timestamp in Milliseconds' asc";
 				logger.debug("extractOrganismDeneWordAttributeValueByIdentityByPeriod,sql=" + sql);
 				rs = statement.executeQuery(sql);
-				
+
 				while(rs.next()){
 					pulseTimestampMillis =  rs.getLong(1);
 					valueType=rs.getString(2);
@@ -685,11 +685,11 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		}
 		return toReturn;
 	}
-	
-		
-public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identity, String attribute) {
+
+
+	public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identity, String attribute) {
 		String organismTeleonomeName = identity.getTeleonomeName();
-		
+
 		ArrayList<String> allTables = this.getAllTableNamesForManagedTable(TeleonomeConstants.ORGANISMPULSE_TABLE);
 		String lastTableName =  allTables.get(allTables.size()-1);
 		String sql = "select DeneWord -> '"+ attribute+"' As Units from "+lastTableName+ " p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where  Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' limit 1";
@@ -708,7 +708,7 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 			Long L;
 			while(rs.next()){
 				toReturn = (PGobject) rs.getObject(1);
-				
+
 			}
 
 		} catch (SQLException e) {
@@ -732,72 +732,72 @@ public PGobject getOrganismDeneWordAttributeLastValueByIdentity(Identity identit
 		}
 		return toReturn;
 	}
-	
-public JSONObject getPulseByTimestamp( long timemillis) {
-	
-	//
-	// first find what table is the user asking
-	//
-	Calendar cal = Calendar.getInstance();
-	cal.setTimeInMillis(timemillis);
-	String tableName = getTableNameByCalendar(TeleonomeConstants.PULSE_TABLE,  cal);
-	
-	String sql = "select data from "+tableName +" where pulsetimemillis="+ timemillis + " limit 1";
-	logger.debug("getPulseByTimestamp,sql=" + sql);
-	Connection connection = null;
-	Statement statement = null;
-	JSONObject toReturn = new JSONObject();
-	ResultSet rs=null;	
 
-	try {
-		connection = connectionPool.getConnection();
-		statement = connection.createStatement();
-		rs = statement.executeQuery(sql);
-		
-		JSONObject data=null;
-		Long L;
-		while(rs.next()){
-			//
-			// only one record comeback
-			//
-			String pulse = rs.getString(1);
-			//
-			// it comes with "" so remove them, also remove the first and last characrets because they are 
-			// also ""
-			
-			
-			
-			try {
-				logger.debug("point 1");
+	public JSONObject getPulseByTimestamp( long timemillis) {
+
+		//
+		// first find what table is the user asking
+		//
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(timemillis);
+		String tableName = getTableNameByCalendar(TeleonomeConstants.PULSE_TABLE,  cal);
+
+		String sql = "select data from "+tableName +" where pulsetimemillis="+ timemillis + " limit 1";
+		logger.debug("getPulseByTimestamp,sql=" + sql);
+		Connection connection = null;
+		Statement statement = null;
+		JSONObject toReturn = new JSONObject();
+		ResultSet rs=null;	
+
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(sql);
+
+			JSONObject data=null;
+			Long L;
+			while(rs.next()){
+				//
+				// only one record comeback
+				//
+				String pulse = rs.getString(1);
+				//
+				// it comes with "" so remove them, also remove the first and last characrets because they are 
+				// also ""
+
+
+
+				try {
+					logger.debug("point 1");
+					toReturn = new JSONObject(pulse);
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
 				toReturn = new JSONObject(pulse);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				logger.debug(Utils.getStringException(e));
-			}
-			toReturn = new JSONObject(pulse);
-		}
-
-	} catch (SQLException e) {
-		// TODO Auto-generated catch block
-		logger.debug(Utils.getStringException(e));
-	} catch (JSONException e) {
-		// TODO Auto-generated catch block
-		logger.debug(Utils.getStringException(e));
-	}finally{
-		if(connection!=null){
-			try {
-				if(rs!=null)rs.close();
-				if(statement!=null)statement.close();
-				if(connection!=null)connectionPool.closeConnection(connection);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			logger.debug(Utils.getStringException(e));
+		}finally{
+			if(connection!=null){
+				try {
+					if(rs!=null)rs.close();
+					if(statement!=null)statement.close();
+					if(connection!=null)connectionPool.closeConnection(connection);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
 		}
+		return toReturn;
 	}
-	return toReturn;
-}
 
 	public JSONObject getOrganismPulseByTeleonomeNameAndTimestamp(String teleonomeName, long timemillis) {
 		Calendar cal = Calendar.getInstance();
@@ -814,7 +814,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
 			rs = statement.executeQuery(sql);
-			
+
 			JSONObject data=null;
 			Long L;
 			while(rs.next()){
@@ -825,9 +825,9 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				//
 				// it comes with "" so remove them, also remove the first and last characrets because they are 
 				// also ""
-				
-				
-				
+
+
+
 				try {
 					logger.debug("point 1");
 					toReturn = new JSONObject(pulse);
@@ -835,37 +835,37 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					// TODO Auto-generated catch block
 					logger.debug(Utils.getStringException(e));
 				}
-				
-//				
-//				
-//				pulse = pulse.replace("\"\"", "\"");
-//				if(pulse.substring(0,1).equals("\"")) {
-//					pulse=pulse.substring(1);
-//				}
-//				
-//				
-//				try {
-//					logger.debug("point 2");
-//					toReturn = new JSONObject(pulse);
-//				} catch (JSONException e) {
-//					// TODO Auto-generated catch block
-//					logger.debug(Utils.getStringException(e));
-//				}
-//				
-//				
-//				
-//				if(pulse.substring(pulse.length()-1).equals("\"")) {
-//					pulse=pulse.substring(0,pulse.length()-1);
-//				}
-//				try {
-//					logger.debug("point 3");
-//					toReturn = new JSONObject(pulse);
-//				} catch (JSONException e) {
-//					// TODO Auto-generated catch block
-//					logger.debug(Utils.getStringException(e));
-//				}
-				
-				
+
+				//				
+				//				
+				//				pulse = pulse.replace("\"\"", "\"");
+				//				if(pulse.substring(0,1).equals("\"")) {
+				//					pulse=pulse.substring(1);
+				//				}
+				//				
+				//				
+				//				try {
+				//					logger.debug("point 2");
+				//					toReturn = new JSONObject(pulse);
+				//				} catch (JSONException e) {
+				//					// TODO Auto-generated catch block
+				//					logger.debug(Utils.getStringException(e));
+				//				}
+				//				
+				//				
+				//				
+				//				if(pulse.substring(pulse.length()-1).equals("\"")) {
+				//					pulse=pulse.substring(0,pulse.length()-1);
+				//				}
+				//				try {
+				//					logger.debug("point 3");
+				//					toReturn = new JSONObject(pulse);
+				//				} catch (JSONException e) {
+				//					// TODO Auto-generated catch block
+				//					logger.debug(Utils.getStringException(e));
+				//				}
+
+
 				toReturn = new JSONObject(pulse);
 			}
 
@@ -908,9 +908,9 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
 			for(int i=0;i<allTables.size();i++) {
-				 sql = "select pulsetimemillis,createdOn, DeneWord -> 'Value' As CurrentPulse from "+allTables.get(i)+" p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where createdOn>='"+ createdOnStart + "' and createdOn<='" + createdOnEnd+"' and Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' order by createdOn "+ order;
+				sql = "select pulsetimemillis,createdOn, DeneWord -> 'Value' As CurrentPulse from "+allTables.get(i)+" p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where createdOn>='"+ createdOnStart + "' and createdOn<='" + createdOnEnd+"' and Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' order by createdOn "+ order;
 				logger.debug("getOrganismDeneWordTimeSeriesByIdentity,sql=" + sql);
-				
+
 				rs = statement.executeQuery(sql);
 				while(rs.next()){
 					data = new JSONObject();
@@ -942,12 +942,12 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
+
 	public JSONArray getOrganismDeneWordTimeSeriesByIdentity(Identity identity, long startTimeMillis, long endTimeMillis) {
 		String organismTeleonomeName = identity.getTeleonomeName();
 		ArrayList<String> tables = getAllManagedTablesForAPeriod(TeleonomeConstants.ORGANISMPULSE_TABLE,startTimeMillis, endTimeMillis);
-		
-		
+
+
 		String sql = "";
 		logger.debug("getOrganismDeneWordTimeSeriesByIdentity,sql=" + sql);
 		Connection connection = null;
@@ -959,7 +959,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
-			
+
 			for(int i=0;i<tables.size();i++) {
 				sql = "select pulsetimemillis,DeneWord -> 'Value' As CurrentPulse from "+ tables.get(i)+" p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where pulsetimemillis>="+ startTimeMillis + " and pulsetimemillis<=" + endTimeMillis+" and Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' and teleonomeName='"+ organismTeleonomeName+"' order by pulsetimemillis asc";
 				logger.debug("getOrganismDeneWordTimeSeriesByIdentity,sql=" + sql);
@@ -994,11 +994,11 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
+
 	private ArrayList getAllManagedTablesForAPeriod(String tableName, long startTimeMillis, long endTimeMillis) {
 		ArrayList<String> allTables = getAllTableNamesForManagedTable(tableName);
 		ArrayList<String> toReturn = new ArrayList();
-		
+
 		String dailyTableName, dateString;
 		//
 		// because this is daily set the time to 00:00:00 for the start
@@ -1008,44 +1008,44 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		startCalendar.set(Calendar.HOUR_OF_DAY, 0);
 		startCalendar.set(Calendar.MINUTE, 0);
 		startCalendar.set(Calendar.SECOND, 0);
-		
+
 		Calendar endCalendar = Calendar.getInstance();
 		endCalendar.setTimeInMillis(endTimeMillis);
 		endCalendar.set(Calendar.HOUR_OF_DAY, 23);
 		endCalendar.set(Calendar.MINUTE, 59);
 		endCalendar.set(Calendar.SECOND, 0);
-		
+
 		Date startDate = startCalendar.getTime();
 		Date endDate = endCalendar.getTime();
-		
-		 Date date;
-		
-		 boolean deleteResult=false;
-		 int deleteCounter=0;
-		 String[] tokens;
-		 Calendar aCal = Calendar.getInstance();
-		 
-		 for(int i=0;i<allTables.size();i++) {
-			 //Pulse_ 
-			 dailyTableName = ((String)allTables.get(i));
-			 dateString = dailyTableName.substring(tableName.length() + 1);
-			 logger.debug("getAllManagedTablesForAPeriod, dateString=" + dateString + " dailyTableName " + dailyTableName);
-			 tokens=dateString.split("_");
-			 aCal.set(Calendar.YEAR, Integer.parseInt(tokens[0]));
-			 aCal.set(Calendar.MONTH, Integer.parseInt(tokens[1])-1);
-			 aCal.set(Calendar.DATE, Integer.parseInt(tokens[2]));
-			 //
+
+		Date date;
+
+		boolean deleteResult=false;
+		int deleteCounter=0;
+		String[] tokens;
+		Calendar aCal = Calendar.getInstance();
+
+		for(int i=0;i<allTables.size();i++) {
+			//Pulse_ 
+			dailyTableName = ((String)allTables.get(i));
+			dateString = dailyTableName.substring(tableName.length() + 1);
+			logger.debug("getAllManagedTablesForAPeriod, dateString=" + dateString + " dailyTableName " + dailyTableName);
+			tokens=dateString.split("_");
+			aCal.set(Calendar.YEAR, Integer.parseInt(tokens[0]));
+			aCal.set(Calendar.MONTH, Integer.parseInt(tokens[1])-1);
+			aCal.set(Calendar.DATE, Integer.parseInt(tokens[2]));
+			//
 			// date=Mon Dec 31 00:00:00 AEDT 2018 startDate Fri Jun 14 14:02:09 AEST 2019 endDate=Fri Jun 14 15:02:09 AEST 2019
-			 
-			 
+
+
 			date = aCal.getTime();// managedTableDateFormat.parse(dateString);
-			 logger.debug("date=" + date + " startDate " + startDate + " endDate=" + endDate);
+			logger.debug("date=" + date + " startDate " + startDate + " endDate=" + endDate);
 			if(date.compareTo(startDate) >=0  && date.compareTo(endDate) <=0 ) {
 				toReturn.add(dailyTableName);
 				logger.debug("getAllManagedTablesForAPeriod, adding " + dailyTableName);
 			}
-		 }
-		 return toReturn;
+		}
+		return toReturn;
 	}
 	public JSONArray getDeneWordTimeSeriesByIdentity(Identity identity, long startTimeMillis, long endTimeMillis) {
 		ArrayList tables = getAllManagedTablesForAPeriod(TeleonomeConstants.PULSE_TABLE, startTimeMillis,  endTimeMillis) ;
@@ -1065,7 +1065,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				tableName = (String) tables.get(i);
 				sql = "select pulsetimemillis,DeneWord -> 'Value' As CurrentPulse from "+ tableName+" p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord where pulsetimemillis>="+ startTimeMillis + " and pulsetimemillis<=" + endTimeMillis+" and Nucleus->>'Name'='"+identity.getNucleusName() +"' and DeneChain->>'Name'='"+ identity.getDenechainName() + "' and Dene->>'Name'='"+ identity.getDeneName()+"' and DeneWord->>'Name'='"+ identity.getDeneWordName() +"' order by pulsetimemillis asc";
 				rs = statement.executeQuery(sql);
-				
+
 				while(rs.next()){
 					data = new JSONObject();
 					data.put(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, rs.getLong(1));
@@ -1073,7 +1073,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					toReturn.put(data);
 				}
 			}
-			
+
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -1144,7 +1144,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			ArrayList<String> tables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.ORGANISMPULSE_TABLE, startPulseMillis, endPulseMillis);
 			String sql = "";
 			//System.out.println("in getPulseForRangeForOrganism sql=" + sql);
-			
+
 			JSONObject data=null;
 			Long L;
 			for(int i=0;i<tables.size();i++) {
@@ -1223,7 +1223,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(millisToDeleteFrom);
 		Date fromDate = cal.getTime();
-		
+
 		Calendar cal2 = Calendar.getInstance();
 		cal2.setTimeInMillis(millisToDeleteUntil);
 		Date untilDate = cal.getTime();
@@ -1232,14 +1232,14 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		//
 		ArrayList<String> toReturn = new ArrayList();
 		ArrayList<String> allTables = getAllTableNamesForManagedTable(tableName);
-		 String dailyTableName, dateString;
-		 Date date;
-		 
-		 for(int i=0;i<allTables.size();i++) {
-			 //Pulse_ 
-			 dailyTableName = ((String)allTables.get(i));
-			 dateString = dailyTableName.substring(tableName.length()+1);
-			 try {
+		String dailyTableName, dateString;
+		Date date;
+
+		for(int i=0;i<allTables.size();i++) {
+			//Pulse_ 
+			dailyTableName = ((String)allTables.get(i));
+			dateString = dailyTableName.substring(tableName.length()+1);
+			try {
 				date = managedTableDateFormat.parse(dateString);
 				logger.debug("getManagedTablesByRange, date=" + date);
 				if(date.after(fromDate) && date.before(untilDate)) {
@@ -1249,10 +1249,10 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e));
 			}
-		 }
+		}
 		return toReturn;
 	}
-	
+
 	public JSONArray getPulsesFromTime(long startPeriod, int numberOfPulses)throws SQLException{
 		Connection connection=null;
 		Statement statement = null;
@@ -1292,8 +1292,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return array;
 	}
-	
-	
+
+
 	public int getNumberOrganismPulsesFromTime(String teleonomeName, long startPeriod, int numberOfPulses)throws SQLException{
 		Connection connection=null;
 		Statement statement = null;
@@ -1303,7 +1303,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
-			
+
 			String sql = "";
 			for(int i=0;i<allTables.size();i++) {
 				sql = "select count(createdon) from "+allTables.get(i)+" where teleonomeName='" + teleonomeName + "' and pulseTimeMillis>="+startPeriod;
@@ -1313,7 +1313,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					numberOfPulsesRemaining += rs.getInt(1);
 				}
 			}
-			
+
 		}finally{
 			if(connection!=null){
 				try {
@@ -1336,7 +1336,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		Statement statement = null;
 		JSONArray array = new JSONArray();
 		ArrayList<String> allTables = this.getManagedTablesByRange(TeleonomeConstants.ORGANISMPULSE_TABLE, startPeriod, System.currentTimeMillis());
-		
+
 		ResultSet rs =null;
 		try {
 			connection = connectionPool.getConnection();
@@ -1423,7 +1423,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return arrayList;
 	}
-	
+
 	public boolean storeMutationEvent(JSONObject mutationEventData){
 		String sql="";
 		Connection connection = null;
@@ -1441,8 +1441,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				int result = statement.executeUpdate(sql);
 				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
 			}
-			
-			
+
+
 			String createdOn = getPostgresDateString(new Timestamp(now));
 			sql = "insert into "+tableName+" (createdOn,createdOnMillis, data) values(" + createdOn + ","+ now+",'" + mutationEventData.toString() +"')";
 			int result = statement.executeUpdate(sql);
@@ -1466,8 +1466,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
-	
+
+
 	public boolean storeLifeCycleEvent(String eventType, long eventTimeMillis, int eventValue){
 		//System.out.println(Utils.generateMethodTrace());
 		int id=-1;
@@ -1475,21 +1475,21 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		PreparedStatement preparedStatement=null;
 		ResultSet rs=null;
 		boolean status=false;
-		
+
 		try {
 			connection = connectionPool.getConnection();
-			
+
 			//String createdOn = getPostgresDateString(new Timestamp(eventTimeMillis));
 			Timestamp eventTime = new Timestamp(eventTimeMillis);
-			
+
 			String sql = "insert into LifeCycleEvent (eventTime,eventTimeMillis, eventType, eventValue) values (?,?,?,?)";
-					
+
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setTimestamp(1, eventTime);
 			preparedStatement.setLong(2, eventTimeMillis);
 			preparedStatement.setString(3, eventType);
 			preparedStatement.setInt(4, eventValue);
-			 status = preparedStatement.execute();
+			status = preparedStatement.execute();
 			logger.debug("storeLifeCycleEvent, eventTime=" + eventTimeMillis + " eventValue=" + eventValue + " eventType=" + eventType);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -1510,8 +1510,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		return status;
 
 	}
-	
-	
+
+
 
 	public boolean storeIndex(String indexName, String identityString, JSONArray todayIndex){
 		String sql="";
@@ -1648,7 +1648,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			//System.out.println("bad sql:" + sql);
-			
+
 			logger.warn(Utils.getStringException(e));
 		}finally{
 			if(connection!=null){
@@ -1663,10 +1663,10 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 
 			}
 		}
-		
+
 		return toReturn;
 	}
-	
+
 	//
 	// methods related to the network sensor
 	//
@@ -1688,7 +1688,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			}
 			statement.close();
 			connectionPool.closeConnection(connection);
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
@@ -1723,7 +1723,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			}
 			statement.close();
 			connectionPool.closeConnection(connection);
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
@@ -1740,24 +1740,24 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
+
 	public JSONArray getLastNetworkSensorDeviceActivity( ) {
 		JSONArray toReturn = new JSONArray();
-		
+
 		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.NETWORK_DEVICE_ACTIVITY_TABLE,System.currentTimeMillis(), System.currentTimeMillis());
 		String sql="";
-		
+
 		Connection connection=null;
 		Statement statement=null;
 		ResultSet rs=null;
 
-		 	
-		 
+
+
 		try {
 
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();	
-			
+
 			JSONObject data=null;
 			String dataPayload;
 			boolean found=false;
@@ -1766,11 +1766,11 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			boolean whiteListStatus,isPresent,isMissing,isNew;
 			JSONObject anObject;
 			for(int i=0;i<allTables.size();i++) {
-				 sql="select deviceName ,deviceIpAddress, deviceMacAddress,whiteListStatus,isPresent,isMissing,isNew from "+ allTables.get(i) +" where scantimemillis in (select scantimemillis from "+ allTables.get(i)+" order by scantimemillis desc limit 1) order by whiteListStatus, scantimemillis, deviceName asc";
+				sql="select deviceName ,deviceIpAddress, deviceMacAddress,whiteListStatus,isPresent,isMissing,isNew from "+ allTables.get(i) +" where scantimemillis in (select scantimemillis from "+ allTables.get(i)+" order by scantimemillis desc limit 1) order by whiteListStatus, scantimemillis, deviceName asc";
 				logger.debug("getLastNetworkSensorDeviceActivity, sql " + sql);
 				rs = statement.executeQuery(sql);
 				while(rs.next()){
-					
+
 					deviceName=rs.getString(1);
 					deviceIpAddress=rs.getString(2);
 					deviceMacAddress=rs.getString(3);
@@ -1778,9 +1778,9 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					isPresent=rs.getBoolean(5);
 					isMissing=rs.getBoolean(6);
 					isNew=rs.getBoolean(7);
-					
+
 					anObject = new JSONObject();
-					
+
 					anObject.put(TeleonomeConstants.DEVICE_NAME, deviceName);
 					anObject.put(TeleonomeConstants.IP_ADDRESS, deviceIpAddress);
 					anObject.put(TeleonomeConstants.MAC_ADDRESS, deviceMacAddress);
@@ -1791,8 +1791,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					toReturn.put(anObject);
 				}
 			}
-			
-			
+
+
 		} catch (SQLException e) {
 			//System.out.println("bad sql:" + sql);
 			logger.warn(Utils.getStringException(e));
@@ -1807,22 +1807,22 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			}
 
 		}
-		
+
 		return toReturn;
 	}
-	
+
 	public JSONArray getNetworkSensorDeviceActivityByPeriod(long startPeriod, long endPeriod) {
 		JSONArray toReturn = new JSONArray();
-		
+
 		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.NETWORK_DEVICE_ACTIVITY_TABLE,startPeriod, endPeriod);
 		String sql="";
-		
+
 		Connection connection=null;
 		Statement statement=null;
 		ResultSet rs=null;
 
-		 	
-		 
+
+
 		try {
 
 			connection = connectionPool.getConnection();
@@ -1836,9 +1836,9 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			boolean whiteListStatus,isPresent,isMissing,isNew;
 			JSONObject anObject;
 			for(int i=0;i<allTables.size();i++) {
-				 sql="select scanTimeMillis, scanTimeString, deviceName ,deviceIpAddress, deviceMacAddress,whiteListStatus,isPresent,isMissing,isNew from "+ allTables.get(i) +" where scantimemillis in (select scantimemillis from "+ allTables.get(i)+" order by scantimemillis desc) order by whiteListStatus, scantimemillis, deviceName asc";
+				sql="select scanTimeMillis, scanTimeString, deviceName ,deviceIpAddress, deviceMacAddress,whiteListStatus,isPresent,isMissing,isNew from "+ allTables.get(i) +" where scantimemillis in (select scantimemillis from "+ allTables.get(i)+" order by scantimemillis desc) order by whiteListStatus, scantimemillis, deviceName asc";
 				logger.debug("getLastNetworkSensorDeviceActivity, sql " + sql);
-				
+
 				while(rs.next()){
 					scanTimeMillis=rs.getLong(1);
 					scanTimeString=rs.getString(2);
@@ -1849,7 +1849,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					isPresent=rs.getBoolean(7);
 					isMissing=rs.getBoolean(8);
 					isNew=rs.getBoolean(9);
-					
+
 					anObject = new JSONObject();
 					anObject.put(TeleonomeConstants.NETWORK_SCAN_MILLIS, scanTimeMillis);
 					anObject.put(TeleonomeConstants.NETWORK_SCAN_TIME_STRING, scanTimeString);
@@ -1863,8 +1863,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					toReturn.put(anObject);
 				}
 			}
-			
-			
+
+
 		} catch (SQLException e) {
 			//System.out.println("bad sql:" + sql);
 			logger.warn(Utils.getStringException(e));
@@ -1879,10 +1879,10 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			}
 
 		}
-		
+
 		return toReturn;
 	}
-	
+
 	public boolean removeDeviceFromWhiteList(String deviceName) {
 		String sql="";
 		Connection connection=null;
@@ -1894,7 +1894,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
 			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
-			
+
 			sql = "delete from NetworkDeviceWhiteList where deviceName ='"+ deviceName+"')";
 			logger.debug("delete  NetworkDeviceWhiteList, sql " + sql);
 			int result = statement.executeUpdate(sql);
@@ -1916,8 +1916,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		return toReturn;
 	}
 
-	
-	
+
+
 	public boolean addDeviceToWhiteList(String deviceName, String macAddress) {
 		String sql="";
 		Connection connection=null;
@@ -1929,7 +1929,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
 			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
-			
+
 			sql = "insert into NetworkDeviceWhiteList (deviceName , deviceMacAddress) values('"+ deviceName+"','"+macAddress +"')";
 			logger.debug("insert  NetworkDeviceWhiteList, sql " + sql);
 			int result = statement.executeUpdate(sql);
@@ -1986,7 +1986,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
+
 	public boolean storeNetworkDeviceActivity(long scanTimeMillis, String scanTimeString,String  deviceName ,String deviceIpAddress, String deviceMacAddress,boolean whiteListStatus,boolean isPresent,boolean isMissing,boolean isNew) { 
 		String sql="";
 		Connection connection=null;
@@ -2005,12 +2005,12 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				int result = statement.executeUpdate(sql);
 				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
 			}
-			
+
 			sql = "insert into " + tableName + " (scanTimeMillis, scanTimeString, deviceName ,deviceIpAddress, deviceMacAddress,whiteListStatus,isPresent,isMissing,isNew" + 
 					") values("+ scanTimeMillis + ",'"+ scanTimeString+"','"+deviceName +"','" + deviceIpAddress + "','"+ deviceMacAddress +"',"+ whiteListStatus + ","+isPresent +"," + isMissing + "," +isNew +")";
 			logger.debug("update network, sql " + sql);
 			int result = statement.executeUpdate(sql);
-			
+
 			toReturn=true;
 		} catch (SQLException e) {
 			//System.out.println("bad sql:" + sql);
@@ -2028,7 +2028,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
+
 	//
 	// end of methods related to the network sensor
 	//
@@ -2050,7 +2050,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(timestampInMills);
-		
+
 		String sql="";
 		Connection connection=null;
 		Statement statement=null;
@@ -2064,7 +2064,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				int result = statement.executeUpdate(sql);
 				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
 			}
-			
+
 			//.replace("\"", "\\\"")
 			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
 			sql = "insert into "+ tableName+" (createdOn,pulseTimeMillis,data) values(" + createdOn + ","+timestampInMills+",'" + pulseData +"')";
@@ -2074,7 +2074,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			//System.out.println("bad sql:" + sql);
-			
+
 			logger.warn(Utils.getStringException(e));
 		}finally{
 			if(connection!=null){
@@ -2136,7 +2136,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			Calendar cal = Calendar.getInstance();
 			cal.setTimeInMillis(milliSeconds);
 			String tableName = getTableNameByCalendar(TeleonomeConstants.PULSE_TABLE,  cal);
-			
+
 			String sql = "select count(createdon) from "+ tableName +" where pulsetimemillis="+ milliSeconds;
 			logger.debug("containsPulse, sql=" + sql);
 			rs = statement.executeQuery(sql);
@@ -2167,7 +2167,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(milliSeconds);
 		String tableName = this.getTableNameByCalendar(TeleonomeConstants.ORGANISMPULSE_TABLE, cal);
-		
+
 		Statement statement=null;
 		Connection connection=null;
 		ResultSet rs=null;
@@ -2229,8 +2229,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				int result = statement.executeUpdate(sql);
 				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
 			}
-			
-			
+
+
 			sql = "insert into " + tableName + " (teleonomeName, createdOn,pulseTimeMillis,networkAddress,data) values('"+ teleonomeName + "',"+ createdOn+","+pulseTimeMillis +",'" + teleonomeAddress + "','"+ pulseData +"')";
 			int result = statement.executeUpdate(sql);
 			//
@@ -2363,7 +2363,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				logger.debug("markAllNonExecutedAsSkipped, sql=" + sql);
 				statement.executeUpdate(sql);
 			}
-			
+
 			toReturn= true;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -2401,8 +2401,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				int result = statement.executeUpdate(sql);
 				logger.debug("table " + tableName + " was not found so it was created, result=" + result);
 			}
-			 sql = "insert into "+ tableName + "(createdOn,command, status, payLoad, commandCode,commandCodeType, clientIp, restartRequired) values (?,?,?,?,?,?,?,?) returning id";
-			
+			sql = "insert into "+ tableName + "(createdOn,command, status, payLoad, commandCode,commandCodeType, clientIp, restartRequired) values (?,?,?,?,?,?,?,?) returning id";
+
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setLong(1, createdOn);
 			preparedStatement.setString(2,  command );
@@ -2412,14 +2412,14 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			preparedStatement.setString(6,commandCodeType);
 			preparedStatement.setString(7, clientIp);
 			preparedStatement.setBoolean(8, restartRequired);
-			
-			
+
+
 			rs = preparedStatement.executeQuery();
 			JSONObject data=null;
 			CommandRequest aCommandRequest = new CommandRequest();
-			
-			
-			
+
+
+
 			while(rs.next()){
 				id = rs.getInt(1);
 				toReturn.put("id", id);
@@ -2450,7 +2450,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	}
 
 	public JSONObject isCommandCompleted(int id){
-		
+
 		Connection connection = null;;
 		Statement statement = null;
 		ArrayList<String> allTables = getAllManagedTablesForAPeriod(TeleonomeConstants.COMMAND_REQUESTS_TABLE, System.currentTimeMillis(), System.currentTimeMillis());
@@ -2468,12 +2468,12 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			while(rs.next()){
 				executedOn=rs.getLong(1);
 				status=rs.getString(2);
-				
+
 				if(executedOn>0) {
 					toReturn.put(TeleonomeConstants.COMMAND_EXECUTED_ON, executedOn);
 					toReturn.put(TeleonomeConstants.COMMAND_EXECUTION_STATUS, status);
 				}
-				
+
 			}
 
 		} catch (SQLException e) {
@@ -2507,7 +2507,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		ResultSet rs = null;
 		CommandRequest aCommandRequest = new CommandRequest();
 
-
+		logger.debug("sql=" + sql);
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
@@ -2560,11 +2560,11 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}else if(!includeHuman && includeInternal) {
 			whereClause = " where clientIp = '127.0.0.1'";
 		}
-		
+
 		String sql;
 		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.COMMAND_REQUESTS_TABLE,0, System.currentTimeMillis());
-		
-		
+
+
 		ResultSet rs = null;
 		ResultSet rs2 = null;
 		CommandRequest aCommandRequest = new CommandRequest();
@@ -2576,37 +2576,49 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		//
 		toReturn.put("Limit", limit);
 		toReturn.put("Offset", offset);
-		
+		ArrayList<Map.Entry<JSONObject, Long>> orderedCommands = new ArrayList(); 
+
 		JSONObject o;
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
 			for(int i=0;i<allTables.size();i++) {
-				 sql = "select id,createdon, executedon,command,status,payload, clientIp from "+allTables.get(i)+" " +  whereClause + "  order by createdOn desc limit " + limit + " offset " + offset;
-				 rs = statement.executeQuery(sql);
-					while(rs.next()){
-						int id = rs.getInt(1);
-						long createdon = rs.getLong(2);
-						long executedon = rs.getLong(3);
-						String command = rs.getString(4);
-						
-						String status = rs.getString(5);
-						String payload = rs.getString(6);
-						String clientIp = rs.getString(7);
-						
-						o = new JSONObject();
-						o.put("id", id);
-						o.put("Createdon", createdon);
-						o.put("Executedon", executedon);
-						o.put("Command", command);
-						
-						o.put("Status", status);
-						o.put("Payload", payload);
-						o.put("ClientIp", clientIp);
-						valuesJSONArray.put(o);
-					}
+				sql = "select id,createdon, executedon,command,status,payload, clientIp from "+allTables.get(i)+" " +  whereClause + "  order by createdOn desc limit " + limit + " offset " + offset;
+				logger.debug("getAllCommandRequests sql=" + sql);
+				rs = statement.executeQuery(sql);
+				while(rs.next()){
+					int id = rs.getInt(1);
+					long createdon = rs.getLong(2);
+					long executedon = rs.getLong(3);
+					String command = rs.getString(4);
+
+					String status = rs.getString(5);
+					String payload = rs.getString(6);
+					String clientIp = rs.getString(7);
+
+					o = new JSONObject();
+					o.put("id", id);
+					o.put("Createdon", createdon);
+					o.put("Executedon", executedon);
+					o.put("Command", command);
+
+					o.put("Status", status);
+					o.put("Payload", payload);
+					o.put("ClientIp", clientIp);
+
+
+
+					orderedCommands.add(new AbstractMap.SimpleEntry<JSONObject,Long>(o, createdon));
+					Collections.sort(orderedCommands, new Comparator<Map.Entry<?, Long>>(){
+						public int compare(Map.Entry<?, Long> o1, Map.Entry<?, Long> o2) {
+							return o1.getValue().compareTo(o2.getValue());
+						}});
+				}
 			}
-			
+
+			//
+			// because they could be over many tables
+			// you need to sort them omce they are in the a
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.debug(Utils.getStringException(e));
@@ -2621,6 +2633,14 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			}
 
 		}
+
+		//
+		// add the to the valuesJSONArray sorted
+		for (Map.Entry<JSONObject, Long> entry3 : orderedCommands) {
+			o = entry3.getKey();
+			valuesJSONArray.put(o);
+		}
+
 		try {
 			//
 			// now repeat the same command with out the limit and the offset to get the total
@@ -2650,7 +2670,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
+
 	public JSONObject markCommandAsBadCommandCode(int id, String reason){
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
@@ -2667,10 +2687,10 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			preparedStatement.setLong(1, System.currentTimeMillis());
 			preparedStatement.setString(2,  reason );
 			preparedStatement.setInt(3, id);
-			
+
 			rs = preparedStatement.executeQuery();
 			while(rs.next()){
-				
+
 				long createdon = rs.getLong(1);
 				long executedon = rs.getLong(2);
 				String command = rs.getString(3);
@@ -2678,7 +2698,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				String commandcode = rs.getString(5);
 				String commandcodeType = rs.getString(6);
 				boolean restartRequired = rs.getBoolean(7);
-				
+
 				toReturn.put("Createdon", createdon);
 				toReturn.put("Executedon", executedon);
 				toReturn.put("Command", command);
@@ -2687,7 +2707,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				toReturn.put("CommandCodeType", commandcodeType);
 				toReturn.put("RestartRequired", restartRequired);
 			}
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.debug(Utils.getStringException(e));
@@ -2704,7 +2724,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}	
-	
+
 	public JSONObject markCommandCompleted(int id){
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
@@ -2720,26 +2740,26 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			preparedStatement.setLong(1, System.currentTimeMillis());
 			preparedStatement.setString(2,  TeleonomeConstants.COMMAND_REQUEST_EXECUTED );
 			preparedStatement.setInt(3, id);
-			
+
 			rs = preparedStatement.executeQuery();
 			while(rs.next()){
-				
+
 				long createdon = rs.getLong(1);
 				long executedon = rs.getLong(2);
 				String command = rs.getString(3);
 				String status = rs.getString(4);
 				String commandcode = rs.getString(5);
 				boolean restartRequired = rs.getBoolean(6);
-				
+
 				toReturn.put("Createdon", createdon);
 				toReturn.put("Executedon", executedon);
 				toReturn.put("Command", command);
 				toReturn.put("Status", status);
 				toReturn.put("CommandCode", commandcode);
 				toReturn.put("RestartRequired", restartRequired);
-				
+
 			}
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.debug(Utils.getStringException(e));
@@ -2770,7 +2790,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		String sql = "update CommandRequests set payload=?   where id=? ";
 		ResultSet rs=null;
 		boolean toReturn=false;
-		
+
 		try {
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(sql);
@@ -2908,8 +2928,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 	public long getOldestPulseMillis(){
 		return getOldestRecordMillis(TeleonomeConstants.PULSE_TABLE, "pulsetimemillis");
 	}
-	
-	
+
+
 	public long getOldestRecordMillis(String tableName, String columnName){
 
 		Connection connection = null;
@@ -2944,7 +2964,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		logger.debug("getOldestPulseMillis, oldestPulseMillis=" + oldestPulseMillis);
 		return oldestPulseMillis;
 	}
-	
+
 	public JSONObject getLastPulse(String teleonomeName){
 
 		Connection connection = null;
@@ -3341,7 +3361,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		//
 		String newestTableName = allTables.get(allTables.size()-1);
 		String oldestTableName = allTables.get(0);
-		
+
 		String minCommand = "select  min(createdon) from " + oldestTableName;
 		String maxCommand = "select  max(createdon) from " + newestTableName;
 		Connection connection=null;
@@ -3351,7 +3371,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		Timestamp timeMin=null;
 		Timestamp timeMax=null;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-		
+
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
@@ -3365,7 +3385,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				}
 				logger.debug("getTeleonomeDataAvailableRanges,TimeMin=" + timeMin );
 			}
-			
+
 			rs = statement.executeQuery(maxCommand);
 			while(rs.next()){
 				timeMax=rs.getTimestamp(1);
@@ -3376,7 +3396,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				}
 				logger.debug("getTeleonomeDataAvailableRanges,timeMax=" + timeMax );
 			}
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
@@ -3394,7 +3414,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		return toReturn;
 	}
 	public JSONArray getTeleonomeDataAvailableInOrganism() {
-		
+
 		ArrayList<String> allTables = getAllTableNamesForManagedTable(TeleonomeConstants.ORGANISMPULSE_TABLE);
 		//
 		// we need the first one and the last one
@@ -3403,7 +3423,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		String oldestTableName = allTables.get(0);
 		String minCommand = "select teleonomeName, min(createdon) from " + oldestTableName + " group by teleonomename";
 		String maxCommand = "select teleonomeName, max(createdon) from " + newestTableName + " group by teleonomename";
-		
+
 		//String command = "select teleonomeName, min(createdon), max(createdon) from organismpulse group by teleonomename";
 		Connection connection=null;
 		Statement statement = null; 
@@ -3414,15 +3434,15 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		try {
 			connection = connectionPool.getConnection();
 			statement = connection.createStatement();
-			
+
 			Timestamp timeMin=null;
 			Timestamp timeMax=null;
-			
+
 			String name;
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-			
+
 			rs = statement.executeQuery(minCommand);
-			
+
 			while(rs.next()){
 				name=rs.getString(1);
 				timeMin=rs.getTimestamp(2);
@@ -3441,7 +3461,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				}
 				h.put(name, jsonObject);
 			}
-			
+
 			rs = statement.executeQuery(maxCommand);
 			while(rs.next()){
 				name=rs.getString(1);
@@ -3458,7 +3478,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				}
 				h.put(name, jsonObject);
 			}
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
@@ -3479,7 +3499,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
+
 	public JSONArray getTeleonomeNamesInOrganism() {
 		ArrayList allTables = this.getAllTableNamesForManagedTable(TeleonomeConstants.ORGANISMPULSE_TABLE);
 		String tableName = (String) allTables.get(allTables.size()-1);
@@ -3515,9 +3535,9 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
+
 	public JSONArray getNucleiNamesForTeleonomeInOrganism(String teleonomeName) {
-		
+
 		//
 		// this command returns the complete nucleus
 		//
@@ -3527,16 +3547,16 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		//
 		ArrayList allTables = this.getAllTableNamesForManagedTable(TeleonomeConstants.ORGANISMPULSE_TABLE);
 		String tableName = (String) allTables.get(allTables.size()-1);
-		
+
 		String command = "select  NU -> 'Name' from "+ tableName +" p, jsonb_array_elements(p.data->'Denome'->'Nuclei') as NU where teleonomeName=? and createdon in (select createdon from "+ tableName +" where teleonomeName=? order by createdon desc limit 1)  order by NU -> 'Name'";
-		
-		
+
+
 		Connection connection=null;
 		PreparedStatement preparedStatement = null; 
 		ResultSet rs=null;
 		JSONArray toReturn = new JSONArray();
 		try {
-			
+
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
 			preparedStatement.setString(1, teleonomeName);
@@ -3570,11 +3590,11 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 
 		return toReturn;
 	}
-	
+
 	public JSONArray getDeneChainNamesForTeleonomeInOrganism(String teleonomeName, String nucleusName) {
 		ArrayList allTables = this.getAllTableNamesForManagedTable(TeleonomeConstants.ORGANISMPULSE_TABLE);
 		String tableName = (String) allTables.get(allTables.size()-1);
-		
+
 		String command = "select distinct(DeneChain  -> 'Name') from "+ tableName +" p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus, jsonb_array_elements(Nucleus->'DeneChains') As DeneChain where teleonomeName=? and Nucleus->>'Name'=? and createdon in (select createdon from "+tableName+"  where teleonomeName=? order by createdon desc limit 1) order by DeneChain -> 'Name'";
 		logger.debug("getDeneChainNamesForTeleonomeInOrganism, command=" + command);
 		Connection connection=null;
@@ -3582,7 +3602,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		ResultSet rs=null;
 		JSONArray toReturn = new JSONArray();
 		try {
-			
+
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
 			preparedStatement.setString(1, teleonomeName);
@@ -3612,27 +3632,27 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
+
 	public JSONArray getDeneNamesForTeleonomeInOrganism(String teleonomeName, String nucleusName, String deneChainName) {
 		ArrayList allTables = this.getAllTableNamesForManagedTable(TeleonomeConstants.ORGANISMPULSE_TABLE);
 		String tableName = (String) allTables.get(allTables.size()-1);
-		
+
 		String command = " select distinct(Dene -> 'Name') As denename from "+tableName +" p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene where teleonomeName=? and createdon in (select createdon from "+tableName +" where teleonomeName=? order by createdon desc limit 1) and Nucleus->>'Name'=? and DeneChain->>'Name'=? order by Dene -> 'Name'";
 		logger.debug("getDeneNamesForTeleonomeInOrganism, command=" + command);
-		
+
 		Connection connection=null;
 		PreparedStatement preparedStatement = null; 
 		ResultSet rs=null;
 		JSONArray toReturn = new JSONArray();
 		try {
-			
+
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
 			preparedStatement.setString(1, teleonomeName);
 			preparedStatement.setString(2, teleonomeName);
 			preparedStatement.setString(3, nucleusName);
 			preparedStatement.setString(4, deneChainName);
-			
+
 			rs = preparedStatement.executeQuery();
 			Timestamp time=null;
 			String name;
@@ -3659,21 +3679,21 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
+
 	public JSONArray getDeneWordNamesForTeleonomeInOrganism(String teleonomeName, String nucleusName, String deneChainName, String deneName) {
 		ArrayList allTables = this.getAllTableNamesForManagedTable(TeleonomeConstants.ORGANISMPULSE_TABLE);
 		String tableName = (String) allTables.get(allTables.size()-1);
-		
-		
+
+
 		String command = " select distinct(DeneWord -> 'Name') As deneWordName from "+tableName +" p, jsonb_array_elements(p.data->'Denome'->'Nuclei')  AS Nucleus,  jsonb_array_elements(Nucleus->'DeneChains') As DeneChain , jsonb_array_elements(DeneChain->'Denes') As Dene, jsonb_array_elements(Dene->'DeneWords') as DeneWord  where teleonomeName=? and createdon in (select createdon from "+ tableName +" where teleonomeName=? order by createdon desc limit 1) and Nucleus->>'Name'=? and DeneChain->>'Name'=? and Dene->>'Name'=?  order by DeneWord -> 'Name'";
 		logger.debug("getDeneWordNamesForTeleonomeInOrganism, command=" + command);
-		
+
 		Connection connection=null;
 		PreparedStatement preparedStatement = null; 
 		ResultSet rs=null;
 		JSONArray toReturn = new JSONArray();
 		try {
-			
+
 			connection = connectionPool.getConnection();
 			preparedStatement = connection.prepareStatement(command);
 			preparedStatement.setString(1, teleonomeName);
@@ -3681,7 +3701,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			preparedStatement.setString(3, nucleusName);
 			preparedStatement.setString(4, deneChainName);
 			preparedStatement.setString(5, deneName);
-			
+
 			rs = preparedStatement.executeQuery();
 			Timestamp time=null;
 			String name;
@@ -3708,8 +3728,8 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
-	
+
+
 	public static String getUniqueIndex(){
 		java.rmi.dgc.VMID v = new java.rmi.dgc.VMID();
 		return v.toString();
@@ -3764,7 +3784,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
+
 	public JSONObject getStatsInfoForRemeberedDeneWord(TimeZone timeZone, String identityPointer,  long startTimeMillis, long  endTimeMillis, String stat){
 		Connection connection=null;
 		PreparedStatement preparedStatement = null; 
@@ -3826,7 +3846,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					}
 				}
 			}
-			
+
 			if(stat.equals(TeleonomeConstants.DENEWORD_AVERAGE_ATTRIBUTE)) {
 				toReturn.put("Value", twoDecimalsFormat.format(averageAggregation/allTables.size()));
 			}
@@ -3847,7 +3867,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		logger.debug("returning " + toReturn.toString(4));
 		return toReturn;
 	}
-	
+
 	public JSONArray getRemeberedDeneWordStatByPeriod( String identityPointer,  long startTimeMillis, long  endTimeMillis, String kind ){
 		Connection connection=null;
 		PreparedStatement preparedStatement = null; 
@@ -3899,27 +3919,27 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				}
 			if(connection!=null)closeConnection(connection);
 		}
-		
-		
-//			String command = "SELECT timemillis, value FROM (" +
-//					  "SELECT *, "+
-//					   " ROW_NUMBER() OVER (PARTITION BY date_trunc('day', time) "+
-//					      "  ORDER BY value "+direction +") AS _rn "+
-//					  "FROM remembereddenewords "+
-//					 " where identitystring=? "+
-//					 " and timeMillis>=? and timeMillis<=? "+
-//					") AS _max "+
-//					"WHERE _rn = 1 "+
-//					"ORDER BY time;";
-			
-			
-			
-			
-			
-		
+
+
+		//			String command = "SELECT timemillis, value FROM (" +
+		//					  "SELECT *, "+
+		//					   " ROW_NUMBER() OVER (PARTITION BY date_trunc('day', time) "+
+		//					      "  ORDER BY value "+direction +") AS _rn "+
+		//					  "FROM remembereddenewords "+
+		//					 " where identitystring=? "+
+		//					 " and timeMillis>=? and timeMillis<=? "+
+		//					") AS _max "+
+		//					"WHERE _rn = 1 "+
+		//					"ORDER BY time;";
+
+
+
+
+
+
 		return toReturn;
 	}
-	
+
 	public JSONArray getRemeberedDeneWordStart( String identityPointer,  long startTimeMillis, long  endTimeMillis){
 		logger.info("enter getRemeberedDeneWordStart identityPointer="+ identityPointer );
 		Connection connection=null;
@@ -3938,7 +3958,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				logger.debug("allTables.get(i)="+ allTables.get(i) );
 				command = "SELECT time, value, units from "+ allTables.get(i)+" where timeMillis>=? and timeMillis<=? and  identityString=? order by time asc";
 				logger.info("command=" + command);
-				
+
 				preparedStatement = connection.prepareStatement(command);
 				preparedStatement.setLong(1, startTimeMillis);
 				preparedStatement.setLong(2, endTimeMillis);
@@ -3975,65 +3995,65 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		return toReturn;
 
 	}
-	
+
 	public JSONArray getRemeberedDeneWord(TimeZone timeZone, String identityPointer,  long startTimeMillis, long  endTimeMillis){
 		return getRemeberedDeneWordStart(  identityPointer,   startTimeMillis,   endTimeMillis);
-//		Connection connection=null;
-//		PreparedStatement preparedStatement = null; 
-//		ResultSet rs=null;
-//		JSONArray toReturn = new JSONArray();
-//		try {
-//			String command = "SELECT time, value from RememberedDeneWords where timeMillis>=? and timeMillis<=? and  identityString=? order by time asc";
-//			logger.info("command=" + command);
-//			connection = connectionPool.getConnection();
-//			preparedStatement = connection.prepareStatement(command);
-////			java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(startTimeMillis);
-////			java.sql.Timestamp untilTimeValue = new java.sql.Timestamp(endTimeMillis);
-////			
-////			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
-////			preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
-////			preparedStatement.setTimestamp(2, untilTimeValue, calendarTimeZone);
-//			preparedStatement.setLong(1, startTimeMillis);
-//			preparedStatement.setLong(2, endTimeMillis);
-//			preparedStatement.setString(3, identityPointer);
-//			
-//			rs = preparedStatement.executeQuery();
-//			Timestamp time=null;
-//			JSONObject j;
-//			double value;
-//			while(rs.next()){
-//				time=rs.getTimestamp(1);
-//				value = rs.getDouble(2);
-//				j = new JSONObject();
-//				j.put("Pulse Timestamp in Milliseconds", time.getTime());
-//				j.put("Value", value);
-//				toReturn.put(j);
-//			}
-//
-//
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			logger.warn(Utils.getStringException(e));
-//
-//		}finally{
-//
-//			if(preparedStatement!=null)
-//				try {
-//					if(rs!=null)rs.close();
-//					preparedStatement.close();
-//				} catch (SQLException e) {
-//					// TODO Auto-generated catch block
-//					logger.debug(Utils.getStringException(e));
-//				}
-//			if(connection!=null)closeConnection(connection);
-//		}
-//
-//		return toReturn;
+		//		Connection connection=null;
+		//		PreparedStatement preparedStatement = null; 
+		//		ResultSet rs=null;
+		//		JSONArray toReturn = new JSONArray();
+		//		try {
+		//			String command = "SELECT time, value from RememberedDeneWords where timeMillis>=? and timeMillis<=? and  identityString=? order by time asc";
+		//			logger.info("command=" + command);
+		//			connection = connectionPool.getConnection();
+		//			preparedStatement = connection.prepareStatement(command);
+		////			java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(startTimeMillis);
+		////			java.sql.Timestamp untilTimeValue = new java.sql.Timestamp(endTimeMillis);
+		////			
+		////			Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
+		////			preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
+		////			preparedStatement.setTimestamp(2, untilTimeValue, calendarTimeZone);
+		//			preparedStatement.setLong(1, startTimeMillis);
+		//			preparedStatement.setLong(2, endTimeMillis);
+		//			preparedStatement.setString(3, identityPointer);
+		//			
+		//			rs = preparedStatement.executeQuery();
+		//			Timestamp time=null;
+		//			JSONObject j;
+		//			double value;
+		//			while(rs.next()){
+		//				time=rs.getTimestamp(1);
+		//				value = rs.getDouble(2);
+		//				j = new JSONObject();
+		//				j.put("Pulse Timestamp in Milliseconds", time.getTime());
+		//				j.put("Value", value);
+		//				toReturn.put(j);
+		//			}
+		//
+		//
+		//		} catch (SQLException e) {
+		//			// TODO Auto-generated catch block
+		//			logger.warn(Utils.getStringException(e));
+		//
+		//		}finally{
+		//
+		//			if(preparedStatement!=null)
+		//				try {
+		//					if(rs!=null)rs.close();
+		//					preparedStatement.close();
+		//				} catch (SQLException e) {
+		//					// TODO Auto-generated catch block
+		//					logger.debug(Utils.getStringException(e));
+		//				}
+		//			if(connection!=null)closeConnection(connection);
+		//		}
+		//
+		//		return toReturn;
 
 	}
 
 	public JSONArray getMotherRemeberedValuesByRecordTimeInterval(long intervalStart,long intervalEnd){
-//	public JSONArray getMotherRemeberedValuesByRecordTime(long recordTime){
+		//	public JSONArray getMotherRemeberedValuesByRecordTime(long recordTime){
 		Connection connection=null;
 		PreparedStatement preparedStatement = null; 
 		ResultSet rs=null;
@@ -4046,10 +4066,10 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			long recordMillis=0L;
 			String label= null;
 			double value=0;
-		    String unit= null;
-		  
+			String unit= null;
+
 			JSONObject j;
-			
+
 			connection = connectionPool.getConnection();
 			for(int i=0;i<allTables.size();i++) {
 				command = "SELECT importedOnMillis,recordMillis,label, value,unit from "+allTables.get(i) +  "  where recordMillis>=? &&   recordMillis<=? ";
@@ -4058,7 +4078,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 				preparedStatement.setLong(1, intervalStart);
 				preparedStatement.setLong(2, intervalEnd);
 				rs = preparedStatement.executeQuery();
-				
+
 				while(rs.next()){
 					j = new JSONObject();
 					j.put("ImportedOnMillis", rs.getLong(1));
@@ -4069,7 +4089,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 					logger.debug("getMotherRemeberedRecordsByRecordTime:" + j.toString(4));
 					toReturn.put(j);
 				}
-				
+
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -4091,58 +4111,58 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		return toReturn;
 
 	}
-	
 
-//	public JSONArray getMotherRemeberedValuesByRecordTimeInterval(long intervalStart,long intervalEnd){
-//		Connection connection=null;
-//		PreparedStatement preparedStatement = null; 
-//		ResultSet rs=null;
-//		JSONArray toReturn = new JSONArray();
-//		try {
-//			//
-//			//  first get all distinct recordMillis in the period
-//			ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.MOTHER_REMEMBERED_VALUES_TABLE, intervalStart, intervalEnd);
-//			String command = "SELECT recordMillis from MotherRememberedValues where recordMillis>=? &&   recordMillis<=?";
-//			logger.info("command=" + command);
-//			connection = connectionPool.getConnection();
-//			
-//			
-//			preparedStatement = connection.prepareStatement(command);
-//			rs = preparedStatement.executeQuery();
-//			ArrayList<Long> recordsMillis = new ArrayList();
-//			while(rs.next()){
-//				recordsMillis.add(rs.getLong(1));
-//			}
-//			preparedStatement.close();
-//			//
-//			// now do it again, but every record,
-//			JSONArray completeRecordSetArray;
-//			for(int i=0;i<recordsMillis.size();i++) {
-//				completeRecordSetArray= getMotherRemeberedValuesByRecordTime(recordsMillis.get(i));
-//				toReturn.put(completeRecordSetArray);
-//			}
-//
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			logger.warn(Utils.getStringException(e));
-//
-//		}finally{
-//
-//			if(preparedStatement!=null)
-//				try {
-//					if(rs!=null)rs.close();
-//					preparedStatement.close();
-//				} catch (SQLException e) {
-//					// TODO Auto-generated catch block
-//					logger.debug(Utils.getStringException(e));
-//				}
-//			if(connection!=null)closeConnection(connection);
-//		}
-//
-//		return toReturn;
-//
-//	}
-	
+
+	//	public JSONArray getMotherRemeberedValuesByRecordTimeInterval(long intervalStart,long intervalEnd){
+	//		Connection connection=null;
+	//		PreparedStatement preparedStatement = null; 
+	//		ResultSet rs=null;
+	//		JSONArray toReturn = new JSONArray();
+	//		try {
+	//			//
+	//			//  first get all distinct recordMillis in the period
+	//			ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.MOTHER_REMEMBERED_VALUES_TABLE, intervalStart, intervalEnd);
+	//			String command = "SELECT recordMillis from MotherRememberedValues where recordMillis>=? &&   recordMillis<=?";
+	//			logger.info("command=" + command);
+	//			connection = connectionPool.getConnection();
+	//			
+	//			
+	//			preparedStatement = connection.prepareStatement(command);
+	//			rs = preparedStatement.executeQuery();
+	//			ArrayList<Long> recordsMillis = new ArrayList();
+	//			while(rs.next()){
+	//				recordsMillis.add(rs.getLong(1));
+	//			}
+	//			preparedStatement.close();
+	//			//
+	//			// now do it again, but every record,
+	//			JSONArray completeRecordSetArray;
+	//			for(int i=0;i<recordsMillis.size();i++) {
+	//				completeRecordSetArray= getMotherRemeberedValuesByRecordTime(recordsMillis.get(i));
+	//				toReturn.put(completeRecordSetArray);
+	//			}
+	//
+	//		} catch (SQLException e) {
+	//			// TODO Auto-generated catch block
+	//			logger.warn(Utils.getStringException(e));
+	//
+	//		}finally{
+	//
+	//			if(preparedStatement!=null)
+	//				try {
+	//					if(rs!=null)rs.close();
+	//					preparedStatement.close();
+	//				} catch (SQLException e) {
+	//					// TODO Auto-generated catch block
+	//					logger.debug(Utils.getStringException(e));
+	//				}
+	//			if(connection!=null)closeConnection(connection);
+	//		}
+	//
+	//		return toReturn;
+	//
+	//	}
+
 	public boolean storeMotherRememberedValue( long importedOnMillis,long recordMillis,  String label,  Object value, String unit) {
 		String sql="";
 		Connection connection = null;
@@ -4167,11 +4187,11 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setLong(1, importedOnMillis);
 			preparedStatement.setLong(2, recordMillis);
-			
+
 			preparedStatement.setString(3, label);
 			preparedStatement.setDouble(4, (double)value);
 			preparedStatement.setString(5, unit);
-			
+
 			int result = preparedStatement.executeUpdate();
 			preparedStatement.close();
 			connectionPool.closeConnection(connection);
@@ -4192,7 +4212,7 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		}
 		return toReturn;
 	}
-	
+
 	public boolean unwrap( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value, String source, String units) {
 		String sql="";
 		Connection connection = null;
@@ -4201,24 +4221,24 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 		Statement statement=null;
 		try {
 			connection = connectionPool.getConnection();
-			
+
 			java.sql.Timestamp dateTimeValue = new java.sql.Timestamp(pulseTimeMillis);
 			Calendar cal = Calendar.getInstance();
 			String tableName = getTableNameByCalendar(TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE, cal);
-			
+
 			if(!tableExists(tableName)) {
 				sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE +" with no data";
 				statement = connection.createStatement();
 				int result = statement.executeUpdate(sql);
 				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
-				
-				
+
+
 				sql = "alter table " + tableName + " add CONSTRAINT pk_tbl_"+ tableName+" PRIMARY KEY (timeMillis,teleonomename, identitystring)";
-				 result = statement.executeUpdate(sql);
+				result = statement.executeUpdate(sql);
 				logger.debug("created primary key command executed, result=" + result);
 			}
-			
-			
+
+
 			sql = "insert into "+ tableName +" (time,timeMillis, teleonomeName,identityString,value, source, units) values(?,?,?,?,?,?,?) ON CONFLICT(timeMillis, teleonomeName,identityString) DO NOTHING";
 			logger.debug("unwrap=" + sql);
 			//Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
@@ -4226,11 +4246,11 @@ public JSONObject getPulseByTimestamp( long timemillis) {
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setTimestamp(1, dateTimeValue);
 			preparedStatement.setLong(2, pulseTimeMillis);
-			
+
 			preparedStatement.setString(3, teleonomeName);
 			preparedStatement.setString(4, identityString);
-			
-			
+
+
 			double d = 0;
 			if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
 
