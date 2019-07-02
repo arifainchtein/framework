@@ -4261,7 +4261,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				
 				statement = connection.createStatement();
 				int result = statement.executeUpdate(sql);
-				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
+				logger.debug("line 4264 table " + tableName + " was nt found so it was created, result=" + result);
 
 
 				sql = "alter table " + tableName + " add CONSTRAINT pk_tbl_"+ tableName+" PRIMARY KEY (timeMillis,teleonomename, identitystring)";
