@@ -4257,6 +4257,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 						  "units text NOT NULL,"+
 						  "CONSTRAINT pk_tbl_"+ tableName +" PRIMARY KEY (timeMillis,teleonomename, identitystring)"+
 						")";
+				logger.debug("line 4260 sql " + sql);
 				
 				
 				statement = connection.createStatement();
