@@ -1307,7 +1307,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			String sql = "";
 			for(int i=0;i<allTables.size();i++) {
 				sql = "select count(createdon) from "+allTables.get(i)+" where teleonomeName='" + teleonomeName + "' and pulseTimeMillis>="+startPeriod;
-				logger.info("sql=" + sql);
+				logger.debug("sql=" + sql);
 				rs = statement.executeQuery(sql);
 				while(rs.next()){
 					numberOfPulsesRemaining += rs.getInt(1);
@@ -1345,7 +1345,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			String sql = "";
 			for(int i=0;i<allTables.size();i++) {
 				sql = "select data as text from "+ allTables.get(i)+" where teleonomeName='" + teleonomeName + "' and pulseTimeMillis>="+startPeriod +"  order by pulseTimeMillis asc limit " + numberOfPulses;
-				logger.info("sql=" + sql);
+				logger.debug("sql=" + sql);
 				rs = statement.executeQuery(sql);
 			}
 			while(rs.next()){
@@ -3769,7 +3769,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			connection = connectionPool.getConnection();
 			for(int i=0;i<allTables.size();i++) {
 				command = "SELECT time, value from "+ allTables.get(i)+" where time>=? and time<=? and  identityString=? order by time asc";
-				logger.info("command=" + command);
+				logger.debug("command=" + command);
 				preparedStatement = connection.prepareStatement(command);
 				Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
 				preparedStatement.setTimestamp(1, fromTimeValue, calendarTimeZone);
@@ -3907,7 +3907,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			connection = connectionPool.getConnection();
 			for(int i=0;i<allTables.size();i++) {
 				command = "SELECT timemillis, value FROM "+allTables.get(i) + "  where identitystring=?  and timeMillis>=? and timeMillis<=? order by timeMillis "+ direction + " limit 1";
-				logger.info("getRemeberedDeneWordStatByPeriod command=" + command);
+				logger.debug("getRemeberedDeneWordStatByPeriod command=" + command);
 				preparedStatement = connection.prepareStatement(command);
 				preparedStatement.setString(1, identityPointer);
 				preparedStatement.setLong(2, startTimeMillis);
@@ -3975,7 +3975,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			for(int i=0;i<allTables.size();i++) {
 				logger.debug("allTables.get(i)="+ allTables.get(i) );
 				command = "SELECT time, value, units from "+ allTables.get(i)+" where timeMillis>=? and timeMillis<=? and  identityString=? order by time asc";
-				logger.info("command=" + command);
+				logger.debug("command=" + command);
 
 				preparedStatement = connection.prepareStatement(command);
 				preparedStatement.setLong(1, startTimeMillis);
@@ -4091,7 +4091,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			connection = connectionPool.getConnection();
 			for(int i=0;i<allTables.size();i++) {
 				command = "SELECT importedOnMillis,recordMillis,label, value,unit from "+allTables.get(i) +  "  where recordMillis>=? &&   recordMillis<=? ";
-				logger.info("getMotherRemeberedValuesByRecordTime command=" + command);
+				logger.debug("getMotherRemeberedValuesByRecordTime command=" + command);
 				preparedStatement = connection.prepareStatement(command);
 				preparedStatement.setLong(1, intervalStart);
 				preparedStatement.setLong(2, intervalEnd);
