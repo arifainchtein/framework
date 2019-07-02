@@ -4245,7 +4245,20 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			String tableName = getTableNameByCalendar(TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE, cal);
 
 			if(!tableExists(tableName)) {
-				sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE +" with no data";
+				//sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE +" with no data";
+				
+				sql = "CREATE TABLE "+tableName+ " (" +
+						  "time        TIMESTAMPTZ  NOT NULL,"+
+						  "timeMillis bigint NOT NULL,"+
+						  "teleonomename    TEXT  NOT NULL,"+
+						  "identitystring TEXT NOT NULL,"+
+						  "source text not null,"+
+						  "value    DOUBLE PRECISION  NULL,"+
+						  "units text NOT NULL,"+
+						  "CONSTRAINT pk_tbl_RememberedRecords PRIMARY KEY (timeMillis,teleonomename, identitystring)"+
+						")";
+				
+				
 				statement = connection.createStatement();
 				int result = statement.executeUpdate(sql);
 				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
