@@ -80,7 +80,7 @@ public class SimpleMicroController extends MotherMicroController {
 		boolean toReturn=false;
 		
 		String code = getCommandCode();
-		logger.debug("userCode=" + userCode + " code=" + code);
+		logger.debug("line 83 userCode=" + userCode + " code=" + code);
 		if(userCode.equals(code)) {
 			return true;
 		}else {
