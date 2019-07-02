@@ -4244,7 +4244,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			Calendar cal = Calendar.getInstance();
 			String tableName = getTableNameByCalendar(TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE, cal);
 			boolean tableExists = tableExists(tableName);
-			logger.debug("line 4246 table " + tableName + "exists=" + tableExistse));
+			logger.debug("line 4246 table " + tableName + "exists=" + tableExists);
 
 			if(!tableExists) {
 				//sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE +" with no data";
