@@ -4255,7 +4255,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 						  "source text not null,"+
 						  "value    DOUBLE PRECISION  NULL,"+
 						  "units text NOT NULL,"+
-						  "CONSTRAINT pk_tbl_RememberedRecords PRIMARY KEY (timeMillis,teleonomename, identitystring)"+
+						  "CONSTRAINT pk_tbl_"+ tableName +" PRIMARY KEY (timeMillis,teleonomename, identitystring)"+
 						")";
 				
 				
@@ -4264,9 +4264,9 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				logger.debug("line 4264 table " + tableName + " was nt found so it was created, result=" + result);
 
 
-				sql = "alter table " + tableName + " add CONSTRAINT pk_tbl_"+ tableName+" PRIMARY KEY (timeMillis,teleonomename, identitystring)";
-				result = statement.executeUpdate(sql);
-				logger.debug("created primary key command executed, result=" + result);
+//				sql = "alter table " + tableName + " add CONSTRAINT pk_tbl_"+ tableName+" PRIMARY KEY (timeMillis,teleonomename, identitystring)";
+//				result = statement.executeUpdate(sql);
+//				logger.debug("created primary key command executed, result=" + result);
 			}
 
 
