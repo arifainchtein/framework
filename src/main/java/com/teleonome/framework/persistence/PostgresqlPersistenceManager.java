@@ -4243,8 +4243,10 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			java.sql.Timestamp dateTimeValue = new java.sql.Timestamp(pulseTimeMillis);
 			Calendar cal = Calendar.getInstance();
 			String tableName = getTableNameByCalendar(TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE, cal);
+			boolean tableExists = tableExists(tableName);
+			logger.debug("line 4246 table " + tableName + "exists=" + tableExistse));
 
-			if(!tableExists(tableName)) {
+			if(!tableExists) {
 				//sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE +" with no data";
 				
 				sql = "CREATE TABLE "+tableName+ " (" +
