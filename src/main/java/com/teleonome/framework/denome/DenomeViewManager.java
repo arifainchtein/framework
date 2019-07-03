@@ -479,9 +479,9 @@ public class DenomeViewManager {
 				pointerToMicroControllerSensorDenesVectorIndex = new Hashtable();
 				for(int j=0;j<sensorDenesJSONArray.length();j++){
 					aDeneJSONObject = (JSONObject) sensorDenesJSONArray.get(j);
-					logger.info("line 474 aDeneJSONObject=" + aDeneJSONObject.getString("Name"));
+					logger.debug("line 474 aDeneJSONObject=" + aDeneJSONObject.getString("Name"));
 					pointerToMicroController =  (String) getDeneWordAttributeByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_MICROCONTROLLER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.info("line 476 pointerToMicroController=" + pointerToMicroController);
+					logger.debug("line 476 pointerToMicroController=" + pointerToMicroController);
 					v = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get(pointerToMicroController);
 					if(v==null)v = new Vector();
 					v.addElement(aDeneJSONObject);
@@ -493,22 +493,22 @@ public class DenomeViewManager {
 					pointerToMicroController = en.nextElement();
 					v = (Vector)pointerToMicroControllerSensorDenesVectorIndex.get(pointerToMicroController);
 					sensorRequestQueuePositionDeneWordIndex = new ArrayList();
-					logger.info("line 488,pointerToMicroController=" + pointerToMicroController );
+					logger.debug("line 488,pointerToMicroController=" + pointerToMicroController );
 					for(int j=0;j<v.size();j++){
 						aDeneJSONObject = (JSONObject) v.elementAt(j);
 						isSensor = DenomeUtils.isDeneOfType(aDeneJSONObject, TeleonomeConstants.DENE_TYPE_SENSOR);
-						logger.info("line 491 aDeneJSONObject.=" + aDeneJSONObject.getString("Name") + " isSensor="+isSensor);
+						logger.debug("line 491 aDeneJSONObject.=" + aDeneJSONObject.getString("Name") + " isSensor="+isSensor);
 						if(isSensor){
 							sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
 							sensorValuesJSONArray = this.loadDenesFromPointers(sensorValuesPointersJSONArray);
 
 
-							logger.info("sensorValuesJSONArray.length=" + sensorValuesJSONArray.length());
+							logger.debug("sensorValuesJSONArray.length=" + sensorValuesJSONArray.length());
 							for(int k=0;k<sensorValuesJSONArray.length();k++){
 
 								aDeneValueJSONObject = (JSONObject) sensorValuesJSONArray.get(k);
-								logger.info("k="+ k + " aDeneValueJSONObject:" + aDeneValueJSONObject);
+								logger.debug("k="+ k + " aDeneValueJSONObject:" + aDeneValueJSONObject);
 
 								I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneValueJSONObject, "Sensor Request Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
@@ -517,7 +517,7 @@ public class DenomeViewManager {
 									public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
 										return o1.getValue().compareTo(o2.getValue());
 									}});
-								logger.info("line 511, after sorting sensorRequestQueuePositionDeneWordIndex="+ sensorRequestQueuePositionDeneWordIndex.size() + " aDeneValueJSONObject:" + aDeneValueJSONObject.getString("Name"));
+								logger.debug("line 511, after sorting sensorRequestQueuePositionDeneWordIndex="+ sensorRequestQueuePositionDeneWordIndex.size() + " aDeneValueJSONObject:" + aDeneValueJSONObject.getString("Name"));
 
 							}
 						}else if(DenomeUtils.isDeneOfType(aDeneJSONObject, TeleonomeConstants.DENE_TYPE_ON_START_SENSOR)){
@@ -528,7 +528,7 @@ public class DenomeViewManager {
 
 							for(int k=0;k<sensorValuesJSONArray.length();k++){
 								aDeneValueJSONObject = (JSONObject) sensorValuesJSONArray.get(k);
-								logger.info("line 521 aDeneJSONObject.=" + aDeneValueJSONObject.getString("Name"));
+								logger.debug("line 521 aDeneJSONObject.=" + aDeneValueJSONObject.getString("Name"));
 
 								I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneValueJSONObject, "Sensor Request Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 								logger.debug("In denomemanager, aDeneValueJSONObject=" + aDeneValueJSONObject.getString("Name") + " Sensor Request Queue Position=" + I);
@@ -548,10 +548,10 @@ public class DenomeViewManager {
 					//
 					// finishing running through the sensors of a microcontroller, so store it
 					//
-					logger.info("line 541");
+					logger.debug("line 541");
 					pointerToMicroControllerSensorsDeneWordsBySensorRequestQueuePositionIndex.put(pointerToMicroController, sensorRequestQueuePositionDeneWordIndex);
 					pointerToMicroControllerSensorsDeneWordsForInitialBySensorRequestQueuePositionIndex.put(pointerToMicroController, sensorRequestQueuePositionDeneWordForInitialIndex);
-					logger.info("line 543 storing data for microcontrollerpointer: " + pointerToMicroController + " sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size() + " sensorRequestQueuePositionDeneWordForInitialIndex:" + sensorRequestQueuePositionDeneWordForInitialIndex.size());
+					logger.debug("line 543 storing data for microcontrollerpointer: " + pointerToMicroController + " sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex.size() + " sensorRequestQueuePositionDeneWordForInitialIndex:" + sensorRequestQueuePositionDeneWordForInitialIndex.size());
 				}
 			}
 			//
