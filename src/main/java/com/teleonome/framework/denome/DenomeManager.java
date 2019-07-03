@@ -3159,6 +3159,9 @@ public class DenomeManager {
 			Object mutationPayloadValue, mutationTargetNewValue;
 			String[] tokens;
 			String targetDeneChain,targetDene,targetDeneWord;
+			JSONArray mutationDeneChains, mutationDenes,mutationDeneWords;
+			JSONObject mutationDeneChain, mutationDene, mutationDeneWord;
+			
 			for(int i=0;i<mutationsJSONArray.length();i++){
 				mutationJSONObject = (JSONObject) mutationsJSONArray.getJSONObject(i);
 				logger.info("line 2980 of inject, mutationJSONObject=" + mutationJSONObject.getString("Name") + " " + mutationJSONObject.getString("Mutation Type"));
@@ -3198,8 +3201,7 @@ public class DenomeManager {
 
 						//
 						// now loop over all the object of the target mutation
-						JSONArray mutationDeneChains, mutationDenes,mutationDeneWords;
-						JSONObject mutationDeneChain, mutationDene, mutationDeneWord;
+						
 
 						mutationDeneChains = mutationJSONObject.getJSONArray("DeneChains");
 						//logger.info("line 1560 demomemanager mutationDeneChains:" + mutationDeneChains.length());
@@ -4454,7 +4456,7 @@ public class DenomeManager {
 			Object targetDeneWordValue;
 			JSONArray denes;
 			String targetDeneWordValueType;
-			JSONObject onLoadMutationDeneChainJSONObject=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENE_TYPE_ON_LOAD_MUTATION);
+			JSONObject onLoadMutationDeneChainJSONObject=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_ON_LOAD_MUTATION);
 			logger.info("load immediate mutation  onLoadMutationDeneChainJSONObject="  + onLoadMutationDeneChainJSONObject);
 
 			if(onLoadMutationDeneChainJSONObject!=null){
@@ -4845,7 +4847,7 @@ public class DenomeManager {
 			// The On Finish does the same sort of things as the On Load, update denewords, update dene etc, 
 			// it is usefull to update values of denomic structures created in the mutation
 			//
-			JSONObject onFinishMutationDeneChainJSONObject=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENE_TYPE_ON_FINISH_MUTATION);
+			JSONObject onFinishMutationDeneChainJSONObject=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_ON_FINISH_MUTATION);
 			logger.info("load immediate mutation  onFinishMutationDeneChainJSONObject="  + onFinishMutationDeneChainJSONObject);
 			String deneType="";
 			String newDeneName="";
@@ -5046,7 +5048,7 @@ public class DenomeManager {
 					Object targetDeneWordValue;
 					JSONArray denes;
 
-					JSONObject onLoadMutationDeneChainJSONObject=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENE_TYPE_ON_LOAD_MUTATION);
+					JSONObject onLoadMutationDeneChainJSONObject=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_ON_LOAD_MUTATION);
 
 					if(onLoadMutationDeneChainJSONObject!=null){
 						denes = onLoadMutationDeneChainJSONObject.getJSONArray("Denes");

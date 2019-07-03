@@ -308,7 +308,8 @@ public class TeleonomeConstants {
 	//
 	// the mutations denechains
 	//
-	public static final String DENE_TYPE_ON_LOAD_MUTATION = "On Load";
+	public static final String DENECHAIN_ON_LOAD_MUTATION = "On Load";
+	public static final String DENECHAIN_ON_FINISH_MUTATION = "On Finish";
 	public static final String DENECHAIN_DENE_INJECTION ="Dene Injections";
 	public static final String DENECHAIN_DENEWORD_INJECTION ="DeneWord Injections";
 	public static final String DENECHAIN_DENE_DELETION ="Dene Deletion";
@@ -319,7 +320,7 @@ public class TeleonomeConstants {
 	public static final String DENECHAIN_MNEMOSYNE_OPERATIONS="Mnemosyne Operations";
 	public static final String DENE_TYPE_MNEMOSYCON_LIST="Mnemosycon List";
 	
-	public static final String DENE_TYPE_ON_FINISH_MUTATION = "On Finish";
+	
 	public static final String DENE_TYPE_DENEWORD_CARRIER= "DeneWord Carrier";
 	public static final String DENE_TYPE_ACTION_LIST= "Action List";
 	public static final String DENE_NAME_ATTRIBUTE= "Name";
