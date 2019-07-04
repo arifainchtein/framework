@@ -995,6 +995,7 @@ class MappedBusThread extends Thread{
 							}
 
 						}else{
+							logger.info("line 998 about to read  mutation for " + command);
 							if(dataPayloadJSONObject==null)mutationJSONObject = hypothalamus.aDenomeManager.readImmediateMutation(command);
 						}
 

@@ -1095,7 +1095,7 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 			for(int k=0;k<sensorDataTokens.length;k++) {
 				logger.debug("k=" + k + " sensorDataTokens[k]= "+ sensorDataTokens[k]);
 			}
-			logger.info("sending GetSensorData received=" + sensorDataTokens.length + " need=" +sensorRequestQueuePositionDeneWordIndex.size() + "  counter=" + counter + " inputLine=" + inputLine);
+			logger.debug("sending GetSensorData received=" + sensorDataTokens.length + " need=" +sensorRequestQueuePositionDeneWordIndex.size() + "  counter=" + counter + " inputLine=" + inputLine);
 		}while(sensorDataTokens.length!=sensorRequestQueuePositionDeneWordIndex.size());
 		logger.debug("inputLine.length()>0=" + (inputLine.length()>0));
 		if(inputLine.length()>0){
