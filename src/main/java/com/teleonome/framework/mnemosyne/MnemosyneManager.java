@@ -112,6 +112,15 @@ public class MnemosyneManager {
 	//
 	// Methods related to the NetworkSensor
 	//
+	public boolean removeDeviceFromWhiteList(String deviceName) {
+		// TODO Auto-generated method stub
+		return aDBManager.removeDeviceFromWhiteList(deviceName);
+	}
+	
+	public boolean addDeviceToWhiteList(String deviceName, String deviceMacAddress) {
+		// TODO Auto-generated method stub
+		return aDBManager.addDeviceToWhiteList(deviceName,  deviceMacAddress);
+	}
 	public int geNumberUnknowDevicesInLastSample() {
 		return aDBManager.geNumberUnknowDevicesInLastSample();
 	}
@@ -2580,4 +2589,6 @@ public class MnemosyneManager {
 		}
 		return toReturn;
 	}
+
+	
 }
