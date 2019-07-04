@@ -1,5 +1,6 @@
 package com.teleonome.framework.tools;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,6 +47,7 @@ import org.apache.commons.codec.binary.Hex;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.imageio.ImageIO;
 
 import java.util.Scanner;
 import java.util.Set;
@@ -85,6 +87,27 @@ public class MethodTester implements SftpProgressMonitor{
 		//pingURL(url,2000);
 		//calculateSunrise();
 		logger = Logger.getLogger(getClass());
+		int coverWidth = 450;
+		int coverHeight=450;
+		BufferedImage bimg;
+		boolean foundImage=false; 
+		String completeAlbumName =  "/Users/arifainchtein/Desktop/7503003825210.jpg";
+		File albumFile = new File(completeAlbumName);
+		System.out.println(albumFile.isFile());
+		try {
+			bimg = ImageIO.read(albumFile);
+			logger.debug("bimg=" + bimg);
+
+			coverWidth = bimg.getWidth(); 
+			coverHeight = bimg.getHeight();
+			foundImage=true; 
+			System.out.println("coverWidth="+ coverWidth);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			logger.debug("labout to instantiate=" + Utils.getStringException(e1));
+			 System.out.println(Utils.getStringException(e1));
+		} 
+		
 		//String arg="MyLegoDoor";
 		//String s= String.format("%040x", new BigInteger(1, arg.getBytes("UTF-8")));
 //	System.out.println(s);
@@ -106,7 +129,7 @@ public class MethodTester implements SftpProgressMonitor{
 //		String remoteSourceFileName="/home/arifainchtein/db_backups/casete_backup.sql";
 //		downloadFile( remoteSourceFileName, localDestinationFilename) ;
 		
-		generateNetworkSensorData();
+		//generateNetworkSensorData();
 	}
 
 	

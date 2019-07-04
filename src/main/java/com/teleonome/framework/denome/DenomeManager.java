@@ -3323,11 +3323,12 @@ public class DenomeManager {
 			// it would have modified the denome and written the modification to disk
 
 			JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
-
 			mutationsJSONArray = denomeObject.getJSONArray("Mutations");
+			logger.debug("readImmediateMutation mutationsJSONArray=" + mutationsJSONArray.length());
 			JSONObject mutationJSONObject;
 			for(int i=0;i<mutationsJSONArray.length();i++){
 				mutationJSONObject = (JSONObject) mutationsJSONArray.getJSONObject(i);
+				logger.debug("readImmediateMutation name=" + mutationJSONObject.getString("Name") + "type=" + mutationJSONObject.getString("Mutation Type"));
 				if(mutationJSONObject.getString("Name").equals(mutationName) && mutationJSONObject.getString("Mutation Type").equals(TeleonomeConstants.MUTATION_TYPE_STATE)){
 					return mutationJSONObject;
 				}
