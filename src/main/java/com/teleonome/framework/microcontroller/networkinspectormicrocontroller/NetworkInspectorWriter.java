@@ -59,12 +59,19 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			logger.debug("AddToWhiteList deviceName=" + deviceName + " " + deviceMacAddress);
 			boolean b = aMnemosyneManager.addDeviceToWhiteList(deviceName, deviceMacAddress);
 			logger.debug("AddToWhiteList deviceName=" + deviceName + " " + deviceMacAddress + " " + b);
+			
+			GenerateAnalysisThread a = new GenerateAnalysisThread();
+			a.start();
+			
 		}else if(command.startsWith("RemoveDeviceFromWhiteList")){
 			String[] tokens = command.split("#");
 			String deviceName=tokens[1];
 			logger.debug("RemoveDeviceFromWhiteList deviceName=" + deviceName);
 			boolean b = aMnemosyneManager.removeDeviceFromWhiteList(deviceName);
 			logger.debug("RemoveDeviceFromWhiteList deviceName=" + deviceName  + " " + b);
+			
+			GenerateAnalysisThread a = new GenerateAnalysisThread();
+			a.start();
 		}
 	}
 
