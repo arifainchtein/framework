@@ -73,7 +73,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 	}
 
 	private void updateWhiteListStatusInFile(String deviceName, boolean status) throws IOException {
-		String finalSensorDataString = FileUtils.readFileToString(new File("network.json"));
+		String finalSensorDataString = FileUtils.readFileToString(new File("NetworkSensor.json"),Charset.defaultCharset());
 		String[] sensorTokens = finalSensorDataString.split("#");
 		JSONArray lastNetworkActivityJSONArray = new JSONArray(sensorTokens[2]);
 		JSONObject anObject;
