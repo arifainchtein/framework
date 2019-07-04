@@ -1895,7 +1895,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			statement = connection.createStatement();
 			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
 
-			sql = "delete from NetworkDeviceWhiteList where deviceName ='"+ deviceName+"')";
+			sql = "delete from NetworkDeviceWhiteList where deviceName ='"+ deviceName+"'";
 			logger.debug("delete  NetworkDeviceWhiteList, sql " + sql);
 			int result = statement.executeUpdate(sql);
 			toReturn=true;
