@@ -296,7 +296,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			String tableName;
 			while(rs.next()){
 				tableName = rs.getString(1);
-				logger.info("line 299, tableName=" + tableName");
+				logger.info("line 299, tableName=" + tableName);
 				tableDate = this.getDateForManagedTable(prefix, tableName);
 				arrayList.add(new AbstractMap.SimpleEntry<String,Date>(tableName, tableDate));
 				Collections.sort(arrayList, new Comparator<Map.Entry<?, Date>>(){
