@@ -30,7 +30,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 	NetworkInspectorReader aNetworkInspectorReader;
 	Logger logger;
 	int arpScanRetry=8;
-	
+	boolean generatingAnalysis=false;
 	
 	DecimalFormat twoDecimalFormat = new DecimalFormat("0.00");
 	MnemosyneManager aMnemosyneManager;
@@ -59,9 +59,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			logger.debug("AddToWhiteList deviceName=" + deviceName + " " + deviceMacAddress);
 			boolean b = aMnemosyneManager.addDeviceToWhiteList(deviceName, deviceMacAddress);
 			logger.debug("AddToWhiteList deviceName=" + deviceName + " " + deviceMacAddress + " " + b);
-			
-			GenerateAnalysisThread a = new GenerateAnalysisThread();
-			a.start();
+			updateWhiteListStatusInFile( deviceName, true);			
 			
 		}else if(command.startsWith("RemoveDeviceFromWhiteList")){
 			String[] tokens = command.split("#");
@@ -70,16 +68,34 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			boolean b = aMnemosyneManager.removeDeviceFromWhiteList(deviceName);
 			logger.debug("RemoveDeviceFromWhiteList deviceName=" + deviceName  + " " + b);
 			
-			GenerateAnalysisThread a = new GenerateAnalysisThread();
-			a.start();
+			updateWhiteListStatusInFile( deviceName, false);
 		}
 	}
 
+	private void updateWhiteListStatusInFile(String deviceName, boolean status) throws IOException {
+		String finalSensorDataString = FileUtils.readFileToString(new File("network.json"));
+		String[] sensorTokens = finalSensorDataString.split("#");
+		JSONArray lastNetworkActivityJSONArray = new JSONArray(sensorTokens[2]);
+		JSONObject anObject;
+		found:
+		for(int i=0;i<lastNetworkActivityJSONArray.length();i++) {
+			anObject = lastNetworkActivityJSONArray.getJSONObject(i);
+			if(deviceName.equals(anObject.getString(TeleonomeConstants.DEVICE_NAME))) {
+				anObject.put(TeleonomeConstants.WHITE_LIST_STATUS, status);
+				logger.debug("updateWhiteListStatusInFile=" + deviceName);
+				break found;
+			}
+		}
+		
+		String newFinalSensorDataString =sensorTokens[0] + "#" + sensorTokens[1] + "#" + lastNetworkActivityJSONArray.toString() + "#" + sensorTokens[3]+"#" + sensorTokens[4]+"#"+sensorTokens[5]+"#" +sensorTokens[6] + "#" + sensorTokens[7] + "#" + sensorTokens[8];
+		FileUtils.writeStringToFile(new File("NetworkSensor.json"), newFinalSensorDataString ,  Charset.defaultCharset(),false);
+		
+	}
 	class GenerateAnalysisThread extends Thread{
 		public void run() {
 			
 			long startingTime = System.currentTimeMillis();
-
+			generatingAnalysis=true;
 
 			int numDevices;
 			JSONArray  previousDeviceListJSONArray = null;
@@ -204,6 +220,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e));
 			}
+			generatingAnalysis=false;
 		}
 
 
