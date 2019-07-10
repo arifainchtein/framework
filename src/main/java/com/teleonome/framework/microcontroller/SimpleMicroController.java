@@ -115,6 +115,7 @@ public class SimpleMicroController extends MotherMicroController {
 		try {
 			code = totp.generateCurrentNumberFromUnencodedString(StringUtils.chomp(unEncodedKey));
 
+			
 		} catch (GeneralSecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
