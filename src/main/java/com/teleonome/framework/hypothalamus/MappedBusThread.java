@@ -1276,8 +1276,8 @@ class MappedBusThread extends Thread{
 							includedRememberedIdentity = new Identity(deneChainIdentity.getTeleonomeName(), deneChainIdentity.getNucleusName(), deneChainIdentity.getDenechainName(), dene.getString(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE),deneWord.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
 							value = getDeneWordByIdentity(currentPulse,includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							valueType = (String) getDeneWordByIdentity(currentPulse, includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
-							units = (String) getDeneWordByIdentity(currentPulse, includedRememberedIdentity, TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
-							logger.debug("about to unwrap " + includedRememberedIdentity.toString() + " with value:" + value  + " and valueType=" + valueType);
+							units = (String) getDeneWordByIdentity(currentPulse, includedRememberedIdentity, TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE);
+							logger.debug("about to unwrap " + includedRememberedIdentity.toString() + " with value:" + value  + " and valueType=" + valueType + " units=" + units);
 							aMnemosyneManager.unwrap( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), valueType,value, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_PULSE, units);			
 						}
 					}
