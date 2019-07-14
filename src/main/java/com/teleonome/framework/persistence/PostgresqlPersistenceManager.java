@@ -1712,6 +1712,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		Connection connection = null;
 		Statement statement = null;
 		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.NETWORK_DEVICE_ACTIVITY_TABLE,System.currentTimeMillis(), System.currentTimeMillis());
+		if(allTables.size()==0)return 0;
 		String sql = "select count(deviceMacAddress) from "+ allTables.get(0)+" where whiteliststatus=false and scantimemillis in (select scantimemillis from "+ allTables.get(0)+" order by scantimemillis desc limit 1)";
 		ResultSet rs = null;
 		int toReturn=-1;
