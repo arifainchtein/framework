@@ -158,6 +158,11 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			// 2 perform the differential analysis
 			//
 			diffAnalysisJSONObject = new JSONObject();
+			JSONArray missingDevices = new JSONArray();
+			JSONArray newDevices = new JSONArray();
+
+			diffAnalysisJSONObject.put("Missing", missingDevices);
+			diffAnalysisJSONObject.put("New", newDevices);
 			logger.debug("previousDeviceListJSONArray=" + previousDeviceListJSONArray);
 			if(previousDeviceListJSONArray!=null) {
 				//
