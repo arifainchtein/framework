@@ -25,6 +25,7 @@ import com.teleonome.framework.mnemosyne.MnemosyneManager;
 import com.teleonome.framework.network.NetworkUtilities;
 import com.teleonome.framework.utils.Utils;
 
+
 public class NetworkInspectorWriter  extends BufferedWriter{
 
 	NetworkInspectorReader aNetworkInspectorReader;
@@ -171,6 +172,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			//
 			// 3- get the connection speed
 			//
+			logger.debug("about to execute speedtest-cli" );
 			String speedtestCommand = "speedtest-cli --json";
 			JSONObject connectionInfoJSONObject = null;
 			double downloadSpeed=0,uploadSpeed=0, pingTime=0;

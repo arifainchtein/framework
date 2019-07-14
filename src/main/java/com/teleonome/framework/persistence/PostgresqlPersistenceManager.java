@@ -296,7 +296,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			String tableName;
 			while(rs.next()){
 				tableName = rs.getString(1);
-				logger.info("line 299, tableName=" + tableName);
+				logger.debug("line 299, tableName=" + tableName);
 				tableDate = this.getDateForManagedTable(prefix, tableName);
 				arrayList.add(new AbstractMap.SimpleEntry<String,Date>(tableName, tableDate));
 				Collections.sort(arrayList, new Comparator<Map.Entry<?, Date>>(){
@@ -374,7 +374,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		String dateString = dailyTableName.substring(prefix.length()+1);
 		Date date=null;
 		try {
-			logger.info("line 376 dateString=" + dateString);
+			logger.debug("line 376 dateString=" + dateString);
 			date = managedTableDateFormat.parse(dateString);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
