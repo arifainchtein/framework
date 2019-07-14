@@ -193,7 +193,9 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				e1.printStackTrace();
 			}
 			long connectionSpeedDuration = System.currentTimeMillis()- diffAnalysisEndTime;
-
+			logger.debug("connectionSpeedDuration=" +connectionSpeedDuration);
+			
+			logger.debug("Generating String " )
 			//
 			// generate the string
 			try {
