@@ -390,7 +390,7 @@ public class NetworkUtilities {
 		return toReturn;
 	}
 	
-	public static JSONArray getSSID(boolean debug) {
+	public static JSONArray getSSIDNew(boolean debug) {
 		//
 		// try both interfaces wlan0 and wlan1
 		JSONArray toReturn = new JSONArray();
@@ -427,16 +427,9 @@ public class NetworkUtilities {
 		}
 		return toReturn;
 	}
-	public static JSONArray getSSIDOld(boolean debug){
-		ArrayList result=new ArrayList();;
-		try {
-			//if(debug)//System.out.println("in getSSID, About to execute command");
-			result = Utils.executeCommand( "sudo  iw dev wlan0 scan ap-force");
-			//if(debug)//System.out.println("in getSSID, executed command, size="+ result.size());
-		} catch (IOException | InterruptedException e) {
-			// TODO Auto-generated catch block
-			//System.out.println(Utils.getStringException(e));
-		}
+	public static JSONArray getSSID(boolean debug){
+		ArrayList result=new ArrayList();
+		String[] lans= {"wlan0", "wlan1"};
 		boolean foundTSF=false;
 		boolean foundSSID=false;
 		String signal;
@@ -444,46 +437,69 @@ public class NetworkUtilities {
 		JSONObject ssidInfo = new JSONObject();
 		String[] tokens;
 		String line;
-		for(int j=0;j<result.size();j++){
-			line = (String) result.get(j);
-			if(debug) {
-				logger.debug("line=" + line);
+		
+		for(int i=0;i<lans.length;i++) {
+
+			 foundTSF=false;
+			 foundSSID=false;
+
+			try {
+				//if(debug)//System.out.println("in getSSID, About to execute command");
+				result = Utils.executeCommand( "sudo  iw dev wlan1 scan ap-force");
+				//if(debug)//System.out.println("in getSSID, executed command, size="+ result.size());
+			} catch (IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				//System.out.println(Utils.getStringException(e));
 			}
-			if(line.contains("TSF:")){
-				foundTSF=true;
-//				if(ssidInfo.length()>0){
-//					units.put(ssidInfo);
-//				}
-//				ssidInfo = new JSONObject();
-				ssidInfo = new JSONObject();
-				units.put(ssidInfo);
-			}
-			if(line.contains("signal:")){
-				try {
-					ssidInfo.put("Signal", line.substring(8));
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			//
+			// result can either be:
+			// command failed: Network is down (-100)
+			// or
+			// actual data
+			//
+			if(result.size()>2) {
+				for(int j=0;j<result.size();j++){
+					line = (String) result.get(j);
+					if(debug) {
+						logger.debug("line=" + line);
+					}
+					if(line.contains("TSF:")){
+						foundTSF=true;
+						//				if(ssidInfo.length()>0){
+						//					units.put(ssidInfo);
+						//				}
+						//				ssidInfo = new JSONObject();
+						ssidInfo = new JSONObject();
+						units.put(ssidInfo);
+					}
+					if(line.contains("signal:")){
+						try {
+							ssidInfo.put("Signal", line.substring(8));
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}else if(line.contains("SSID:")){
+						tokens = line.split(":");
+						try {
+							ssidInfo.put("SSID", tokens[1].trim());
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}else if(line.contains("* Authentication suites:")){
+						tokens = line.split(":");
+						try {
+							ssidInfo.put("Authentication", tokens[1].trim());
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					if(debug) {
+						logger.debug("ssidInfo=" + ssidInfo.toString(4));
+					}
 				}
-			}else if(line.contains("SSID:")){
-				tokens = line.split(":");
-				try {
-					ssidInfo.put("SSID", tokens[1].trim());
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}else if(line.contains("* Authentication suites:")){
-				tokens = line.split(":");
-				try {
-					ssidInfo.put("Authentication", tokens[1].trim());
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			if(debug) {
-				logger.debug("ssidInfo=" + ssidInfo.toString(4));
 			}
 		}
 		logger.debug("getssid returning =" + units.toString(4));
