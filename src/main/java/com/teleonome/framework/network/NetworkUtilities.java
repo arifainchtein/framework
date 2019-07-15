@@ -390,8 +390,44 @@ public class NetworkUtilities {
 		return toReturn;
 	}
 	
-	
-	public static JSONArray getSSID(boolean debug){
+	public static JSONArray getSSID(boolean debug) {
+		//
+		// try both interfaces wlan0 and wlan1
+		JSONArray toReturn = new JSONArray();
+		ArrayList result=new ArrayList();;
+		ArrayList<String> interim = new ArrayList();
+		try {
+			
+			result = Utils.executeCommand( "sudo iwlist wlan0 scan | grep ESSID");
+			//ESSID:"MainRouter24"
+			String line, ssid;
+			for(int j=0;j<result.size();j++){
+				line = (String) result.get(j);
+				logger.debug("line=" + line);
+				ssid = line.split(":")[1];
+				if(!ssid.equals("") && !interim.contains(ssid)) {
+					toReturn.put(ssid);
+				}
+			}
+			
+			result = Utils.executeCommand( "sudo iwlist wlan1 scan | grep ESSID");
+			//ESSID:"MainRouter24"
+			
+			for(int j=0;j<result.size();j++){
+				line = (String) result.get(j);
+				logger.debug("line=" + line);
+				ssid = line.split(":")[1];
+				if(!ssid.equals("") && !interim.contains(ssid)) {
+					toReturn.put(ssid);
+				}
+			}
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			//System.out.println(Utils.getStringException(e));
+		}
+		return toReturn;
+	}
+	public static JSONArray getSSIDOld(boolean debug){
 		ArrayList result=new ArrayList();;
 		try {
 			//if(debug)//System.out.println("in getSSID, About to execute command");
