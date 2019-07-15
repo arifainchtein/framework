@@ -290,9 +290,45 @@ public class NetworkUtilities {
 		
 		return number;
 	}
-	
-	
 	public static JSONObject getAvailableAdapters(){
+		ArrayList result=new ArrayList();;
+		JSONObject toReturn = new JSONObject();
+		logger.debug("inside of getAvailableAdapters");
+		try {
+			//if(debug)//System.out.println("in getSSID, About to execute command");
+			result = Utils.executeCommand( "cat /proc/net/dev");
+			logger.debug("result=" + result.toString());
+//			Inter-|   Receive                                                |  Transmit
+//			 face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
+//			  eth0: 19385485   31545    0    0    0     0          0         0  7652359   23632    0    0    0     0       0          0
+//			    lo: 1037868    3001    0    0    0     0          0         0  1037868    3001    0    0    0     0       0          0
+//			 wlan1:       0       0    0    0    0     0          0         0     5020      33    0    0    0     0       0          0
+//			 wlan0:       0       0    0   32    0     0          0         0        0       0    0    0    0     0       0          0
+		    
+			
+			// ignoring lo
+			String line;
+			String ipAddress,adapter;
+			for(int j=2;j<result.size();j++){
+				line = (String) result.get(j);
+				logger.debug("line=" + line);
+				adapter = line.split(":")[0];
+				if(!adapter.equals("lo")) {
+					ipAddress=getIpAddressByInterfaceName(adapter);
+					toReturn.put(adapter, ipAddress);
+				}
+				
+			}
+			
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			//System.out.println(Utils.getStringException(e));
+		}
+		
+		return toReturn;
+	}
+	
+	public static JSONObject getAvailableAdaptersOld(){
 		ArrayList result=new ArrayList();;
 		JSONObject toReturn = new JSONObject();
 		logger.debug("inside of getAvailableAdapters");
