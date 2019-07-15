@@ -311,11 +311,15 @@ public class NetworkUtilities {
 			String ipAddress,adapter;
 			for(int j=2;j<result.size();j++){
 				line = (String) result.get(j);
-				logger.debug("line=" + line);
-				adapter = line.split(":")[0];
+				
+				adapter = line.split(":")[0].trim();
+				logger.debug("adapter=" + adapter + " line=" + line);
 				if(!adapter.equals("lo")) {
 					ipAddress=getIpAddressByInterfaceName(adapter);
-					toReturn.put(adapter, ipAddress);
+					logger.debug("ipAddress=" + ipAddress );
+					if()toReturn.put(adapter, ipAddress);
+					else toReturn.put(adapter, "");
+					
 				}
 				
 			}
