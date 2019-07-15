@@ -109,14 +109,13 @@ public class SimpleMicroController extends MotherMicroController {
 	@Override
 	public String getCommandCode()  throws IOException {
 		String code="";
-		String unEncodedKey = FileUtils.readFileToString(new File("SecretKey"), "UTF-8").trim();
-		String chomped=StringUtils.chomp(unEncodedKey);
-		logger.debug("unEncodedKey = " + unEncodedKey + " chomped" + chomped);
+		String base32String = FileUtils.readFileToString(new File("SecretKey"), "UTF-8").trim();
+//		String chomped=StringUtils.chomp(unEncodedKey);
+//		logger.debug("unEncodedKey = " + unEncodedKey + " chomped" + chomped);
 		TOTP totp = new TOTP();
 		try {
-			code = totp.generateCurrentNumberFromUnencodedString(unEncodedKey);
-			logger.debug("unEncodedKey code = " + code );
-			code = totp.generateCurrentNumberFromUnencodedString(chomped);
+			
+			code = totp.generateCurrentNumberFromBase32(base32String);
 			logger.debug("chomped code = " + code );
 			
 		} catch (GeneralSecurityException e) {

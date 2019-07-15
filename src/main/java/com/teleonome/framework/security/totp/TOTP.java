@@ -44,10 +44,10 @@ public class TOTP {
 	}
 
 	public String generateCurrentNumberFromUnencodedString(String unencodedString) throws GeneralSecurityException {
-		//Base32 b = new Base32();
-		//String base32Secret = b.encodeAsString(unencodedString.getBytes());
+		Base32 b = new Base32();
+		String base32Secret = b.encodeAsString(unencodedString.getBytes());
 		long now = System.currentTimeMillis();
-		System.out.println("unencodedString=" + unencodedString  + " now " + now);
+		System.out.println("unencodedString=" + unencodedString + " base32=" + base32Secret + " now " + now);
 		//return generateCurrentNumber(base32Secret, now);
 		return generateCurrentNumber(unencodedString, now);
 	}
