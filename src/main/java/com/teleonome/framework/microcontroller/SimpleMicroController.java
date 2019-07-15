@@ -32,7 +32,6 @@ import com.teleonome.framework.security.totp.TOTP;
 import com.teleonome.framework.utils.Utils;
 
 
-
 public class SimpleMicroController extends MotherMicroController {
 	StringWriter sw = new StringWriter();
 	String  dataString="dataString";
@@ -111,10 +110,14 @@ public class SimpleMicroController extends MotherMicroController {
 	public String getCommandCode()  throws IOException {
 		String code="";
 		String unEncodedKey = FileUtils.readFileToString(new File("SecretKey"), "UTF-8").trim();
+		String chomped=StringUtils.chomp(unEncodedKey);
+		logger.debug("unEncodedKey = " + unEncodedKey + " chomped" + chomped);
 		TOTP totp = new TOTP();
 		try {
-			code = totp.generateCurrentNumberFromUnencodedString(StringUtils.chomp(unEncodedKey));
-
+			code = totp.generateCurrentNumberFromUnencodedString(unEncodedKey);
+			logger.debug("unEncodedKey code = " + code );
+			code = totp.generateCurrentNumberFromUnencodedString(chomped);
+			logger.debug("chomped code = " + code );
 			
 		} catch (GeneralSecurityException e) {
 			// TODO Auto-generated catch block
