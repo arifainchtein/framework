@@ -317,8 +317,8 @@ public class NetworkUtilities {
 				if(!adapter.equals("lo")) {
 					ipAddress=getIpAddressByInterfaceName(adapter);
 					logger.debug("ipAddress=" + ipAddress );
-					if()toReturn.put(adapter, ipAddress);
-					else toReturn.put(adapter, "");
+					toReturn.put(adapter, ipAddress);
+					
 					
 				}
 				
