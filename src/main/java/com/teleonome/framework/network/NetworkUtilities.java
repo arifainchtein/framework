@@ -250,8 +250,44 @@ public class NetworkUtilities {
 		}
 		return toReturn;
 	}
-
 	public static int getNumberOfAvailableWifiAdapters(){
+		ArrayList result=new ArrayList();;
+		int toReturn = 0;
+		logger.debug("inside of getAvailableAdapters");
+		try {
+			//if(debug)//System.out.println("in getSSID, About to execute command");
+			result = Utils.executeCommand( "cat /proc/net/dev");
+			logger.debug("result=" + result.toString());
+			//			Inter-|   Receive                                                |  Transmit
+			//			 face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
+			//			  eth0: 19385485   31545    0    0    0     0          0         0  7652359   23632    0    0    0     0       0          0
+			//			    lo: 1037868    3001    0    0    0     0          0         0  1037868    3001    0    0    0     0       0          0
+			//			 wlan1:       0       0    0    0    0     0          0         0     5020      33    0    0    0     0       0          0
+			//			 wlan0:       0       0    0   32    0     0          0         0        0       0    0    0    0     0       0          0
+
+
+			// ignoring lo
+			String line;
+			String ipAddress,adapter;
+			for(int j=2;j<result.size();j++){
+				line = (String) result.get(j);
+
+				adapter = line.split(":")[0].trim();
+				logger.debug("adapter=" + adapter + " line=" + line);
+				if(!adapter.equals("lo") && !adapter.equals("eth0")) {
+					toReturn++;
+				}
+
+			}
+
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			//System.out.println(Utils.getStringException(e));
+		}
+
+		return toReturn;
+	}
+	public static int getNumberOfAvailableWifiAdaptersOld(){
 		ArrayList result=new ArrayList();;
 		int number=0;
 		logger.debug("inside of getNumberOfAvailableWifiAdapters");
