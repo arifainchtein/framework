@@ -1089,7 +1089,7 @@ class MappedBusThread extends Thread{
 								// each update object has two parameters, the target and the value
 								//
 								updateTargetPointer = updateJSNObject.getString(TeleonomeConstants.MUTATION_PAYLOAD_UPDATE_TARGET);
-								updateJSNObject.get("Value");
+								//updateJSNObject.get("Value");
 								if(updateTargetPointer.equals("@On Load:Update PSK:Update PSK")) {
 									updateJSNObject.put("Value", "*");
 								}
