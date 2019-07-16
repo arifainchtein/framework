@@ -1137,7 +1137,7 @@ class MappedBusThread extends Thread{
 							String ssid = (String) DenomeUtils.getDeneWordAttributeFromMutationByMutationIdentity(mutationJSONObject, identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							identity = new MutationIdentity(teleonomeName,"SetNetworkMode", "On Load", "Update PSK", "Update PSK");
 							String password = (String) DenomeUtils.getDeneWordAttributeFromMutationByMutationIdentity(mutationJSONObject, identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-							logger.debug("about to create supplicant with " + ssid + " " + password);
+							logger.debug("about to create supplicant with ssid=" + ssid + " password=" + password);
 							NetworkUtilities.createNetworkSupplicant(ssid, password);
 							String logFileName="/home/pi/Teleonome/networkmode.log";
 

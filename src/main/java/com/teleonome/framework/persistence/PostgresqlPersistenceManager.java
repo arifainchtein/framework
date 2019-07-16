@@ -2424,7 +2424,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				logger.debug("table " + tableName + " was not found so it was created, result=" + result);
 			}
 			sql = "insert into "+ tableName + "(createdOn,command, status, payLoad, commandCode,commandCodeType, clientIp, restartRequired) values (?,?,?,?,?,?,?,?) returning id";
-
+			
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setLong(1, createdOn);
 			preparedStatement.setString(2,  command );
@@ -2434,7 +2434,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			preparedStatement.setString(6,commandCodeType);
 			preparedStatement.setString(7, clientIp);
 			preparedStatement.setBoolean(8, restartRequired);
-
+			logger.debug("requestCommandToExecute, payload=" + payLoad);;
 
 			rs = preparedStatement.executeQuery();
 			JSONObject data=null;
@@ -3963,7 +3963,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	}
 
 	public JSONArray getRemeberedDeneWordStart( String identityPointer,  long startTimeMillis, long  endTimeMillis){
-		logger.info("enter getRemeberedDeneWordStart identityPointer="+ identityPointer );
+		logger.debug("enter getRemeberedDeneWordStart identityPointer="+ identityPointer );
 		Connection connection=null;
 		PreparedStatement preparedStatement = null; 
 		ResultSet rs=null;
