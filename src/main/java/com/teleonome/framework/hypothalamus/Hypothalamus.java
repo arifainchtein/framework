@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -178,7 +179,7 @@ public abstract class Hypothalamus {
 				
 				
 				hostName = InetAddress.getLocalHost().getCanonicalHostName();
-				initOperationalMode = FileUtils.readFileToString(new File("InitOperationalMode"));
+				initOperationalMode = FileUtils.readFileToString(new File("InitOperationalMode"), Charset.defaultCharset());
 				aDenomeManager.setNetworkInfo(networkAdapterInfoJSONObject, hostName, initOperationalMode);
 				aDenomeManager.setProcessInfo(pacemakerPid);
 				/*

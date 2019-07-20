@@ -194,6 +194,9 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	 * @return
 	 */
 	public boolean createDailyPartitions(Calendar cal) {
+		return true;
+	}
+	public boolean createDailyPartitionsOld(Calendar cal) {
 		boolean toReturn=false;
 		int year = cal.get(Calendar.YEAR);
 		int month = cal.get(Calendar.MONTH) + 1;

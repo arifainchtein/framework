@@ -75,7 +75,7 @@ public class TeleonomeConstants {
 	public static final String TELEONOME_IDENTITY_LABEL = "Identity";
 	public static final String TELEONOME_IDENTITY_SELF = "Self";
 	public static final String TELEONOME_IDENTITY_ORGANISM = "Organism";
-	
+	public static final String TELEONOME_IDENTITY_DUAL = "Dual";
 	
 	
 	//

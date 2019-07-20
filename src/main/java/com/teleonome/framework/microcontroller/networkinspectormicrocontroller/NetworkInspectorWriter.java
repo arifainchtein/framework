@@ -1,7 +1,6 @@
 package com.teleonome.framework.microcontroller.networkinspectormicrocontroller;
 
 
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -181,8 +180,9 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			String speedtestCommand = "speedtest-cli --json";
 			JSONObject connectionInfoJSONObject = null;
 			double downloadSpeed=0,uploadSpeed=0, pingTime=0;
+			ArrayList<String> results=null;
 			try {
-				ArrayList<String> results = Utils.executeCommand(speedtestCommand);
+				 results = Utils.executeCommand(speedtestCommand);
 				//
 				// only one line comes back and its a jsnobject
 				//
@@ -195,7 +195,8 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				}
 			} catch (IOException | InterruptedException e1) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				logger.warn("results=" + results);
+				logger.warn(Utils.getStringException(e1));
 			}
 			long connectionSpeedDuration = System.currentTimeMillis()- diffAnalysisEndTime;
 			logger.debug("connectionSpeedDuration=" +connectionSpeedDuration);
