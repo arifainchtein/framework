@@ -363,8 +363,8 @@ public class DenomeUtils {
 					//KiB Mem:    380416 total,   364956 used,    15460 free,     5028 buffers
 					splited = lines[i].split(":")[1].split(",");
 					double totalSystemMemory = Double.parseDouble(splited[0].trim().split("\\s+")[0])/1000;
-					int freeSystemMemory = Integer.parseInt(splited[1].trim().split("\\s+")[0])/1000;
-					int memoryUsed = Integer.parseInt(splited[2].trim().split("\\s+")[0])/1000;
+					double freeSystemMemory = Double.parseDouble(splited[1].trim().split("\\s+")[0])/1000;
+					double memoryUsed = Double.parseDouble(splited[2].trim().split("\\s+")[0])/1000;
 					double bufferCache = Double.parseDouble(splited[3].trim().split("\\s+")[0]);
 					logger.debug("lines[i]=" + lines[i]);
 					logger.debug("splited[2]="+ splited[2]);
