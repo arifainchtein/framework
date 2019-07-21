@@ -372,9 +372,9 @@ public class DenomeUtils {
 
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Total System Memory",""+totalSystemMemory,"Mb","double",true);
 					memoryStatusDeneWords.put(deneWord);
-					deneWord = DenomeUtils.buildDeneWordJSONObject("Free System Memory",""+freeSystemMemory,"Mb","int",true);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Free System Memory",""+freeSystemMemory,"Mb","double",true);
 					memoryStatusDeneWords.put(deneWord);
-					deneWord = DenomeUtils.buildDeneWordJSONObject("Memory Used",""+memoryUsed,"Mb","int",true);
+					deneWord = DenomeUtils.buildDeneWordJSONObject("Memory Used",""+memoryUsed,"Mb","double",true);
 					memoryStatusDeneWords.put(deneWord);
 					deneWord = DenomeUtils.buildDeneWordJSONObject("Buffer Cache",""+bufferCache,"Kb","double",true);
 					memoryStatusDeneWords.put(deneWord);
