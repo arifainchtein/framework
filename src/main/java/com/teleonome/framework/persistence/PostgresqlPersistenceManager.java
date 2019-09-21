@@ -84,6 +84,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				// get the property value and print it out
 				port = Integer.parseInt(prop.getProperty("port"));
 				pwd = prop.getProperty("pwd");
+				logger.debug("getting connection with params " + port);
 			}catch(IOException e) {
 				logger.warn(Utils.getStringException(e));
 			}finally {
