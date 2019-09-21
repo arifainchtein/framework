@@ -65,17 +65,19 @@ public class InternetAudioWriter extends BufferedWriter{
 	public void write(String command, int off, int len) throws IOException {
 		
 		logger.debug("received command:" + command);
-		//
-		// put a three second delay,
-		// this is because the AsyncCycle puts a 3 second delay
-		// after writing the message
-		// this is because otherwise you run the risk of floding the serial bus
-		// so to make it standards all microcontrollers do this
 		
 		
-	    Random rand = new Random(); 
-	    int value = rand.nextInt(1000);
-	    if(command.startsWith("StationChange")) {
+		
+	    
+		if(command.equals("Rewind")) {
+			
+		}else if(command.equals("Play")) {
+			
+		}else if(command.equals("Forward")) {
+			
+		}else if(command.equals("Mark")) {
+			
+		}else if(command.startsWith("StationChange")) {
 	    	String previousStationName = currentStation.getString("StationName");
 			if(previousStationName.equals("Spotify")) {
 				processSpotify("Pause");

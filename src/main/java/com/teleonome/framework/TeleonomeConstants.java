@@ -72,6 +72,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_INITIAL_IDENTITY_MODE = "Initial Identity Mode";
 	public static final String DENEWORD_TYPE_CURRENT_IDENTITY_MODE = "Current Identity Mode";
 	
+	public static final String USER_COMMAND="UserCommand";
 	public static final String TELEONOME_IDENTITY_LABEL = "Identity";
 	public static final String TELEONOME_IDENTITY_SELF = "Self";
 	public static final String TELEONOME_IDENTITY_ORGANISM = "Organism";
