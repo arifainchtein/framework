@@ -167,7 +167,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			publishingResults="Fault#DigitalGeppettoPublisher#Error Adding Identity to JSch";
 			return false;
 		}
-		logger.debug("creating tunnel about to get session" );
+		logger.debug("creating tunnel about to get session, host=" + host + " sshPort=" + sshPort );
 
 		try {
 			session=jsch.getSession(userName, host, sshPort);
