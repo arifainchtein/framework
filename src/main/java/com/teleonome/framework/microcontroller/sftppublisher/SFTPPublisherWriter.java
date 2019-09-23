@@ -419,7 +419,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 
 				}else if(deneName.equals("SFTP Publish Contents")) {
 					String contentsPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "SFTP Publish Contents", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
+					logger.debug("contentsPointer " + contentsPointer);
 					if(contentsPointer.equals(TeleonomeConstants.COMMANDS_PUBLISH_TELEONOME_PULSE)) {
 
 						//
@@ -428,13 +428,13 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 						//byte[] messageBytes = StringCompressor.compress(fileInString);
 						sourceFilename = Utils.getLocalDirectory() + "DGPubTemp";
 						File sourceFile = new File(sourceFilename);
-
+						logger.debug("contentsPointer " + contentsPointer);
 						try {
 							FileUtils.writeStringToFile(sourceFile, tempPulseJSONObject.toString(4), "UTF8");
 							//FileUtils.writeByteArrayToFile(tempFile, messageBytes);
 							destinationDir="/home/pi/Teleonome/" + teleonomeName;
 							//sourceFilename = Utils.getLocalDirectory() + "Teleonome.denome";
-							// logger.debug("sending the denome file");
+							 logger.debug("sending the denome file, destinationDir=" + destinationDir);
 							//	uploadFile( destinationDir, sourceFilename,   "Teleonome.denome");
 							String destinationFileName = Utils.getLocalDirectory() + "DGPubTemp.zip";
 

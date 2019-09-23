@@ -7389,7 +7389,7 @@ public class DenomeManager {
 	public boolean evaluateExpressionDeneWordOperation(String deneWordOperationPointer){
 		boolean toReturn=false;
 		try {
-			logger.info("Evaluate Deneword operation,deneWordOperationPointer=" + deneWordOperationPointer);
+			logger.debug("Evaluate Deneword operation,deneWordOperationPointer=" + deneWordOperationPointer);
 
 			JSONObject evaluationParametersJSONObject = getDeneByIdentity( new Identity(deneWordOperationPointer));
 			//***************
@@ -7399,13 +7399,13 @@ public class DenomeManager {
 			Object variableValue;
 			String actionName="", destinationPointer="", actionExpressionString="";
 
-			logger.info("line 5502 evaluationParametersJSONObject=" + evaluationParametersJSONObject);
+			logger.debug("line 5502 evaluationParametersJSONObject=" + evaluationParametersJSONObject);
 			JSONObject actuatorLogicProcessingDeneChain = null;
 
 			JSONArray actuatorLogicProcessingDenes=null;
 			try {
 				actuatorLogicProcessingDeneChain = getDeneChainByName(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_ACTUATOR_LOGIC_PROCESSING);
-				//logger.info("actuatorLogicProcessingDeneChain=" + actuatorLogicProcessingDeneChain);
+				//logger.debug("actuatorLogicProcessingDeneChain=" + actuatorLogicProcessingDeneChain);
 				actuatorLogicProcessingDenes = actuatorLogicProcessingDeneChain.getJSONArray("Denes");
 
 			} catch (JSONException e2) {
@@ -7457,7 +7457,7 @@ public class DenomeManager {
 
 
 			JSONArray actuatorActionVariablesJSONArray = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(evaluationParametersJSONObject,TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_OPERATION_VARIABLE, TeleonomeConstants.COMPLETE);
-			logger.info("Evaluate Deneword operation,actionExpressionString=" + actionExpressionString + " there are " + actuatorActionVariablesJSONArray.length() + " variables");
+			logger.debug("Evaluate Deneword operation,actionExpressionString=" + actionExpressionString + " there are " + actuatorActionVariablesJSONArray.length() + " variables");
 			//
 			// only do evaluation if there are variables, this is because there
 			try {
@@ -7483,17 +7483,17 @@ public class DenomeManager {
 
 					variableValue=null;
 
-					logger.info("actionVariableValueJSONObject=" + actionVariableValueJSONObject.toString(4));
-					logger.info("Evaluate Deneword operation,variableName=" + variableName);
-					logger.info("Evaluate Deneword operation,variableRawValue=" + variableRawValue);
-					logger.info("Evaluate Deneword operation,variableValueType=" + variableValueType);
+					logger.debug("actionVariableValueJSONObject=" + actionVariableValueJSONObject.toString(4));
+					logger.debug("Evaluate Deneword operation,variableName=" + variableName);
+					logger.debug("Evaluate Deneword operation,variableRawValue=" + variableRawValue);
+					logger.debug("Evaluate Deneword operation,variableValueType=" + variableValueType);
 
 					if(variableValueType.equals(TeleonomeConstants.DENEWORD_TYPE_POINTER)){
 						variableIdentityPointer = actionVariableValueJSONObject.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						logger.info("variableIdentityPointer=" + variableIdentityPointer);
+						logger.debug("variableIdentityPointer=" + variableIdentityPointer);
 
 						resolvedVariablePointerJSONObject = (JSONObject) getDeneWordAttributeByIdentity(new Identity(variableIdentityPointer), TeleonomeConstants.COMPLETE);
-						logger.info("resolvedVariablePointerJSONObject=" + resolvedVariablePointerJSONObject);
+						logger.debug("resolvedVariablePointerJSONObject=" + resolvedVariablePointerJSONObject);
 
 						if(resolvedVariablePointerJSONObject!=null){
 							resolvedVariablePointerValueType = resolvedVariablePointerJSONObject.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
@@ -7513,34 +7513,34 @@ public class DenomeManager {
 						}
 					}else if(variableValueType.equals("String") && variableRawValue.toString().startsWith("$")){
 						String commandData = actionVariableValueJSONObject.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						logger.info("rendering command commandData= " + commandData);
+						logger.debug("rendering command commandData= " + commandData);
 						//
 						// this is a command
 						if(commandData.equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP_MILLIS)){
-							//	logger.info("rendering command of COMMANDS_CURRENT_TIMESTAMP_MILLIS");
+							//	logger.debug("rendering command of COMMANDS_CURRENT_TIMESTAMP_MILLIS");
 							variableValue = System.currentTimeMillis();
 						}else if(commandData.equals(TeleonomeConstants.COMMANDS_CURRENT_MINUTE_IN_THE_HOUR)){
 							Calendar rightNow = Calendar.getInstance();
 							variableValue = rightNow.get(Calendar.MINUTE);
-							logger.info("rendering command of COMMANDS_CURRENT_MINUTE_IN_THE_HOUR= " + variableValue);
+							logger.debug("rendering command of COMMANDS_CURRENT_MINUTE_IN_THE_HOUR= " + variableValue);
 
 						}else if(commandData.equals(TeleonomeConstants.COMMANDS_CURRENT_HOUR_IN_DAY)){
 							Calendar rightNow = Calendar.getInstance();
 							variableValue = rightNow.get(Calendar.HOUR_OF_DAY);
-							logger.info("rendering command of COMMANDS_CURRENT_HOUR_IN_DAY= " + variableValue);
+							logger.debug("rendering command of COMMANDS_CURRENT_HOUR_IN_DAY= " + variableValue);
 
 						}else if(commandData.equals(TeleonomeConstants.COMMANDS_CURRENT_DAY_IN_WEEK)){
 							Calendar rightNow = Calendar.getInstance();
 							variableValue = rightNow.get(Calendar.DAY_OF_WEEK);
-							logger.info("rendering command of COMMANDS_CURRENT_DAY_IN_WEEK= " + variableValue);
+							logger.debug("rendering command of COMMANDS_CURRENT_DAY_IN_WEEK= " + variableValue);
 
 						}else if(commandData.equals(TeleonomeConstants.COMMANDS_CURRENT_DAY_IN_MONTH)){
 							Calendar rightNow = Calendar.getInstance();
 							variableValue = rightNow.get(Calendar.DAY_OF_MONTH);
-							logger.info("rendering command of COMMANDS_CURRENT_DAY_IN_MONTH= " + variableValue);
+							logger.debug("rendering command of COMMANDS_CURRENT_DAY_IN_MONTH= " + variableValue);
 
 						}else if(commandData.equals(TeleonomeConstants.COMMANDS_PREVIOUS_PULSE_MILLIS)){
-							//logger.info("rendering COMMANDS_PREVIOUS_PULSE_MILLIS, previousPulseJSONObject= " + previousPulseJSONObject);
+							//logger.debug("rendering COMMANDS_PREVIOUS_PULSE_MILLIS, previousPulseJSONObject= " + previousPulseJSONObject);
 							if(previousPulseJSONObject!=null){
 								long previousPulseTimestamp = previousPulseJSONObject.getLong("Pulse Timestamp in Milliseconds");
 								variableValue = previousPulseTimestamp;
@@ -7563,7 +7563,7 @@ public class DenomeManager {
 							variableValue = actionVariableValueJSONObject.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						}
 					}
-					logger.info("line 4585 Evaluate Deneword operation,after rendering abpout to set variableName=" + variableName + " variableValue=" + variableValue);
+					logger.debug("line 4585 Evaluate Deneword operation,after rendering abpout to set variableName=" + variableName + " variableValue=" + variableValue);
 
 					actuatorActionEvaluationLogicProcessingDeneDeneWord = Utils.createDeneWordJSONObject(variableName, variableValue,null,variableValueType.toString(),true);
 					actuatorActionEvaluationLogicProcessingDeneDeneWord.put(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_EVALUATED_VARIABLE);
@@ -7577,14 +7577,14 @@ public class DenomeManager {
 						allVariablesInExpressionRenderedSuccesfully=false;
 					}
 				}
-				logger.info("line 4583 allVariablesInExpressionRenderedSuccesfully=" + allVariablesInExpressionRenderedSuccesfully);
+				logger.debug("line 4583 allVariablesInExpressionRenderedSuccesfully=" + allVariablesInExpressionRenderedSuccesfully);
 
 
 
 				if(allVariablesInExpressionRenderedSuccesfully){
 					Object result = actionExpression.evaluate(jexlActionContext);	
 					JSONObject destinationJSONObject = this.getDeneWordByIdentity(new Identity(destinationPointer));
-					logger.info("line 4597 Evaluate Deneword operation,after rendering abpout to set destinationPointer=" + destinationPointer + " result=" + result);
+					logger.debug("line 4597 Evaluate Deneword operation,after rendering abpout to set destinationPointer=" + destinationPointer + " result=" + result);
 					if(result instanceof Double) {
 						result = Math.ceil((double)result);
 					}
@@ -7608,7 +7608,7 @@ public class DenomeManager {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
 		}
-		logger.info("Evaluate Deneword operation,returning " + toReturn );
+		logger.debug("Evaluate Deneword operation,returning " + toReturn );
 
 		return toReturn;
 	}
