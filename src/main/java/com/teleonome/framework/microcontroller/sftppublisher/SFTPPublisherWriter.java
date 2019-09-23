@@ -428,7 +428,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 						//byte[] messageBytes = StringCompressor.compress(fileInString);
 						sourceFilename = Utils.getLocalDirectory() + "DGPubTemp";
 						File sourceFile = new File(sourceFilename);
-						logger.debug("contentsPointer " + contentsPointer);
+						logger.debug("sourceFilename " + sourceFilename);
 						try {
 							FileUtils.writeStringToFile(sourceFile, tempPulseJSONObject.toString(4), "UTF8");
 							//FileUtils.writeByteArrayToFile(tempFile, messageBytes);
@@ -436,14 +436,13 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 							//sourceFilename = Utils.getLocalDirectory() + "Teleonome.denome";
 							 logger.debug("sending the denome file, destinationDir=" + destinationDir);
 							//	uploadFile( destinationDir, sourceFilename,   "Teleonome.denome");
-							String destinationFileName = Utils.getLocalDirectory() + "DGPubTemp.zip";
-
-							File destinationFile = new File(destinationFileName);
+							
+							File destinationFile = new File(sourceFilename);
 
 							Utils.zipFile(sourceFile, destinationFile);
-							logger.debug("sending the zip file, destinationFileName=" + destinationFileName);
+							logger.debug("calling uploadfile the zip file, sourceFilename=" + sourceFilename);
 
-							uploadFile( destinationDir, destinationFileName,   "Teleonome.zip");
+							uploadFile( destinationDir, sourceFilename,   "Teleonome.zip");
 
 							sourceFile.delete();
 							destinationFile.delete();
@@ -498,6 +497,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 
 			sftp.cd(destinationDir);
 			currentRemoteDir = sftp.pwd();
+			logger.debug("uploading file in " + destinationDir + " sourceFilename=" + sourceFilename  + " destFilename=" + destFilename);
 			sftp.put(sourceFilename, destFilename, this,ChannelSftp.OVERWRITE);
 			fis.close();
 
