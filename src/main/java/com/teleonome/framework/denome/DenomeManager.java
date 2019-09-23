@@ -7540,7 +7540,7 @@ public class DenomeManager {
 							logger.info("rendering command of COMMANDS_CURRENT_DAY_IN_MONTH= " + variableValue);
 
 						}else if(commandData.equals(TeleonomeConstants.COMMANDS_PREVIOUS_PULSE_MILLIS)){
-							logger.info("rendering COMMANDS_PREVIOUS_PULSE_MILLIS, previousPulseJSONObject= " + previousPulseJSONObject);
+							//logger.info("rendering COMMANDS_PREVIOUS_PULSE_MILLIS, previousPulseJSONObject= " + previousPulseJSONObject);
 							if(previousPulseJSONObject!=null){
 								long previousPulseTimestamp = previousPulseJSONObject.getLong("Pulse Timestamp in Milliseconds");
 								variableValue = previousPulseTimestamp;
