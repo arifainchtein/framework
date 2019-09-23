@@ -426,26 +426,26 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 						// compress the file and save it to upload it and then delete it
 						//
 						//byte[] messageBytes = StringCompressor.compress(fileInString);
-						sourceFilename = Utils.getLocalDirectory() + "DGPubTemp";
-						File sourceFile = new File(sourceFilename);
+						
+						File sourceFile = new File("/home/pi/Teleonome/Teleonome.denome");
 						logger.debug("sourceFilename " + sourceFilename);
 						try {
-							FileUtils.writeStringToFile(sourceFile, tempPulseJSONObject.toString(4), "UTF8");
+							//FileUtils.writeStringToFile(sourceFile, tempPulseJSONObject.toString(4), "UTF8");
 							//FileUtils.writeByteArrayToFile(tempFile, messageBytes);
 							destinationDir="/home/pi/Teleonome/" + teleonomeName;
 							//sourceFilename = Utils.getLocalDirectory() + "Teleonome.denome";
 							 logger.debug("sending the denome file, destinationDir=" + destinationDir);
 							//	uploadFile( destinationDir, sourceFilename,   "Teleonome.denome");
 							
-							File destinationFile = new File(sourceFilename);
+							String compressedFileName="/home/pi/Teleonome/Teleonome.zip";
+							File compressedFile = new File(compressedFileName);
 
-							Utils.zipFile(sourceFile, destinationFile);
-							logger.debug("calling uploadfile the zip file, sourceFilename=" + sourceFilename);
-
-							uploadFile( destinationDir, sourceFilename,   "Teleonome.zip");
+							Utils.zipFile(sourceFile, compressedFile);
+							logger.debug("calling uploadfile the zip file, compressedFileName=" + compressedFileName);
+							uploadFile( destinationDir, compressedFileName,   "Teleonome.zip");
 
 							sourceFile.delete();
-							destinationFile.delete();
+							compressedFile.delete();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							logger.warn(Utils.getStringException(e));
