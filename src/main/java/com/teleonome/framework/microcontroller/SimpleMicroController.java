@@ -109,9 +109,9 @@ public class SimpleMicroController extends MotherMicroController {
 	@Override
 	public String getCommandCode()  throws IOException {
 		String code="";
-		String base32String = FileUtils.readFileToString(new File("SecretKey"), "UTF-8").trim();
+		String base32String = FileUtils.readFileToString(new File("/home/pi/Teleonome/SecretKey"), "UTF-8").trim();
 //		String chomped=StringUtils.chomp(unEncodedKey);
-//		logger.debug("unEncodedKey = " + unEncodedKey + " chomped" + chomped);
+		logger.debug("base32String = " + base32String);
 		TOTP totp = new TOTP();
 		try {
 			
