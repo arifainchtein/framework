@@ -35,6 +35,7 @@ public class CSVPublisherWriter extends BufferedWriter{
 		aDenomeManager=d;
 		exportFileName=fN;
 		exportOperation=eo;
+		logger.debug("exportFileName=" + exportFileName);
 		// TODO Auto-generated constructor stub
 	}
 	

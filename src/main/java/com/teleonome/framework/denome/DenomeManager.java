@@ -4414,7 +4414,7 @@ public class DenomeManager {
 		ArrayList<Map.Entry<String, MutationActionsExecutionResult>>  microControllerPointerMutationActionsExecutionResultArrayList = new ArrayList(); 
 
 		try {
-			logger.info("load immediate mutation " + mutationObject.getString("Name") );
+			logger.debug("load immediate mutation " + mutationObject.getString("Name") );
 
 			//
 			// now parse them
@@ -4423,7 +4423,7 @@ public class DenomeManager {
 			// only process this mutation if its active
 			//
 			if(!mutationObject.getBoolean("Active"))return new ArrayList();
-			logger.info("load immediate mutation  after checking active " );
+			logger.debug("load immediate mutation  after checking active " );
 
 			String executionMode = mutationObject.getString("Execution Mode");
 			if(!executionMode.equals(TeleonomeConstants.MUTATION_EXECUTION_MODE_IMMEDIATE)){
@@ -4432,7 +4432,7 @@ public class DenomeManager {
 				throw new InvalidMutation(details);
 			}
 			JSONArray deneChainsArray = mutationObject.getJSONArray("DeneChains");
-			logger.info("load immediate mutation  after getting denechains " );
+			logger.debug("load immediate mutation  after getting denechains " );
 
 			//
 			// inde
@@ -4442,7 +4442,7 @@ public class DenomeManager {
 				nameMutationDeneChainIndex.put(mutationDeneChainJSONObject.getString("Name"), mutationDeneChainJSONObject);
 			}
 			//
-			logger.info("load immediate mutation  after nameMutationDeneChainIndex " );
+			logger.debug("load immediate mutation  after nameMutationDeneChainIndex " );
 			//
 			// perform onload denechain
 			//
@@ -4458,7 +4458,7 @@ public class DenomeManager {
 			JSONArray denes;
 			String targetDeneWordValueType;
 			JSONObject onLoadMutationDeneChainJSONObject=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_ON_LOAD_MUTATION);
-			logger.info("load immediate mutation  onLoadMutationDeneChainJSONObject="  + onLoadMutationDeneChainJSONObject);
+			logger.debug("load immediate mutation  onLoadMutationDeneChainJSONObject="  + onLoadMutationDeneChainJSONObject);
 
 			if(onLoadMutationDeneChainJSONObject!=null){
 				denes = onLoadMutationDeneChainJSONObject.getJSONArray("Denes");
@@ -4477,7 +4477,7 @@ public class DenomeManager {
 
 						deneWord = (JSONObject) deneWordsJSONArray.get(j);
 						target = deneWord.getString("Target");
-						logger.info("denewordName=" + deneWord.getString("Name") + " target=" + target);
+						logger.debug("denewordName=" + deneWord.getString("Name") + " target=" + target);
 
 						//
 						// the value can beString, int booolean, date
@@ -4511,7 +4511,7 @@ public class DenomeManager {
 							}
 
 
-							logger.info("load immediate mutation  onLoadMutation  just performed an edit in onLoad target=" + target + " targetDeneWordValue=" + deneWord.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE) );
+							logger.debug("load immediate mutation  onLoadMutation  just performed an edit in onLoad target=" + target + " targetDeneWordValue=" + deneWord.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE) );
 
 						}
 
@@ -4527,7 +4527,7 @@ public class DenomeManager {
 			// using the target parameter. There is only one dene in this chain
 			//
 			JSONObject deneWordDeletions=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_DENEWORD_DELETION);
-			logger.info("load immediate mutation  deneWordDeletions " + deneWordDeletions);
+			logger.debug("load immediate mutation  deneWordDeletions " + deneWordDeletions);
 			String deletionTargetPointer;
 
 			if(deneWordDeletions!=null){
@@ -4542,7 +4542,7 @@ public class DenomeManager {
 					//
 					// target must be a deneword
 					target = deneWord.getString(TeleonomeConstants.MUTATION_DELETION_TARGET);
-					logger.info("in deneworddeletion, deneWordName=" + deneWordName + " deletion target=" + target);
+					logger.debug("in deneworddeletion, deneWordName=" + deneWordName + " deletion target=" + target);
 					//
 					// use the identity to get the dene
 					Identity deneWordToDeleteIdentity = new Identity(target);
@@ -4555,7 +4555,7 @@ public class DenomeManager {
 						for(int k=0;k<deneWords.length();k++){
 							if(deneWords.getJSONObject(k).getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE).equals(deneWordToDeleteIdentity.getDeneWordName())) {
 								deneWords.remove(k);
-								logger.info("in deneworddeletion, removed denword position=" + k );
+								logger.debug("in deneworddeletion, removed denword position=" + k );
 								break found;
 							}
 						}
@@ -4565,7 +4565,7 @@ public class DenomeManager {
 			// then do the Dene Deletion Chain
 			//
 			JSONObject deneDeletions=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_DENE_DELETION);
-			logger.info("load immediate mutation  deneInjections " + deneDeletions);
+			logger.debug("load immediate mutation  deneInjections " + deneDeletions);
 
 			if(deneDeletions!=null){
 				denes = deneDeletions.getJSONArray("Denes");
@@ -4583,7 +4583,7 @@ public class DenomeManager {
 					deletionTargetDene = getDenomicElementByIdentity(deletionTargetIdentity);
 					deletionTargetDeneChain = getDenomicElementByIdentity(new Identity(deletionTargetIdentity.getTeleonomeName(), deletionTargetIdentity.getNucleusName(), deletionTargetIdentity.getDenechainName()));
 					deletionTargetDeneName = deletionTargetDene.getString(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE);
-					logger.info("deletionTargetPointer="+ deletionTargetPointer + " deletionTargetDeneName="+ deletionTargetDeneName + " deletionTargetDeneChain=" + deletionTargetDeneChain.getString("Name"));
+					logger.debug("deletionTargetPointer="+ deletionTargetPointer + " deletionTargetDeneName="+ deletionTargetDeneName + " deletionTargetDeneChain=" + deletionTargetDeneChain.getString("Name"));
 					//
 					// remove the target attribute
 
@@ -4607,7 +4607,7 @@ public class DenomeManager {
 			// using the target parameter. There is only one dene in this chain
 			//
 			JSONObject deneWordInjections=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_DENEWORD_INJECTION);
-			logger.info("load immediate mutation  deneWordInjections " + deneWordInjections);
+			logger.debug("load immediate mutation  deneWordInjections " + deneWordInjections);
 			String injectionTargetPointer;
 
 			if(deneWordInjections!=null){
@@ -4622,7 +4622,7 @@ public class DenomeManager {
 					//
 					// target must be a dene
 					target = deneWord.getString(TeleonomeConstants.MUTATION_INJECTION_TARGET);
-					logger.info("in denewordinjections, deneWordName=" + deneWordName + " injection target=" + target);
+					logger.debug("in denewordinjections, deneWordName=" + deneWordName + " injection target=" + target);
 					targetDeneWordValue = deneWord.getString("Value");
 					injectionTarget = getDenomicElementByIdentity(new Identity(target));
 					JSONArray deneWords = injectionTarget.getJSONArray("DeneWords");
@@ -4635,7 +4635,7 @@ public class DenomeManager {
 			// then do the Dene Injection Chain
 			//
 			JSONObject deneInjections=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_DENE_INJECTION);
-			logger.info("load immediate mutation  deneInjections " + deneInjections);
+			logger.debug("load immediate mutation  deneInjections " + deneInjections);
 
 			if(deneInjections!=null){
 				denes = deneInjections.getJSONArray("Denes");
@@ -4657,7 +4657,7 @@ public class DenomeManager {
 					//
 					// injection target is always a denechain
 					injectionTarget = getDenomicElementByIdentity(new Identity(injectionTargetPointer));
-					logger.info("injectionTargetPointer="+ injectionTargetPointer + " injectionTarget="+ injectionTarget);
+					logger.debug("injectionTargetPointer="+ injectionTargetPointer + " injectionTarget="+ injectionTarget);
 					//
 					// remove the target attribute
 					clonedDene.remove(TeleonomeConstants.MUTATION_INJECTION_TARGET);
@@ -4672,7 +4672,7 @@ public class DenomeManager {
 			//
 			JSONObject actionToExecute=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_ACTIONS_TO_EXECUTE);
 			JSONObject mutationActionDeneJSONObject;
-			logger.info("load immediate mutation  actionToExecute " + actionToExecute);
+			logger.debug("load immediate mutation  actionToExecute " + actionToExecute);
 
 			if(actionToExecute!=null){
 				denes = DenomeUtils.getDenesByDeneType(actionToExecute, TeleonomeConstants.DENE_TYPE_ACTION_LIST);
@@ -4681,7 +4681,7 @@ public class DenomeManager {
 				JSONArray actuatorDeneWordPointers, microControllerPointersJSONArray;
 				String actuatorDeneWordPointer;
 				JSONObject actuatorJSONObject=null;
-				logger.info("line 4473, denes.length " + denes);
+				logger.debug("line 4473, denes.length " + denes);
 				//
 				// actionDeneWordPointers cntains an array of string which are pointers to the denes that contain the evaluation postion
 				String denePointer;
@@ -4700,7 +4700,7 @@ public class DenomeManager {
 						//
 						// there is only actuator so get the first element
 						actuatorDeneWordPointer=null;
-						logger.info("line 4492, actuatorDeneWordPointers.length() " + actuatorDeneWordPointers.length());
+						logger.debug("line 4492, actuatorDeneWordPointers.length() " + actuatorDeneWordPointers.length());
 						if(actuatorDeneWordPointers.length()>0){
 							actuatorDeneWordPointer = actuatorDeneWordPointers.getString(0);
 							actuatorJSONObject = getDeneByIdentity(new Identity(actuatorDeneWordPointer));
@@ -4711,7 +4711,7 @@ public class DenomeManager {
 								microControllerPointer = microControllerPointersJSONArray.getString(0);
 							}
 						}
-						logger.info("in load mutation immediately, microControllerPointer=" + microControllerPointer + " actionDeneWordPointers=" + actionDeneWordPointers);
+						logger.debug("in load mutation immediately, microControllerPointer=" + microControllerPointer + " actionDeneWordPointers=" + actionDeneWordPointers);
 						//
 						// every item in actionPointers is an action that needs to be executed
 						// and all the actions in this dene must come from the same actuator
@@ -4723,11 +4723,11 @@ public class DenomeManager {
 						if(microControllerPointer!=null){
 							for(int n=0;n<actionDeneWordPointers.length();n++){
 								denePointer = (String)actionDeneWordPointers.getString(n);
-								logger.info("4515 in load mutation immediately, denePointer=" + denePointer);						
+								logger.debug("4515 in load mutation immediately, denePointer=" + denePointer);						
 								//
 								// now execute the action
 								JSONObject actuatorActionJSONObject = getDeneByIdentity(new Identity(denePointer));
-								logger.info("4519 in load mutation immediately, microControllerPointer=" + microControllerPointer);						
+								logger.debug("4519 in load mutation immediately, microControllerPointer=" + microControllerPointer);						
 								//
 								// commandsToExecute is an ArrayList with one memeber 
 								// ArrayList<Map.Entry<String, JSONObject>> toReturn = new ArrayList();
@@ -4737,13 +4737,13 @@ public class DenomeManager {
 								String pointerToActionSuccessTasks = (String) this.getDeneWordAttributeByDeneWordTypeFromDene(actuatorActionJSONObject,  TeleonomeConstants.DENEWORD_TYPE_ACTION_SUCCESS_TASK_TRUE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 								String pointerToMnemosyneTasks = (String) this.getDeneWordAttributeByDeneWordTypeFromDene(actuatorActionJSONObject,  TeleonomeConstants.MNEMOSYNE_OPERATION_INDEX_LABEL, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
-								logger.info("4529 in load mutation immediately, pointerToActionSuccessTasks=" + pointerToActionSuccessTasks);						
-								logger.info("4530 in load mutation immediately, actuatorActionJSONObject=" + actuatorActionJSONObject);						
+								logger.debug("4529 in load mutation immediately, pointerToActionSuccessTasks=" + pointerToActionSuccessTasks);						
+								logger.debug("4530 in load mutation immediately, actuatorActionJSONObject=" + actuatorActionJSONObject);						
 
 								//
 								// now load the action
 								commandToExecute = aDenomeManager.evaluateMutationAction(actuatorActionJSONObject);	
-								logger.info("line 4535 in load mutation immediately, commandToExecute=" + commandToExecute);						
+								logger.debug("line 4535 in load mutation immediately, commandToExecute=" + commandToExecute);						
 
 								aMutationActionsExecutionResult = new MutationActionsExecutionResult(pointerToActionSuccessTasks, commandToExecute, selectedDenomeFileName, pointerToMnemosyneTasks);
 
@@ -4761,10 +4761,10 @@ public class DenomeManager {
 			//
 			// next check to see if there are any mnemosycons that need to be executed
 			//
-			logger.info("about to do mnemosycons to execute");
+			logger.debug("about to do mnemosycons to execute");
 			JSONObject mnemosyconsToExecute=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_MNEMOSYCONS_TO_EXECUTE);
 			JSONObject mutationMnemosyconDeneJSONObject;
-			logger.info("mnemosyconsToExecute=" + mnemosyconsToExecute);
+			logger.debug("mnemosyconsToExecute=" + mnemosyconsToExecute);
 			if(mnemosyconsToExecute!=null){
 				denes = DenomeUtils.getDenesByDeneType(mnemosyconsToExecute, TeleonomeConstants.DENE_TYPE_MNEMOSYCON_LIST);
 				ArrayList arrayList;
@@ -4778,24 +4778,24 @@ public class DenomeManager {
 				String denePointer, mnemosyconDenePointer;
 				JSONObject mnemosyconDene = null;
 				Integer evaluationPosition;
-				logger.info("denes.length()=" + denes.length());
+				logger.debug("denes.length()=" + denes.length());
 				boolean mnemosyconActive=false;
 				if(denes.length()>0) {
 					for(int i=0;i<denes.length();i++){
 						mutationMnemosyconDeneJSONObject = (JSONObject) denes.get(i);
 						mnemsyconDeneWordPointers =  DenomeUtils.getAllDeneWordsFromDeneByDeneWordType(mutationMnemosyconDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						logger.info("mnemsyconDeneWordPointers=" + mnemsyconDeneWordPointers);
+						logger.debug("mnemsyconDeneWordPointers=" + mnemsyconDeneWordPointers);
 						for(int j=0;j<mnemsyconDeneWordPointers.length(); j++) {
 							mnemosyconDenePointer=mnemsyconDeneWordPointers.getString(j);
 							mnemosyconDene = getDeneByIdentity(new Identity(mnemosyconDenePointer));
-							logger.info("mnemosyconDenePointer=" + mnemosyconDenePointer);
+							logger.debug("mnemosyconDenePointer=" + mnemosyconDenePointer);
 							String name = mnemosyconDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
 
-							logger.info("mnemosyconsDene=" + mnemosyconDene);
+							logger.debug("mnemosyconsDene=" + mnemosyconDene);
 							mnemosyconActive = (boolean) getDeneWordAttributeByDeneWordNameFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-							logger.info("mnemosyconActive=" + mnemosyconActive);
+							logger.debug("mnemosyconActive=" + mnemosyconActive);
 							if(!mnemosyconActive) {
-								logger.info("skiping mnemosycon " + name + " because is not Active");
+								logger.debug("skiping mnemosycon " + name + " because is not Active");
 								continue;
 							}
 							//
@@ -4804,26 +4804,26 @@ public class DenomeManager {
 							//
 							String mnemosyconProfileIdentityPointer = (String)this.aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_PROFILE_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							if(mnemosyconProfileIdentityPointer==null) {
-								logger.info("skiping mnemosycon " + name + " because it does not have a profile");
+								logger.debug("skiping mnemosycon " + name + " because it does not have a profile");
 								continue;
 							}
 							String mnemosyconType = (String)getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYCON_TYPE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-							logger.info("mnemosyconType=" + mnemosyconType);
+							logger.debug("mnemosyconType=" + mnemosyconType);
 
 							Identity mnemosyconProfileIdentity = new Identity(mnemosyconProfileIdentityPointer);
-							logger.info("mnemosyconProfileIdentity=" + mnemosyconProfileIdentity);
+							logger.debug("mnemosyconProfileIdentity=" + mnemosyconProfileIdentity);
 							JSONObject mnemosyconProfileDene = this.aDenomeManager.getDeneByIdentity(mnemosyconProfileIdentity);
 							String functionName = (String) this.aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconProfileDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_PROCESSING_FUNCTION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-							logger.info("functionName=" + functionName);
+							logger.debug("functionName=" + functionName);
 
 
 							Object[] parameters =  {mnemosyconProfileDene, mnemosyconType};
-							logger.info("parameters=" + parameters);
+							logger.debug("parameters=" + parameters);
 
 							Method mnemomsyneMethod;
 							try {
 								mnemomsyneMethod = MnemosyneManager.class.getMethod(functionName, JSONObject.class, String.class);
-								logger.info("mnemomsyneMethod=" + mnemomsyneMethod);
+								logger.debug("mnemomsyneMethod=" + mnemomsyneMethod);
 								Object result = mnemomsyneMethod.invoke(aMnemosyneManager,parameters);
 							} catch (NoSuchMethodException | SecurityException e) {
 								// TODO Auto-generated catch block
@@ -4849,7 +4849,7 @@ public class DenomeManager {
 			// it is usefull to update values of denomic structures created in the mutation
 			//
 			JSONObject onFinishMutationDeneChainJSONObject=(JSONObject)nameMutationDeneChainIndex.get(TeleonomeConstants.DENECHAIN_ON_FINISH_MUTATION);
-			logger.info("load immediate mutation  onFinishMutationDeneChainJSONObject="  + onFinishMutationDeneChainJSONObject);
+			logger.debug("load immediate mutation  onFinishMutationDeneChainJSONObject="  + onFinishMutationDeneChainJSONObject);
 			String deneType="";
 			String newDeneName="";
 			if(onFinishMutationDeneChainJSONObject!=null){
@@ -4872,7 +4872,7 @@ public class DenomeManager {
 
 									deneWord = (JSONObject) deneWordsJSONArray.get(j);
 									target = deneWord.getString("Target");
-									logger.info("denewordName=" + deneWord.getString("Name") + " target=" + target);
+									logger.debug("denewordName=" + deneWord.getString("Name") + " target=" + target);
 
 									//
 									// the value can beString, int booolean, date
@@ -4885,7 +4885,7 @@ public class DenomeManager {
 									if(target.startsWith("@")){
 										injectionTarget = getDenomicElementByIdentity(new Identity(target));
 										injectionTarget.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, targetDeneWordValue);
-										logger.info("load immediate mutation  onLoadMutation  just performed an edit in onFinish target=" + target + " targetDeneWordValue=" + targetDeneWordValue );
+										logger.debug("load immediate mutation  onLoadMutation  just performed an edit in onFinish target=" + target + " targetDeneWordValue=" + targetDeneWordValue );
 									}
 								}	
 							}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_UPDATE_DENE_NAME)) {
@@ -4899,14 +4899,14 @@ public class DenomeManager {
 									//
 									// the value can beString, int booolean, date
 									newDeneName = deneWord.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-									logger.info("in DENE_TYPE_UPDATE_DENE_NAME newDeneName=" + newDeneName + " target=" + target);
+									logger.debug("in DENE_TYPE_UPDATE_DENE_NAME newDeneName=" + newDeneName + " target=" + target);
 
 									//
 									// the target will always be a  pointer to a denetem
 									if(target.startsWith("@")){
 										injectionTarget = getDenomicElementByIdentity(new Identity(target));
 										injectionTarget.put(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE, newDeneName);
-										logger.info("load immediate mutation  onLoadMutation  just updated denename in onFinish target=" + target + " newDeneName=" + newDeneName );
+										logger.debug("load immediate mutation  onLoadMutation  just updated denename in onFinish target=" + target + " newDeneName=" + newDeneName );
 									}
 								}
 
@@ -4919,7 +4919,7 @@ public class DenomeManager {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
 		}
-		logger.info("microControllerPointerMutationActionsExecutionResultArrayList=" + microControllerPointerMutationActionsExecutionResultArrayList);						
+		logger.debug("microControllerPointerMutationActionsExecutionResultArrayList=" + microControllerPointerMutationActionsExecutionResultArrayList);						
 
 		return microControllerPointerMutationActionsExecutionResultArrayList;
 	}
