@@ -1635,7 +1635,8 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 	public boolean tableExists(String tableName){
 		//
-		// Create
+		// Create 
+		
 		String sql="SELECT EXISTS (SELECT 1 FROM   information_schema.tables WHERE  table_schema = 'public'  AND    table_name = '"+tableName+"');";
 		logger.debug("tableExists sql=" + sql );
 		Connection connection=null;
@@ -3965,7 +3966,86 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 		return toReturn;
 	}
+	/**
+	 * this methd returns the rows in the remembereddeneword tables, where the columns are separated 
+	 * by the third parameter.  It is used to export data to be put into a spreadshee
+	 * t
+	 * 
+	 * @param startTimeMillis
+	 * @param endTimeMillis
+	 * @params identities - comma separated list of identities to include
+	 * @param separator
+	 * @return
+	 */
+	public String exportRemeberedDeneWordsByPeriodByIdentities(long startTimeMillis, long  endTimeMillis,String[] identities, String separator){
+		logger.debug("enter exportRemeberedDeneWordsyPeriod " );
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE, startTimeMillis, endTimeMillis);
+		String command = "", units="";
+		Timestamp time=null;
+		JSONObject j;
+		double value;
+		String identityString="";
+		logger.debug("allTables="+ allTables.size() );
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("Pulse Timestamp in Milliseconds#Identity String#Value#Units" + System.lineSeparator());
+		StringBuffer identityListBuffer=new StringBuffer();
+		
+		for(int i=0;i<identities.length;i++){
+			if(i>0)identityListBuffer.append("," );
+			identityListBuffer.append("'" + identities + "'");
+		}
+		try {
+			connection = connectionPool.getConnection();
+			for(int i=0;i<allTables.size();i++) {
+				logger.debug("allTables.get(i)="+ allTables.get(i) );
+				command = "SELECT time,identityString, value, units from "+ allTables.get(i)+" where timeMillis>=? and timeMillis<=? and identityString in( " + identityListBuffer.toString() + ") order by time asc";
+				logger.debug("command=" + command);
 
+				preparedStatement = connection.prepareStatement(command);
+				preparedStatement.setLong(1, startTimeMillis);
+				preparedStatement.setLong(2, endTimeMillis);
+				rs = preparedStatement.executeQuery();
+				while(rs.next()){
+					time=rs.getTimestamp(1);
+					identityString = rs.getString(2);
+					value = rs.getDouble(3);
+					units = rs.getString(4);
+					buffer.append(time.getTime() + separator + identityString + separator + value + separator + units + System.lineSeparator());
+					
+//					j = new JSONObject();
+//					j.put("Pulse Timestamp in Milliseconds", time.getTime());
+//					j.put("IdentityString", identityString);
+//					j.put("Value", value);
+//					j.put("Units", units);
+//					toReturn.put(j);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+
+		return buffer.toString();
+	}
+
+	
+		
 	public JSONArray getRemeberedDeneWordStart( String identityPointer,  long startTimeMillis, long  endTimeMillis){
 		logger.debug("enter getRemeberedDeneWordStart identityPointer="+ identityPointer );
 		Connection connection=null;

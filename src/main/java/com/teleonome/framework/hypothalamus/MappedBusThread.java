@@ -459,6 +459,9 @@ class MappedBusThread extends Thread{
 						} 
 					}
 					//
+					// save the denome to the drive
+					hypothalamus.aDenomeManager.writeDenomeToDisk();
+					//
 					// End of Events
 					//
 
