@@ -3996,7 +3996,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		
 		for(int i=0;i<identities.length;i++){
 			if(i>0)identityListBuffer.append("," );
-			identityListBuffer.append("'" + identities + "'");
+			identityListBuffer.append("'" + identities[i] + "'");
 		}
 		try {
 			connection = connectionPool.getConnection();
