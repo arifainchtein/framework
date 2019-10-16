@@ -3991,8 +3991,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		String identityString="";
 		logger.debug("allTables="+ allTables.size() );
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("Pulse Timestamp in Milliseconds#Identity String#Value#Units" + System.lineSeparator());
-		StringBuffer identityListBuffer=new StringBuffer();
+			StringBuffer identityListBuffer=new StringBuffer();
 		
 		for(int i=0;i<identities.length;i++){
 			if(i>0)identityListBuffer.append("," );
@@ -4014,7 +4013,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 					identityString = rs.getString(2);
 					value = rs.getDouble(3);
 					units = rs.getString(4);
-					buffer.append(time.getTime() + separator + identityString + separator + value + separator + units + System.lineSeparator());
+					buffer.append(time.getTime() + separator + identityString + separator + value + separator + units + "<br>");
 					
 //					j = new JSONObject();
 //					j.put("Pulse Timestamp in Milliseconds", time.getTime());
