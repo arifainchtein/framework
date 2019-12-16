@@ -631,121 +631,121 @@ public class PulseThread extends Thread{
 				}
 			}
 			
-//			//
-//			// process the telepathons
-//			//
-//			// for each telepathon look here extract its PowerManagerStatus
-//			Vector telepathons  = anHypothalamus.aDenomeManager.getTelepathonsByMicroControllerPointerByExecutionPosition(microControllerPointer);
-//			logger.debug("Checking for " + telepathons.size()+ " telepathns events coming from  " + aMicroController.getName());
-//			if(telepathons.size()>0) {
-//				JSONObject telepathon;
-//				String messageToSend, inputLine;
-//				int counter=0;
-//				int expectedFields = PowerStatusStruct.class.getDeclaredFields().length;
-//				String telepathonName="";
-//				String[] powerStatusTokens;
-//				if(anHypothalamus.motherMicroController!=null) {
-//					try {
-//						for(int k=0;k<telepathons.size();k++) {
-//							telepathon=(JSONObject) telepathons.elementAt(k);
-//							telepathonName = telepathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
-//								//									//
-//								// send message and process data
-//								//
-//								do{
-//									//logger.debug("sending GetSensorData counter=" + counter);
-//									//String commandToSend = "GetSensorData" + counter;
-//
-//									logger.debug("sending GetTelepathonPowerStatusData#"+ telepathonName);
-//									messageToSend = "GetTelepathonPowerStatusData#"+ telepathonName;
-//
-//									//output.write("GetSensorData",0,"GetSensorData".length());
-//									output.write(commandToSend,0,commandToSend.length());
-//									output.flush();
-//									inputLine = input.readLine();
-//									logger.debug("received inputLine=" + inputLine);
-//									counter++;
-//									powerStatusTokens = inputLine.split("#");
-//									for(int l=0;l<powerStatusTokens.length;l++) {
-//										logger.debug("k=" + k + " powerStatusTokens[k]= "+ powerStatusTokens[l]);
-//									}
-//									logger.debug("sending GetSensorData received=" + powerStatusTokens.length + " need=" +expectedFields+ "  counter=" + counter + " inputLine=" + inputLine);
-//								}while(powerStatusTokens.length!=expectedFields);
-//								
-//								logger.debug("inputLine.length()>0=" + (inputLine.length()>0));
-//								if(inputLine.length()>0){
-//									for (Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
-//										currentlyProcessingSensorValueDeneJSONObject = entry2.getKey();
-//										logger.debug("currentlyProcessingSensorValueDeneJSONObject=" + currentlyProcessingSensorValueDeneJSONObject);
-//
-//										adjustedIndex = ((Integer)entry2.getValue()).intValue()-1;
-//										logger.debug("processing sensor token:" + adjustedIndex );   
-//										sensorValueString = sensorDataTokens[adjustedIndex];
-//										logger.debug("processing sensor token:" + adjustedIndex + " resutled in " + sensorValueString);   
-//										//
-//										// the sensorRequestQueuePosition starts at 1 but the sensorDataTokens start at 0 so
-//										// 
-//										// logger.debug("inputLIne=" + inputLine);
-//										if(sensorValueString!=null && !sensorValueString.equals("")){
-//											aDenomeManager.addSensorValueRenderedDeneWordToPulse(currentlyProcessingSensorValueDeneJSONObject, sensorValueString);
-//										}
-//										//}
-//									}
-//								}else{
-//									logger.debug("microprocessor sent blank sensor data line" + adjustedIndex );
-//								}
-//								
-//								
-//								input = aMicroController.getReader();
-//								//String inputLine=getInputLine( input);
-//								boolean ready = input.ready();
-//								logger.debug("line 664 input.ready()=" + ready);
-//								
-//								if(ready){
-//									//   logger.debug("about to call readline");
-//									String inputLine = "";
-//									
-//									do {
-//										inputLine = input.readLine();
-//										logger.info(aMicroController.getName()  + " was sent=" + messageToSend + " received=" + inputLine);
-//										try {
-//											Thread.sleep(500);
-//										} catch (InterruptedException e) {
-//											// TODO Auto-generated catch block
-//											e.printStackTrace();
-//										}
-//										if(inputLine.startsWith("Ok")  || inputLine.startsWith("Failure")) {
-//											keepGoing=false;
-//										}else {
-//											keepGoing=true;
-//											//
-//											// now process the event by parsing the inputLine 
-//											// 
-//											//
-//											if(inputLine.length()>0){
-//												try{
-//													processEvent( eventJSONObject , inputLine) ;											
-//												}catch (InvalidDenomeException e1) {
-//													// TODO Auto-generated catch block
-//													logger.warn(Utils.getStringException(e1));
-//												}
-//											}
-//										}
-//									}while(keepGoing );
-//
-//									input.close();
-//									output.close();
-//								}
-//							
-//						}
-//					}catch(IOException e) {
-//						logger.warn(Utils.getStringException(e));
-//					} catch (InvalidDenomeException e2) {
-//						// TODO Auto-generated catch block
-//						logger.warn(Utils.getStringException(e2));
-//					}
-//				}
-//			}
+	//			//
+	//			// process the telepathons
+	//			//
+	//			// for each telepathon look here extract its PowerManagerStatus
+	//			Vector telepathons  = anHypothalamus.aDenomeManager.getTelepathonsByMicroControllerPointerByExecutionPosition(microControllerPointer);
+	//			logger.debug("Checking for " + telepathons.size()+ " telepathns events coming from  " + aMicroController.getName());
+	//			if(telepathons.size()>0) {
+	//				JSONObject telepathon;
+	//				String messageToSend, inputLine;
+	//				int counter=0;
+	//				int expectedFields = PowerStatusStruct.class.getDeclaredFields().length;
+	//				String telepathonName="";
+	//				String[] powerStatusTokens;
+	//				if(anHypothalamus.motherMicroController!=null) {
+	//					try {
+	//						for(int k=0;k<telepathons.size();k++) {
+	//							telepathon=(JSONObject) telepathons.elementAt(k);
+	//							telepathonName = telepathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
+	//								//									//
+	//								// send message and process data
+	//								//
+	//								do{
+	//									//logger.debug("sending GetSensorData counter=" + counter);
+	//									//String commandToSend = "GetSensorData" + counter;
+	//
+	//									logger.debug("sending GetTelepathonPowerStatusData#"+ telepathonName);
+	//									messageToSend = "GetTelepathonPowerStatusData#"+ telepathonName;
+	//
+	//									//output.write("GetSensorData",0,"GetSensorData".length());
+	//									output.write(commandToSend,0,commandToSend.length());
+	//									output.flush();
+	//									inputLine = input.readLine();
+	//									logger.debug("received inputLine=" + inputLine);
+	//									counter++;
+	//									powerStatusTokens = inputLine.split("#");
+	//									for(int l=0;l<powerStatusTokens.length;l++) {
+	//										logger.debug("k=" + k + " powerStatusTokens[k]= "+ powerStatusTokens[l]);
+	//									}
+	//									logger.debug("sending GetSensorData received=" + powerStatusTokens.length + " need=" +expectedFields+ "  counter=" + counter + " inputLine=" + inputLine);
+	//								}while(powerStatusTokens.length!=expectedFields);
+	//								
+	//								logger.debug("inputLine.length()>0=" + (inputLine.length()>0));
+	//								if(inputLine.length()>0){
+	//									for (Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
+	//										currentlyProcessingSensorValueDeneJSONObject = entry2.getKey();
+	//										logger.debug("currentlyProcessingSensorValueDeneJSONObject=" + currentlyProcessingSensorValueDeneJSONObject);
+	//
+	//										adjustedIndex = ((Integer)entry2.getValue()).intValue()-1;
+	//										logger.debug("processing sensor token:" + adjustedIndex );   
+	//										sensorValueString = sensorDataTokens[adjustedIndex];
+	//										logger.debug("processing sensor token:" + adjustedIndex + " resutled in " + sensorValueString);   
+	//										//
+	//										// the sensorRequestQueuePosition starts at 1 but the sensorDataTokens start at 0 so
+	//										// 
+	//										// logger.debug("inputLIne=" + inputLine);
+	//										if(sensorValueString!=null && !sensorValueString.equals("")){
+	//											aDenomeManager.addSensorValueRenderedDeneWordToPulse(currentlyProcessingSensorValueDeneJSONObject, sensorValueString);
+	//										}
+	//										//}
+	//									}
+	//								}else{
+	//									logger.debug("microprocessor sent blank sensor data line" + adjustedIndex );
+	//								}
+	//								
+	//								
+	//								input = aMicroController.getReader();
+	//								//String inputLine=getInputLine( input);
+	//								boolean ready = input.ready();
+	//								logger.debug("line 664 input.ready()=" + ready);
+	//								
+	//								if(ready){
+	//									//   logger.debug("about to call readline");
+	//									String inputLine = "";
+	//									
+	//									do {
+	//										inputLine = input.readLine();
+	//										logger.info(aMicroController.getName()  + " was sent=" + messageToSend + " received=" + inputLine);
+	//										try {
+	//											Thread.sleep(500);
+	//										} catch (InterruptedException e) {
+	//											// TODO Auto-generated catch block
+	//											e.printStackTrace();
+	//										}
+	//										if(inputLine.startsWith("Ok")  || inputLine.startsWith("Failure")) {
+	//											keepGoing=false;
+	//										}else {
+	//											keepGoing=true;
+	//											//
+	//											// now process the event by parsing the inputLine 
+	//											// 
+	//											//
+	//											if(inputLine.length()>0){
+	//												try{
+	//													processEvent( eventJSONObject , inputLine) ;											
+	//												}catch (InvalidDenomeException e1) {
+	//													// TODO Auto-generated catch block
+	//													logger.warn(Utils.getStringException(e1));
+	//												}
+	//											}
+	//										}
+	//									}while(keepGoing );
+	//
+	//									input.close();
+	//									output.close();
+	//								}
+	//							
+	//						}
+	//					}catch(IOException e) {
+	//						logger.warn(Utils.getStringException(e));
+	//					} catch (InvalidDenomeException e2) {
+	//						// TODO Auto-generated catch block
+	//						logger.warn(Utils.getStringException(e2));
+	//					}
+	//				}
+	//			}
 			//
 			// then process the external data
 			//

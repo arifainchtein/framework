@@ -1638,7 +1638,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		// Create 
 		
 		String sql="SELECT EXISTS (SELECT 1 FROM   information_schema.tables WHERE  table_schema = 'public'  AND    table_name = '"+tableName+"');";
-		logger.debug("tableExists sql=" + sql );
+		logger.info("tableExists sql=" + sql );
 		Connection connection=null;
 		Statement statement=null;
 		ResultSet rs=null;
@@ -2234,7 +2234,19 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			Calendar cal = Calendar.getInstance();
 			String tableName = getTableNameByCalendar(TeleonomeConstants.ORGANISMPULSE_TABLE,  cal);
 			if(!tableExists(tableName)) {
-				sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.ORGANISMPULSE_TABLE +" with no data";
+				
+				//sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.ORGANISMPULSE_TABLE +" with no data";
+				
+				sql = "create table "+ tableName +"("+
+					 "TeleonomeName varchar(500) NOT Null,"+
+						"createdOn timestamp,"+
+						"pulseTimeMillis bigint,"+
+						"networkAddress inet,"+
+						"dataString text,"+
+						"data jsonb);";
+				
+				
+				
 				int result = statement.executeUpdate(sql);
 				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
 			}
@@ -4331,7 +4343,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			Calendar cal = Calendar.getInstance();
 			String tableName = getTableNameByCalendar(TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE, cal);
 			boolean tableExists = tableExists(tableName);
-			logger.debug("line 4246 table " + tableName + "exists=" + tableExists);
+			logger.info("line 4246 table " + tableName + "exists=" + tableExists);
 
 			if(!tableExists) {
 				//sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE +" with no data";

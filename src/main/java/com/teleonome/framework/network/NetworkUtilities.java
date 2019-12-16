@@ -50,7 +50,34 @@ public class NetworkUtilities {
 	//		
 	//	}
 
-
+	/**
+	 *  This method executes the command:
+	 * sudo netstat -tnpa | grep 'ESTABLISHED.*sshd'
+	 *  which produces:
+	 *  the fifth column is the ip address of the connection
+			tcp        0      0 192.168.1.194:22        192.168.1.139:55146     ESTABLISHED 16122/sshd: pi [pri
+	 * @throws InterruptedException 
+	 * @throws IOException 
+	 */
+	public ArrayList<String> getConnectedClientsViaSSH() throws IOException, InterruptedException {
+		ArrayList initialData = Utils.executeCommand("sudo netstat -tnpa | grep 'ESTABLISHED.*sshd'");
+		String line;
+		String ipaddress;
+		String[] tokens;
+		ArrayList<String> toReturn = new ArrayList();
+		for(int i=0;i<initialData.size();i++){
+			line = (String) initialData.get(i);
+			//
+			// get the name
+			//
+			////System.out.println("pint 2 line=" + line );	
+			tokens = line.replaceAll("\\s{2,}", " ").split(" ");
+			ipaddress = tokens[4].split(":")[0];
+			System.out.println("adding " + ipaddress);
+			toReturn.add(ipaddress);
+		}
+		return toReturn;
+	}
 	public static LinkedHashMap getConnectedClients() throws IOException, InterruptedException{
 		ArrayList initialData = Utils.executeCommand("sudo hostapd_cli all_sta");
 		//
