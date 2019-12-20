@@ -856,7 +856,9 @@ public class TeleonomeConstants {
 	public static final String PATHOLOGY_HEART_PULSE_LATE= "Heart Pulse Late";
 	public static final String PATHOLOGY_HEART_CRASHED_HPROF= "Heart Crashed hprof";
 	
-	public static final String PATHOLOGY_CORRUPT_PULSE_FILE= "Corrupt Pulse File";
+	public static final String PATHOLOGY_CORRUPT_PULSE_FILE= "Corrupt Denome File";
+	public static final String PATHOLOGY_MISSING_DENOME_FILE= "Missing Denome File";
+	
 	public static final String PATHOLOGY_TOMCAT_PING_LATE= "Tomcat Ping Late";
 	public static final String PATHOLOGY_DETAILS_LABEL= "Details";
 	
