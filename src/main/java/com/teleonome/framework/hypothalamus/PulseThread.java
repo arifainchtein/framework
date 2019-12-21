@@ -335,9 +335,7 @@ public class PulseThread extends Thread{
 	int maxNumRebootsBeforeIdentitySwitch=0;
 	try {
 		identitySwitchEventsMnemosyneDestinationIdentityPointer = (String) this.aDenomeManager.getDeneWordAttributeByIdentity(identitySwitchEventsMnemosyneDestinationSourceIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
 		maxNumRebootsBeforeIdentitySwitch = (int) this.aDenomeManager.getDeneWordAttributeByIdentity(maxNumRebootsBeforeIdentitySwitchIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-
 	} catch (InvalidDenomeException | JSONException e3) {
 		// TODO Auto-generated catch block
 		logger.warn(Utils.getStringException(e3));
@@ -582,7 +580,7 @@ public class PulseThread extends Thread{
 					}catch(Exception e) {
 						logger.warn(Utils.getStringException(e));
 					}
-					logger.debug("netwok is not reachable,currentNumRebootsBeforeMetamorphosis=" + currentNumRebootsBeforeMetamorphosis +" maxNumRebootsBeforeIdentitySwitch=" + maxNumRebootsBeforeIdentitySwitch);
+					logger.info("netwok is not reachable,currentNumRebootsBeforeMetamorphosis=" + currentNumRebootsBeforeMetamorphosis +" maxNumRebootsBeforeIdentitySwitch=" + maxNumRebootsBeforeIdentitySwitch);
 
 					if(currentNumRebootsBeforeMetamorphosis<maxNumRebootsBeforeIdentitySwitch){
 						//
@@ -592,7 +590,7 @@ public class PulseThread extends Thread{
 						// 3) and reboot
 						// but keep the mode as network
 						currentNumRebootsBeforeMetamorphosis++;
-						logger.debug("about to update currentNumRebootsBeforeMetamorphosis=" + currentNumRebootsBeforeMetamorphosis );
+						logger.info("about to update currentNumRebootsBeforeMetamorphosis=" + currentNumRebootsBeforeMetamorphosis );
 
 						this.aDenomeManager.updateDeneWordCurrentPulse(currentNumRebootsBeforeIdentitySwitchIdentity.toString(), currentNumRebootsBeforeMetamorphosis);
 					}else{
@@ -602,11 +600,11 @@ public class PulseThread extends Thread{
 						// 2)Add a  and event to metamorphosisEventsMnemosyneDestination
 						// 3)switch mode to host
 						// 4)reboot
-						logger.debug("netwok is not reachable,and switching to host mode =" + currentNumRebootsBeforeMetamorphosis );
+						logger.info("netwok is not reachable,and switching to host mode =" + currentNumRebootsBeforeMetamorphosis );
 
 						this.aDenomeManager.updateDeneWordCurrentPulse(currentIdentityStateIdentity.toString(), "HostMode");
 						this.aDenomeManager.updateDeneWordCurrentPulse(currentNumRebootsBeforeIdentitySwitchIdentity.toString(), 0);
-						logger.debug("about to reboot enable host");
+						logger.info("about to reboot enable host");
 						String logFileName="/home/pi/Teleonome/hostmode.log";
 						Runtime.getRuntime().exec("sudo sh /home/pi/Teleonome/hostmode.sh " );
 						try {
@@ -619,14 +617,13 @@ public class PulseThread extends Thread{
 						while(!file.isFile()){
 
 						}
-						this.aDenomeManager.writeDenomeToDisk();
-						Runtime.getRuntime().exec("sudo reboot");
 					}
 					//
 					// save the denome to disk and reboot
 					//
 					this.aDenomeManager.addExogenousMetamorphosisEventDeneToMnemosyneDeneChain(new Identity(identitySwitchEventsMnemosyneDestinationIdentityPointer));
-
+					this.aDenomeManager.writeDenomeToDisk();
+					Runtime.getRuntime().exec("sudo reboot");
 
 				}
 			}
