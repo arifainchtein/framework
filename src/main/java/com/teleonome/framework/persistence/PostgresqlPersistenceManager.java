@@ -1636,7 +1636,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	public boolean tableExists(String tableName){
 		//
 		// Create 
-		
+		logger.info("starting table exist, number of connections=" + connectionPool.getCurrentNumberConnections());
 		String sql="SELECT EXISTS (SELECT 1 FROM   information_schema.tables WHERE  table_schema = 'public'  AND    table_name = '"+tableName+"');";
 		logger.info("tableExists sql=" + sql );
 		Connection connection=null;
@@ -1654,7 +1654,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			//System.out.println("bad sql:" + sql);
+			logger.warn("bad sql:" + sql);
 
 			logger.warn(Utils.getStringException(e));
 		}finally{
@@ -1670,7 +1670,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 			}
 		}
-
+		logger.info("finishing table exist, number of connections=" + connectionPool.getCurrentNumberConnections());
 		return toReturn;
 	}
 
@@ -4338,14 +4338,15 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		Statement statement=null;
 		int numberCurrentConnections = connectionPool.getCurrentNumberConnections();
 		try {
-			logger.info("line 4340 starting unwrap before getting a connection, number current connections " + numberCurrentConnections);
-			connection = connectionPool.getConnection();
-
+			
 			java.sql.Timestamp dateTimeValue = new java.sql.Timestamp(pulseTimeMillis);
 			Calendar cal = Calendar.getInstance();
 			String tableName = getTableNameByCalendar(TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE, cal);
 			boolean tableExists = tableExists(tableName);
 			logger.info("line 4347 table " + tableName + "exists=" + tableExists);
+
+			logger.info("line 4340 starting unwrap before getting a connection, number current connections " + numberCurrentConnections);
+			connection = connectionPool.getConnection();
 
 			if(!tableExists) {
 				//sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE +" with no data";
