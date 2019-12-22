@@ -4421,8 +4421,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			preparedStatement.setString(6, source);
 			preparedStatement.setString(7, units);
 			int result = preparedStatement.executeUpdate();
-			preparedStatement.close();
-			connectionPool.closeConnection(connection);
+			
 			toReturn= true;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
