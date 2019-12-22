@@ -4336,14 +4336,16 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		PreparedStatement preparedStatement = null;
 		boolean toReturn=false;
 		Statement statement=null;
+		int numberCurrentConnections = connectionPool.getCurrentNumberConnections();
 		try {
+			logger.info("line 4340 starting unwrap before getting a connection, number current connections " + numberCurrentConnections);
 			connection = connectionPool.getConnection();
 
 			java.sql.Timestamp dateTimeValue = new java.sql.Timestamp(pulseTimeMillis);
 			Calendar cal = Calendar.getInstance();
 			String tableName = getTableNameByCalendar(TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE, cal);
 			boolean tableExists = tableExists(tableName);
-			logger.info("line 4246 table " + tableName + "exists=" + tableExists);
+			logger.info("line 4347 table " + tableName + "exists=" + tableExists);
 
 			if(!tableExists) {
 				//sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE +" with no data";
@@ -4435,6 +4437,9 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				logger.debug(Utils.getStringException(e));
 			}
 		}
+		 numberCurrentConnections = connectionPool.getCurrentNumberConnections();
+		logger.info("line 4441 finishing unwrap  number current connections " + numberCurrentConnections);
+		
 		return toReturn;
 	}
 
