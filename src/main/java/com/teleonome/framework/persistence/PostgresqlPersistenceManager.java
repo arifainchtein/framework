@@ -4113,6 +4113,54 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 	}
 
+	public JSONArray getLastRememberedWordForEachTeleonome() {
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		long timeMillis=0L;
+		JSONObject j;
+		String teleonomeName;
+		try {
+			java.sql.Timestamp fromTimeValue = new java.sql.Timestamp(System.currentTimeMillis());
+			java.sql.Timestamp untilTimeValue = new java.sql.Timestamp(System.currentTimeMillis());
+			long now = System.currentTimeMillis();
+			ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE, now, now);
+			String command ="";		
+			
+			connection = connectionPool.getConnection();
+			for(int i=0;i<allTables.size();i++) {
+				command = "SELECT teleonomename, max(timemillis) from "+ allTables.get(i)+" group by teleonomename";
+				logger.debug("command=" + command);
+				preparedStatement = connection.prepareStatement(command);
+				
+				rs = preparedStatement.executeQuery();
+				while(rs.next()){
+					timeMillis=rs.getLong(1);
+					teleonomeName = rs.getString(2);
+					j = new JSONObject();
+					j.put("Pulse Timestamp in Milliseconds", timeMillis);
+					j.put("TeleonomeName", teleonomeName);
+					toReturn.put(j);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+		return toReturn;
+	}
 	public JSONArray getRemeberedDeneWord(TimeZone timeZone, String identityPointer,  long startTimeMillis, long  endTimeMillis){
 		return getRemeberedDeneWordStart(  identityPointer,   startTimeMillis,   endTimeMillis);
 		//		Connection connection=null;

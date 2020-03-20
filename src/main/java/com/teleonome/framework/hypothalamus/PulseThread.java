@@ -16,6 +16,7 @@ import java.util.Vector;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -1053,7 +1054,32 @@ public class PulseThread extends Thread{
 				persistenceOrganismPulses = (boolean) aDenomeManager.getDeneWordAttributeByIdentity(identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 				logger.debug(" persistenceOrganismPulses=" + persistenceOrganismPulses);  
 			}
+			
+			//
+			// now see if the teleonome should be copied to other location in the drive
+			//
+			identity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_DESCRIPTIVE,TeleonomeConstants.DENE_VITAL, TeleonomeConstants.DENEWORD_PERSIST_PULSE_ADDITIONAL_LOCATIONS_POINTER);
 
+			if(aDenomeManager.hasDeneWordByIdentity(identity)) {
+				JSONObject additionalLocationJSNObject =  (JSONObject) aDenomeManager.getDeneWordAttributeByIdentity(identity, TeleonomeConstants.COMPLETE);
+				JSONArray additionalLocationsJSONArray = additionalLocationJSNObject.getJSONArray(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE);
+				String location;
+				File locationDir;
+				File otherLocationFile; 
+				for(int i=0;i<additionalLocationsJSONArray.length();i++) {
+					location = additionalLocationsJSONArray.getString(i);
+					if(!location.equals("/home/pi/Teleonome") && !location.equals("/home/pi/Teleonome/tomcat/webapps/ROOT")) {
+						locationDir = new File(location);
+						if(!locationDir.isDirectory()) {
+							locationDir.mkdirs();
+						}
+						otherLocationFile = new File(location + "/Teleonome.denome"); 
+						FileUtils.writeStringToFile(otherLocationFile, pulse, "UTF8");
+					}
+				}
+				persistenceOrganismPulses = (boolean) aDenomeManager.getDeneWordAttributeByIdentity(identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				logger.debug(" persistenceOrganismPulses=" + persistenceOrganismPulses);  
+			}
 
 			anHypothalamus.currentPulseInMilliSeconds = this.aDenomeManager.getCurrentPulseFrequencyMilliseconds();
 			long  storingAndPublishing= System.currentTimeMillis()-startStoringAndPublishing;
@@ -1327,6 +1353,20 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 									}else if(actuatorCommand.equals(TeleonomeConstants.COMMAND_VERIFY_FILE_CREATION_DATE)){
 										Calendar cal = Calendar.getInstance();
 										actuatorCommand="SetClock#" + cal.get(Calendar.YEAR) + "#" + (cal.get(Calendar.MONTH)+1) + "#" + cal.get(Calendar.DATE) + "#" + cal.get(Calendar.HOUR_OF_DAY) + "#" + cal.get(Calendar.MINUTE) + "#"  + cal.get(Calendar.SECOND);
+									}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_GET_LAST_REMEMBERED_DENEWORD_FOR_EACH_TELEONOME)){
+										JSONArray lastRememberedWordForEachTeleonome = aDenomeManager.getLastRememberedWordForEachTeleonome();
+										//
+										// now get the destination which is a deneword in actuatorActionJSONObject
+										String destinationIdentityPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(anActuatorDeneJSONObject, TeleonomeConstants.LAST_REMEMBERED_DENEWORD_FOR_EACH_TELEONOME_DESTINATION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+										if(destinationIdentityPointer!=null && destinationIdentityPointer.contains("@")) {
+											try {
+												 aDenomeManager.updateDeneWordCurrentPulse( destinationIdentityPointer, lastRememberedWordForEachTeleonome);
+											} catch (InvalidDenomeException e) {
+												// TODO Auto-generated catch block
+												logger.warn(Utils.getStringException(e));
+											}
+											
+										}
 									}else{
 										actuatorCommand = Utils.renderCommand(actuatorCommand);
 									}

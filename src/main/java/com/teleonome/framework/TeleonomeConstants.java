@@ -242,6 +242,9 @@ public class TeleonomeConstants {
 	//
 	// the command embedded as values
 	//
+	public static final String LAST_REMEMBERED_DENEWORD_FOR_EACH_TELEONOME_DESTINATION="Last Remembered Deneword Destination";
+	
+	public static final String COMMANDS_GET_LAST_REMEMBERED_DENEWORD_FOR_EACH_TELEONOME="$GetLastRememberedWordForEachTeleonome";
 	public static final String COMMANDS_CREATE_DAILY_PARTITIONS="$CreateDailyPartitions";
 	public static final String COMMANDS_ELAPSED_TIME_STRING = "$ElapsedTimeString";
 	public static final String COMMANDS_PUBLISH_TELEONOME_PULSE="$Teleonome_Pulse";
@@ -840,6 +843,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_VISUALIZATION_PARAMETER="Visualization Parameter";
 	public static final String DENEWORD_EXECUTION_POSITION="Execution Position";
 	public static final String DENEWORD_PERSIST_ORGANISM_PULSE="Persist Organism Pulse";
+	public static final String DENEWORD_PERSIST_PULSE_ADDITIONAL_LOCATIONS_POINTER="Persist Pulse in Additional Locations Pointer";
 	public static final String DENEWORD_PERSIST_PULSE="Persist Pulse";
 	//
 	//

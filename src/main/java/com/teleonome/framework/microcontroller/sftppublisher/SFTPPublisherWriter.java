@@ -417,7 +417,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 						logger.debug("Did not upload " + sourceFilename + " because it could not be found");
 					}
 
-				}else if(deneName.equals("SFTP Publish Contents")) {
+				}else if(deneName.equals("	")) {
 					String contentsPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "SFTP Publish Contents", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					logger.debug("contentsPointer " + contentsPointer);
 					if(contentsPointer.equals(TeleonomeConstants.COMMANDS_PUBLISH_TELEONOME_PULSE)) {

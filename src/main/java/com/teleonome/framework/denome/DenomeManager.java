@@ -3031,6 +3031,9 @@ public class DenomeManager {
 		return null;
 	}
 
+	public JSONArray getLastRememberedWordForEachTeleonome() {
+		return aDBManager.getLastRememberedWordForEachTeleonome();
+	}
 	public void storeMutationEvent(JSONObject mutationEventJSONObject) throws PersistenceException{
 		aDBManager.storeMutationEvent(mutationEventJSONObject);
 	}
