@@ -1,5 +1,4 @@
 package com.teleonome.framework.microcontroller.pifourvaluesfourdigitdisplaysmicrocontroller;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;

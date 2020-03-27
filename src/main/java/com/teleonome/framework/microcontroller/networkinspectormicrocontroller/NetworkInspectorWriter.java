@@ -188,8 +188,8 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				//
 				if(results.size()>0) {
 					connectionInfoJSONObject = new JSONObject(results.get(0));
-					downloadSpeed = connectionInfoJSONObject.getDouble("download")/(8*1024);
-					uploadSpeed = connectionInfoJSONObject.getDouble("upload")/(8*1024);
+					downloadSpeed = connectionInfoJSONObject.getDouble("download")/(8*1024*1024);
+					uploadSpeed = connectionInfoJSONObject.getDouble("upload")/(8*1024*1024);
 					pingTime = connectionInfoJSONObject.getDouble("ping");
 
 				}
