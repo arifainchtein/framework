@@ -493,6 +493,7 @@ public class MnemosyneManager {
 					}
 
 					rowsDeleted = aDBManager.deleteByPeriodFromOrganismPulse(millisToDeleteFrom, teamParam);
+					logger.debug("rowsDeleted=" + rowsDeleted);
 				}	
 
 				aDBManager.vacuum();

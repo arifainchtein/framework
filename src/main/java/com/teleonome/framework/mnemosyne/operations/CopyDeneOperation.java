@@ -1,5 +1,4 @@
 package com.teleonome.framework.mnemosyne.operations;
-
 import java.time.ZoneId;
 
 import org.apache.log4j.Logger;
@@ -31,6 +30,7 @@ public class CopyDeneOperation extends MnemosyneOperation {
 		clonedSourceDene.put("Timestamp Milliseconds", currentTimeMillis);
 
 		String targetMnemosyneDeneChainIdentityPointer = (String) denomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		logger.info("line 33 targetMnemosyneDeneChainIdentityPointer =" + targetMnemosyneDeneChainIdentityPointer);
 		JSONObject targetMnemosyneDeneChain = denomeManager.getDenomicElementByIdentity(new Identity(targetMnemosyneDeneChainIdentityPointer));
 		JSONArray targetMnemosyneDeneChainDenesJSONArray = targetMnemosyneDeneChain.getJSONArray("Denes");
 
@@ -42,7 +42,7 @@ public class CopyDeneOperation extends MnemosyneOperation {
 		}
 
 		newDenePosition = denomeManager.getNextPostionForDeneInMnemosyneChain(targetMnemosyneDeneChain, clonedSourceDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE));
-		logger.info("line 3255 newDenePosition =" + newDenePosition);
+		logger.info("line 45 newDenePosition =" + newDenePosition);
 		clonedSourceDene.put("Position", newDenePosition);
 		targetMnemosyneDeneChainDenesJSONArray.put(clonedSourceDene);
 	}
