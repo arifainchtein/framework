@@ -3433,6 +3433,7 @@ public class DenomeManager {
 			deneType = mnemosyneDene.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
 			logger.info("line 3231 deneType =" + deneType);
 			if(deneType.equals(TeleonomeConstants.MNEMOSYNE_COPY_DENE_OPERATION)){
+				logger.info(Utils.generateMethodTrace());
 				CopyDeneOperation copyDeneOp = new CopyDeneOperation(mnemosyneDene);
 				copyDeneOp.process(this,  currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime, currentTimeZone.toZoneId());
 			}else if(deneType.equals(TeleonomeConstants.MNEMOSYNE_CREATE_DENE_OPERATION)){
