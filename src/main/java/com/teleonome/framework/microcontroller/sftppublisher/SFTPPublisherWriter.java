@@ -191,7 +191,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 		config.put("StrictHostKeyChecking", "no");
 		session.setConfig(config);
 		try {
-			session.connect();
+			session.connect(60000);
 		} catch (JSchException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
