@@ -15,7 +15,7 @@ public abstract class MicroController {
 	private String name;
 	protected DenomeManager aDenomeManager; 
 	protected boolean enableAsyncUpdate=false;
-	protected int asyncRequestMillisecondsDelay=5000;
+	protected int asyncRequestMillisecondsDelay=0;//5000;
 	
 	public MicroController(DenomeManager d, String n){
 		aDenomeManager=d;
