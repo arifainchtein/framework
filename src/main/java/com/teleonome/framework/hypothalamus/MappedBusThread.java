@@ -451,6 +451,11 @@ class MappedBusThread extends Thread{
 									}
 								}
 							}
+							
+							//
+							// save the denome to the drive
+							hypothalamus.aDenomeManager.writeDenomeToDisk();
+							
 						}catch(IOException e) {
 							logger.warn(Utils.getStringException(e));
 						} catch (InvalidDenomeException e2) {
@@ -458,9 +463,7 @@ class MappedBusThread extends Thread{
 							logger.warn(Utils.getStringException(e2));
 						} 
 					}
-					//
-					// save the denome to the drive
-					hypothalamus.aDenomeManager.writeDenomeToDisk();
+					
 					//
 					// End of Events
 					//
@@ -468,7 +471,7 @@ class MappedBusThread extends Thread{
 					//
 					// now do the mutation commands
 					//
-					logger.debug("starting the mutation commands" );
+					logger.debug("line 474 starting the mutation commands" );
 					for(int k=0;k<mutationCommands.size();k++) {
 						try {
 							messageToSend = mutationCommands.get(k);
@@ -1043,7 +1046,7 @@ class MappedBusThread extends Thread{
 							//}
 							if(asyncRequestDelayMillis>0) {
 								try {
-									logger.debug("about to sleep " +  asyncRequestDelayMillis);
+									logger.debug("line 1049 about to sleep " +  asyncRequestDelayMillis);
 									Thread.sleep(asyncRequestDelayMillis);
 								} catch (InterruptedException e) {
 									// TODO Auto-generated catch block

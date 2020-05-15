@@ -1160,6 +1160,7 @@ public class PulseThread extends Thread{
 			anHypothalamus.aMappedBusThread= new MappedBusThread(anHypothalamus);
 			anHypothalamus.aMappedBusThread.start();
 			Thread.sleep(anHypothalamus.currentPulseInMilliSeconds);
+			logger.info("finishing sleep");  
 
 		}catch (IOException e) {
 			// TODO Auto-generated catch block
