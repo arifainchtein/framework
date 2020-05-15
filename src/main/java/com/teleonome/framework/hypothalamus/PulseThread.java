@@ -455,14 +455,16 @@ public class PulseThread extends Thread{
 			//FileUtils.deleteQuietly(new File("EndPulse.info"));
 			//FileUtils.writeByteArrayToFile(new File("StartPulse.info"), (""+System.currentTimeMillis()).getBytes());
 
-			logger.debug("11111aMappedBusThread=" + anHypothalamus.aMappedBusThread);
+			logger.info("11111aMappedBusThread=" + anHypothalamus.aMappedBusThread);
 			if(anHypothalamus.aMappedBusThread!=null){
 
 				anHypothalamus.aMappedBusThread.setKeepRunning(false);
 				while( anHypothalamus.aMappedBusThread.isAlive()){
-					logger.debug("waiting for mapped bus to finish");
+					logger.info("waiting for mapped bus to finish");
 					Thread.sleep(500);
 				}
+			}else {
+				logger.info("anHypothalamus.aMappedBusThread is null ");
 			}
 
 
