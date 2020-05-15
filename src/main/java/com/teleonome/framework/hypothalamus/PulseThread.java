@@ -446,7 +446,7 @@ public class PulseThread extends Thread{
 	do{
 		try{
 			while(anHypothalamus.mutationIsInEffect){
-				//logger.debug("Mutation in Effect");
+				logger.info("Mutation in Effect");
 			}
 
 
