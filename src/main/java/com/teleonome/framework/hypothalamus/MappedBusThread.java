@@ -946,7 +946,9 @@ class MappedBusThread extends Thread{
 												}
 											}
 										}
-
+									if(!keepRunning) {
+										break stop;
+									}
 
 									if(inputLine.startsWith("Ok") || 
 											inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE) ||
@@ -966,6 +968,9 @@ class MappedBusThread extends Thread{
 											logger.info("counter=" + counter );
 										}
 									}
+									if(!keepRunning) {
+										break stop;
+									}
 								}catch(IOException e) {
 									logger.warn(Utils.getStringException(e));
 									logger.info("After erro talking to mama wait 2 sec and try again");
@@ -980,7 +985,9 @@ class MappedBusThread extends Thread{
 
 							input.close();
 							output.close();
-
+							if(!keepRunning) {
+								break stop;
+							}
 							//if(!inputLine.equals("")){
 							if(inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE)){
 								logger.info("receive AsynC Update  from " + microControllerPointer + " inputLine="+ inputLine);
@@ -1054,7 +1061,9 @@ class MappedBusThread extends Thread{
 				//	logger.warn(Utils.getStringException(e));
 				//}
 				//
-
+				if(!keepRunning) {
+					break stop;
+				}
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
