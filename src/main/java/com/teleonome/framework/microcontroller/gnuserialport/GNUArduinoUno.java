@@ -1,6 +1,5 @@
 package com.teleonome.framework.microcontroller.gnuserialport;
 
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;

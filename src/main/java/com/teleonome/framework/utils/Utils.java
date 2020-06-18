@@ -236,6 +236,8 @@ public class Utils {
 						modelName="Raspberry Pi 3 Model B";
 					}else if(tokens[1].contains("a020d3")  ){
 						modelName="Raspberry Pi 3 Model B+";
+					}else if(tokens[1].contains("b03111")  ){
+						modelName="Raspberry Pi 4 Model B";
 					}
 				}
 			}

@@ -1,6 +1,5 @@
 package com.teleonome.framework.microcontroller.networkinspectormicrocontroller;
 
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;

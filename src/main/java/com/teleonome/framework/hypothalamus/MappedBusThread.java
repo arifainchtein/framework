@@ -1193,7 +1193,7 @@ class MappedBusThread extends Thread{
 
 				//
 				// flag that we are starting a mutation
-				hypothalamus.mutationIsInEffect=true;
+				//hypothalamus.mutationIsInEffect=true;
 
 
 
