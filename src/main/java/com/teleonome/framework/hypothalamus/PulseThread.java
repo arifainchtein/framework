@@ -483,20 +483,22 @@ public class PulseThread extends Thread{
 
 				Calendar cal = Calendar.getInstance();//TimeZone.getTimeZone("GMT+10:00"));
 
-				String now=anHypothalamus.timeFormatter.format(cal.getTime());
-
-				logger.info("telling mama pulse is starting at " +now);
-				 commandToSend = "PulseStart#"+now;
-
-				//output.write("GetSensorData",0,"GetSensorData".length());
-				output.write(commandToSend,0,commandToSend.length());
-				output.flush();
-				logger.info("waiting for mama to respond2 wait 5000");
 				
 
+				
+				String now;
 				boolean waitingForMama=true;
 				do {
 					try {
+						 now=anHypothalamus.timeFormatter.format(cal.getTime());
+
+						logger.info("telling mama pulse is starting at " +now);
+						 commandToSend = "PulseStart#"+now;
+						//output.write("GetSensorData",0,"GetSensorData".length());
+						output.write(commandToSend,0,commandToSend.length());
+						output.flush();
+						logger.info("waiting for mama to respond2 wait 5000");
+
 						Thread.sleep(2000);
 						
 						if(input.ready()) {
@@ -506,7 +508,7 @@ public class PulseThread extends Thread{
 								waitingForMama=false;
 							}
 						}
-
+						Thread.sleep(2000);
 					}catch(IOException e) {
 						logger.warn(Utils.getStringException(e));
 						logger.info("After erro talking to mama wait 2 sec and try again");
