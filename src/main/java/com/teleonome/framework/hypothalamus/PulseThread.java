@@ -446,7 +446,7 @@ public class PulseThread extends Thread{
 	do{
 		try{
 			while(anHypothalamus.mutationIsInEffect){
-				logger.info("Mutation in Effect");
+				logger.debug("Mutation in Effect");
 			}
 
 
@@ -1128,7 +1128,7 @@ public class PulseThread extends Thread{
 
 						//if(motherInputStream.ready()) {
 						inputLine = motherInputStream.readLine();
-						logger.info("received inputLine=" + inputLine);
+						logger.info(" telling mama pulse is done received inputLine=" + inputLine);
 						//}
 
 					}catch(IOException e) {
@@ -1232,7 +1232,7 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 			output.write(commandToSend,0,commandToSend.length());
 			output.flush();
 			inputLine = input.readLine();
-			logger.debug("received inputLine=" + inputLine);
+			logger.debug("line 1234 received inputLine=" + inputLine);
 			counter++;
 			sensorDataTokens = inputLine.split("#");
 			for(int k=0;k<sensorDataTokens.length;k++) {

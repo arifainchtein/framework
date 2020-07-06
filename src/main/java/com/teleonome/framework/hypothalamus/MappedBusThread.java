@@ -370,7 +370,8 @@ class MappedBusThread extends Thread{
 								input.close();
 								output.close();
 							}
-						}catch(Exception e) {	
+						}catch(Exception e) {
+							hypothalamus.mutationIsInEffect=false;
 						}
 
 					}
