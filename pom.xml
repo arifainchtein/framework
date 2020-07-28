@@ -16,6 +16,13 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  <distributionManagement>
+       <repository>
+          <id>Central Maven repository</id>
+          <name>Central Maven repository https</name>
+          <url>https://repo.maven.apache.org/maven2</url>
+       </repository>
+    </distributionManagement>
   <dependencies>
   <!-- https://mvnrepository.com/artifact/org.java-websocket/Java-WebSocket -->
 <dependency>
