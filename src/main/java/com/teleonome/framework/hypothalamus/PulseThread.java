@@ -784,7 +784,7 @@ public class PulseThread extends Thread{
 
 			long  startMicroController= System.currentTimeMillis();
 
-
+			
 			for (Map.Entry<String, Integer> entry : microControllerPointerProcessingQueuePositionIndex) {
 				microControllerPointer = (String)entry.getKey();
 				logger.debug("line 651   microControllerPointer=" + microControllerPointer);
@@ -1232,13 +1232,13 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 			output.write(commandToSend,0,commandToSend.length());
 			output.flush();
 			inputLine = input.readLine();
-			logger.debug("line 1234 received inputLine=" + inputLine);
+			//logger.debug("line 1234 received inputLine=" + inputLine);
 			counter++;
 			sensorDataTokens = inputLine.split("#");
 			for(int k=0;k<sensorDataTokens.length;k++) {
 				logger.debug("k=" + k + " sensorDataTokens[k]= "+ sensorDataTokens[k]);
 			}
-			logger.debug("sending GetSensorData received=" + sensorDataTokens.length + " need=" +sensorRequestQueuePositionDeneWordIndex.size() + "  counter=" + counter + " inputLine=" + inputLine);
+			//logger.debug("sending GetSensorData received=" + sensorDataTokens.length + " need=" +sensorRequestQueuePositionDeneWordIndex.size() + "  counter=" + counter + " inputLine=" + inputLine);
 		}while(sensorDataTokens.length!=sensorRequestQueuePositionDeneWordIndex.size());
 		
 		logger.debug("inputLine.length()>0=" + (inputLine.length()>0));
