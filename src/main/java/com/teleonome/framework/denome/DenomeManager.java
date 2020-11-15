@@ -522,13 +522,17 @@ public class DenomeManager {
 				boolean microProcessorActive=true;
 				for(int m=0;m<microProcessorsDenesJSONArray.length();m++){
 					microProcessorDene = microProcessorsDenesJSONArray.getJSONObject(m);
+					microProcessorName = microProcessorDene.getString("Name");
 					if(microProcessorDene.has(TeleonomeConstants.DENEWORD_ACTIVE) && !microProcessorDene.getBoolean(TeleonomeConstants.DENEWORD_ACTIVE)) {
+						logger.info("line 527 microProcessorName=" + microProcessorName + " is NOT active");
 						microProcessorActive=false;
 					}else {
 						microProcessorActive=true;
+						logger.info("line 530 microProcessorName=" + microProcessorName + " is active");
+						
 					}
 					if(microProcessorActive) {
-						microProcessorName = microProcessorDene.getString("Name");
+						
 						logger.debug("microProcessorName=" + microProcessorName);
 						pointerToMicroController = "@" +  denomeName + ":" + TeleonomeConstants.NUCLEI_INTERNAL + ":" + TeleonomeConstants.DENECHAIN_COMPONENTS + ":" + microProcessorName;
 						//

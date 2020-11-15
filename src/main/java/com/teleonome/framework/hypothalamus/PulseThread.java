@@ -1225,7 +1225,7 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 			//logger.debug("sending GetSensorData counter=" + counter);
 			//String commandToSend = "GetSensorData" + counter;
 
-			logger.debug("sending GetSensorData");
+		//	logger.debug("sending GetSensorData");
 			String commandToSend = "GetSensorData";
 
 			//output.write("GetSensorData",0,"GetSensorData".length());
@@ -1235,9 +1235,9 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 			//logger.debug("line 1234 received inputLine=" + inputLine);
 			counter++;
 			sensorDataTokens = inputLine.split("#");
-			for(int k=0;k<sensorDataTokens.length;k++) {
-				logger.debug("k=" + k + " sensorDataTokens[k]= "+ sensorDataTokens[k]);
-			}
+//			for(int k=0;k<sensorDataTokens.length;k++) {
+//				logger.debug("k=" + k + " sensorDataTokens[k]= "+ sensorDataTokens[k]);
+//			}
 			//logger.debug("sending GetSensorData received=" + sensorDataTokens.length + " need=" +sensorRequestQueuePositionDeneWordIndex.size() + "  counter=" + counter + " inputLine=" + inputLine);
 		}while(sensorDataTokens.length!=sensorRequestQueuePositionDeneWordIndex.size());
 		
