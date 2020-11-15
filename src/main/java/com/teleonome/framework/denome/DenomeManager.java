@@ -519,57 +519,64 @@ public class DenomeManager {
 				JSONObject microControllerConfigParameterListDene, microControllerConfigParameterDeneWord;
 				JSONArray microControllerParams, microControllerParamsPointers;
 				logger.debug("microProcessorsDenesJSONArray.length()=" + microProcessorsDenesJSONArray.length());
-
+				boolean microProcessorActive=true;
 				for(int m=0;m<microProcessorsDenesJSONArray.length();m++){
 					microProcessorDene = microProcessorsDenesJSONArray.getJSONObject(m);
-					microProcessorName = microProcessorDene.getString("Name");
-					logger.debug("microProcessorName=" + microProcessorName);
-					pointerToMicroController = "@" +  denomeName + ":" + TeleonomeConstants.NUCLEI_INTERNAL + ":" + TeleonomeConstants.DENECHAIN_COMPONENTS + ":" + microProcessorName;
-					//
-					// Process the MicroController Config Parameter
-					//
-					microControllerParams = new JSONArray();
-					microControllerConfigParameterListPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(microProcessorDene, TeleonomeConstants.DENE_TYPE_MICROCONTROLLER_CONFIG_PARAMETER_LIST, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("microControllerConfigParameterListPointer=" + microControllerConfigParameterListPointer);
-
-					if(microControllerConfigParameterListPointer!=null && !microControllerConfigParameterListPointer.equals("")){
-						try {
-							//
-							// get the dene that has the list
-							microControllerConfigParameterListDene = this.getDeneByIdentity(new Identity(microControllerConfigParameterListPointer));
-							logger.debug("microControllerConfigParameterListDene=" + microControllerConfigParameterListDene.toString(4));
-							//
-							// get just the value for each deneword in the list, this is a pointer to the actual dene
-							// 
-							microControllerParamsPointers = getAllDeneWordAttributeByDeneWordTypeFromDene(microControllerConfigParameterListDene, TeleonomeConstants.DENE_TYPE_MICROCONTROLLER_CONFIG_PARAMETER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-							logger.debug("microControllerParamsPointers=" + microControllerParamsPointers.toString(4));
-							
-							//
-							// now loop over every pointer to get the dene
-							//
-							for(int n=0;n<microControllerParamsPointers.length();n++){
-								microControllerConfigParameterPointer = microControllerParamsPointers.getString(n);
-								logger.debug("microControllerConfigParameterPointer=" + microControllerConfigParameterPointer);
-								microControllerConfigParameterDeneWord = getDeneByIdentity(new Identity(microControllerConfigParameterPointer));
-								microControllerParams.put(microControllerConfigParameterDeneWord);
-							}		
-						} catch (InvalidDenomeException e) {
-							// TODO Auto-generated catch block
-							logger.warn(Utils.getStringException(e));
-						}
-						microControllerNameMicroControllerParamsIndex.put(microProcessorName, microControllerParams);
+					if(microProcessorDene.has(TeleonomeConstants.DENEWORD_ACTIVE) && !microProcessorDene.getBoolean(TeleonomeConstants.DENEWORD_ACTIVE)) {
+						microProcessorActive=false;
+					}else {
+						microProcessorActive=true;
 					}
+					if(microProcessorActive) {
+						microProcessorName = microProcessorDene.getString("Name");
+						logger.debug("microProcessorName=" + microProcessorName);
+						pointerToMicroController = "@" +  denomeName + ":" + TeleonomeConstants.NUCLEI_INTERNAL + ":" + TeleonomeConstants.DENECHAIN_COMPONENTS + ":" + microProcessorName;
+						//
+						// Process the MicroController Config Parameter
+						//
+						microControllerParams = new JSONArray();
+						microControllerConfigParameterListPointer = (String) getDeneWordAttributeByDeneWordTypeFromDene(microProcessorDene, TeleonomeConstants.DENE_TYPE_MICROCONTROLLER_CONFIG_PARAMETER_LIST, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("microControllerConfigParameterListPointer=" + microControllerConfigParameterListPointer);
 
-					//
-					// Process the Queue Position
-					//
-					I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(microProcessorDene, TeleonomeConstants.PROCESSING_QUEUE_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-					logger.debug("Processing Queue Position=" + I);
-					microControllerPointerProcessingQueuePositionIndex.add(new AbstractMap.SimpleEntry<String, Integer>(pointerToMicroController, I));
-					Collections.sort(microControllerPointerProcessingQueuePositionIndex, new Comparator<Map.Entry<?, Integer>>(){
-						public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
-							return o1.getValue().compareTo(o2.getValue());
-						}});
+						if(microControllerConfigParameterListPointer!=null && !microControllerConfigParameterListPointer.equals("")){
+							try {
+								//
+								// get the dene that has the list
+								microControllerConfigParameterListDene = this.getDeneByIdentity(new Identity(microControllerConfigParameterListPointer));
+								logger.debug("microControllerConfigParameterListDene=" + microControllerConfigParameterListDene.toString(4));
+								//
+								// get just the value for each deneword in the list, this is a pointer to the actual dene
+								// 
+								microControllerParamsPointers = getAllDeneWordAttributeByDeneWordTypeFromDene(microControllerConfigParameterListDene, TeleonomeConstants.DENE_TYPE_MICROCONTROLLER_CONFIG_PARAMETER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+								logger.debug("microControllerParamsPointers=" + microControllerParamsPointers.toString(4));
+
+								//
+								// now loop over every pointer to get the dene
+								//
+								for(int n=0;n<microControllerParamsPointers.length();n++){
+									microControllerConfigParameterPointer = microControllerParamsPointers.getString(n);
+									logger.debug("microControllerConfigParameterPointer=" + microControllerConfigParameterPointer);
+									microControllerConfigParameterDeneWord = getDeneByIdentity(new Identity(microControllerConfigParameterPointer));
+									microControllerParams.put(microControllerConfigParameterDeneWord);
+								}		
+							} catch (InvalidDenomeException e) {
+								// TODO Auto-generated catch block
+								logger.warn(Utils.getStringException(e));
+							}
+							microControllerNameMicroControllerParamsIndex.put(microProcessorName, microControllerParams);
+						}
+
+						//
+						// Process the Queue Position
+						//
+						I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(microProcessorDene, TeleonomeConstants.PROCESSING_QUEUE_POSITION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						logger.debug("Processing Queue Position=" + I);
+						microControllerPointerProcessingQueuePositionIndex.add(new AbstractMap.SimpleEntry<String, Integer>(pointerToMicroController, I));
+						Collections.sort(microControllerPointerProcessingQueuePositionIndex, new Comparator<Map.Entry<?, Integer>>(){
+							public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
+								return o1.getValue().compareTo(o2.getValue());
+							}});
+					}
 				}
 
 			}
