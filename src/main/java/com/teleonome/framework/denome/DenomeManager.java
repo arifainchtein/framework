@@ -520,10 +520,13 @@ public class DenomeManager {
 				JSONArray microControllerParams, microControllerParamsPointers;
 				logger.debug("microProcessorsDenesJSONArray.length()=" + microProcessorsDenesJSONArray.length());
 				boolean microProcessorActive=true;
+				Object microProcessorActiveDenewordExists=null;
+				
 				for(int m=0;m<microProcessorsDenesJSONArray.length();m++){
 					microProcessorDene = microProcessorsDenesJSONArray.getJSONObject(m);
 					microProcessorName = microProcessorDene.getString("Name");
-					if(microProcessorDene.has(TeleonomeConstants.DENEWORD_ACTIVE) && !microProcessorDene.getBoolean(TeleonomeConstants.DENEWORD_ACTIVE)) {
+					microProcessorActiveDenewordExists = getDeneWordAttributeByDeneWordNameFromDene(microProcessorDene, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					if(microProcessorActiveDenewordExists!=null && !((Boolean)microProcessorActiveDenewordExists).booleanValue()) {
 						logger.info("line 527 microProcessorName=" + microProcessorName + " is NOT active");
 						microProcessorActive=false;
 					}else {
