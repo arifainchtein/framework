@@ -15,7 +15,6 @@ import com.teleonome.framework.denome.DenomeUtils;
 import com.teleonome.framework.denome.Identity;
 import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.utils.Utils;
-
 public class PiFourValuesFourDigitDisplaysWriter extends BufferedWriter {
 	private DenomeManager aDenomeManager;
 	Logger logger;
