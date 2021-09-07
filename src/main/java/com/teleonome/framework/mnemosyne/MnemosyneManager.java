@@ -383,7 +383,7 @@ public class MnemosyneManager {
 			mnemosyconRuleTeamParameter=null;
 			Map.Entry<JSONObject, Integer> entry = (Map.Entry<JSONObject, Integer>)mnemosyneRulesExecutionPositionIndex.get(j);
 			mnemosyconRuleJSONObject = entry.getKey();
-			logger.debug("processing mnemosyconRuleJSONObject=" + mnemosyconRuleJSONObject.getString("Name") );
+			logger.debug("line 386 j=" + j + " processing mnemosyconRuleJSONObject=" + mnemosyconRuleJSONObject.getString("Name") );
 
 
 			mnemosyconRuleSource = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_SOURCE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
@@ -448,9 +448,8 @@ public class MnemosyneManager {
 					mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 					rowsDeleted = aDBManager.deleteByPeriodFromRememberedDeneWords(columnName, columnValue, millisToDeleteFrom);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_COMMAND_REQUESTS)) {
-					
-					
 					rowsDeleted = aDBManager.deleteByPeriodFromCommandRequests(millisToDeleteFrom);
+					logger.debug("line 452 rowsDeleted=" +rowsDeleted);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_MUTATION_EVENT)) {
 					rowsDeleted = aDBManager.deleteByPeriodFromMutationEvent(millisToDeleteFrom);
 				}else if(mnemosyconRuleLocation.equals(TeleonomeConstants.MNEMOSYCON_DATA_LOCATION_ORGANISM)) {
