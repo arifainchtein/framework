@@ -8277,7 +8277,70 @@ public class DenomeManager {
 					}
 				}
 			}
+			//
+			// now do the Read and Replace DeneChains
+			//
+			//xxx
+			JSONArray actionSuccessTaskReadAndReplaceDeneChains = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(actionSuccessTask, TeleonomeConstants.DENEWORD_TYPE_READ_AND_REPLACE_DENECHAIN, TeleonomeConstants.COMPLETE);
+			if(actionSuccessTaskReadAndReplaceDeneChains!=null && actionSuccessTaskReadAndReplaceDeneChains.length()>0) {
+				for(int i=0;i<actionSuccessTaskReadAndReplaceDeneChains.length();i++){
+					try {
+						toDoDeneWordJSONObject = actionSuccessTaskReadAndReplaceDeneChains.getJSONObject(i);
+						logger.debug("actionSuccessTaskReadAndReplaceDeneChains ,toDoDeneWordJSONObject=" + toDoDeneWordJSONObject);
 
+						//
+						//the target is a pointer to where the denechain needs to be replaced, ie @Sento:Purpose:Zhinu
+						target = toDoDeneWordJSONObject.getString(TeleonomeConstants.DENEWORD_TARGET_ATTRIBUTE);
+
+						//
+						// the value is the location of the JSON file that contains the denechain
+						String fileName = (String) toDoDeneWordJSONObject.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						
+						/*
+						if(valueType.equals(TeleonomeConstants.DATATYPE_DENE_POINTER) && (value instanceof java.lang.String) &&  ((String)value).startsWith("@") ){
+// ***************
+							Identity identity = new Identity(target);
+							
+							try {
+								boolean success = DenomeUtils.removeChainFromNucleus(currentlyCreatingPulseJSONObject, identity.getNucleusName(), identity.getDenechainName());	
+								logger.debug("removing "+ target +" , result:" + success);
+								JSONObject newDeneChain = new JSONObject(FileUtils.readFileToString(new File(fileName), Charset.defaultCharset()));
+								DenomeUtils.addDeneChainToNucleusByIdentity(pulseJSONObject, newDeneChain,  identity.getNucleusName());
+
+							} catch (InvalidDenomeException e) {
+								// TODO Auto-generated catch block
+								logger.warn(Utils.getStringException(e));
+							}
+							//
+							// only add the actuatorLogicProcessingDeneChain if there are actions either startup or standard
+							//xx
+							logger.debug("about to check to see if we need to create processing chains(actuatorExecutionPositionDeneIndex.size()="  + actuatorExecutionPositionDeneIndex.size() + "  actuatorExecutionPositionDeneForInitialIndex.size()=" + actuatorExecutionPositionDeneForInitialIndex.size());
+							if(actuatorExecutionPositionDeneIndex.size()>0 || actuatorExecutionPositionDeneForInitialIndex.size()>0){
+								//
+								// first remove the one from the previous pulse
+								//
+								
+								//
+								// then add a new one
+								actuatorLogicProcessingDeneChain = new JSONObject();
+								deneChains.put(actuatorLogicProcessingDeneChain);
+								JSONArray actuatorLogicProcessingDenes = new JSONArray();
+								actuatorLogicProcessingDeneChain.put("Name", TeleonomeConstants.DENECHAIN_ACTUATOR_LOGIC_PROCESSING);
+								actuatorLogicProcessingDeneChain.put("Denes", actuatorLogicProcessingDenes);
+								logger.debug("added DENECHAIN_ACTUATOR_LOGIC_PROCESSING");
+
+							}
+
+// ****************
+						}
+*/
+						
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						logger.warn(Utils.getStringException(e));
+					}
+				}
+			}
 		} catch (InvalidDenomeException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));

@@ -399,13 +399,15 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		ArrayList allTables = getAllTableNamesForManagedTable(tableName);
 		String dailyTableName, dateString;
 		Date date;
-
+		logger.debug("line 402 allTables size " + allTables.size());
 		boolean deleteResult=false;
 		int deleteCounter=0;
 		for(int i=0;i<allTables.size();i++) {
 			//Pulse_ 
 			dailyTableName = ((String)allTables.get(i));
+			
 			date = getDateForManagedTable(tableName,dailyTableName);
+			logger.debug("line 410 dailyTableName " + dailyTableName + " limitDate=" + limitDate + " date=" + date);
 			if(limitDate.after(date)) {
 				logger.debug("dropping " + dailyTableName);
 				deleteResult = dropTable(dailyTableName);

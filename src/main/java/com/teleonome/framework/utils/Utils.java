@@ -433,7 +433,16 @@ public class Utils {
 		return deneWord;
 	}
 	
-	
+	public static void executeHeadlessCommand(String command, File homeDirectory) {
+		ProcessBuilder processBuilder = new ProcessBuilder("nohup", "sh", command);
+		try {
+		    processBuilder.directory(homeDirectory);
+		    processBuilder.redirectErrorStream(false);
+		    processBuilder.start();
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
 	
 	
 	public static ArrayList executeCommand(String command) throws IOException, InterruptedException{

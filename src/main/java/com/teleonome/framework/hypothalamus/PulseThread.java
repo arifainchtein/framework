@@ -871,7 +871,7 @@ public class PulseThread extends Thread{
 						Method mnemomsyneMethod = MnemosyneManager.class.getMethod(functionName,Identity.class, JSONObject.class);
 						logger.debug("mnemomsyneMethod=" + mnemomsyneMethod);
 
-						anHypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_PULSE_STATUS_INFO, "Executing Anaylticon " + analyticonDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE)+ "  " + (i+1) + " out of "  + analyticonDenesJSONArray.length());
+						anHypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_PULSE_STATUS_INFO, "Executing Analyticons " + analyticonDene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE)+ "  " + (i+1) + " out of "  + analyticonDenesJSONArray.length());
 
 						Object result = mnemomsyneMethod.invoke(anHypothalamus.aMnemosyneManager,parameters);
 						logger.debug("result=" + result);

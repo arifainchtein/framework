@@ -400,6 +400,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_SENSOR_VALUE = "Sensor Value";
 	public static final String DENEWORD_TYPE_UPDATE_DENEWORD_VALUE = "Update DeneWord Value";
 	public static final String DENEWORD_TYPE_APPEND_DENEWORD_VALUE = "Append DeneWord Value";
+	public static final String DENEWORD_TYPE_READ_AND_REPLACE_DENECHAIN = "Read and Replace DeneChain";
 	public static final String DENE_TYPE_UPDATE_DENEWORD_VALUE = "Update DeneWord Value";
 	public static final String DENE_TYPE_UPDATE_DENE_NAME = "Update Dene Name";
 	
