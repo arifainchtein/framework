@@ -32,11 +32,13 @@ public class PlainReader extends BufferedReader{
 	}
 
 	public String readLine(){
-
+		logger.debug("executing command " + currentCommand);
 		if(currentCommand.contains("PulseStart")) {
 			return "Ok-PulseStart";
 		}else if(currentCommand.contains("PulseFinished")) {
 			return "Ok-PulseFinished";
+		}else if(currentCommand.contains("GetLifeCycleData")){
+			return "Ok-GetLifeCycleData";
 		}else {
 			if(counter<maximum){
 				counter++;
