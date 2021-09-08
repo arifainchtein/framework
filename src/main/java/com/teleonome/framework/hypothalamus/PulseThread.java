@@ -110,7 +110,7 @@ public class PulseThread extends Thread{
 				try {
 					do{
 					  line = input.readLine();
-						logger.info("line 111 line=" + line);
+						logger.info("line 112 line=" + line);
 						if(line!=null) {
 
 							if(line.equals("Ok-GetLifeCycleData")) {
@@ -1197,7 +1197,7 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 	//
 	String[] sensorDataTokens;
 	String inputLine="";
-	TimeLimiter timeLimiter = new SimpleTimeLimiter();
+	//TimeLimiter timeLimiter = new SimpleTimeLimiter();
 	TimerCallable aTimerCallable;
 	int adjustedIndex=0;
 	String sensorValueString="";
