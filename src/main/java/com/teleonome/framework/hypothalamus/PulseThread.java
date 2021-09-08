@@ -108,17 +108,18 @@ public class PulseThread extends Thread{
 				logger.debug("line 106");
 				try {
 					String line = input.readLine();
+					logger.info("line 111 line=" + line);
 					if(line!=null) {
-						String inputLine = "";
+						
 						do{
 							
-							inputLine = input.readLine();
-							logger.info("inputLine=" + inputLine);
-							if(inputLine.equals("Ok-GetLifeCycleData")) {
+							
+							
+							if(line.equals("Ok-GetLifeCycleData")) {
 								logger.info("line 118 GetLifeCycleData received inputLine=" + inputLine);
-							}else if(inputLine.length()>5 && !inputLine.startsWith("Ok")&& !inputLine.startsWith("Failure")) {
+							}else if(line.length()>5 && !line.startsWith("Ok")&& !line.startsWith("Failure")) {
 								logger.info("GetLifeCycleData received inputLine=" + inputLine);
-								tokens = inputLine.split("#");
+								tokens = line.split("#");
 								// find which remembereddenewords come the mother and 
 								// storem them using the REMEMBERED_DENEWORD_SOURCE_WPS
 								String t0=tokens[0];
@@ -136,7 +137,7 @@ public class PulseThread extends Thread{
 								}
 							}
 							//
-						}while(!inputLine.startsWith("Ok") && !inputLine.startsWith("Failure"));
+						}while(!line.startsWith("Ok") && !line.startsWith("Failure"));
 
 
 						waitingForMama=false;
