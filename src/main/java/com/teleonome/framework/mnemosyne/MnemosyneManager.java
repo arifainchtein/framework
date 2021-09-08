@@ -494,9 +494,11 @@ public class MnemosyneManager {
 					rowsDeleted = aDBManager.deleteByPeriodFromOrganismPulse(millisToDeleteFrom, teamParam);
 					logger.debug("rowsDeleted=" + rowsDeleted);
 				}	
-
+				logger.debug("line 497 about to vacum");
+				  now = System.currentTimeMillis();
 				aDBManager.vacuum();
-
+				long vacumingTime = System.currentTimeMillis()-now;
+				logger.debug("line 500  vacumg took " + vacumingTime);
 				mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Rows Deleted", rowsDeleted,null,"int",true);
 				mnemosyconRuleProcessingDeneDeneWords.put(mnemosyconRuleProcessingDeneWord);
 
