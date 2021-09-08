@@ -116,9 +116,9 @@ public class PulseThread extends Thread{
 							
 							
 							if(line.equals("Ok-GetLifeCycleData")) {
-								logger.info("line 118 GetLifeCycleData received inputLine=" + inputLine);
+								logger.info("line 118 GetLifeCycleData received inputLine=" + line);
 							}else if(line.length()>5 && !line.startsWith("Ok")&& !line.startsWith("Failure")) {
-								logger.info("GetLifeCycleData received inputLine=" + inputLine);
+								logger.info("GetLifeCycleData received inputLine=" + line);
 								tokens = line.split("#");
 								// find which remembereddenewords come the mother and 
 								// storem them using the REMEMBERED_DENEWORD_SOURCE_WPS
