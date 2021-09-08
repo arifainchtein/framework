@@ -79,6 +79,7 @@ public class PulseThread extends Thread{
 		// if so, ask the mother to send data
 		
 		if(anHypothalamus.motherMicroController!=null) {
+			logger.debug("mother class="+ anHypothalamus.motherMicroController.getClass());
 			aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE,System.currentTimeMillis(), TeleonomeConstants.LIFE_CYCLE_EVENT_AWAKE_VALUE);
 			try {
 				output = anHypothalamus.motherMicroController.getWriter();
@@ -88,7 +89,7 @@ public class PulseThread extends Thread{
 
 				output.write(commandToSend,0,commandToSend.length());
 				output.flush();
-				logger.debug("line 89 waiting for mama to respond1 wait 5000");
+				logger.debug("line 91 waiting for mama to respond1 wait 5000");
 				Thread.sleep(5000);
 
 			} catch (IOException e2) {
