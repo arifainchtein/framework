@@ -32,7 +32,7 @@ public class PlainReader extends BufferedReader{
 	}
 
 	public String readLine(){
-		logger.debug("executing command " + currentCommand);
+		logger.debug("line 35 executing command " + currentCommand);
 		if(currentCommand.contains("PulseStart")) {
 			return "Ok-PulseStart";
 		}else if(currentCommand.contains("PulseFinished")) {
