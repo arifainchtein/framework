@@ -104,17 +104,15 @@ public class PulseThread extends Thread{
 			String eventType="";
 			long eventTimeMillis=0;
 			int eventValue=0;
+			String line ="";
 			while(waitingForMama) {
 				logger.debug("line 106");
 				try {
-					String line = input.readLine();
-					logger.info("line 111 line=" + line);
-					if(line!=null) {
-						
-						do{
-							
-							
-							
+					do{
+					  line = input.readLine();
+						logger.info("line 111 line=" + line);
+						if(line!=null) {
+
 							if(line.equals("Ok-GetLifeCycleData")) {
 								logger.info("line 118 GetLifeCycleData received inputLine=" + line);
 							}else if(line.length()>5 && !line.startsWith("Ok")&& !line.startsWith("Failure")) {
@@ -137,18 +135,20 @@ public class PulseThread extends Thread{
 								}
 							}
 							//
-						}while(!line.startsWith("Ok") && !line.startsWith("Failure"));
+
+						}else {
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								logger.warn(Utils.getStringException(e));
+							}
+						}
+					}while(!line.startsWith("Ok") && !line.startsWith("Failure"));
 
 
 						waitingForMama=false;
-					}else {
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							logger.warn(Utils.getStringException(e));
-						}
-					}
+					
 
 				}catch(IOException e) {
 					logger.warn(Utils.getStringException(e));
