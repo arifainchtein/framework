@@ -1,5 +1,4 @@
 package com.teleonome.framework.microcontroller;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -9,10 +8,12 @@ import java.io.StringWriter;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
+import org.apache.log4j.Logger;
 
 import com.teleonome.framework.TeleonomeConstants;
 
 public class PlainReader extends BufferedReader{
+	Logger logger;
 	int counter=0;
 	int maximum=2;
 	int value=0;
@@ -20,12 +21,14 @@ public class PlainReader extends BufferedReader{
 	String currentCommand="";
 	public PlainReader(Reader in, StringWriter s) {
 		super(in);
+		logger = Logger.getLogger(getClass());
 		stringWriter=s;
 	}
 
 	public void setCurrentCommand(String command) {
 		// TODO Auto-generated method stub
 		currentCommand=command;
+		logger.debug("got command " + currentCommand);
 	}
 
 	public String readLine(){

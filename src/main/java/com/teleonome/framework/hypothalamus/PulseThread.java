@@ -107,7 +107,8 @@ public class PulseThread extends Thread{
 			while(waitingForMama) {
 				logger.debug("line 106");
 				try {
-					if(input.ready()) {
+					String line = input.readLine();
+					if(line!=null) {
 						String inputLine = "";
 						do{
 							
