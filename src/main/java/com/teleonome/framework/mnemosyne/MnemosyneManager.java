@@ -392,7 +392,7 @@ public class MnemosyneManager {
 			mnemosyconRuleTimeUnitValue= (int) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyconRuleJSONObject, TeleonomeConstants.MNEMOSYCON_RULE_TIME_UNIT_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			now=System.currentTimeMillis();
 			millisToDeleteFrom=0;
-			logger.debug("processing mnemosyconRuleSource=" + mnemosyconRuleSource  + " mnemosyconRuleLocation=" + mnemosyconRuleLocation);
+			logger.debug("line 395 processing now=" + now + "  mnemosyconRuleSource=" + mnemosyconRuleSource  + " mnemosyconRuleLocation=" + mnemosyconRuleLocation + " mnemosyconRuleTimeUnitValue=" + mnemosyconRuleTimeUnitValue + " mnemosyconRuleTimeUnit="+ mnemosyconRuleTimeUnit);
 
 			//
 			// now create a dene for this rule 
@@ -410,19 +410,19 @@ public class MnemosyneManager {
 
 			if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_DAY)) {
 
-				millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*24*60*60*1000;
+				millisToDeleteFrom=now -( mnemosyconRuleTimeUnitValue*24*60*60*1000);
 
 			}else if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_WEEK)) {
 
-				millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*7*24*60*60*1000;
+				millisToDeleteFrom=now - (mnemosyconRuleTimeUnitValue*7*24*60*60*1000);
 
 			}else if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_MONTH)) {
 
-				millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*30*24*60*60*1000;
+				millisToDeleteFrom=now - (mnemosyconRuleTimeUnitValue*30*24*60*60*1000);
 
 			}else if(mnemosyconRuleTimeUnit.equals(TeleonomeConstants.TIME_UNIT_YEAR)) {
 
-				millisToDeleteFrom=now - mnemosyconRuleTimeUnitValue*365*24*60*60*1000;
+				millisToDeleteFrom=now - (mnemosyconRuleTimeUnitValue*365*24*60*60*1000);
 
 			}
 			//
@@ -496,7 +496,7 @@ public class MnemosyneManager {
 				}	
 				logger.debug("line 497 about to vacum");
 				  now = System.currentTimeMillis();
-			//	aDBManager.vacuum();
+				// aDBManager.vacuum();
 				long vacumingTime = System.currentTimeMillis()-now;
 				logger.debug("line 500  vacumg took " + vacumingTime);
 				mnemosyconRuleProcessingDeneWord = Utils.createDeneWordJSONObject("Rows Deleted", rowsDeleted,null,"int",true);
