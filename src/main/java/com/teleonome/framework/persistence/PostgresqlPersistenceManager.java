@@ -3,6 +3,8 @@ package com.teleonome.framework.persistence;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -546,7 +548,8 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			else if(units.equalsIgnoreCase("MB"))size= size;
 			else if(units.equalsIgnoreCase("GB"))size= size*1000;
 			else if(units.equalsIgnoreCase("TB"))size= size*1000000;
-
+			
+			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
@@ -567,7 +570,9 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			if(connection!=null)closeConnection(connection);
 		}
 
-		return size;
+		BigDecimal bd = new BigDecimal(size).setScale(2, RoundingMode.HALF_UP);
+	      double value = bd.doubleValue();
+		return value;
 
 	}
 

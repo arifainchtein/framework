@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -98,7 +99,7 @@ public class DenomeManager {
 	JSONObject networkAdapterInfoJSONObject;
 	String hostName="";
 	String selectedDenomeFileName="";
-
+	private final DecimalFormat decimalFormat = new DecimalFormat("0.00");
 	SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	SimpleDateFormat statusMessagedateTimeFormat = new SimpleDateFormat("HH:mm");
 
