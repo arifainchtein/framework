@@ -189,11 +189,14 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				if(results.size()>0) {
 					
 					connectionInfoJSONObject = new JSONObject(results.get(0));
+					FileUtils.writeStringToFile(new File("SpeedTestResults.txt"), connectionInfoJSONObject.toString(4), Charset.defaultCharset());
 					logger.debug("speedtest-cli result=" +  connectionInfoJSONObject.toString(4));
 					downloadSpeed = connectionInfoJSONObject.getDouble("download")/(8*1024*1024);
 					uploadSpeed = connectionInfoJSONObject.getDouble("upload")/(8*1024*1024);
 					pingTime = connectionInfoJSONObject.getDouble("ping");
 
+				}else {
+					logger.debug("speedtest-cli result is empty=" );
 				}
 			} catch (IOException | InterruptedException e1) {
 				// TODO Auto-generated catch block
