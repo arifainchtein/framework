@@ -43,6 +43,7 @@ public class PiFourValuesFourDigitDisplaysWriter extends BufferedWriter {
 			ArrayList results;
 			String resultsString,valuePointer;
 			JSONObject dataSource;
+			logger.debug("params= " + params.toString(4));
 			for(int i=0;i<params.length();i++) {
 				displayInfo = params.getJSONObject(i);
 				
