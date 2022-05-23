@@ -193,9 +193,10 @@ public class TeleonomeConstants {
 	// the different types of DeneChain
 	//
 	public static final String DENECHAIN_OPERONS = "Operons";
+	public static final String DENECHAIN_HEART = "Heart";
 	public static final String DENECHAIN_ACTUATORS = "Actuators";
 	public static final String DENECHAIN_ANALYSIS = "Analysis";
-	
+	public static final String DENECHAIN_TELEPHATONS = "Telephatons";
 	public static final String DENECHAIN_SENSORS = "Sensors";	
 	public static final String DENECHAIN_TELEPATHONS = "Telepathons";    
 	public static final String DENECHAIN_DESCRIPTIVE = "Descriptive";
@@ -388,6 +389,8 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_TYPE_CURRENT_PULSE_FREQUENCY="Current Pulse Frequency";
 	public static final String DENEWORD_TYPE_CURRENT_PULSE_GENERATION_DURATION="Current Pulse Generation Duration";
 	public static final String DENEWORD_TYPE_CONFIGURATION_PARAMETER="Configuration Parameter";
+	public static final String DENEWORD_TYPE_HEART_TOPIC = "Heart Topic";
+	
 	
 	public static final String DENEWORD_TYPE_BASE_PULSE_FREQUENCY="Base Pulse Frequency";
 	public static final String DENEWORD_TYPE_NUMBER_PULSES_BEFORE_LATE="Number of Pulses Before Late";
@@ -1225,6 +1228,8 @@ public class TeleonomeConstants {
 	public static final String HEART_TOPIC_BLINK="Blink";
 	public static final String HEART_TOPIC_ADA_STATUS="AdaStatus";
 	public static final String HEART_TOPIC_ORGANISM_STATUS="OrganismStatus";
+	public static final String HEART_TOPIC_ORGANISM_IP="OrganismIP";
+	
 	public static final String HEART_TOPIC_ORGANISM_UPDATE="OrganismUpdate";
 	public static final String HEART_TOPIC_AVAILABLE_SSIDS="Available SSID";
 	public static final String HEART_TOPIC_EXECUTE_MANUAL_ACTION="Manual Action";

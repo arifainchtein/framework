@@ -1045,9 +1045,52 @@ public class PulseThread extends Thread{
 			logger.warn("published  pulse to zeromq, byte size=" + pulseBytes.length);
 			//JSONObject purpose = aDenomeManager.getDeneByPointer( TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA, TeleonomeConstants.DENE_VITAL);
 			//publishToHeart(TeleonomeConstants.HEART_TOPIC_STATUS, purpose.toString());
+			//
+			// now do the heart publishing, get the different topics and publish them
+			//
+			// starting with the pulse
 			anHypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_STATUS, pulse);
+			//
+			// then read the heart topics denes and published them
+			JSONArray topics = aDenomeManager.getDeneByDeneType(TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_HEART, TeleonomeConstants.DENEWORD_TYPE_HEART_TOPIC);
+			JSONObject topicDene, heartTopicDeneword;
+			String heartTopicName, heartTopicData, heartTopicIdentityPointer;
+//			{
+//				"Name":Heart,
+//				"Denes":[
+//				         {
+//				        	 "Name":"Topic_Sensor_Data",
+//				        	 "DeneType":"Heart Topic",
+//				        	 "DeneWords":[
+//				        	              {
+//				        	            	  "Name":"SensorData",
+//				        	            	  "Value":"@Egg:Purpose:Sensor Data",
+//				        	            	  "Type":"String",
+//				        	            	  "Required":true
+//				        	              }
+//				        	  ]
+//				        			 
+//				         }
+//				 ]
+//						
+//			}
+			for(int i=0;i<topics.length();i++) {
+				topicDene= topics.getJSONObject(i);
+				heartTopicDeneword = (JSONObject) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(topicDene , TeleonomeConstants.DENEWORD_TYPE_HEART_TOPIC, TeleonomeConstants.COMPLETE);
+				heartTopicName = heartTopicDeneword.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+				heartTopicIdentityPointer = heartTopicDeneword.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+				heartTopicData = aDenomeManager.getDenomicElementByIdentity(new Identity(heartTopicIdentityPointer)).toString();
+				// use the identity pointer as a topic name
+				// that way a Nadine that wants to see data  sensor data from  ra will subscribe to the channel called @Ra:Purpose:SensorData
+				//
+				anHypothalamus.publishToHeart(heartTopicIdentityPointer, heartTopicData.toString());
+			}
+			
+			
+			//
+			// are we storing the pulse in the database?
+			//
 			Identity identity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_DESCRIPTIVE,TeleonomeConstants.DENE_VITAL, TeleonomeConstants.DENEWORD_PERSIST_PULSE);
-
 			if(aDenomeManager.hasDeneWordByIdentity(identity)) {
 				persistencePulse = (boolean) aDenomeManager.getDeneWordAttributeByIdentity(identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 				logger.debug("about to store pulse, persistencePulse=" + persistencePulse);  
