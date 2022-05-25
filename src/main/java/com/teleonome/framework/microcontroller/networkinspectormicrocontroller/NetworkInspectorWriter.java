@@ -71,7 +71,9 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			//
 			// get a list of devices
 			//
-			JSONArray deviceList = new JSONArray();
+			String finalSensorDataString = FileUtils.readFileToString(new File("NetworkSensor.json"),Charset.defaultCharset());
+			
+			JSONArray deviceList = new JSONArray(finalSensorDataString);
 			JSONObject device;
 			for(int i=0;i<deviceList.length();i++) {
 				device = deviceList.getJSONObject(i);
