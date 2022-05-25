@@ -67,6 +67,23 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			logger.debug("RemoveDeviceFromWhiteList deviceName=" + deviceName  + " " + b);
 			
 			updateWhiteListStatusInFile( deviceName, false);
+		}else if(command.startsWith("AddAllDevicesToWhiteList")) {
+			//
+			// get a list of devices
+			//
+			JSONArray deviceList = new JSONArray();
+			JSONObject device;
+			for(int i=0;i<deviceList.length();i++) {
+				device = deviceList.getJSONObject(i);
+				if(!device.getBoolean(TeleonomeConstants.WHITE_LIST_STATUS)) {
+					String deviceName=device.getString(TeleonomeConstants.DEVICE_NAME);
+					String deviceMacAddress=device.getString(TeleonomeConstants.MAC_ADDRESS);
+					logger.debug("AddAllToWhiteList deviceName=" + deviceName + " " + deviceMacAddress);
+					boolean b = aMnemosyneManager.addDeviceToWhiteList(deviceName, deviceMacAddress);
+					logger.debug("AddAllToWhiteList deviceName=" + deviceName + " " + deviceMacAddress + " " + b);
+					updateWhiteListStatusInFile( deviceName, true);		
+				}
+			}
 		}
 	}
 
