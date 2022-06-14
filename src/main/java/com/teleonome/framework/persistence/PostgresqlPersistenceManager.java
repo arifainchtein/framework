@@ -100,8 +100,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				}
 			}
 			System.out.println("port=" + port);
-
-
+			
 			String DATABASE_URL = "postgres://postgres:"+pwd+"@localhost:"+ port +"/teleonome";
 			dbUri = new URI(DATABASE_URL);
 			String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() +  dbUri.getPath() ;

@@ -1145,12 +1145,15 @@ class MappedBusThread extends Thread{
 					//
 					// wait a couple of seconds to make sure the heart does its job
 					//
+					logger.debug("in erbooting about to wait 2 sec");
 					try {
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e));
 					}
+					logger.debug("next line is sud reboot");
+					
 					Runtime.getRuntime().exec("sudo reboot");
 				}else {
 					JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId(),TeleonomeConstants.MOTHER_INVALIDATED_REBOOT);
