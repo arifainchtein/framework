@@ -1240,7 +1240,10 @@ public class TeleonomeConstants {
 	public static final String PROCESS_WEB_SERVER="Web Server";
 
 	
-
+	//
+	// telepathon
+	//
+	public static final String TELEPHATON_TOPIC_ANNOUNCE="TelephatonAnnounce";
 	
 
 	
