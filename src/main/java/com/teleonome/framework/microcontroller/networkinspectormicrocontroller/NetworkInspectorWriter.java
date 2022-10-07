@@ -163,8 +163,25 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				sensorDataJSONObject.put(TeleonomeConstants.IP_ADDRESS, infoObj.getString(TeleonomeConstants.IP_ADDRESS));
 				sensorDataJSONObject.put(TeleonomeConstants.MAC_ADDRESS, infoObj.getString(TeleonomeConstants.MAC_ADDRESS));
 				
+				
+				
+				
+				
 				if(infoObj.has(TeleonomeConstants.DEVICE_NAME)) {
-					sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, infoObj.getString(TeleonomeConstants.DEVICE_NAME));
+					String ipAddress = infoObj.getString(TeleonomeConstants.IP_ADDRESS);
+					
+					String deviceName =  infoObj.getString(TeleonomeConstants.DEVICE_NAME);
+					logger.debug("deviceName=" + deviceName + " ipAddress=" + ipAddress);
+					if(deviceName.equals("(Unknown)")) {
+						String telephathonName = getTelepathonHostName( ipAddress);
+						if(!telephathonName.equals("")) {
+							sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, telephathonName);
+						}else {
+							sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, deviceName);
+						}
+					}else {
+						sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, infoObj.getString(TeleonomeConstants.DEVICE_NAME));
+					}
 				}else {
 					sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, infoObj.getString(TeleonomeConstants.IP_ADDRESS));
 				}
@@ -188,6 +205,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			diffAnalysisJSONObject.put("Missing", missingDevices);
 			diffAnalysisJSONObject.put("New", newDevices);
 			logger.debug("previousDeviceListJSONArray=" + previousDeviceListJSONArray);
+			
 			if(previousDeviceListJSONArray!=null) {
 				//
 				//perform analysis
