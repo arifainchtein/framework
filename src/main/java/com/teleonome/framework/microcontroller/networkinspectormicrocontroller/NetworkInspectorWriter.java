@@ -173,7 +173,9 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 					String deviceName =  infoObj.getString(TeleonomeConstants.DEVICE_NAME);
 					logger.debug("deviceName=" + deviceName + " ipAddress=" + ipAddress);
 					if(deviceName.equals("(Unknown)")) {
+						
 						String telephathonName = getTelepathonHostName( ipAddress);
+						logger.debug("telephathonName=" + telephathonName);
 						if(!telephathonName.equals("")) {
 							sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, telephathonName);
 						}else {
