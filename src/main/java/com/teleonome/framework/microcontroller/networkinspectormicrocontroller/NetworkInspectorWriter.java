@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
@@ -366,18 +368,31 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 		
 		private String getTelepathonHostName(String ipAddress) {
 		      StringBuilder result = new StringBuilder();
-		      URL url = new URL(ipAddress + "/GetHostName");
-		      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		      conn.setRequestMethod("GET");
-		      try (BufferedReader reader = new BufferedReader(
-		                  new InputStreamReader(conn.getInputStream()))) {
-		          for (String line; (line = reader.readLine()) != null; ) {
-		              result.append(line);
-		          }
-		      }
+		      URL url;
+			try {
+				url = new URL(ipAddress + "/GetHostName");
+				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			      conn.setRequestMethod("GET");
+			      try (BufferedReader reader = new BufferedReader(
+			                  new InputStreamReader(conn.getInputStream()))) {
+			          for (String line; (line = reader.readLine()) != null; ) {
+			              result.append(line);
+			          }
+			      }
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		      
 		      return result.toString();
 		   }
-	}
+
 
 		public Hashtable<String, JSONObject> getArpScanInfo(int arpScanRetry) {
 			// TODO Auto-generated method stub
