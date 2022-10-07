@@ -1,8 +1,12 @@
 package com.teleonome.framework.microcontroller.networkinspectormicrocontroller;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Writer;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
@@ -329,10 +333,23 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 				infoObj = arpScanInfo.get(arpScanIpAddress);
 
 				sensorDataJSONObject = new JSONObject();
-				sensorDataJSONObject.put(TeleonomeConstants.IP_ADDRESS, infoObj.getString(TeleonomeConstants.IP_ADDRESS));
+				String ipAddress = infoObj.getString(TeleonomeConstants.IP_ADDRESS);
+				sensorDataJSONObject.put(TeleonomeConstants.IP_ADDRESS, ipAddress);
+		
 				sensorDataJSONObject.put(TeleonomeConstants.MAC_ADDRESS, infoObj.getString(TeleonomeConstants.MAC_ADDRESS));
 				if(infoObj.has(TeleonomeConstants.DEVICE_NAME)) {
-					sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, infoObj.getString(TeleonomeConstants.DEVICE_NAME));
+					String deviceName =  infoObj.getString(TeleonomeConstants.DEVICE_NAME);
+					if(deviceName.equals("(Unknown)")) {
+						String telephathonName = getTelepathonHostName( ipAddress);
+						if(!telephathonName.equals("")) {
+							sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, telephathonName);
+						}else {
+							sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, deviceName);
+						}
+					}else {
+						sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, infoObj.getString(TeleonomeConstants.DEVICE_NAME));
+					}
+					
 				}else {
 					sensorDataJSONObject.put(TeleonomeConstants.DEVICE_NAME, infoObj.getString(TeleonomeConstants.IP_ADDRESS));
 				}
@@ -346,6 +363,21 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			
 			return sensorDataStringJSONArray;
 		}
+		
+		private String getTelepathonHostName(String ipAddress) {
+		      StringBuilder result = new StringBuilder();
+		      URL url = new URL(ipAddress + "/GetHostName");
+		      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		      conn.setRequestMethod("GET");
+		      try (BufferedReader reader = new BufferedReader(
+		                  new InputStreamReader(conn.getInputStream()))) {
+		          for (String line; (line = reader.readLine()) != null; ) {
+		              result.append(line);
+		          }
+		      }
+		      return result.toString();
+		   }
+	}
 
 		public Hashtable<String, JSONObject> getArpScanInfo(int arpScanRetry) {
 			// TODO Auto-generated method stub
