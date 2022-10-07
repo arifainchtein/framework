@@ -391,7 +391,7 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 		      StringBuilder result = new StringBuilder();
 		      URL url;
 			try {
-				url = new URL(ipAddress + "/GetHostName");
+				url = new URL("http://"+ipAddress + "/GetHostName");
 				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			      conn.setRequestMethod("GET");
 			      try (BufferedReader reader = new BufferedReader(
@@ -403,12 +403,15 @@ public class NetworkInspectorWriter  extends BufferedWriter{
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				logger.warn(Utils.getStringException(e));
 			} catch (ProtocolException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				logger.warn(Utils.getStringException(e));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				logger.warn(Utils.getStringException(e));
 			}
 		      
 		      return result.toString();
