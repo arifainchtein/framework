@@ -6734,7 +6734,7 @@ public class DenomeManager {
 							variableValue = actionVariableValueJSONObject.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						}
 					}
-					logger.info("line 4585 Evaluate Deneword operation,after rendering abpout to set variableName=" + variableName + " variableValue=" + variableValue);
+					logger.info("line 6738 Evaluate Deneword operation,after rendering abpout to set variableName=" + variableName + " variableValue=" + variableValue);
 
 					actuatorActionEvaluationLogicProcessingDeneDeneWord = Utils.createDeneWordJSONObject(variableName, variableValue,null,variableValueType.toString(),true);
 					actuatorActionEvaluationLogicProcessingDeneDeneWord.put(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_EVALUATED_VARIABLE);
@@ -6748,19 +6748,49 @@ public class DenomeManager {
 						allVariablesInExpressionRenderedSuccesfully=false;
 					}
 				}
-				logger.info("line 4583 allVariablesInExpressionRenderedSuccesfully=" + allVariablesInExpressionRenderedSuccesfully);
+				logger.info("line 6751 allVariablesInExpressionRenderedSuccesfully=" + allVariablesInExpressionRenderedSuccesfully);
 
 
 
 				if(allVariablesInExpressionRenderedSuccesfully){
 					Object result = actionExpression.evaluate(jexlActionContext);	
-					JSONObject destinationJSONObject = this.getDeneWordByIdentity(new Identity(destinationPointer));
-					logger.info("line 4597 Evaluate Deneword operation,after rendering abpout to set destinationPointer=" + destinationPointer + " result=" + result);
+					Identity destinationIdentity = new Identity(destinationPointer);
+					JSONObject destinationJSONObject = this.getDeneWordByIdentity(destinationIdentity);
+					logger.info("line 6759 Evaluate Deneword operation,after rendering abpout to set destinationPointer=" + destinationPointer + " result=" + result);
 					if(result instanceof Double) {
 						result = Math.ceil((double)result);
 					}
 					destinationJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, result); 
+					//
+					// if the destination is a deneword in the mnenosyne, update the timestamp and timestamp milliseconds to make sure that
+					// the prunning is aware that this value is fresh
+					//
+					if(destinationIdentity.getNucleusName().equals(TeleonomeConstants.NUCLEI_MNEMOSYNE)) {
+						
+						long currentTimeMillis = System.currentTimeMillis();
+						Instant instant = Instant.ofEpochMilli(currentTimeMillis);
+						Identity timeZoneIdentity = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_INTERNAL, TeleonomeConstants.DENECHAIN_DESCRIPTIVE, TeleonomeConstants.DENE_VITAL, "Timezone");
+						String timeZoneId = (String) getDeneWordAttributeByIdentity(timeZoneIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						TimeZone currentTimeZone = null;
+						if(timeZoneId!=null && !timeZoneId.equals("")){
+							currentTimeZone = TimeZone.getTimeZone(timeZoneId);
+						}else{
+							currentTimeZone = TimeZone.getDefault();
+						}
 
+						LocalDateTime ldt = LocalDateTime.ofInstant(instant, currentTimeZone.toZoneId());
+						//LocalDateTime currentTime = LocalDateTime.now();
+
+						DateTimeFormatter timeStampformatter = DateTimeFormatter.ofPattern(TeleonomeConstants.MNEMOSYNE_TIMESTAMP_FORMAT);
+						String formatedCurrentTimestamp = ldt.format(timeStampformatter);
+						Identity mnemosyneDeneIdentity = new Identity(teleonomeName, destinationIdentity.getNucleusName(), destinationIdentity.getDenechainName(), destinationIdentity.getDeneName(), "Timezone");
+						logger.info("line 6787 about to update mnemosyne time fields for=" + mnemosyneDeneIdentity.toString() + " currentTimeMillis=" + currentTimeMillis + " formatedCurrentTimestamp=" + formatedCurrentTimestamp);
+						
+						JSONObject mnmosyneDeneJSONObject = this.getDeneByIdentity(mnemosyneDeneIdentity);
+						mnmosyneDeneJSONObject.put("Timestamp", formatedCurrentTimestamp);
+						mnmosyneDeneJSONObject.put("Timestamp Milliseconds", currentTimeMillis);
+
+					}
 
 					actuatorActionEvaluationLogicProcessingDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_ACTION_PROCESSING_RESULT, result,null,"double",true);
 					actuatorActionEvaluationLogicProcessingDeneDeneWords.put(actuatorActionEvaluationLogicProcessingDeneDeneWord);
