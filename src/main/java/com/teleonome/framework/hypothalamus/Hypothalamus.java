@@ -12,6 +12,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -82,6 +83,7 @@ public abstract class Hypothalamus {
 	public Vector teleonomesToReconnect =new Vector();
 	SimpleDateFormat simpleFormatter = new SimpleDateFormat("dd/MM/yy HH:mm");
 	SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
+	SimpleDateFormat detailtimeFormatter = new SimpleDateFormat("HH:mm:ss");
 	MotherMicroController motherMicroController=null;
 	String aMotherMicroControllerPointer="";
 	String mqttBrokerAddress = "tcp://localhost:1883";
@@ -339,7 +341,8 @@ public abstract class Hypothalamus {
 			Calendar calendar = Calendar.getInstance();
 			// substract 30 seconds to make sure that ot runs before the pulse can start in the 00 minute
 			long millisToNextHour = Utils.millisToNextHour(calendar)-45000;
-			logger.info("about to start the timebsased executor, with a delay of " + Utils.getElapsedTimeHoursMinutesSecondsString(millisToNextHour) );
+			String timenow = detailtimeFormatter.format(new Timestamp(System.currentTimeMillis()));
+			logger.info("about to start the timebsased executor, the time now is " + timenow + " with a delay of " + Utils.getElapsedTimeHoursMinutesSecondsString(millisToNextHour) );
 			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),millisToNextHour , 60*60*1000, TimeUnit.MILLISECONDS);
 			
 			//new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),1 , 2, TimeUnit.MINUTES);
