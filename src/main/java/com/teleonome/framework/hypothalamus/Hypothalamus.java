@@ -337,7 +337,8 @@ public abstract class Hypothalamus {
 
 
 			Calendar calendar = Calendar.getInstance();
-			long millisToNextHour = Utils.millisToNextHour(calendar);
+			// substract 30 seconds to make sure that ot runs before the pulse can start in the 00 minute
+			long millisToNextHour = Utils.millisToNextHour(calendar)-45000;
 			logger.info("about to start the timebsased executor, with a delay of " + Utils.getElapsedTimeHoursMinutesSecondsString(millisToNextHour) );
 			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),millisToNextHour , 60*60*1000, TimeUnit.MILLISECONDS);
 			
