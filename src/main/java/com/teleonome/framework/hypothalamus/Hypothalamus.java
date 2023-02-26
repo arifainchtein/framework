@@ -342,7 +342,7 @@ public abstract class Hypothalamus {
 			// substract 30 seconds to make sure that ot runs before the pulse can start in the 00 minute
 			long millisToNextHour = Utils.millisToNextHour(calendar)-45000;
 			String timenow = detailtimeFormatter.format(new Timestamp(System.currentTimeMillis()));
-			logger.info("about to start the timebsased executor, the time now is " + timenow + " with a delay of " + Utils.getElapsedTimeHoursMinutesSecondsString(millisToNextHour) );
+			logger.info("about to start the timebsased executor, the time  is " + timenow + " with a delay of " + Utils.getElapsedTimeHoursMinutesSecondsString(millisToNextHour) );
 			new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),millisToNextHour , 60*60*1000, TimeUnit.MILLISECONDS);
 			
 			//new HypothalamusScheduledThreadPoolExecutor(1).scheduleAtFixedRate(new TimeBasedMutationsTask(),1 , 2, TimeUnit.MINUTES);
