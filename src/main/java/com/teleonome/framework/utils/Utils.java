@@ -19,7 +19,9 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
@@ -58,12 +60,21 @@ public class Utils {
 	
 	public static long millisToNextHour(Calendar calendar) {
 	    int minutes = calendar.get(Calendar.MINUTE);
-	    int seconds = calendar.get(Calendar.SECOND);
-	    int millis = calendar.get(Calendar.MILLISECOND);
-	    int minutesToNextHour = 60 - minutes;
-	    int secondsToNextHour = 60 - seconds;
-	    int millisToNextHour = 1000 - millis;
-	    return minutesToNextHour*60*1000 + secondsToNextHour*1000 + millisToNextHour;
+//	    int seconds = calendar.get(Calendar.SECOND);
+//	    int millis = calendar.get(Calendar.MILLISECOND);
+//	    int minutesToNextHour = 60 - minutes;
+//	    int secondsToNextHour = 60 - seconds;
+//	    int millisToNextHour = 1000 - millis;
+//	    return minutesToNextHour*60*1000 + secondsToNextHour*1000 + millisToNextHour;
+	    
+	    LocalDateTime start = LocalDateTime.now();
+	    // Hour + 1, set Minute and Second to 00
+	    LocalDateTime end = start.plusHours(1).truncatedTo(ChronoUnit.HOURS);
+
+	    // Get Duration
+	    Duration duration = Duration.between(start, end);
+	    long millis = duration.toMillis();
+	    return millis;
 	}
 	
 	
