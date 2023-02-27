@@ -534,7 +534,7 @@ public class PulseThread extends Thread{
 			// make sure that there is at least twice the duration of the pulse to be executed within the same hour
 			// 
 			long durationSecondsBuffer=2*pulseProduccionDuration/1000;
-			logger.debug("line 535 currentMinute=" + currentMinute + " currentSecond=" + currentSecond + " pulseProduccionDuration="+ pulseProduccionDuration + " durationSecondsBuffer =" + durationSecondsBuffer);
+			logger.info("line 535 currentMinute=" + currentMinute + " currentSecond=" + currentSecond + " pulseProduccionDuration="+ pulseProduccionDuration + " durationSecondsBuffer =" + durationSecondsBuffer);
 			
 			if(currentMinute==59 && (durationSecondsBuffer+currentSecond)>60) {
 				//
@@ -546,12 +546,12 @@ public class PulseThread extends Thread{
 				// ending at the next delay necessary so the that the prunning 
 				// can happen right at second 0 of minute 0 . 
 				int secondsToSleep = 60-currentSecond;
-				logger.debug("line 545 about to sleep =" + secondsToSleep + " to insure that prunning happens at second 0 of the period");
+				logger.info("line 545 about to sleep =" + secondsToSleep + " to insure that prunning happens at second 0 of the period");
 				Thread.sleep(secondsToSleep);
 			}
 			//
 			// check to see if we are schedule to prune the mnemosyne
-			logger.debug("performTimePrunningAnalysis=" + anHypothalamus.performTimePrunningAnalysis);
+			logger.info("performTimePrunningAnalysis=" + anHypothalamus.performTimePrunningAnalysis);
 			
 			
 			if(anHypothalamus.performTimePrunningAnalysis) {
