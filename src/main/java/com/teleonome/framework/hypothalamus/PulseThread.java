@@ -593,7 +593,7 @@ public class PulseThread extends Thread{
 					String pathologyName = TeleonomeConstants.PATHOLOGY_NETWORK_UNAVAILABLE;
 					String pathologyLocation = TeleonomeConstants.PATHOLOGY_LOCATION_NETWORK;
 					Vector extraDeneWords = new Vector();
-					Calendar cal = Calendar.getInstance();//TimeZone.getTimeZone("GMT+10:00"));
+					cal = Calendar.getInstance();//TimeZone.getTimeZone("GMT+10:00"));
 					JSONObject pathologyDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_MILLISECONDS, "" + cal.getTime().getTime() ,null,"long",true);
 					extraDeneWords.addElement(pathologyDeneDeneWord);
 					pathologyDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_TIMESTAMP, anHypothalamus.simpleFormatter.format(cal.getTime()) ,null,"long",true);
@@ -1177,7 +1177,7 @@ public class PulseThread extends Thread{
 				motherOutputStream = anHypothalamus.motherMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
 
 				 commandToSend="";
-				Calendar cal = Calendar.getInstance();//TimeZone.getTimeZone("GMT+10:00"));
+				cal = Calendar.getInstance();//TimeZone.getTimeZone("GMT+10:00"));
 				logger.info("telling mama pulse is done");
 
 				//String inputLine = motherInputStream.readLine();
