@@ -543,7 +543,7 @@ public class PulseThread extends Thread{
 				// so to  avoid a pulse a pulse beginning at one hourly period and
 				// ending at the next delay necessary so the that the prunning 
 				// can happen right at second 0 of minute 0 .  Add 1 second to be on the safe side
-				int secondsToSleep = 60+currentSecond+1;
+				int secondsToSleep = 60-currentSecond+1;
 				logger.debug("line 545 about to sleep =" + secondsToSleep + " to insure that prunning happens at second 0 of the period");
 				Thread.sleep(secondsToSleep);
 			}
