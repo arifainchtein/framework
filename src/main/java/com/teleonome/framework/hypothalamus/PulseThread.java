@@ -531,10 +531,12 @@ public class PulseThread extends Thread{
 			int currentMinute = cal.get(Calendar.MINUTE);
 			int currentSecond = cal.get(Calendar.SECOND);
 			//
-			long durationSeconds=pulseProduccionDuration/1000;
-			logger.debug("line 535 currentMinute=" + currentMinute + " currentSecond=" + currentSecond + " durationSeconds =" + durationSeconds);
+			// make sure that there is at least twice the duration of the pulse to be executed within the same hour
+			// 
+			long durationSecondsBuffer=2*pulseProduccionDuration/1000;
+			logger.debug("line 535 currentMinute=" + currentMinute + " currentSecond=" + currentSecond + " pulseProduccionDuration="+ pulseProduccionDuration + " durationSecondsBuffer =" + durationSecondsBuffer);
 			
-			if(currentMinute==59 && (durationSeconds+currentSecond)>60) {
+			if(currentMinute==59 && (durationSecondsBuffer+currentSecond)>60) {
 				//
 				// if we are here is because the current time is something like 
 				// 8:59:54 and the pulse duration is lets say 9 seconds
@@ -542,8 +544,8 @@ public class PulseThread extends Thread{
 				// at the hour 9, which will affect the prunning of the hourly, today
 				// so to  avoid a pulse a pulse beginning at one hourly period and
 				// ending at the next delay necessary so the that the prunning 
-				// can happen right at second 0 of minute 0 .  Add 1 second to be on the safe side
-				int secondsToSleep = 60-currentSecond+1;
+				// can happen right at second 0 of minute 0 . 
+				int secondsToSleep = 60-currentSecond;
 				logger.debug("line 545 about to sleep =" + secondsToSleep + " to insure that prunning happens at second 0 of the period");
 				Thread.sleep(secondsToSleep);
 			}
