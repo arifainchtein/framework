@@ -46,11 +46,6 @@
     <artifactId>Java-WebSocket</artifactId>
     <version>[1.5.0,)</version>
 </dependency>
-  <dependency>
-  <groupId>org.shredzone.commons</groupId>
-  <artifactId>commons-suncalc</artifactId>
-  <version>$version</version>
-</dependency>
   <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
 <dependency>
     <groupId>commons-codec</groupId>
