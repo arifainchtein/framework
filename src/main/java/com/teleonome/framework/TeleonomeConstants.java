@@ -188,10 +188,20 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_MAIN_BATTERY_INPUT_CURRENT="MainBatteryInputCurrent";
 	public static final String DENEWORD_SOLAR_PANEL_INPUT_CURRENT="SolarPanelInputCurrent";
 	public static final String DENEWORD_MAIN_BATTERY_STATE_OF_CHARGE="InternalBatteryStateOfCharge";
+	public static final String DENE_LOCATION_INFORMATION="Location Information";
+	public static final String DENEWORD_LATITUDE="Latitude";
+	public static final String DENEWORD_LONGITUDE="Longitude";
+	public static final String DENEWORD_TIMEZONE="Timezone";
+	public static final String DENEWORD_DAY_LENGTH="Day Length";
+	public static final String DENEWORD_DAY_LENGTH_MILLIS="Day Length Millis";
+	public static final String DENEWORD_SUNSET="Sunset";
+	public static final String DENEWORD_SUNRISE="Sunrise";
 	
+	public static final String DENE_TIME_INFORMATION="Day Time Information";
 	//
 	// the different types of DeneChain
 	//
+	public static final String DENECHAIN_LOCATION="Location";
 	public static final String DENECHAIN_OPERONS = "Operons";
 	public static final String DENECHAIN_HEART = "Heart";
 	public static final String DENECHAIN_ACTUATORS = "Actuators";
@@ -277,6 +287,9 @@ public class TeleonomeConstants {
 	public static final String COMMANDS_PREVIOUS_PULSE_VALUE = "$Previous_Pulse_Value";
 	public static final String COMMANDS_PREVIOUS_PULSE_TIMESTAMP = "$Previous_Pulse_Timestamp";
 	public static final String COMMANDS_PREVIOUS_PULSE_MILLIS = "$Previous_Pulse_Millis";
+	
+	public static final String COMMAND_CALCULATE_DAY_TIME_INFORMATION="$Calculate_Day_Time_information";
+	
 	
 	public static final String COMMAND_REBOOT="$Reboot";
 	public static final String COMMAND_SHUTDOWN="$Shutdown";

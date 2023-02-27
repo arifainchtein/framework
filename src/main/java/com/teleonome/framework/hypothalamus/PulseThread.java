@@ -1441,6 +1441,35 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 											}
 											
 										}
+									}else if(actuatorCommand.equals(TeleonomeConstants.COMMAND_CALCULATE_DAY_TIME_INFORMATION)){
+										Identity latitudeIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_LOCATION,TeleonomeConstants.DENE_LOCATION_INFORMATION, TeleonomeConstants.DENEWORD_LATITUDE);
+										Identity longitudeIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_LOCATION,TeleonomeConstants.DENE_LOCATION_INFORMATION, TeleonomeConstants.DENEWORD_LONGITUDE);
+										Identity timezoneIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_LOCATION,TeleonomeConstants.DENE_LOCATION_INFORMATION, TeleonomeConstants.DENEWORD_TIMEZONE);
+										
+										String latitude;
+										try {
+											latitude = (String) aDenomeManager.getDeneWordAttributeByIdentity(latitudeIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+											String longitude =(String) aDenomeManager.getDeneWordAttributeByIdentity(longitudeIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+											String timezonename =(String) aDenomeManager.getDeneWordAttributeByIdentity(latitudeIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+											
+											JSONObject info = Utils.calculateDayTimeInformation( latitude,  longitude,  timezonename);
+											
+											Identity destinationSunriseIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,TeleonomeConstants.DENE_TIME_INFORMATION, TeleonomeConstants.DENEWORD_SUNRISE);
+											Identity destinationSunsetIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,TeleonomeConstants.DENE_TIME_INFORMATION, TeleonomeConstants.DENEWORD_SUNSET);
+											Identity destinationtDayLengthIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,TeleonomeConstants.DENE_TIME_INFORMATION, TeleonomeConstants.DENEWORD_DAY_LENGTH);
+											Identity destinationtDayLengthMillisIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,TeleonomeConstants.DENE_TIME_INFORMATION, TeleonomeConstants.DENEWORD_DAY_LENGTH_MILLIS);
+											
+											
+											aDenomeManager.updateDeneWordCurrentPulse( destinationSunriseIdentity.toString(), info.getString("Sunrise"));
+											aDenomeManager.updateDeneWordCurrentPulse( destinationSunsetIdentity.toString(), info.getString("Sunset"));
+											aDenomeManager.updateDeneWordCurrentPulse( destinationtDayLengthIdentity.toString(), info.getString("Sunset"));
+											aDenomeManager.updateDeneWordCurrentPulse( destinationtDayLengthMillisIdentity.toString(), info.getString("DayLengthMillis"));
+											
+										} catch (InvalidDenomeException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+										
 									}else{
 										actuatorCommand = Utils.renderCommand(actuatorCommand);
 									}

@@ -50,6 +50,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
+import com.luckycatlabs.sunrisesunset.dto.Location;
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeUtils;
 import com.teleonome.framework.denome.Identity;
@@ -671,6 +673,25 @@ public class Utils {
 		return "Time"+ hour + ":" + minuteString;
 	}
 
+	//
+	//"Australia/Melbourne"
+	
+	public static JSONObject calculateDayTimeInformation(String latitude, String longitude, String timezonename) {
+		JSONObject info = new JSONObject();
+		com.luckycatlabs.sunrisesunset.dto.Location location = new Location(latitude, longitude);
+		SunriseSunsetCalculator sunriseSunsetCalculator = new SunriseSunsetCalculator(location, timezonename);
+		String officialSunriseString = sunriseSunsetCalculator.getOfficialSunriseForDate(Calendar.getInstance());
+		String officialSunsetString = sunriseSunsetCalculator.getOfficialSunsetForDate(Calendar.getInstance());
+
+		Calendar officialSunrise = sunriseSunsetCalculator.getOfficialSunriseCalendarForDate(Calendar.getInstance());
+		Calendar officialSunset = sunriseSunsetCalculator.getOfficialSunsetCalendarForDate(Calendar.getInstance());
+		long dayLengthInMilliseconds = officialSunset.getTimeInMillis() - officialSunrise.getTimeInMillis();
+		info.put("Sunset", officialSunriseString);
+		info.put("Sunrise", officialSunriseString);
+		info.put("DayLengthMillis", dayLengthInMilliseconds);
+		info.put("DayLength",getElapsedTimeHoursMinutesSecondsString(dayLengthInMilliseconds) );
+		return info;
+	}
 	public static String renderCommand(String command){
 		if(command.equals(TeleonomeConstants.COMMANDS_DATE_FOR_LCD)){
 			return getDateForLCD();

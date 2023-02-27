@@ -22,6 +22,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,6 +43,7 @@ import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Context;
 import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.Socket;
+
 
 import com.teleonome.framework.LifeCycleEventListener;
 import com.teleonome.framework.TeleonomeConstants;
@@ -183,21 +185,7 @@ public abstract class Hypothalamus {
 				hostName = InetAddress.getLocalHost().getCanonicalHostName();
 				initOperationalMode = FileUtils.readFileToString(new File("InitOperationalMode"), Charset.defaultCharset());
 				aDenomeManager.setNetworkInfo(networkAdapterInfoJSONObject, hostName, initOperationalMode);
-				aDenomeManager.setProcessInfo(pacemakerPid);
-				/*
-				Calendar officialSunset, officialSunrise;
-				location = new Location(latitude, longitude);
-				SunriseSunsetCalculator sunriseSunsetCalculator = new SunriseSunsetCalculator(location, timezone);
-				Timezone currentTimeZone = TimeZone.getTimeZone(timezone);
-				currentCalendar = Calendar.getInstance(currentTimeZone);
-				
-				officialSunset = sunriseSunsetCalculator.getOfficialSunsetCalendarForDate(currentCalendar);
-				officialSunrise = sunriseSunsetCalculator.getOfficialSunriseCalendarForDate(currentCalendar);
-				long dayLengthInMilliseconds = officialSunset.getTime() - officialSunrise.getTime();
-				
-				aSolarSystemRecord.setSunriseTime(timeFormat.format(officialSunrise.getTime()));
-				aSolarSystemRecord.setSunsetTime(timeFormat.format(officialSunset.getTime()));
-				*/
+				aDenomeManager.setProcessInfo(pacemakerPid);	
 				
 			} catch (SocketException e) {
 				// TODO Auto-generated catch block
