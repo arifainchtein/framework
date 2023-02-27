@@ -532,6 +532,8 @@ public class PulseThread extends Thread{
 			int currentSecond = cal.get(Calendar.SECOND);
 			//
 			long durationSeconds=pulseProduccionDuration/1000;
+			logger.debug("line 535 currentMinute=" + currentMinute + " currentSecond=" + currentSecond + " durationSeconds =" + durationSeconds);
+			
 			if(currentMinute==59 && (durationSeconds+currentSecond)>60) {
 				//
 				// if we are here is because the current time is something like 
