@@ -52,7 +52,7 @@ public class PulseThread extends Thread{
 	private boolean persistencePulse=false;
 	BufferedWriter motherOutputStream = null;
 	BufferedReader motherInputStream = null;
-
+    long pulseProduccionDuration=0;
 	public PulseThread(Hypothalamus t){
 		anHypothalamus = t;
 		logger = Logger.getLogger(getClass());
@@ -527,11 +527,29 @@ public class PulseThread extends Thread{
 			}
 
 			aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE,System.currentTimeMillis(), TeleonomeConstants.LIFE_CYCLE_EVENT_SYNCHRONOUS_VALUE);
-
+			Calendar cal = Calendar.getInstance();
+			int currentMinute = cal.get(Calendar.MINUTE);
+			int currentSecond = cal.get(Calendar.SECOND);
+			//
+			long durationSeconds=pulseProduccionDuration/1000;
+			if(currentMinute==59 && (durationSeconds+currentSecond)>60) {
+				//
+				// if we are here is because the current time is something like 
+				// 8:59:54 and the pulse duration is lets say 9 seconds
+				// which means that a pulse will start at the hour 8 and finish
+				// at the hour 9, which will affect the prunning of the hourly, today
+				// so to  avoid a pulse a pulse beginning at one hourly period and
+				// ending at the next delay necessary so the that the prunning 
+				// can happen right at second 0 of minute 0 .  Add 1 second to be on the safe side
+				int secondsToSleep = 60+currentSecond+1;
+				logger.debug("line 545 about to sleep =" + secondsToSleep + " to insure that prunning happens at second 0 of the period");
+				Thread.sleep(secondsToSleep);
+			}
 			//
 			// check to see if we are schedule to prune the mnemosyne
 			logger.debug("performTimePrunningAnalysis=" + anHypothalamus.performTimePrunningAnalysis);
-
+			
+			
 			if(anHypothalamus.performTimePrunningAnalysis) {
 				anHypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_PULSE_STATUS_INFO, "Performing Mnemosyne Prunning" );
 
@@ -1137,7 +1155,7 @@ public class PulseThread extends Thread{
 
 
 
-			long  pulseProduccionDuration= System.currentTimeMillis()-startPulseTimestamp;
+			pulseProduccionDuration= System.currentTimeMillis()-startPulseTimestamp;
 
 			logger.debug("about to finished");  
 
