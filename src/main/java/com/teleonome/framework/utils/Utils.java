@@ -686,7 +686,7 @@ public class Utils {
 		Calendar officialSunrise = sunriseSunsetCalculator.getOfficialSunriseCalendarForDate(Calendar.getInstance());
 		Calendar officialSunset = sunriseSunsetCalculator.getOfficialSunsetCalendarForDate(Calendar.getInstance());
 		long dayLengthInMilliseconds = officialSunset.getTimeInMillis() - officialSunrise.getTimeInMillis();
-		info.put("Sunset", officialSunriseString);
+		info.put("Sunset", officialSunsetString);
 		info.put("Sunrise", officialSunriseString);
 		info.put("DayLengthMillis", dayLengthInMilliseconds);
 		info.put("DayLength",getElapsedTimeHoursMinutesSecondsString(dayLengthInMilliseconds) );
