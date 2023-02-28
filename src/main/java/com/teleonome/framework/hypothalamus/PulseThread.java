@@ -1462,7 +1462,7 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 											logger.debug("line 1462, returning day info=" + info.toString(4));
 											aDenomeManager.updateDeneWordCurrentPulse( destinationSunriseIdentity.toString(), info.getString("Sunrise"));
 											aDenomeManager.updateDeneWordCurrentPulse( destinationSunsetIdentity.toString(), info.getString("Sunset"));
-											aDenomeManager.updateDeneWordCurrentPulse( destinationtDayLengthIdentity.toString(), info.getString("Day Length"));
+											aDenomeManager.updateDeneWordCurrentPulse( destinationtDayLengthIdentity.toString(), info.getString("DayLength"));
 											aDenomeManager.updateDeneWordCurrentPulse( destinationtDayLengthMillisIdentity.toString(), info.getString("DayLengthMillis"));
 											
 										} catch (InvalidDenomeException e) {
