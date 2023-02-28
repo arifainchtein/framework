@@ -1450,8 +1450,8 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 										try {
 											latitude = (String) aDenomeManager.getDeneWordAttributeByIdentity(latitudeIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 											String longitude =(String) aDenomeManager.getDeneWordAttributeByIdentity(longitudeIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-											String timezonename =(String) aDenomeManager.getDeneWordAttributeByIdentity(latitudeIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-											
+											String timezonename =(String) aDenomeManager.getDeneWordAttributeByIdentity(timezoneIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+											logger.debug("line 1454, latitude=" + latitude + " longitude=" + longitude + " timezonename=" + timezonename);
 											JSONObject info = Utils.calculateDayTimeInformation( latitude,  longitude,  timezonename);
 											
 											Identity destinationSunriseIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,TeleonomeConstants.DENE_TIME_INFORMATION, TeleonomeConstants.DENEWORD_SUNRISE);
