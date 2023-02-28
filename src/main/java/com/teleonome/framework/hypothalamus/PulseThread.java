@@ -1459,12 +1459,24 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 											Identity destinationtDayLengthIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,TeleonomeConstants.DENE_TIME_INFORMATION, TeleonomeConstants.DENEWORD_DAY_LENGTH);
 											Identity destinationtDayLengthMillisIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,TeleonomeConstants.DENE_TIME_INFORMATION, TeleonomeConstants.DENEWORD_DAY_LENGTH_MILLIS);
 											
+											
+											Identity destinationSunriseIdentityTomorrow = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,TeleonomeConstants.DENE_TIME_INFORMATION, TeleonomeConstants.DENEWORD_SUNRISE_TOMORROW);
+											Identity destinationSunsetIdentityTomorrow = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,TeleonomeConstants.DENE_TIME_INFORMATION, TeleonomeConstants.DENEWORD_SUNSET_TOMORROW);
+											Identity destinationtDayLengthIdentityTomorrow = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,TeleonomeConstants.DENE_TIME_INFORMATION, TeleonomeConstants.DENEWORD_DAY_LENGTH_TOMORROW);
+											Identity destinationtDayLengthMillisIdentityTomorrow = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA,TeleonomeConstants.DENE_TIME_INFORMATION, TeleonomeConstants.DENEWORD_DAY_LENGTH_MILLIS_TOMORROW);
+											
+											
 											logger.debug("line 1462, returning day info=" + info.toString(4));
 											aDenomeManager.updateDeneWordCurrentPulse( destinationSunriseIdentity.toString(), info.getString("Sunrise"));
 											aDenomeManager.updateDeneWordCurrentPulse( destinationSunsetIdentity.toString(), info.getString("Sunset"));
 											aDenomeManager.updateDeneWordCurrentPulse( destinationtDayLengthIdentity.toString(), info.getString("DayLength"));
 											aDenomeManager.updateDeneWordCurrentPulse( destinationtDayLengthMillisIdentity.toString(), info.getLong("DayLengthMillis"));
-											
+										
+											aDenomeManager.updateDeneWordCurrentPulse( destinationSunriseIdentityTomorrow.toString(), info.getString("SunriseTomorrow"));
+											aDenomeManager.updateDeneWordCurrentPulse( destinationSunsetIdentityTomorrow.toString(), info.getString("SunsetTomorrow"));
+											aDenomeManager.updateDeneWordCurrentPulse( destinationtDayLengthIdentityTomorrow.toString(), info.getString("DayLengthTomorrow"));
+											aDenomeManager.updateDeneWordCurrentPulse( destinationtDayLengthMillisIdentityTomorrow.toString(), info.getLong("DayLengthMillisTomorrow"));
+										
 										} catch (InvalidDenomeException e) {
 											// TODO Auto-generated catch block
 											e.printStackTrace();

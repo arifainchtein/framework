@@ -197,6 +197,13 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_SUNSET="Sunset";
 	public static final String DENEWORD_SUNRISE="Sunrise";
 	
+
+	public static final String DENEWORD_DAY_LENGTH_TOMORROW="Day Length Tomorrow";
+	public static final String DENEWORD_DAY_LENGTH_MILLIS_TOMORROW="Day Length Millis Tomorrow";
+	public static final String DENEWORD_SUNSET_TOMORROW="Sunset Tomorrow";
+	public static final String DENEWORD_SUNRISE_TOMORROW="Sunrise Tomorrow";
+
+	
 	public static final String DENE_TIME_INFORMATION="Day Time Information";
 	//
 	// the different types of DeneChain

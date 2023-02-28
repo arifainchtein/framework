@@ -682,14 +682,24 @@ public class Utils {
 		SunriseSunsetCalculator sunriseSunsetCalculator = new SunriseSunsetCalculator(location, timezonename);
 		String officialSunriseString = sunriseSunsetCalculator.getOfficialSunriseForDate(Calendar.getInstance());
 		String officialSunsetString = sunriseSunsetCalculator.getOfficialSunsetForDate(Calendar.getInstance());
-
-		Calendar officialSunrise = sunriseSunsetCalculator.getOfficialSunriseCalendarForDate(Calendar.getInstance());
-		Calendar officialSunset = sunriseSunsetCalculator.getOfficialSunsetCalendarForDate(Calendar.getInstance());
+		Calendar cal = Calendar.getInstance();
+		Calendar officialSunrise = sunriseSunsetCalculator.getOfficialSunriseCalendarForDate(cal);
+		Calendar officialSunset = sunriseSunsetCalculator.getOfficialSunsetCalendarForDate(cal);
 		long dayLengthInMilliseconds = officialSunset.getTimeInMillis() - officialSunrise.getTimeInMillis();
 		info.put("Sunset", officialSunsetString);
 		info.put("Sunrise", officialSunriseString);
 		info.put("DayLengthMillis", dayLengthInMilliseconds);
 		info.put("DayLength",getElapsedTimeHoursMinutesSecondsString(dayLengthInMilliseconds) );
+		cal.add(Calendar.DATE, 1);
+		Calendar officialSunriseTomorrow = sunriseSunsetCalculator.getOfficialSunriseCalendarForDate(cal);
+		Calendar officialSunsetTomorrow = sunriseSunsetCalculator.getOfficialSunsetCalendarForDate(cal);
+		long dayLengthInMillisecondsTomorrow = officialSunsetTomorrow.getTimeInMillis() - officialSunriseTomorrow.getTimeInMillis();
+		String officialSunriseStringTomorrow = sunriseSunsetCalculator.getOfficialSunriseForDate(cal);
+		String officialSunsetStringTomorrow = sunriseSunsetCalculator.getOfficialSunsetForDate(cal);
+		info.put("SunsetTomorrow", officialSunsetStringTomorrow);
+		info.put("SunriseTomorrow", officialSunriseStringTomorrow);
+		info.put("DayLengthMillisTomorrow", dayLengthInMillisecondsTomorrow);
+		info.put("DayLengthTomorrow",getElapsedTimeHoursMinutesSecondsString(dayLengthInMillisecondsTomorrow) );
 		return info;
 	}
 	public static String renderCommand(String command){
