@@ -66,10 +66,16 @@ public class I2CWriter extends BufferedWriter {
 	public void write(String command, int off, int len) throws IOException {
 		setCurrentCommand(command);
 		reader.setCurrentCommand(command);
-
-		if(command.startsWith("Update")) {
+		if(currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE ||
+				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE ||
+				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE ||
+				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE 
+			){
+			byte[] b2=command.getBytes("ISO-8859-1");
+			device.write(I2CMicroController.I2C_ADDR,b2);     
+		}else if(command.startsWith("Update")) {
 			JSONObject displayInfo;
-			
+
 			double value;
 			String identityPointer;
 			ArrayList results;
@@ -77,7 +83,7 @@ public class I2CWriter extends BufferedWriter {
 			JSONObject dataSource;
 			logger.debug("params= " + configParams.toString(4));
 			StringBuffer i2ccommandbuffer = new StringBuffer("SetDisplays#");
-			
+
 			for(int i=0;i<configParams.length();i++) {
 				displayInfo = configParams.getJSONObject(i);
 
@@ -114,7 +120,7 @@ public class I2CWriter extends BufferedWriter {
 					}
 
 					i2ccommandbuffer.append(value + "#");
-					
+
 				} catch (InvalidDenomeException e) {
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
