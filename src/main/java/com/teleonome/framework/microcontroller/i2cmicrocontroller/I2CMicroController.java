@@ -92,6 +92,7 @@ public class I2CMicroController  extends MicroController implements LifeCycleEve
 
 		anI2CWriter = new I2CWriter(new StringWriter(), device,configParams, aDenomeManager);
 		anI2CReader = new I2CReader(new StringReader(""),anI2CWriter, device);
+		anI2CWriter.setReader(anI2CReader);
 	}
 
 	@Override
