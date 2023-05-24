@@ -35,6 +35,7 @@ public class I2CMicroController  extends MicroController implements LifeCycleEve
 	public I2CMicroController(DenomeManager d, String n) {
 		super(d, n);
 		// TODO Auto-generated constructor stub
+		logger = Logger.getLogger(getClass());
 	}
 
 	public void processLifeCycleEvent(String lifeCycleEvent) {
