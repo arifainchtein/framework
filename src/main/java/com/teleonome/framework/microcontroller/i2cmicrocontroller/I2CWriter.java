@@ -69,9 +69,14 @@ public class I2CWriter extends BufferedWriter {
 		if(currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE ||
 				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE ||
 				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE ||
-				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE 
+				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE ||
+				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE ||
+				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_END_AWAKE 
+				
+				
 			){
-			byte[] b2=command.getBytes("ISO-8859-1");
+			String i2ccommand = command.replace(" ", "") +"#1#$";
+			byte[] b2=i2ccommand.getBytes("ISO-8859-1");
 			device.write(I2CMicroController.I2C_ADDR,b2);     
 		}else if(command.startsWith("Update")) {
 			JSONObject displayInfo;
