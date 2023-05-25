@@ -69,6 +69,13 @@ public class I2CMicroController  extends MicroController implements LifeCycleEve
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e));
 			}
+		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE)) {
+			try {
+				anI2CWriter.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE.length());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
 		}
 	}
 
