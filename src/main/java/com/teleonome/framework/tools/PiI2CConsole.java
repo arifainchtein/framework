@@ -23,7 +23,7 @@ public class PiI2CConsole {
 	        write(inpcom);
 	        Thread.sleep(100);
 	        String response=readLine();
-	        response=readLine();
+	        	//	response=readLine();
 	        System.out.println(inpcom + " produces response=" + response);
 		} catch (UnsupportedBusNumberException | IOException e) {
 			// TODO Auto-generated catch block
@@ -60,7 +60,7 @@ private static String  readLine()throws UnsupportedEncodingException,IOException
            if(b2[i]<=0)b2[i]=32;
 }
         String s3=new String(b2, "UTF-8").trim();
-        System.out.println("s3=" + s3);
+      //  System.out.println("readLine is returning=" + s3);
         return s3; 
   
 }
