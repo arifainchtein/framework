@@ -43,15 +43,15 @@ public class I2CReader  extends BufferedReader{
 		try {
 			
 			device.read(b2,0,b2.length);
-			 b2 =  new byte[20];
-			 device.read(b2,0,b2.length);
-				 
+//			 b2 =  new byte[20];
+//			 device.read(b2,0,b2.length);
+//				 
 			for(int i=0;i<b2.length;i++){
 				System.out.println("i="+i + " b2[i]=" + b2[i]);
 				if(b2[i]<=0)b2[i]=32;
 			}
 			response=new String(b2, "UTF-8").trim();
-			System.out.println("response=" + response);
+			System.out.println("line 54 response=" + response);
 			logger.debug("response=" + response);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
