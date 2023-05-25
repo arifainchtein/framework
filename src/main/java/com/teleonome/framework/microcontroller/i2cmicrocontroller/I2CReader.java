@@ -26,6 +26,12 @@ public class I2CReader  extends BufferedReader{
 	}
 
 
+	//
+	// override the close method so the stream is not closed
+	//
+	public void close() {
+		
+	}
 
 	public String readLine(){
 		String toReturn="";

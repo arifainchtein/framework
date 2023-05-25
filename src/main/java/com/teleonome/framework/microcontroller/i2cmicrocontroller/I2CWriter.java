@@ -52,6 +52,12 @@ public class I2CWriter extends BufferedWriter {
 		logger.debug("Initialized I2CWriter");
 
 	}
+	//
+	// override the close method so the stream is not closed
+	//
+	public void close() {
+		
+	}
 	public void setReader(I2CReader r) {
 		reader=r;
 
@@ -71,9 +77,8 @@ public class I2CWriter extends BufferedWriter {
 				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE ||
 				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE ||
 				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE ||
-				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_END_AWAKE 
-				
-				
+				currentCommand==TeleonomeConstants.LIFE_CYCLE_EVENT_END_AWAKE ||
+				currentCommand==TeleonomeConstants.USER_COMMAND	
 			){
 			String i2ccommand = command.replace(" ", "") +"#1#$";
 			byte[] b2=i2ccommand.getBytes("ISO-8859-1");
