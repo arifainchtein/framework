@@ -15,12 +15,7 @@ public class SFTPPublisherReader extends BufferedReader{
 		// TODO Auto-generated constructor stub
 	}
 
-	//
-	// override the close method so the stream is not closed
-	//
-	public void close() {
-		
-	}
+	
 	
 	public String readLine(){
 		return aSFTPWriter.getPublishingResults();

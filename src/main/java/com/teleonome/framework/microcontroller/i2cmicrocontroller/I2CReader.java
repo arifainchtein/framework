@@ -12,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import com.pi4j.io.i2c.I2CDevice;
+import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.utils.Utils;
 
 public class I2CReader  extends BufferedReader{
@@ -55,8 +56,8 @@ public class I2CReader  extends BufferedReader{
 			return response;
 		}else if(currentCommand.startsWith("SetDisplays")) {
 			return response;
-
-
+		}else if(currentCommand.equals(TeleonomeConstants.USER_COMMAND)) {
+				return response;
 		}else {
 			toReturn= "Ok";	
 		}
