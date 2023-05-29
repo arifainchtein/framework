@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.teleonome.framework.LifeCycleEventListener;
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.denome.DenomeUtils;
@@ -36,8 +37,7 @@ import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
-
-public class GNUArduinoUno extends MotherMicroController implements SerialPortEventListener {
+public class GNUArduinoUno extends MotherMicroController implements SerialPortEventListener,  LifeCycleEventListener {
 
 	Logger logger;
 	String SerialPortID = "/dev/ttyAMA0";
@@ -60,6 +60,55 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 		setEnableAsyncUpdate(true);
 	}
 	
+	public void processLifeCycleEvent(String lifeCycleEvent) {
+		// TODO Auto-generated method stub
+		logger.debug("1-processing life cycle even=t=" + lifeCycleEvent);
+		BufferedWriter writer;
+		try {
+			writer = getWriter();
+			if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE)) {
+				try {
+					writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE.length());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
+				}
+			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE)) {
+				try {
+					writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE.length());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
+				}
+			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE)) {
+				try {
+					writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE.length());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
+				}
+			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE)) {
+				try {
+					writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE.length());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
+				}
+			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE)) {
+				try {
+					writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE.length());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
+				}
+			}
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
+	}
 	
 	@Override
 	public void init(JSONArray configParams) throws MicrocontrollerCommunicationException {
