@@ -68,35 +68,40 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 			writer = getWriter();
 			if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE)) {
 				try {
-					writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE.length());
+					//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE.length());
+					sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
 				}
 			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE)) {
 				try {
-					writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE.length());
+					sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE);
+					//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE.length());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
 				}
 			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE)) {
 				try {
-					writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE.length());
+					sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE);
+				//	writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE.length());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
 				}
 			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE)) {
 				try {
-					writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE.length());
+					sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE);
+					//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE.length());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
 				}
 			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE)) {
 				try {
-					writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE.length());
+					sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE);
+				//	writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE.length());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
