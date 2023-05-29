@@ -189,15 +189,16 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 			logger.debug("opened port , sleeping another 10 sec " );
 			Thread.sleep(10000);
 			//serialPort.disableReceiveTimeout();
+			serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
 			serialPort.enableReceiveTimeout(30000);
-			serialPort.enableReceiveThreshold(0);
+			serialPort.enableReceiveThreshold(1);
 			serialPort.setSerialPortParams(DATA_RATE,
 					SerialPort.DATABITS_8,
 					SerialPort.STOPBITS_1,
 					SerialPort.PARITY_NONE);
 			//serialPort.setRTS(false);
 			//serialPort.setDTR(true);
-			serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN |  SerialPort.FLOWCONTROL_RTSCTS_OUT);
+			//serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN |  SerialPort.FLOWCONTROL_RTSCTS_OUT);
 			serialPort.setDTR(true);
 			// open the streams
 

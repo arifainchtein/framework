@@ -59,6 +59,7 @@ public class TeleonomeConstants {
 	public static final String DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_EVALUATION = "Expression Evaluation";
 	public static final String DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_SWITCH = "Expression Switch";
 	public static final String DENE_TYPE_DENEWORD_OPERATION_DATA_TRANSFORMATION = "Data Transformation";
+	public static final String DENE_TYPE_DENEWORD_OPERATION_DENEWORD_CONCATENATION="Deneword Concatenation";
 	//
 	// the types of microcontrolers
 	//
@@ -622,12 +623,12 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_ANALYTICONS_ACTIVE = "Analyticons Active";
 	public static final String DENEWORD_MNEMOSYCONS_ACTIVE = "Mnemosycons Active";
 	
-
+	public static final String DENEWORD_POSITION_ATTRIBUTE = "Position";
 	public static final String DENEWORD_DEFAULT_VALUE = "Default";
 	public static final String DENEWORD_VALUE_ATTRIBUTE = "Value";
 	public static final String DENEWORD_IDENTITY_ATTRIBUTE = "Identity";
 	public static final String DENEWORD_QUANTITY_ATTRIBUTE = "Quantity";
-	
+	public static final String DENEWORD_TYPE_CONCATENATION_SEPARATOR="Concatenation Separator";
 	public static final String DENEWORD_TARGET_ATTRIBUTE = "Target";
 	public static final String DENEWORD_TIMESTRING_VALUE = "Time String";
 	public static final String DENEWORD_TIMESTRING_FORMAT_VALUE = "Time String Format";

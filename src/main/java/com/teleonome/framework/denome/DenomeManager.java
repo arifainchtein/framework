@@ -528,11 +528,11 @@ public class DenomeManager {
 					microProcessorName = microProcessorDene.getString("Name");
 					microProcessorActiveDenewordExists = getDeneWordAttributeByDeneWordNameFromDene(microProcessorDene, TeleonomeConstants.DENEWORD_ACTIVE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					if(microProcessorActiveDenewordExists!=null && !((Boolean)microProcessorActiveDenewordExists).booleanValue()) {
-						logger.info("line 527 microProcessorName=" + microProcessorName + " is NOT active");
+						logger.debug("line 527 microProcessorName=" + microProcessorName + " is NOT active");
 						microProcessorActive=false;
 					}else {
 						microProcessorActive=true;
-						logger.info("line 530 microProcessorName=" + microProcessorName + " is active");
+						logger.debug("line 530 microProcessorName=" + microProcessorName + " is active");
 						
 					}
 					if(microProcessorActive) {
@@ -3161,14 +3161,14 @@ public class DenomeManager {
 	public JSONObject injectPayloadIntoStateMutation(JSONObject payload) throws IOException, InvalidMutation{
 		//
 		// this is the read from the menome way
-		//logger.info("line 1950 of inject, mutationName=" + mutationName);
-		logger.info("line 2963 of inject, payload=" + payload);
+		//logger.debug("line 1950 of inject, mutationName=" + mutationName);
+		logger.debug("line 2963 of inject, payload=" + payload);
 		JSONArray mutationsJSONArray;
 		JSONObject selectedMutationJSONObject=null;
 		try {
 			JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
 			String mutationName = payload.getString("Mutation Name");
-			logger.info("line 2969 of inject, mutationName=" + mutationName);
+			logger.debug("line 2969 of inject, mutationName=" + mutationName);
 
 			JSONArray updatesJSONArray;
 			mutationsJSONArray = denomeObject.getJSONArray("Mutations");
@@ -3182,7 +3182,7 @@ public class DenomeManager {
 			
 			for(int i=0;i<mutationsJSONArray.length();i++){
 				mutationJSONObject = (JSONObject) mutationsJSONArray.getJSONObject(i);
-				logger.info("line 2980 of inject, mutationJSONObject=" + mutationJSONObject.getString("Name") + " " + mutationJSONObject.getString("Mutation Type"));
+				logger.debug("line 2980 of inject, mutationJSONObject=" + mutationJSONObject.getString("Name") + " " + mutationJSONObject.getString("Mutation Type"));
 
 				if(mutationJSONObject.getString("Name").equals(mutationName) && mutationJSONObject.getString(TeleonomeConstants.MUTATION_TYPE_ATTRIBUTE).equals(TeleonomeConstants.MUTATION_TYPE_STATE)){
 
@@ -3193,7 +3193,7 @@ public class DenomeManager {
 					// the payload 
 					payloadJSONObject = payload.getJSONObject("Payload");
 					updatesJSONArray = payloadJSONObject.getJSONArray("Updates");
-					logger.info("line 1965 of inject, payloadJSONObject=" + payloadJSONObject);
+					logger.debug("line 1965 of inject, payloadJSONObject=" + payloadJSONObject);
 					String mutationTarget, injectionTarget,deletionTarget, valueAttribute;
 
 					JSONObject updateJSNObject;
@@ -3215,26 +3215,26 @@ public class DenomeManager {
 						if(targetDeneChain.startsWith("@"))targetDeneChain = targetDeneChain.substring(1);
 						targetDene = tokens[1];
 						targetDeneWord = tokens[2];
-						logger.info("line 1993 demomemanager targetDeneChain:" + targetDeneChain + " targetDene:" + targetDene + " targetDeneWord:" + targetDeneWord);
+						logger.debug("line 1993 demomemanager targetDeneChain:" + targetDeneChain + " targetDene:" + targetDene + " targetDeneWord:" + targetDeneWord);
 
 						//
 						// now loop over all the object of the target mutation
 						
 
 						mutationDeneChains = mutationJSONObject.getJSONArray("DeneChains");
-						//logger.info("line 1560 demomemanager mutationDeneChains:" + mutationDeneChains.length());
+						//logger.debug("line 1560 demomemanager mutationDeneChains:" + mutationDeneChains.length());
 
 						for(int k=0;k<mutationDeneChains.length();k++){
 							//
 
 							mutationDeneChain=mutationDeneChains.getJSONObject(k);
-							logger.info("line 2034 demomemanager mutationDeneChain.getString(Name):" + mutationDeneChain.getString("Name"));
+							logger.debug("line 2034 demomemanager mutationDeneChain.getString(Name):" + mutationDeneChain.getString("Name"));
 
 							if(mutationDeneChain.getString("Name").equals(targetDeneChain)){
 								mutationDenes = mutationDeneChain.getJSONArray("Denes");
 								for(int l=0;l<mutationDenes.length();l++){
 									mutationDene = mutationDenes.getJSONObject(l);
-									logger.info("line 1566 demomemanager mutationDene:" + mutationDene.getString("Name"));
+									logger.debug("line 1566 demomemanager mutationDene:" + mutationDene.getString("Name"));
 
 									if(mutationDene.getString("Name").equals(targetDene)){
 										//
@@ -3242,7 +3242,7 @@ public class DenomeManager {
 										mutationDeneWords=mutationDene.getJSONArray("DeneWords");
 										for(int m=0;m<mutationDeneWords.length();m++){
 											mutationDeneWord = mutationDeneWords.getJSONObject(m);
-											logger.info("line 2946 demomemanager mutationDeneWord:" + mutationDeneWord.getString("Name"));
+											logger.debug("line 2946 demomemanager mutationDeneWord:" + mutationDeneWord.getString("Name"));
 											if(mutationDeneWord.getString("Name").equals(targetDeneWord)){
 
 
@@ -3251,19 +3251,19 @@ public class DenomeManager {
 												//
 												if(updateJSNObject.has(TeleonomeConstants.MUTATION_TARGET)) {
 													mutationDeneWord.put(TeleonomeConstants.MUTATION_TARGET,updateJSNObject.getString(TeleonomeConstants.MUTATION_TARGET));
-													logger.info("line 3050 updating :" + TeleonomeConstants.MUTATION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_TARGET));
+													logger.debug("line 3050 updating :" + TeleonomeConstants.MUTATION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_TARGET));
 
 												}
 
 												if(updateJSNObject.has(TeleonomeConstants.MUTATION_INJECTION_TARGET)) {
 													mutationDeneWord.put(TeleonomeConstants.MUTATION_INJECTION_TARGET,updateJSNObject.getString(TeleonomeConstants.MUTATION_INJECTION_TARGET));
-													logger.info("line 3056 updating :" + TeleonomeConstants.MUTATION_INJECTION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_INJECTION_TARGET));
+													logger.debug("line 3056 updating :" + TeleonomeConstants.MUTATION_INJECTION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_INJECTION_TARGET));
 
 												}
 
 												if(updateJSNObject.has(TeleonomeConstants.MUTATION_DELETION_TARGET)) {
 													mutationDeneWord.put(TeleonomeConstants.MUTATION_DELETION_TARGET,updateJSNObject.getString(TeleonomeConstants.MUTATION_DELETION_TARGET));
-													logger.info("line 3063 updating :" + TeleonomeConstants.MUTATION_DELETION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_DELETION_TARGET));
+													logger.debug("line 3063 updating :" + TeleonomeConstants.MUTATION_DELETION_TARGET + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_DELETION_TARGET));
 
 												}
 
@@ -3277,23 +3277,23 @@ public class DenomeManager {
 													if(updateJSNObject.has(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE)) {
 														if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_INTEGER)) {
 															mutationDeneWord.put("Value",updateJSNObject.getInt(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
-															logger.info("line 3052 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getInt(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.debug("line 3052 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getInt(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 
 														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
 															mutationDeneWord.put("Value",updateJSNObject.getDouble(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
-															logger.info("line 3056 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getDouble(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.debug("line 3056 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getDouble(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 
 														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_LONG)) {
 															mutationDeneWord.put("Value",updateJSNObject.getLong(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
-															logger.info("line 3061 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getLong(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.debug("line 3061 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getLong(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 
 														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_DENE_POINTER)) {
 															mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
-															logger.info("line 3065 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getString(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.debug("line 3065 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getString(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 
 														}else if(updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUETYPE).equals(TeleonomeConstants.DATATYPE_STRING)) {
 															mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
-															logger.info("line 3069 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getString(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+															logger.debug("line 3069 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.getString(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 
 														}
 													}else {
@@ -3302,7 +3302,7 @@ public class DenomeManager {
 														// asume is string
 														//
 														mutationDeneWord.put("Value",updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
-														logger.info("line 3029 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
+														logger.debug("line 3029 updating :" + TeleonomeConstants.MUTATION_PAYLOAD_VALUE + " with :" + updateJSNObject.get(TeleonomeConstants.MUTATION_PAYLOAD_VALUE));
 
 													}
 
@@ -3323,7 +3323,7 @@ public class DenomeManager {
 			logger.warn(Utils.getStringException(e));
 		}
 
-		//	logger.info("Finished injecting payload, exiting for now");
+		//	logger.debug("Finished injecting payload, exiting for now");
 		//	System.exit(0);
 		return selectedMutationJSONObject;
 
@@ -3342,7 +3342,7 @@ public class DenomeManager {
 
 			JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
 			mutationsJSONArray = denomeObject.getJSONArray("Mutations");
-			logger.info("readImmediateMutation mutationsJSONArray=" + mutationsJSONArray.length());
+			logger.debug("readImmediateMutation mutationsJSONArray=" + mutationsJSONArray.length());
 			JSONObject mutationJSONObject;
 			for(int i=0;i<mutationsJSONArray.length();i++){
 				mutationJSONObject = (JSONObject) mutationsJSONArray.getJSONObject(i);
@@ -3388,7 +3388,7 @@ public class DenomeManager {
 		JSONObject mnemosyneDene;
 		int executionPosition;
 		ArrayList<Map.Entry<JSONObject, Integer>> mnemosyneOperationsExecutionPositionIndex = new ArrayList();
-		logger.info("line 3376 mnemosyneDenes size=" + mnemosyneDenes.length());
+		logger.debug("line 3376 mnemosyneDenes size=" + mnemosyneDenes.length());
 
 		for(int i=0;i<mnemosyneDenes.length();i++){
 			mnemosyneDene = mnemosyneDenes.getJSONObject(i);
@@ -3396,7 +3396,7 @@ public class DenomeManager {
 			mnemosyneOperationsExecutionPositionIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(mnemosyneDene, new Integer(executionPosition)));
 		}
 		Collections.sort(mnemosyneOperationsExecutionPositionIndex, new IntegerCompare());
-		logger.info("line 3384 mnemosyneOperationsExecutionPositionIndex size=" + mnemosyneOperationsExecutionPositionIndex.size());
+		logger.debug("line 3384 mnemosyneOperationsExecutionPositionIndex size=" + mnemosyneOperationsExecutionPositionIndex.size());
 
 		//
 		// now execute each operation
@@ -3439,16 +3439,16 @@ public class DenomeManager {
 		String formatedCurrentTime = currentTime.format(timeformatter);
 
 
-		logger.info("line 2479 mnemosyneOperationsExecutionPositionIndex size=" + mnemosyneOperationsExecutionPositionIndex.size());
+		logger.debug("line 2479 mnemosyneOperationsExecutionPositionIndex size=" + mnemosyneOperationsExecutionPositionIndex.size());
 		JSONObject copySourceDene, clonedSourceDene, targetMnemosyneDeneChain;
 		JSONArray targetMnemosyneDeneChainDenesJSONArray;
 
 		for (Map.Entry<JSONObject, Integer> entry : mnemosyneOperationsExecutionPositionIndex) {
 			mnemosyneDene = entry.getKey();
 			deneType = mnemosyneDene.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
-			logger.info("line 3231 deneType =" + deneType);
+			logger.debug("line 3231 deneType =" + deneType);
 			if(deneType.equals(TeleonomeConstants.MNEMOSYNE_COPY_DENE_OPERATION)){
-				logger.info(Utils.generateMethodTrace());
+				logger.debug(Utils.generateMethodTrace());
 				CopyDeneOperation copyDeneOp = new CopyDeneOperation(mnemosyneDene);
 				copyDeneOp.process(this,  currentTimeMillis, formatedCurrentTimestamp, formatedCurrentDate, formatedCurrentTime, currentTimeZone.toZoneId());
 			}else if(deneType.equals(TeleonomeConstants.MNEMOSYNE_CREATE_DENE_OPERATION)){
@@ -4544,7 +4544,7 @@ public class DenomeManager {
 
 
 	public void addLifeCycleEventListener(MicroController aMicroController) {
-		logger.info("adding lifecycleevnetlistern=" + aMicroController);
+		logger.debug("adding lifecycleevnetlistern=" + aMicroController);
 		if(!lifeCycleEventListeners.contains(aMicroController)) {
 			lifeCycleEventListeners.add((LifeCycleEventListener)aMicroController);
 		}
@@ -4616,7 +4616,7 @@ public class DenomeManager {
 		LifeCycleEventListener aLifeCycleEventListener;
 		for(int i=0;i<lifeCycleEventListeners.size();i++) {
 			aLifeCycleEventListener = (LifeCycleEventListener)lifeCycleEventListeners.get(i);
-			logger.info("line 5178 eventType=" + eventType + " aLifeCycleEventListener=" + aLifeCycleEventListener);
+			logger.debug("line 5178 eventType=" + eventType + " aLifeCycleEventListener=" + aLifeCycleEventListener);
 			aLifeCycleEventListener.processLifeCycleEvent(eventType);
 		}
 		return aDBManager.storeLifeCycleEvent(eventType,eventTimeMillis, value);
@@ -6400,12 +6400,12 @@ public class DenomeManager {
 	//		// that only has startup actions and therefore it could be null
 	//		String commandToExecute, pointerToActionSuccessTasks;
 	//		String payload;
-	//		logger.info("line 4979 actuatorActionEvaluationPositionActionIndex=" + actuatorActionEvaluationPositionActionIndex);
+	//		logger.debug("line 4979 actuatorActionEvaluationPositionActionIndex=" + actuatorActionEvaluationPositionActionIndex);
 	//		if(actuatorActionEvaluationPositionActionIndex!=null){
 	//			for (Map.Entry<JSONObject, Integer> action : actuatorActionEvaluationPositionActionIndex) {
 	//				actuatorActionJSONObject = action.getKey();
 	//				entry = evaluateAction(teleonomeName, actuatorActionJSONObject);
-	//				logger.info(" line 4983 actuatorAction=" + actuatorActionJSONObject.getString("Name") + " returns " + entry);
+	//				logger.debug(" line 4983 actuatorAction=" + actuatorActionJSONObject.getString("Name") + " returns " + entry);
 	//				//
 	//				// if the action is not active, ie the Active DeneWord is set to false
 	//				//it will return a null, so only add them if they are not null
@@ -6452,15 +6452,17 @@ public class DenomeManager {
 		boolean toReturn=false;
 
 		try {
-			logger.info("evaluateDeneWordOperation=" + deneWordOperationPointer );
+			logger.debug("evaluateDeneWordOperation=" + deneWordOperationPointer );
 			JSONObject evaluationDeneJSONObject = getDeneByIdentity( new Identity(deneWordOperationPointer));
 			if(evaluationDeneJSONObject.has(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE)) {
 				String deneType = evaluationDeneJSONObject.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE);
-				logger.info("evaluateDeneWordOperation, deneType=" + deneType	 );
+				logger.debug("evaluateDeneWordOperation, deneType=" + deneType	 );
 				if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_EVALUATION)) {
 					return evaluateExpressionDeneWordOperation( deneWordOperationPointer);
 				}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_DATA_TRANSFORMATION)) {
 					return dataTransformationDeneWordOperation( deneWordOperationPointer);
+				}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_DENEWORD_CONCATENATION)) {
+					return dataConcatenationDeneWordOperation( deneWordOperationPointer);
 				}else if(deneType.equals(TeleonomeConstants.DENE_TYPE_DENEWORD_OPERATION_EXPRESSION_SWITCH)) {
 					return evaluateSwitchDeneWordOperation(deneWordOperationPointer);
 				}else if(deneType.equals("Action")) {
@@ -6494,7 +6496,7 @@ public class DenomeManager {
 				seconds = (int)this.getDeneWordAttributeByIdentity(new Identity(dataTransformationValuePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 				double fractionalTime =  Utils.getTimeFractionalHourMinutesFromSeconds( seconds);
 				JSONObject destinationJSONObject = this.getDeneWordByIdentity(new Identity(destinationPointer));
-				logger.info("line 7250 secondsToFractionalTime destinationPointer=" + destinationPointer + " seconds=" + seconds + " fractionalTime=" + fractionalTime);
+				logger.debug("line 7250 secondsToFractionalTime destinationPointer=" + destinationPointer + " seconds=" + seconds + " fractionalTime=" + fractionalTime);
 				destinationJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, fractionalTime); 
 				toReturn=true;
 			} catch (InvalidDenomeException | JSONException e) {
@@ -6503,53 +6505,127 @@ public class DenomeManager {
 			}
 			return toReturn;
 		} 
+		public boolean dataTransformationDeneWordOperation(String deneWordOperationPointer){
+			boolean toReturn=false;
+			try {
+				logger.debug("Data Transformation Deneword operation,deneWordOperationPointer=" + deneWordOperationPointer);
+
+				JSONObject dataTransformationParametersJSONObject = getDeneByIdentity( new Identity(deneWordOperationPointer));
+				//***************
+				boolean active = (Boolean)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dataTransformationParametersJSONObject,"Active",TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				if(!active)return toReturn;
+				String transformationFunction =  (String) getDeneWordAttributeByDeneWordTypeFromDene(dataTransformationParametersJSONObject,TeleonomeConstants.DENEWORD_TYPE_TRANSFORMATION_FUNCTION,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				String dataTransformationValuePointer =  (String) getDeneWordAttributeByDeneWordTypeFromDene(dataTransformationParametersJSONObject,TeleonomeConstants.DENEWORD_TYPE_OPERATION_VARIABLE,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				String destinationPointer =  (String) getDeneWordAttributeByDeneWordTypeFromDene(dataTransformationParametersJSONObject,TeleonomeConstants.DENEWORD_TYPE_OPERATION_DESTINATION,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				Object[] parameters =  {dataTransformationValuePointer,destinationPointer};
+				Method transformationMethod = getClass().getMethod(transformationFunction,String.class, String.class);
+				logger.debug("transformationMethod=" + transformationMethod);
+
+				Object result = transformationMethod.invoke(this,parameters);
+				if(result instanceof Boolean && (Boolean)result) {
+					toReturn=true;
+				}
+				//****************
+			} catch (InvalidDenomeException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+			logger.debug("Evaluate Deneword operation,returning " + toReturn );
+			return toReturn;
+		}
 	
-	public boolean dataTransformationDeneWordOperation(String deneWordOperationPointer){
+	public boolean dataConcatenationDeneWordOperation(String deneWordOperationPointer){
 		boolean toReturn=false;
 		try {
-			logger.info("Data Transformation Deneword operation,deneWordOperationPointer=" + deneWordOperationPointer);
+			logger.debug("Data Concatenation Deneword operation,deneWordOperationPointer=" + deneWordOperationPointer);
 
-			JSONObject dataTransformationParametersJSONObject = getDeneByIdentity( new Identity(deneWordOperationPointer));
+			JSONObject dataConcatenationDene= getDeneByIdentity( new Identity(deneWordOperationPointer));
 			//***************
-			boolean active = (Boolean)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dataTransformationParametersJSONObject,"Active",TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			boolean active = (Boolean)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dataConcatenationDene,"Active",TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			if(!active)return toReturn;
-			String transformationFunction =  (String) getDeneWordAttributeByDeneWordTypeFromDene(dataTransformationParametersJSONObject,TeleonomeConstants.DENEWORD_TYPE_TRANSFORMATION_FUNCTION,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-			String dataTransformationValuePointer =  (String) getDeneWordAttributeByDeneWordTypeFromDene(dataTransformationParametersJSONObject,TeleonomeConstants.DENEWORD_TYPE_OPERATION_VARIABLE,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-			String destinationPointer =  (String) getDeneWordAttributeByDeneWordTypeFromDene(dataTransformationParametersJSONObject,TeleonomeConstants.DENEWORD_TYPE_OPERATION_DESTINATION,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-			Object[] parameters =  {dataTransformationValuePointer,destinationPointer};
-			Method transformationMethod = getClass().getMethod(transformationFunction,String.class, String.class);
-			logger.debug("transformationMethod=" + transformationMethod);
-
-			Object result = transformationMethod.invoke(this,parameters);
-			if(result instanceof Boolean && (Boolean)result) {
-				toReturn=true;
+			String destinationPointer =  (String) getDeneWordAttributeByDeneWordTypeFromDene(dataConcatenationDene,TeleonomeConstants.DENEWORD_TYPE_OPERATION_DESTINATION,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			String concatenationSeparator =  (String) getDeneWordAttributeByDeneWordTypeFromDene(dataConcatenationDene,TeleonomeConstants.DENEWORD_TYPE_CONCATENATION_SEPARATOR,TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			StringBuffer concatenationResultBuffer = new StringBuffer();
+			
+			JSONArray variables = getAllDeneWordAttributeByDeneWordTypeFromDene(dataConcatenationDene, TeleonomeConstants.DENEWORD_TYPE_OPERATION_VARIABLE, TeleonomeConstants.COMPLETE);
+			JSONObject variable, renderedDeneWord;
+			int position;
+			ArrayList<Map.Entry<JSONObject, Integer>> sorted = new ArrayList();
+			String value, renderedDeneWordValue;
+			
+			for(int i=0;i<variables.length();i++) {
+				variable = variables.getJSONObject(i);
+				position= variable.getInt(TeleonomeConstants.DENEWORD_POSITION_ATTRIBUTE);
+				sorted.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(variable, position));
+				Collections.sort(sorted, new Comparator<Map.Entry<?, Integer>>(){
+					public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
+						return o1.getValue().compareTo(o2.getValue());
+					}});
 			}
+			for (Map.Entry<JSONObject, Integer> entry : sorted) {
+				variable = (JSONObject)entry.getKey();
+				value = variable.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				if(value.startsWith("@")) {
+					//
+					// render the pointer 
+					renderedDeneWordValue = (String) getDeneWordAttributeByIdentity(new Identity(value), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+//					if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("int")) {
+//						
+//					}else if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("double")) {
+//						
+//					}else if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("long")) {
+//						
+//					}else if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("String")) {
+//						
+//					}else if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("boolean")) {
+//						
+//					}
+					logger.info("line 6586,value=" + value + " rendered=" +renderedDeneWordValue );
+					concatenationResultBuffer.append(renderedDeneWordValue + concatenationSeparator);
+				}else {
+					concatenationResultBuffer.append(value + concatenationSeparator);
+				}
+				
+			}
+			
+			
+			JSONObject destinationJSONObject = this.getDeneWordByIdentity(new Identity(destinationPointer));
+			logger.info("line 659668 dataConcatenationDeneWordOperation destinationPointer=" + destinationPointer + " result=" + concatenationResultBuffer.toString());
+			destinationJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, concatenationResultBuffer.toString()); 
+			toReturn=true;
+	
 			//****************
 		} catch (InvalidDenomeException e) {
-			// TODO Auto-generated catch block
-			logger.warn(Utils.getStringException(e));
-		} catch (NoSuchMethodException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
 		} catch (SecurityException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			logger.warn(Utils.getStringException(e));
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			logger.warn(Utils.getStringException(e));
 		}
-		logger.info("Evaluate Deneword operation,returning " + toReturn );
-
-
-
+		logger.debug("dataConcatenationDeneWordOperation,returning " + toReturn );
 		return toReturn;
 	}
+	
+	
+	
 	/**
 	 * 
 	 *  this method evaluates a deneword operation, this means that the actuator commmand code
@@ -6560,7 +6636,7 @@ public class DenomeManager {
 	public boolean evaluateExpressionDeneWordOperation(String deneWordOperationPointer){
 		boolean toReturn=false;
 		try {
-			logger.info("Evaluate Deneword operation,deneWordOperationPointer=" + deneWordOperationPointer);
+			logger.debug("Evaluate Deneword operation,deneWordOperationPointer=" + deneWordOperationPointer);
 
 			JSONObject evaluationParametersJSONObject = getDeneByIdentity( new Identity(deneWordOperationPointer));
 			//***************
@@ -6570,13 +6646,13 @@ public class DenomeManager {
 			Object variableValue;
 			String actionName="", destinationPointer="", actionExpressionString="";
 
-			logger.info("line 5502 evaluationParametersJSONObject=" + evaluationParametersJSONObject);
+			logger.debug("line 5502 evaluationParametersJSONObject=" + evaluationParametersJSONObject);
 			JSONObject actuatorLogicProcessingDeneChain = null;
 
 			JSONArray actuatorLogicProcessingDenes=null;
 			try {
 				actuatorLogicProcessingDeneChain = getDeneChainByName(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_ACTUATOR_LOGIC_PROCESSING);
-				//logger.info("actuatorLogicProcessingDeneChain=" + actuatorLogicProcessingDeneChain);
+				//logger.debug("actuatorLogicProcessingDeneChain=" + actuatorLogicProcessingDeneChain);
 				actuatorLogicProcessingDenes = actuatorLogicProcessingDeneChain.getJSONArray("Denes");
 
 			} catch (JSONException e2) {
@@ -6628,7 +6704,7 @@ public class DenomeManager {
 
 
 			JSONArray actuatorActionVariablesJSONArray = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(evaluationParametersJSONObject,TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_OPERATION_VARIABLE, TeleonomeConstants.COMPLETE);
-			logger.info("Evaluate Deneword operation,actionExpressionString=" + actionExpressionString + " there are " + actuatorActionVariablesJSONArray.length() + " variables");
+			logger.debug("Evaluate Deneword operation,actionExpressionString=" + actionExpressionString + " there are " + actuatorActionVariablesJSONArray.length() + " variables");
 			//
 			// only do evaluation if there are variables, this is because there
 			try {
@@ -6654,17 +6730,17 @@ public class DenomeManager {
 
 					variableValue=null;
 
-					logger.info("actionVariableValueJSONObject=" + actionVariableValueJSONObject.toString(4));
-					logger.info("Evaluate Deneword operation,variableName=" + variableName);
-					logger.info("Evaluate Deneword operation,variableRawValue=" + variableRawValue);
-					logger.info("Evaluate Deneword operation,variableValueType=" + variableValueType);
+					logger.debug("actionVariableValueJSONObject=" + actionVariableValueJSONObject.toString(4));
+					logger.debug("Evaluate Deneword operation,variableName=" + variableName);
+					logger.debug("Evaluate Deneword operation,variableRawValue=" + variableRawValue);
+					logger.debug("Evaluate Deneword operation,variableValueType=" + variableValueType);
 
 					if(variableValueType.equals(TeleonomeConstants.DENEWORD_TYPE_POINTER)){
 						variableIdentityPointer = actionVariableValueJSONObject.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						logger.info("variableIdentityPointer=" + variableIdentityPointer);
+						logger.debug("variableIdentityPointer=" + variableIdentityPointer);
 
 						resolvedVariablePointerJSONObject = (JSONObject) getDeneWordAttributeByIdentity(new Identity(variableIdentityPointer), TeleonomeConstants.COMPLETE);
-						logger.info("resolvedVariablePointerJSONObject=" + resolvedVariablePointerJSONObject);
+						logger.debug("resolvedVariablePointerJSONObject=" + resolvedVariablePointerJSONObject);
 
 						if(resolvedVariablePointerJSONObject!=null){
 							resolvedVariablePointerValueType = resolvedVariablePointerJSONObject.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE);
@@ -6684,34 +6760,34 @@ public class DenomeManager {
 						}
 					}else if(variableValueType.equals("String") && variableRawValue.toString().startsWith("$")){
 						String commandData = actionVariableValueJSONObject.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-						logger.info("rendering command commandData= " + commandData);
+						logger.debug("rendering command commandData= " + commandData);
 						//
 						// this is a command
 						if(commandData.equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP_MILLIS)){
-							//	logger.info("rendering command of COMMANDS_CURRENT_TIMESTAMP_MILLIS");
+							//	logger.debug("rendering command of COMMANDS_CURRENT_TIMESTAMP_MILLIS");
 							variableValue = System.currentTimeMillis();
 						}else if(commandData.equals(TeleonomeConstants.COMMANDS_CURRENT_MINUTE_IN_THE_HOUR)){
 							Calendar rightNow = Calendar.getInstance();
 							variableValue = rightNow.get(Calendar.MINUTE);
-							logger.info("rendering command of COMMANDS_CURRENT_MINUTE_IN_THE_HOUR= " + variableValue);
+							logger.debug("rendering command of COMMANDS_CURRENT_MINUTE_IN_THE_HOUR= " + variableValue);
 
 						}else if(commandData.equals(TeleonomeConstants.COMMANDS_CURRENT_HOUR_IN_DAY)){
 							Calendar rightNow = Calendar.getInstance();
 							variableValue = rightNow.get(Calendar.HOUR_OF_DAY);
-							logger.info("rendering command of COMMANDS_CURRENT_HOUR_IN_DAY= " + variableValue);
+							logger.debug("rendering command of COMMANDS_CURRENT_HOUR_IN_DAY= " + variableValue);
 
 						}else if(commandData.equals(TeleonomeConstants.COMMANDS_CURRENT_DAY_IN_WEEK)){
 							Calendar rightNow = Calendar.getInstance();
 							variableValue = rightNow.get(Calendar.DAY_OF_WEEK);
-							logger.info("rendering command of COMMANDS_CURRENT_DAY_IN_WEEK= " + variableValue);
+							logger.debug("rendering command of COMMANDS_CURRENT_DAY_IN_WEEK= " + variableValue);
 
 						}else if(commandData.equals(TeleonomeConstants.COMMANDS_CURRENT_DAY_IN_MONTH)){
 							Calendar rightNow = Calendar.getInstance();
 							variableValue = rightNow.get(Calendar.DAY_OF_MONTH);
-							logger.info("rendering command of COMMANDS_CURRENT_DAY_IN_MONTH= " + variableValue);
+							logger.debug("rendering command of COMMANDS_CURRENT_DAY_IN_MONTH= " + variableValue);
 
 						}else if(commandData.equals(TeleonomeConstants.COMMANDS_PREVIOUS_PULSE_MILLIS)){
-							//logger.info("rendering COMMANDS_PREVIOUS_PULSE_MILLIS, previousPulseJSONObject= " + previousPulseJSONObject);
+							//logger.debug("rendering COMMANDS_PREVIOUS_PULSE_MILLIS, previousPulseJSONObject= " + previousPulseJSONObject);
 							if(previousPulseJSONObject!=null){
 								long previousPulseTimestamp = previousPulseJSONObject.getLong("Pulse Timestamp in Milliseconds");
 								variableValue = previousPulseTimestamp;
@@ -6734,7 +6810,7 @@ public class DenomeManager {
 							variableValue = actionVariableValueJSONObject.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 						}
 					}
-					logger.info("line 6738 Evaluate Deneword operation,after rendering abpout to set variableName=" + variableName + " variableValue=" + variableValue);
+					logger.debug("line 6738 Evaluate Deneword operation,after rendering abpout to set variableName=" + variableName + " variableValue=" + variableValue);
 
 					actuatorActionEvaluationLogicProcessingDeneDeneWord = Utils.createDeneWordJSONObject(variableName, variableValue,null,variableValueType.toString(),true);
 					actuatorActionEvaluationLogicProcessingDeneDeneWord.put(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_EVALUATED_VARIABLE);
@@ -6748,7 +6824,7 @@ public class DenomeManager {
 						allVariablesInExpressionRenderedSuccesfully=false;
 					}
 				}
-				logger.info("line 6751 allVariablesInExpressionRenderedSuccesfully=" + allVariablesInExpressionRenderedSuccesfully);
+				logger.debug("line 6751 allVariablesInExpressionRenderedSuccesfully=" + allVariablesInExpressionRenderedSuccesfully);
 
 
 
@@ -6756,7 +6832,7 @@ public class DenomeManager {
 					Object result = actionExpression.evaluate(jexlActionContext);	
 					Identity destinationIdentity = new Identity(destinationPointer);
 					JSONObject destinationJSONObject = this.getDeneWordByIdentity(destinationIdentity);
-					logger.info("line 6759 Evaluate Deneword operation,after rendering abpout to set destinationPointer=" + destinationPointer + " result=" + result);
+					logger.debug("line 6759 Evaluate Deneword operation,after rendering abpout to set destinationPointer=" + destinationPointer + " result=" + result);
 					if(result instanceof Double) {
 						result = Math.ceil((double)result);
 					}
@@ -6784,7 +6860,7 @@ public class DenomeManager {
 						DateTimeFormatter timeStampformatter = DateTimeFormatter.ofPattern(TeleonomeConstants.MNEMOSYNE_TIMESTAMP_FORMAT);
 						String formatedCurrentTimestamp = ldt.format(timeStampformatter);
 						Identity mnemosyneDeneIdentity = new Identity(teleonomeName, destinationIdentity.getNucleusName(), destinationIdentity.getDenechainName(), destinationIdentity.getDeneName(), "Timezone");
-						logger.info("line 6787 about to update mnemosyne time fields for=" + mnemosyneDeneIdentity.toString() + " currentTimeMillis=" + currentTimeMillis + " formatedCurrentTimestamp=" + formatedCurrentTimestamp);
+						logger.debug("line 6787 about to update mnemosyne time fields for=" + mnemosyneDeneIdentity.toString() + " currentTimeMillis=" + currentTimeMillis + " formatedCurrentTimestamp=" + formatedCurrentTimestamp);
 						
 						JSONObject mnmosyneDeneJSONObject = this.getDeneByIdentity(mnemosyneDeneIdentity);
 						mnmosyneDeneJSONObject.put("Timestamp", formatedCurrentTimestamp);
@@ -6809,15 +6885,15 @@ public class DenomeManager {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
 		}
-		logger.info("Evaluate Deneword operation,returning " + toReturn );
+		logger.debug("Evaluate Deneword operation,returning " + toReturn );
 
 		return toReturn;
 	}
 
 	public AbstractMap.SimpleEntry<String, JSONArray>  evaluateAction(String teleonomeName, JSONObject actuatorActionJSONObject) throws JSONException{
 		String commandToExecute="";
-		//logger.info("evaluate action actuatorActionJSONObject=" + actuatorActionJSONObject);
-		logger.info("line 7249processing " + actuatorActionJSONObject.toString(4));
+		//logger.debug("evaluate action actuatorActionJSONObject=" + actuatorActionJSONObject);
+		logger.debug("line 7249processing " + actuatorActionJSONObject.toString(4));
 		String actuatorActionConditionVariable_Name, actuatorActionConditionPointer;
 		Object actuatorActionConditionVariable_Value = null;
 		Object actuatorActionConditionVariable_Value_Rendered=null, actuatorActionConditionVariable_Type;
@@ -6852,7 +6928,7 @@ public class DenomeManager {
 		JSONArray actuatorLogicProcessingDenes=null;
 		try {
 			actuatorLogicProcessingDeneChain = getDeneChainByName(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE,TeleonomeConstants.DENECHAIN_ACTUATOR_LOGIC_PROCESSING);
-			//logger.info("actuatorLogicProcessingDeneChain=" + actuatorLogicProcessingDeneChain);
+			//logger.debug("actuatorLogicProcessingDeneChain=" + actuatorLogicProcessingDeneChain);
 			actuatorLogicProcessingDenes = actuatorLogicProcessingDeneChain.getJSONArray("Denes");
 
 		} catch (JSONException e2) {
@@ -6896,7 +6972,7 @@ public class DenomeManager {
 
 			//
 			// create the actionExpression and condition
-			logger.info ("actionExpressionString=" + actionExpressionString );
+			logger.debug ("actionExpressionString=" + actionExpressionString );
 			actionExpression = jexl.createExpression(actionExpressionString);
 			jexlActionContext = new MapContext();
 			//
@@ -6907,11 +6983,11 @@ public class DenomeManager {
 			//
 			actuatorActionConditionPointersJSONArray = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(actuatorActionJSONObject,TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_CONDITION_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			JSONArray actuatorActionConditionNamesJSONArray = DenomeUtils.getAllMeweWordsFromDeneByDeneWordType(actuatorActionJSONObject,TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE, TeleonomeConstants.DENEWORD_TYPE_ACTUATOR_CONDITION_POINTER, TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
-			logger.info("actuatorActionConditionPointersJSONArray=" + actuatorActionConditionPointersJSONArray);
+			logger.debug("actuatorActionConditionPointersJSONArray=" + actuatorActionConditionPointersJSONArray);
 			for(int j=0;j<actuatorActionConditionPointersJSONArray.length();j++){
 				actuatorActionConditionPointer = (String) actuatorActionConditionPointersJSONArray.getString(j);
 				conditionName = actuatorActionConditionNamesJSONArray.getString(j);
-				logger.info("conditionName=" + conditionName);
+				logger.debug("conditionName=" + conditionName);
 				actuatorActionConditionJSONObject=null;
 				//
 				// actuatorActionConditionJSONObject is a deneword get the value which is a denepointer and render it
@@ -6966,10 +7042,10 @@ public class DenomeManager {
 				actuatorActionConditionVariablesJSONArray = renderDeneWordsFromPointers(actuatorActionConditionVariablesPointersJSONArray);
 
 				mapDeneWordsToPointers = mapDeneWordsToPointers(actuatorActionConditionVariablesPointersJSONArray);
-				logger.info("mapDeneWordsToPointers=" + mapDeneWordsToPointers);
+				logger.debug("mapDeneWordsToPointers=" + mapDeneWordsToPointers);
 
 				//actuatorActionConditionVariablesJSONArray  = actuatorActionConditionJSONObject.getJSONArray("Variables");
-				logger.info("actuatorActionConditionVariable_Expression=" + actuatorActionConditionVariable_Expression);
+				logger.debug("actuatorActionConditionVariable_Expression=" + actuatorActionConditionVariable_Expression);
 
 
 
@@ -6987,7 +7063,7 @@ public class DenomeManager {
 
 					actuatorLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject("Result", new Boolean(conditionEval).toString(),null,"boolean",true);
 					actuatorLogicProcessingDeneDeneWords.put(actuatorLogicProcessingCodonDeneDeneWord);
-					logger.info("line 6939 conditionName=" + conditionName+ " pointing to " + actuatorActionConditionVariable_Expression + " conditionEval=" + conditionEval);
+					logger.debug("line 6939 conditionName=" + conditionName+ " pointing to " + actuatorActionConditionVariable_Expression + " conditionEval=" + conditionEval);
 
 
 				}else{
@@ -6998,7 +7074,7 @@ public class DenomeManager {
 					//set this flag to true, if any of the data is not there, then it will set to false
 					//
 					allVariableInConditionRenderedSuccesfully=true;
-					//logger.info("actuatorActionConditionVariablesJSONArray=" + actuatorActionConditionVariablesJSONArray);
+					//logger.debug("actuatorActionConditionVariablesJSONArray=" + actuatorActionConditionVariablesJSONArray);
 					Iterator it = mapDeneWordsToPointers.entrySet().iterator();
 					String deneWordPointer;
 					while (it.hasNext()) {
@@ -7010,9 +7086,9 @@ public class DenomeManager {
 						actuatorActionConditionVariable_Name = actuatorActionConditionVariableJSONObject.getString("Name");
 						actuatorActionConditionVariable_Type = actuatorActionConditionVariableJSONObject.getString("Value Type");
 
-						logger.info("actuatorActionConditionVariable_Name=" + actuatorActionConditionVariable_Name);
-						logger.info("actuatorActionConditionVariable_Type=" + actuatorActionConditionVariable_Type);
-						logger.info("line 6964 deneWordPointer=" + deneWordPointer);
+						logger.debug("actuatorActionConditionVariable_Name=" + actuatorActionConditionVariable_Name);
+						logger.debug("actuatorActionConditionVariable_Type=" + actuatorActionConditionVariable_Type);
+						logger.debug("line 6964 deneWordPointer=" + deneWordPointer);
 						//
 						// now check to see if this data came from the external data and if so, whether is stale or not
 						//
@@ -7023,17 +7099,17 @@ public class DenomeManager {
 							// it is danger, it means its stall and therefore set allVariableInConditionRenderedSuccesfully=false; 
 							Identity deneWordIdentity = new Identity(deneWordPointer);
 							Identity denewordStatusIdentity = new Identity(deneWordIdentity.getTeleonomeName(),deneWordIdentity.getNucleusName(), deneWordIdentity.getDenechainName(),deneWordIdentity.getDeneName(), TeleonomeConstants.EXTERNAL_DATA_STATUS);
-							logger.info("line 6975 the dene for external denewordStatusIdentity is " + denewordStatusIdentity.toString());
+							logger.debug("line 6975 the dene for external denewordStatusIdentity is " + denewordStatusIdentity.toString());
 							//
 							// now get the value
 							String externalDeneStatus=TeleonomeConstants.EXTERNAL_DATA_STATUS_STALE;
 							try {
 								externalDeneStatus = (String) this.getDeneWordAttributeByIdentity(denewordStatusIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-								logger.info("externalDeneStatus after getting data by pointer " + externalDeneStatus);
+								logger.debug("externalDeneStatus after getting data by pointer " + externalDeneStatus);
 
 							} catch (InvalidDenomeException e) {
 								// TODO Auto-generated catch block
-								logger.info(Utils.getStringException(e));
+								logger.debug(Utils.getStringException(e));
 							}
 							if(externalDeneStatus.equals(TeleonomeConstants.EXTERNAL_DATA_STATUS_STALE)) {
 								allVariableInConditionRenderedSuccesfully=false;
@@ -7046,12 +7122,12 @@ public class DenomeManager {
 							}
 						}
 
-						logger.info("after externalDeneStatus allVariableInConditionRenderedSuccesfully " + allVariableInConditionRenderedSuccesfully);
+						logger.debug("after externalDeneStatus allVariableInConditionRenderedSuccesfully " + allVariableInConditionRenderedSuccesfully);
 
 						if(allVariableInConditionRenderedSuccesfully) {
 
 
-							logger.info("actuatorActionConditionVariableJSONObject=" + actuatorActionConditionVariableJSONObject.toString(4));
+							logger.debug("actuatorActionConditionVariableJSONObject=" + actuatorActionConditionVariableJSONObject.toString(4));
 
 							if(actuatorActionConditionVariable_Type.equals("double")){
 								actuatorActionConditionVariable_Value =new Double( actuatorActionConditionVariableJSONObject.getDouble("Value"));
@@ -7069,16 +7145,16 @@ public class DenomeManager {
 							}
 
 
-							logger.info("actuatorActionConditionVariable_Name=" + actuatorActionConditionVariable_Name);
-							logger.info("actuatorActionConditionVariable_Value=" + actuatorActionConditionVariable_Value);
-							logger.info("actuatorActionConditionVariable_Type=" + actuatorActionConditionVariable_Type);
+							logger.debug("actuatorActionConditionVariable_Name=" + actuatorActionConditionVariable_Name);
+							logger.debug("actuatorActionConditionVariable_Value=" + actuatorActionConditionVariable_Value);
+							logger.debug("actuatorActionConditionVariable_Type=" + actuatorActionConditionVariable_Type);
 
 							if(actuatorActionConditionVariable_Type.equals(TeleonomeConstants.DENEWORD_TYPE_POINTER) ){
 								//
 								// this is a pointer to another value in the denome, so get it
 								try {
 									actuatorActionConditionVariable_Value_Rendered = getCurrentPulseValueForDeneWord(actuatorActionConditionVariable_Value.toString());
-									logger.info("line 5772 of denomemanager, actuatorActionConditionVariable_Value_Rendered=" + actuatorActionConditionVariable_Value_Rendered + " actuatorActionConditionVariable_Value=" + actuatorActionConditionVariable_Value);
+									logger.debug("line 5772 of denomemanager, actuatorActionConditionVariable_Value_Rendered=" + actuatorActionConditionVariable_Value_Rendered + " actuatorActionConditionVariable_Value=" + actuatorActionConditionVariable_Value);
 									//
 									//
 									// if we are referencing external data and the data has not arrived yet
@@ -7092,7 +7168,7 @@ public class DenomeManager {
 										externalDataVariableOk=isExternalDataOk(actuatorActionConditionVariable_Value_Rendered.toString());
 										if(!externalDataVariableOk)allVariableInConditionRenderedSuccesfully=false;
 									}
-									logger.info("line 5785 of denomemanager, variableIsExternalData=" + variableIsExternalData + " externalDataVariableOk=" + externalDataVariableOk);
+									logger.debug("line 5785 of denomemanager, variableIsExternalData=" + variableIsExternalData + " externalDataVariableOk=" + externalDataVariableOk);
 
 
 									if(actuatorActionConditionVariable_Value_Rendered.equals(TeleonomeConstants.VALUE_UNDEFINED)){
@@ -7111,35 +7187,35 @@ public class DenomeManager {
 									}
 								} catch (InvalidDenomeException e) {
 									// TODO Auto-generated catch block
-									logger.info(Utils.getStringException(e));
+									logger.debug(Utils.getStringException(e));
 								}
 							}else if(actuatorActionConditionVariable_Type.equals("String") && actuatorActionConditionVariable_Value.toString().startsWith("$")){
-								logger.info("line 3406 of denomemanager, actuatorActionConditionVariable_Value_Rendered=" + actuatorActionConditionVariable_Value_Rendered + " actuatorActionConditionVariable_Value=" + actuatorActionConditionVariable_Value);
+								logger.debug("line 3406 of denomemanager, actuatorActionConditionVariable_Value_Rendered=" + actuatorActionConditionVariable_Value_Rendered + " actuatorActionConditionVariable_Value=" + actuatorActionConditionVariable_Value);
 
 								//
 								// this is a command
 								if(actuatorActionConditionVariable_Value.equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP_MILLIS)){
-									//	logger.info("rendering command of COMMANDS_CURRENT_TIMESTAMP_MILLIS");
+									//	logger.debug("rendering command of COMMANDS_CURRENT_TIMESTAMP_MILLIS");
 									actuatorActionConditionVariable_Value_Rendered = System.currentTimeMillis();
 								}else if(actuatorActionConditionVariable_Value.equals(TeleonomeConstants.COMMANDS_CURRENT_MINUTE_IN_THE_HOUR)){
 									Calendar rightNow = Calendar.getInstance();
 									actuatorActionConditionVariable_Value_Rendered = rightNow.get(Calendar.MINUTE);
-									logger.info("rendering command of COMMANDS_CURRENT_MINUTE_IN_THE_HOUR= " + actuatorActionConditionVariable_Value_Rendered);
+									logger.debug("rendering command of COMMANDS_CURRENT_MINUTE_IN_THE_HOUR= " + actuatorActionConditionVariable_Value_Rendered);
 
 								}else if(actuatorActionConditionVariable_Value.equals(TeleonomeConstants.COMMANDS_CURRENT_HOUR_IN_DAY)){
 									Calendar rightNow = Calendar.getInstance();
 									actuatorActionConditionVariable_Value_Rendered = rightNow.get(Calendar.HOUR_OF_DAY);
-									logger.info("rendering command of COMMANDS_CURRENT_HOUR_IN_DAY= " + actuatorActionConditionVariable_Value_Rendered);
+									logger.debug("rendering command of COMMANDS_CURRENT_HOUR_IN_DAY= " + actuatorActionConditionVariable_Value_Rendered);
 
 								}else if(actuatorActionConditionVariable_Value.equals(TeleonomeConstants.COMMANDS_CURRENT_DAY_IN_WEEK)){
 									Calendar rightNow = Calendar.getInstance();
 									actuatorActionConditionVariable_Value_Rendered = rightNow.get(Calendar.DAY_OF_WEEK);
-									logger.info("rendering command of COMMANDS_CURRENT_DAY_IN_WEEK= " + actuatorActionConditionVariable_Value_Rendered);
+									logger.debug("rendering command of COMMANDS_CURRENT_DAY_IN_WEEK= " + actuatorActionConditionVariable_Value_Rendered);
 
 								}else if(actuatorActionConditionVariable_Value.equals(TeleonomeConstants.COMMANDS_CURRENT_DAY_IN_MONTH)){
 									Calendar rightNow = Calendar.getInstance();
 									actuatorActionConditionVariable_Value_Rendered = rightNow.get(Calendar.DAY_OF_MONTH);
-									logger.info("rendering command of COMMANDS_CURRENT_DAY_IN_MONTH= " + actuatorActionConditionVariable_Value_Rendered);
+									logger.debug("rendering command of COMMANDS_CURRENT_DAY_IN_MONTH= " + actuatorActionConditionVariable_Value_Rendered);
 
 								}else if(actuatorActionConditionVariable_Value.equals(TeleonomeConstants.COMMANDS_CURRENT_TIMESTAMP)){
 									actuatorActionConditionVariable_Value_Rendered = dateTimeFormat.format(new Timestamp(System.currentTimeMillis()));
@@ -7155,14 +7231,14 @@ public class DenomeManager {
 								}
 							}else{
 
-								logger.info("line 7107 actuatorActionConditionVariable_Value =" + actuatorActionConditionVariable_Value);
+								logger.debug("line 7107 actuatorActionConditionVariable_Value =" + actuatorActionConditionVariable_Value);
 								if(actuatorActionConditionVariable_Value.equals(TeleonomeConstants.VALUE_UNDEFINED)){
 									//
 									// check to see if there is a default, will throw an exception if its not there
 									//
 									try{
 										actuatorActionConditionVariable_Value = actuatorActionConditionVariableJSONObject.getString("Default");
-										logger.info("line 7114 actuatorActionConditionVariable_Value =" + actuatorActionConditionVariable_Value);
+										logger.debug("line 7114 actuatorActionConditionVariable_Value =" + actuatorActionConditionVariable_Value);
 										if(actuatorActionConditionVariable_Value.equals(TeleonomeConstants.VALUE_UNDEFINED)){
 											allVariableInConditionRenderedSuccesfully=false;
 										}
@@ -7176,7 +7252,7 @@ public class DenomeManager {
 
 
 							}
-							//	logger.info("conditionName=" + conditionName);
+							//	logger.debug("conditionName=" + conditionName);
 
 
 
@@ -7186,10 +7262,10 @@ public class DenomeManager {
 
 
 							actuatorLogicProcessingDeneDeneWords.put(actuatorLogicProcessingCodonDeneDeneWord);
-							logger.info("line 7138 actuatorActionConditionVariable_Value_Rendered=" + actuatorActionConditionVariable_Value_Rendered);
+							logger.debug("line 7138 actuatorActionConditionVariable_Value_Rendered=" + actuatorActionConditionVariable_Value_Rendered);
 
 							if(!actuatorActionConditionVariable_Value_Rendered.equals(TeleonomeConstants.VALUE_UNDEFINED)){
-								logger.info("line 7141 actuatorActionConditionVariable_Name=" + actuatorActionConditionVariable_Name + " actuatorActionConditionVariable_Value_Rendered=" + actuatorActionConditionVariable_Value_Rendered);
+								logger.debug("line 7141 actuatorActionConditionVariable_Name=" + actuatorActionConditionVariable_Name + " actuatorActionConditionVariable_Value_Rendered=" + actuatorActionConditionVariable_Value_Rendered);
 
 								jexlConditionContext.set(actuatorActionConditionVariable_Name,actuatorActionConditionVariable_Value_Rendered);
 							}
@@ -7203,10 +7279,10 @@ public class DenomeManager {
 					// as long as allVariableInConditionRenderedSuccesfully=true
 					//
 					// and set this value in the actionMap
-					logger.info("line 7155 allVariableInConditionRenderedSuccesfully=" + allVariableInConditionRenderedSuccesfully);
+					logger.debug("line 7155 allVariableInConditionRenderedSuccesfully=" + allVariableInConditionRenderedSuccesfully);
 					if(allVariableInConditionRenderedSuccesfully){
 						conditionEval = ((Boolean)conditionExpression.evaluate(jexlConditionContext)).booleanValue();
-						logger.info("line 7162 conditionName=" + conditionName+ " conditionEval=" + conditionEval + " actionExpression=" + actionExpression.getExpression() + " dump=" + actionExpression.dump());
+						logger.debug("line 7162 conditionName=" + conditionName+ " conditionEval=" + conditionEval + " actionExpression=" + actionExpression.getExpression() + " dump=" + actionExpression.dump());
 						jexlActionContext.set(conditionName,conditionEval);
 
 						actuatorLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_CONDITION_PROCESSING_RESULT, new Boolean(conditionEval),null,"boolean",true);
@@ -7214,7 +7290,7 @@ public class DenomeManager {
 
 
 					}else{
-						logger.info("conditionName=" + conditionName+ " onLackOfDataForCondition=" + conditionEval);
+						logger.debug("conditionName=" + conditionName+ " onLackOfDataForCondition=" + conditionEval);
 						jexlActionContext.set(conditionName,onLackOfDataForCondition);
 						actuatorLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_CONDITION_PROCESSING_RESULT, new Boolean(onLackOfDataForCondition),null,"boolean",true);
 						actuatorLogicProcessingDeneDeneWords.put(actuatorLogicProcessingCodonDeneDeneWord);
@@ -7242,9 +7318,9 @@ public class DenomeManager {
 			if(allVariableInConditionRenderedSuccesfully){
 
 				result = ((Boolean)actionExpression.evaluate(jexlActionContext)).booleanValue();
-				logger.info("action expression evaluation "+ actionExpressionString + " result="+ result);
+				logger.debug("action expression evaluation "+ actionExpressionString + " result="+ result);
 			}else {
-				logger.info("action expression evaluation failed allVariableInConditionRenderedSuccesfully is false");
+				logger.debug("action expression evaluation failed allVariableInConditionRenderedSuccesfully is false");
 			}
 
 			if(result){
@@ -7264,7 +7340,7 @@ public class DenomeManager {
 				actuatorActionLogicProcessingDeneDeneWords.put(actuatorActionLogicProcessingCodonDeneDeneWord);
 
 
-				logger.info("action expression evaluation returning command true which is "+ commandToExecute );
+				logger.debug("action expression evaluation returning command true which is "+ commandToExecute );
 				JSONArray info = new JSONArray();
 				if(pointerToActionSuccessTasks!=null) {
 					JSONObject actionSuccessTasksJSONObject = new JSONObject();
@@ -7282,7 +7358,7 @@ public class DenomeManager {
 				//
 				// check to see if there is a false expression actuator command code
 				commandToExecute = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(actuatorActionJSONObject, TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_FALSE_EXPRESSION, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				logger.info("action expression evaluation returning command false which is "+ commandToExecute  );
+				logger.debug("action expression evaluation returning command false which is "+ commandToExecute  );
 				actuatorActionLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_ACTION_PROCESSING_RESULT, false,null,"boolean",true);
 				actuatorActionLogicProcessingDeneDeneWords.put(actuatorActionLogicProcessingCodonDeneDeneWord);
 
@@ -7293,7 +7369,7 @@ public class DenomeManager {
 					actuatorActionLogicProcessingCodonDeneDeneWord = Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_COMMAND_TO_EXECUTE, commandToExecute,null,"String",true);
 					actuatorActionLogicProcessingDeneDeneWords.put(actuatorActionLogicProcessingCodonDeneDeneWord);
 
-					logger.info("action expression evaluation returning command false pointerToActionSuccessTasks "+ pointerToActionSuccessTasks  );
+					logger.debug("action expression evaluation returning command false pointerToActionSuccessTasks "+ pointerToActionSuccessTasks  );
 
 					JSONArray info = new JSONArray();
 
