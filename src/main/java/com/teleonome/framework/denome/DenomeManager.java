@@ -6566,7 +6566,7 @@ public class DenomeManager {
 			JSONObject variable, renderedDeneWord;
 			int position;
 			ArrayList<Map.Entry<JSONObject, Integer>> sorted = new ArrayList();
-			String value, renderedDeneWordValue;
+			String value, renderedDeneWordValue, renderedDeneWordValueType;
 			
 			for(int i=0;i<variables.length();i++) {
 				variable = variables.getJSONObject(i);
@@ -6583,18 +6583,19 @@ public class DenomeManager {
 				if(value.startsWith("@")) {
 					//
 					// render the pointer 
-					renderedDeneWordValue = (String) getDeneWordAttributeByIdentity(new Identity(value), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-//					if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("int")) {
-//						
-//					}else if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("double")) {
-//						
-//					}else if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("long")) {
-//						
-//					}else if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("String")) {
-//						
-//					}else if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("boolean")) {
-//						
-//					}
+					renderedDeneWord = (JSONObject) getDeneWordAttributeByIdentity(new Identity(value), TeleonomeConstants.COMPLETE);
+					renderedDeneWordValue="";
+					if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("int")) {
+						renderedDeneWordValue = ""+renderedDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					}else if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("double")) {
+						renderedDeneWordValue = ""+renderedDeneWord.getDouble(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					}else if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("long")) {
+						renderedDeneWordValue = ""+renderedDeneWord.getLong(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					}else if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("String")) {
+						renderedDeneWordValue = renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					}else if(renderedDeneWord.getString(TeleonomeConstants.DENEWORD_VALUETYPE_ATTRIBUTE).equals("boolean")) {
+						renderedDeneWordValue = ""+renderedDeneWord.getBoolean(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					}
 					logger.info("line 6586,value=" + value + " rendered=" +renderedDeneWordValue );
 					concatenationResultBuffer.append(renderedDeneWordValue + concatenationSeparator);
 				}else {
