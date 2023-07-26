@@ -1,0 +1,183 @@
+package com.teleonome.framework.microcontroller.cajalmicrocontroller;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.teleonome.framework.TeleonomeConstants;
+import com.teleonome.framework.denome.DenomeUtils;
+
+public class GloriaTFDeserializer extends CajalDeserializer {
+
+	@Override
+	public JSONObject deserialise(String line) {
+		JSONObject toReturn = new JSONObject();
+		String[] tokens = line.split("#");
+		String deviceTypeId=tokens[0];
+		String deviceName=tokens[1];
+		String deviceshortname=tokens[2];
+		String serialnumber=tokens[3];
+		String groupidentifier=tokens[4];
+		int currentFunctionValue = Integer.parseInt(tokens[5]);
+		int dataSamplingSec = Integer.parseInt(tokens[6]);
+		String latitude=tokens[7];
+		String longitude=tokens[8];
+		// sensors
+		String flow1name=tokens[9];
+		double qfactor1 = Double.parseDouble(tokens[10]);
+		String flow2name=tokens[11];
+		double qfactor2 = Double.parseDouble(tokens[12]);
+		String tank1name=tokens[13];
+		double tank1HeightMeters = Double.parseDouble(tokens[14]);
+		String tank2name=tokens[15];
+		double tank2HeightMeters = Double.parseDouble(tokens[16]);
+	   
+	    // Purpose
+		long secondsTime = Long.parseLong(tokens[17]);
+		double temperature = Double.parseDouble(tokens[18]);
+		double rtcBatVolt = Double.parseDouble(tokens[19]);
+		int opMode = Integer.parseInt(tokens[20]);
+		double rssi = Double.parseDouble(tokens[21]);
+		double snr = Double.parseDouble(tokens[22]);
+	   
+		double flowRate = Double.parseDouble(tokens[23]);
+		int totalMilliLitres = Integer.parseInt(tokens[24]);
+		double flowRate2 = Double.parseDouble(tokens[25]);
+		int totalMilliLitres2 = Integer.parseInt(tokens[26]);
+		
+		double tank1PressurePsi = Double.parseDouble(tokens[27]);
+		double tank1PressureVolts = Double.parseDouble(tokens[28]);
+		double tank1WaterLevel = Double.parseDouble(tokens[29]);
+	     
+		double tank2PressurePsi = Double.parseDouble(tokens[30]);
+		double tank2PressureVolts = Double.parseDouble(tokens[31]);
+		double tank2WaterLevel = Double.parseDouble(tokens[32]);
+	    
+		int operatingStatus = Integer.parseInt(tokens[33]);
+		int digitalStablesUpload = Integer.parseInt(tokens[34]);
+		int secondsSinceLastPulse = Integer.parseInt(tokens[35]);
+		int sleepPingMinutes = Integer.parseInt(tokens[36]);
+		double solarvoltage = Double.parseDouble(tokens[37]);
+		double capacitorvoltage = Double.parseDouble(tokens[38]);
+		
+		toReturn.put("Name", deviceName);
+		JSONArray denes = new JSONArray();
+		toReturn.put("Denes", denes);
+		//
+		// configuration
+		//
+		JSONObject configurationDene = new JSONObject();
+		denes.put(configurationDene);
+		configurationDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, "Configurations");
+
+		JSONArray configurationDeneWords = new JSONArray();
+		configurationDene.put("DeneWords", configurationDeneWords);
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Short Name", deviceshortname, null,TeleonomeConstants.DATATYPE_STRING, true));
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Serial Number", serialnumber, null,TeleonomeConstants.DATATYPE_STRING, true));
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Group identifier", groupidentifier, null,TeleonomeConstants.DATATYPE_STRING, true));
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Device Type Id", deviceTypeId, null,TeleonomeConstants.DATATYPE_STRING, true));
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Data Sampling Sec", ""+dataSamplingSec, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Current Function", ""+currentFunctionValue, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Latitude",latitude, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("longitude",longitude, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+	    
+
+		JSONObject sensorDene = new JSONObject();
+		denes.put(sensorDene);
+		sensorDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, "Sensors");
+		JSONArray sensorDeneWords = new JSONArray();
+		sensorDene.put("DeneWords", sensorDeneWords);
+		
+		// the Cajal Types
+				
+		if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_1_FLOW) {
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow 1 Name", flow1name, null,TeleonomeConstants.DATATYPE_STRING, true));
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("QFactor 1", ""+qfactor1, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			
+		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_2_FLOW) {
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow 1 Name", flow1name, null,TeleonomeConstants.DATATYPE_STRING, true));
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("QFactor 1", ""+qfactor1, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow 2 Name", flow2name, null,TeleonomeConstants.DATATYPE_STRING, true));
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("QFactor 2", ""+qfactor2, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			
+		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_1_FLOW_1_TANK) {
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow 1 Name", flow1name, null,TeleonomeConstants.DATATYPE_STRING, true));
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("QFactor 1", ""+qfactor1, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Name", tank1name, null,TeleonomeConstants.DATATYPE_STRING, true));
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Height", ""+qfactor1, "Meter",TeleonomeConstants.DATATYPE_DOUBLE, true));
+			
+		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_1_TANK) {
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Name", tank1name, null,TeleonomeConstants.DATATYPE_STRING, true));
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Height", ""+tank1HeightMeters, "Meter",TeleonomeConstants.DATATYPE_DOUBLE, true));
+			
+		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_2_TANK) {
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Name", tank1name, null,TeleonomeConstants.DATATYPE_STRING, true));
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Height", ""+qfactor1, "Meter",TeleonomeConstants.DATATYPE_DOUBLE, true));
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 2 Name", tank2name, null,TeleonomeConstants.DATATYPE_STRING, true));
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 2 Height", ""+tank2HeightMeters, "Meter",TeleonomeConstants.DATATYPE_DOUBLE, true));	
+		}
+	
+		JSONObject purposeDene = new JSONObject();
+		denes.put(purposeDene);
+		purposeDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, "Purpose");
+		JSONArray purposeDeneWords = new JSONArray();
+		purposeDene.put("DeneWords", purposeDeneWords);
+		
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Time", ""+secondsTime, null,TeleonomeConstants.DATATYPE_LONG, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Internal Temperature", ""+temperature, null,TeleonomeConstants.DATATYPE_LONG, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("RTC Battery Volt", ""+rtcBatVolt, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("OP Mode", ""+opMode, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("rssi", ""+rssi, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("snr", ""+snr, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		
+		
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", ""+operatingStatus, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("SleepPing Minutes", ""+sleepPingMinutes, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Digital Stables Upload", ""+digitalStablesUpload, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Since Last Pulse", ""+secondsSinceLastPulse, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", ""+operatingStatus, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", ""+operatingStatus, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		
+
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Solar Voltage", ""+solarvoltage, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Capacitor Voltage", ""+capacitorvoltage, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+
+		
+		if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_1_FLOW) {
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow Rate 1", ""+flowRate, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Total Millilitres", ""+totalMilliLitres, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+			
+		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_2_FLOW) {
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow Rate 1", ""+flowRate, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Total Millilitres", ""+totalMilliLitres, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow Rate 2", ""+flowRate2, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Total Millilitres 2", ""+totalMilliLitres2, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+			
+		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_1_FLOW_1_TANK) {
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow Rate 1", ""+flowRate, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Total Millilitres", ""+totalMilliLitres, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+			
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Pressure Psi", ""+tank1PressurePsi, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 PressureVolts", ""+tank1PressureVolts, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Water Level", ""+tank1WaterLevel, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			
+			
+		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_1_TANK) {
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Pressure Psi", ""+tank1PressurePsi, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 PressureVolts", ""+tank1PressureVolts, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Water Level", ""+tank1WaterLevel, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			
+		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_2_TANK) {
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Pressure Psi", ""+tank1PressurePsi, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 PressureVolts", ""+tank1PressureVolts, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Water Level", ""+tank1WaterLevel, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 2 Pressure Psi", ""+tank2PressurePsi, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 2 PressureVolts", ""+tank2PressureVolts, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 2 Water Level", ""+tank2WaterLevel, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+			
+		}
+		return toReturn;
+	}
+
+}

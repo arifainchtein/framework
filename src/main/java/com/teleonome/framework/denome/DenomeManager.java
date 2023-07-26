@@ -5397,6 +5397,20 @@ public class DenomeManager {
 		return null;
 	}
 
+	public JSONObject injectDeneChainIntoNucleus( String nucleusName, JSONObject deneChain) throws JSONException{
+		JSONObject denomeArray = currentlyCreatingPulseJSONObject.getJSONObject("Denome");
+		JSONArray nucleiArray = denomeArray.getJSONArray("Nuclei");
+		JSONObject aNucleusJSONObject, aDeneChain;
+		JSONArray deneChains;
+		for(int i=0;i<nucleiArray.length();i++){
+			aNucleusJSONObject = nucleiArray.getJSONObject(i);
+			if(aNucleusJSONObject.getString("Name").equals(nucleusName)){
+				deneChains = aNucleusJSONObject.getJSONArray("DeneChains");
+				deneChains.put(deneChain);
+			}
+		}
+		return null;
+	}
 	public JSONObject getDeneFromDeneChainByDeneName(JSONObject deneChain, String deneName) throws JSONException{
 		JSONArray denesJSONArray = deneChain.getJSONArray("Denes");
 		logger.debug("getDeneFromDeneChainByDeneName point 2, deneName=" + deneName + " deneChain=" + deneChain.getString("Name"));

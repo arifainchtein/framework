@@ -1,4 +1,4 @@
-	package com.teleonome.framework.microcontroller.commandlinecontroller;
+	package com.teleonome.framework.microcontroller.cajalmicrocontroller;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -8,15 +8,15 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import com.teleonome.framework.utils.Utils;
 
-public class CommandLineWriter  extends BufferedWriter{
+public class CajalWriter  extends BufferedWriter{
 
-		CommandLineReader aCommandLineReader;
+		CajalReader aCajalReader;
 		Logger logger;
 		
 		
-		public CommandLineWriter(Writer out, CommandLineReader c) {
+		public CajalWriter(Writer out, CajalReader c) {
 			super(out);
-			aCommandLineReader=c;
+			aCajalReader=c;
 			logger = Logger.getLogger(getClass());
 			// TODO Auto-generated constructor stub
 		}
@@ -24,7 +24,7 @@ public class CommandLineWriter  extends BufferedWriter{
 		public void write(String command, int off, int len) throws IOException {
 
 			if(command.equals("GetSensorData")){
-				aCommandLineReader.setCurrentCommand(command);
+				aCajalReader.setCurrentCommand(command);
 			}else{
 				try {
 					//

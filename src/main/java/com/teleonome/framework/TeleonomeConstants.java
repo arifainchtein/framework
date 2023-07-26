@@ -2,6 +2,14 @@ package com.teleonome.framework;
 
 public class TeleonomeConstants {
 
+	//
+	// the Cajal Types
+	public static final int CAJAL_FUN_1_FLOW=1;
+	public static final int CAJAL_FUN_2_FLOW=2;
+	public static final int CAJAL_FUN_1_FLOW_1_TANK=3;
+	public static final int CAJAL_FUN_1_TANK =4;
+	public static final int CAJAL_FUN_2_TANK =5;
+	
 	public static final String ADA_INTERNAL_HOST_IPADDRESS="172.16.1.1";
 	
 	//
@@ -246,6 +254,8 @@ public class TeleonomeConstants {
 	public static final String NUCLEI_INTERNAL = "Internal";
 	public static final String NUCLEI_PURPOSE = "Purpose";
 	public static final String NUCLEI_MNEMOSYNE = "Mnemosyne";
+	public static final String NUCLEI_TELEPATHONS = "Telepathons";
+	
 	public static final String NUCLEI_HUMAN_INTERFACE = "Human Interface";
 	
 	public static final String VALUE_UNDEFINED = "Undefined";

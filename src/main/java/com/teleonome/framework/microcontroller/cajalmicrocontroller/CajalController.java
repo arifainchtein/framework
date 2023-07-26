@@ -1,4 +1,4 @@
-package com.teleonome.framework.microcontroller.gnuserialport;
+package com.teleonome.framework.microcontroller.cajalmicrocontroller;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -37,13 +37,13 @@ import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
-public class GNUArduinoUno extends MotherMicroController implements SerialPortEventListener,  LifeCycleEventListener {
+public class CajalController extends MotherMicroController implements SerialPortEventListener,  LifeCycleEventListener {
 
 	Logger logger;
 	String SerialPortID = "/dev/ttyAMA0";
 	private static final String PORT_NAMES[] = { "/dev/tty.usbmodem641", "/dev/ttyACM0", "/dev/ttyAMA0", "/dev/ttyUSB0","/dev/ttyUSB1","/dev/cu.usbmodem1411" };
 	SerialPort serialPort=null;
-	private GNUArduinoReader input;
+	private CajalReader input;
 	//private InputStream input;
 	
 	private BufferedWriter output;
@@ -54,7 +54,7 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 	InputStream serialPortInputStream = null;
 	OutputStream serialPortOutputStream = null;
 	
-	public GNUArduinoUno(DenomeManager d, String n){
+	public CajalController(DenomeManager d, String n){
 		super(d,n);
 		logger = Logger.getLogger(getClass());
 		setEnableAsyncUpdate(true);
@@ -188,7 +188,7 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 			for(int i=0;i<allDenes.length();i++) {
 				microcontrollerDene = allDenes.getJSONObject(i);
 				className = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(microcontrollerDene, TeleonomeConstants.DENEWORD_TYPE_MICROCONTROLLER_PROCESSING_CLASSNAME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				if(className.equals("com.teleonome.framework.microcontroller.gnuserialport.GNUArduinoUno")) {
+				if(className.equals("com.teleonome.framework.microcontroller.gnuserialport.CajalUno")) {
 					arduinoUnoMicrocontrollerDene=microcontrollerDene;
 				}
 			}
@@ -281,7 +281,7 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 				//
 				// now open and test it
 				//
-				input = new GNUArduinoReader(new BufferedReader(new InputStreamReader(serialPortInputStream)));
+				input = new CajalReader(new BufferedReader(new InputStreamReader(serialPortInputStream)), aDenomeManager);
 				output = new BufferedWriter(new OutputStreamWriter(serialPortOutputStream));
 
 				try{
@@ -326,12 +326,12 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 		}
 	}
 
-	public GNUArduinoReader getReader() throws IOException{
+	public CajalReader getReader() throws IOException{
 		//logger.debug("Arduino uno asking for reader" );
 		//String trace = Utils.generateMethodTrace();
 		//logger.debug(trace);
 		
-		input = new GNUArduinoReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())));
+		input = new CajalReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())), aDenomeManager);
 		
 		return input;
 	}
@@ -541,7 +541,7 @@ public class GNUArduinoUno extends MotherMicroController implements SerialPortEv
 			e.printStackTrace();
 		}
 		output.flush();
-		input = new GNUArduinoReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())));
+		input = new CajalReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())), aDenomeManager);
 		String inputLine = input.readLine();
 		logger.debug("receivibg response :"+ inputLine);
 		
