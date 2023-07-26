@@ -62,9 +62,10 @@ public class CajalReader extends BufferedReader{
 					tokens = line.split("#");
 					deviceType=tokens[0];
 					
-					try {
+					try {	
 						className = "com.teleonome.framework.microcontroller.cajalmicrocontroller." + deviceType + "Deserializer";
 						aCajalDeserializer = CajalDeserializerFactory.createCajalDeserializer(className);
+						aCajalDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
 						telephathon = aCajalDeserializer.deserialise(line);
 						aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_INTERNAL,telephathon);
 					} catch (ServletProcessingException e) {

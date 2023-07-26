@@ -1161,6 +1161,8 @@ public class TeleonomeConstants {
 	// the two different sources for a remembereddeneword, pulse or wps
 	public static final String REMEMBERED_DENEWORD_SOURCE_PULSE="Pulse";
 	public static final String REMEMBERED_DENEWORD_SOURCE_WPS="WPS";
+	public static final String REMEMBERED_DENEWORD_SOURCE_TELEPATHON="Telepathon";
+	
 	
 	public static final String DENEWORD_TYPE_MNEMOSYCON_TYPE="Mnemosycon Type";
 	public static final String MNEMOSYCON_TYPE_STATIC="Static";
