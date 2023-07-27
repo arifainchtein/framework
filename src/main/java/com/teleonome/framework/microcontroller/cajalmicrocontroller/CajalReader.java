@@ -68,7 +68,9 @@ public class CajalReader extends BufferedReader{
 						aCajalDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
 						String teleonomeName = aDenomeManager.getDenomeName();
 						telephathon = aCajalDeserializer.deserialise(teleonomeName,line);
-						aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_INTERNAL,telephathon);
+						String telepathonName = telephathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
+						aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+						aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telephathon);
 					} catch (ServletProcessingException e) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e));
