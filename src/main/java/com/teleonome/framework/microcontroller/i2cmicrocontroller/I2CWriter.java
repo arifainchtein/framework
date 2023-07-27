@@ -145,7 +145,11 @@ public class I2CWriter extends BufferedWriter {
 			i2ccommandbuffer.append("$");
 			logger.debug("line 141 about to send via i2c:"  +i2ccommandbuffer.toString() );
 			byte[] b2=i2ccommandbuffer.toString().getBytes("ISO-8859-1");
-			device.write(I2CMicroController.I2C_ADDR,b2);      
+			try{
+				device.write(I2CMicroController.I2C_ADDR,b2);      
+			}catch(IOException e) {
+				logger.warn(Utils.getStringException(e));
+			}
 		}
 		publishingResults="Ok-Update";
 	}
