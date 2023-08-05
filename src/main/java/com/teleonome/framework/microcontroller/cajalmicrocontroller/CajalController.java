@@ -224,7 +224,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 					logger.debug(" configDene.getString(Name)= " + configDene.getString("Name"));
 					if(configDene.getString("Name").equals("Serial Data Rate")) {
 						DATA_RATE = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(configDene, "Serial Data Rate", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).intValue();
-						logger.debug(" gnu arduino microcontroller DATA_RATE " + DATA_RATE);
+						logger.debug(" Cajal microcontroller DATA_RATE " + DATA_RATE);
 					}
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
