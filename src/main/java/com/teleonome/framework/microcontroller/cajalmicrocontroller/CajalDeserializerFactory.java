@@ -32,7 +32,7 @@ public class CajalDeserializerFactory extends Object {
             Constructor[] constructors = aClass.getConstructors();
             for ( int i=0; i < constructors.length; i++ ) {
                 Class[] parameterTypes = constructors[i].getParameterTypes();
-                if (parameterTypes.length == 3){
+                if (parameterTypes.length == 0){
                     Object[] anArray = { };
                     aCajalDeserializer = (CajalDeserializer) constructors[i].newInstance(anArray);
                     objectCreated = true;
