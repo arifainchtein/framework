@@ -57,6 +57,7 @@ public class CajalReader extends BufferedReader{
 		while(keepGoing) {
 			try {
 				line = reader.readLine();
+				logger.debug("received line=" + line);
 				if(line==null) {
 					keepGoing=false;
 				}else {
@@ -65,6 +66,7 @@ public class CajalReader extends BufferedReader{
 					
 					try {	
 						className = "com.teleonome.framework.microcontroller.cajalmicrocontroller." + deviceType + "Deserializer";
+						logger.debug("className for deserializer =" + className);
 						aCajalDeserializer = CajalDeserializerFactory.createCajalDeserializer(className);
 						aCajalDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
 						String teleonomeName = aDenomeManager.getDenomeName();
