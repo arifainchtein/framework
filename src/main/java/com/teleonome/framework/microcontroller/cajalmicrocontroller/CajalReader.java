@@ -20,8 +20,9 @@ public class CajalReader extends BufferedReader{
 	DenomeManager aDenomeManager;
 	                                                                                                                                                                                                                               
 	private String currentCommand="";
-	public CajalReader(Reader in ,DenomeManager d) {
+	public CajalReader(BufferedReader in ,DenomeManager d) {
 		super(in);
+		reader=in;
 		logger = Logger.getLogger(getClass().getName());
 		aDenomeManager=d;
 		// TODO Auto-generated constructor stub
