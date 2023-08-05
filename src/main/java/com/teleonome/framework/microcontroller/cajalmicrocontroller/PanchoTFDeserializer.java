@@ -66,7 +66,7 @@ public class PanchoTFDeserializer extends CajalDeserializer {
 		//
 		JSONObject configurationDene = new JSONObject();
 		denes.put(configurationDene);
-		configurationDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, "Configurations");
+		configurationDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE,TeleonomeConstants.TELEPATHON_DENE_CONFIGURATION);
 
 		JSONArray configurationDeneWords = new JSONArray();
 		configurationDene.put("DeneWords", configurationDeneWords);
@@ -82,7 +82,7 @@ public class PanchoTFDeserializer extends CajalDeserializer {
 
 		JSONObject sensorDene = new JSONObject();
 		denes.put(sensorDene);
-		sensorDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, "Sensors");
+		sensorDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, TeleonomeConstants.TELEPATHON_DENE_SENSORS);
 		JSONArray sensorDeneWords = new JSONArray();
 		sensorDene.put("DeneWords", sensorDeneWords);
 		
@@ -118,7 +118,7 @@ public class PanchoTFDeserializer extends CajalDeserializer {
 	
 		JSONObject purposeDene = new JSONObject();
 		denes.put(purposeDene);
-		purposeDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, "Purpose");
+		purposeDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE,  TeleonomeConstants.TELEPATHON_DENE_PURPOSE);
 		JSONArray purposeDeneWords = new JSONArray();
 		purposeDene.put("DeneWords", purposeDeneWords);
 		

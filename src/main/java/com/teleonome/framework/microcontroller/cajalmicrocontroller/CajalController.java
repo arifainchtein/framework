@@ -182,24 +182,24 @@ public class CajalController extends MotherMicroController implements SerialPort
 			//
 			// get the data rate for the arduno ie get the DeneWord , get the dene that represents the arduino
 			JSONArray allDenes = (JSONArray)aDenomeManager.getDeneByDeneType(TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_COMPONENTS, TeleonomeConstants.DENE_TYPE_MICROCONTROLLER);
-			JSONObject arduinoUnoMicrocontrollerDene = null;
+			JSONObject cajalMicrocontrollerDene = null;
 			JSONObject microcontrollerDene = null;
 			String className="";
 			for(int i=0;i<allDenes.length();i++) {
 				microcontrollerDene = allDenes.getJSONObject(i);
 				className = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(microcontrollerDene, TeleonomeConstants.DENEWORD_TYPE_MICROCONTROLLER_PROCESSING_CLASSNAME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				if(className.equals("com.teleonome.framework.microcontroller.gnuserialport.CajalUno")) {
-					arduinoUnoMicrocontrollerDene=microcontrollerDene;
+				if(className.equals("com.teleonome.framework.microcontroller.cajalmicrocontroller.CajalController")) {
+					cajalMicrocontrollerDene=microcontrollerDene;
 				}
 			}
-			if(arduinoUnoMicrocontrollerDene==null) {
-				logger.warn("Could not find Arduino Uno Microcontroller Dene");
+			if(cajalMicrocontrollerDene==null) {
+				logger.warn("Could not find Cajal Microcontroller Dene");
 				Hashtable<String, String> h = new Hashtable();
 				h.put("message","Could not find COM port");
 				throw new MicrocontrollerCommunicationException(h);
 			}
 			try {
-				Object o =  DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(arduinoUnoMicrocontrollerDene, TeleonomeConstants.DENEWORD_MICROCONTROLLER_ASYNC_REQUEST_DELAY_MILLIS, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				Object o =  DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(cajalMicrocontrollerDene, TeleonomeConstants.DENEWORD_MICROCONTROLLER_ASYNC_REQUEST_DELAY_MILLIS, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 				if(o!=null) {
 					asyncRequestMillisecondsDelay = (int)o;
 					logger.info("Using asyncRequestMillisecondsDelay=" + asyncRequestMillisecondsDelay);

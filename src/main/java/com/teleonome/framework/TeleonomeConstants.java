@@ -2,6 +2,9 @@ package com.teleonome.framework;
 
 public class TeleonomeConstants {
 
+	public static final String TELEPATHON_DENE_CONFIGURATION="Configuration";
+	public static final String TELEPATHON_DENE_SENSORS="Sensors";
+	public static final String TELEPATHON_DENE_PURPOSE="Purpose";
 	//
 	// the Cajal Types
 	public static final int CAJAL_FUN_1_FLOW=1;
@@ -1058,6 +1061,7 @@ public class TeleonomeConstants {
 	public static final String PANEL_VISUALIZATION_COMPLETE_DENE_STYLE_SINGLE_VALUE_PANEL="Complete Dene Single Value Panel";
 	public static final String PANEL_VISUALIZATION_COMPLETE_DENE_CHAIN_STYLE_SINGLE_VALUE_PANEL="Complete Dene Chain Single Value Panel";
 	public static final String PANEL_VISUALIZATION_WELL_SINGLE_VALUE_PANEL="Well Single Value";
+	public static final String PANEL_VISUALIZATION_STYLE_TELEPATHON_VISUALIZATION="Telepathon Visualization";
 	public static final String PANEL_TITLE="Panel Title";
 	
 	public static final String PANEL_VISUALIZATION_STYLE_DENEWORD_TABLE="DeneWord Table";
