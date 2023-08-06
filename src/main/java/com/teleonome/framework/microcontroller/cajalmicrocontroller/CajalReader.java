@@ -58,7 +58,8 @@ public class CajalReader extends BufferedReader{
 			try {
 				line = reader.readLine();
 				logger.debug("received line=" + line);
-				if(line==null || line.contains("Ok-")) {
+				if(line==null || line.contains("Ok-") || line.contains("Failure"))
+				{
 					keepGoing=false;
 				}else {
 					tokens = line.split("#");

@@ -313,7 +313,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 			//
 			// to make sure that the serial port has not hung, do a test
 			//
-			logger.debug("finished initializing Arduino Uno" );
+			logger.debug("finished initializing Cajal" );
 
 		} catch (Exception e) {
 
