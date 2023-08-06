@@ -236,11 +236,11 @@ public class CajalController extends MotherMicroController implements SerialPort
 			logger.debug("using datarate=" + DATA_RATE);
 		    counter=0;
 			boolean openAndTested=false;
-			logger.debug("about to open port , sleeping 10 sec first" );
+			logger.debug("about to open port , sleeping 1 sec first" );
 			
 			Thread.sleep(1000);
 			serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
-			logger.debug("opened port , sleeping another 10 sec " );
+			logger.debug("opened port , sleeping another  sec " );
 			Thread.sleep(1000);
 			//serialPort.disableReceiveTimeout();
 			serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
