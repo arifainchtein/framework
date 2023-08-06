@@ -30,9 +30,9 @@ public class CajalReader extends BufferedReader{
 	}
 
 	public void close() throws IOException {
-		logger.info("about to close GNUArduinoReader");
-		String trace = Utils.generateMethodTrace();
-		logger.debug(trace);
+		logger.info("about to close CajalReader");
+		//String trace = Utils.generateMethodTrace();
+	//	logger.debug(trace);
 		super.close();
 	}
 	public boolean ready() throws IOException {

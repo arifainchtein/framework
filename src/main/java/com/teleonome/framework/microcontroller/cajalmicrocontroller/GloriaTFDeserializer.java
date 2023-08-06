@@ -26,14 +26,33 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 		String longitude=tokens[8];
 		// sensors
 		String flow1name=tokens[9];
-		double qfactor1 = Double.parseDouble(tokens[10]);
+		double qfactor1 =0.0;
+		try{
+			qfactor1=Double.parseDouble(tokens[10]);
+		}catch(NumberFormatException e) {
+			
+		}
 		String flow2name=tokens[11];
 		double qfactor2 = Double.parseDouble(tokens[12]);
+		try{
+			qfactor2=Double.parseDouble(tokens[12]);
+		}catch(NumberFormatException e) {
+			
+		}
 		String tank1name=tokens[13];
-		double tank1HeightMeters = Double.parseDouble(tokens[14]);
+		double tank1HeightMeters = 0.0;
+		try{
+			tank1HeightMeters=Double.parseDouble(tokens[14]);
+		}catch(NumberFormatException e) {
+			
+		}
 		String tank2name=tokens[15];
-		double tank2HeightMeters = Double.parseDouble(tokens[16]);
-	   
+		double tank2HeightMeters = 0.0;
+		try{
+			tank2HeightMeters=Double.parseDouble(tokens[16]);
+		}catch(NumberFormatException e) {
+			
+		}
 	    // Purpose
 		long secondsTime = Long.parseLong(tokens[17]);
 		long lastPulseTime=secondsTime*1000;
