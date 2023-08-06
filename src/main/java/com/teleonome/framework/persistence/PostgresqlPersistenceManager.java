@@ -2398,7 +2398,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		}finally{
 			try {
 				if(statement!=null)statement.close();
-				connectionPool.closeConnection(connection);
+				if(connection!=null)connectionPool.closeConnection(connection);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				logger.debug(Utils.getStringException(e));
