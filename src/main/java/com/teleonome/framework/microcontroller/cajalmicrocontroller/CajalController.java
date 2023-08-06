@@ -238,10 +238,10 @@ public class CajalController extends MotherMicroController implements SerialPort
 			boolean openAndTested=false;
 			logger.debug("about to open port , sleeping 10 sec first" );
 			
-			Thread.sleep(10000);
+			Thread.sleep(1000);
 			serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
 			logger.debug("opened port , sleeping another 10 sec " );
-			Thread.sleep(10000);
+			Thread.sleep(1000);
 			//serialPort.disableReceiveTimeout();
 			serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
 			serialPort.enableReceiveTimeout(30000);
