@@ -56,7 +56,7 @@ public class CajalReader extends BufferedReader{
 		JSONObject telephathon;
 		while(keepGoing) {
 			try {
-				line = reader.readLine();
+				line = reader.readLine().replaceAll("\u0000", "");
 				logger.debug("received line=" + line);
 				if(line==null || line.contains("Ok-") || line.contains("Failure"))
 				{
