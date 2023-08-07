@@ -24,35 +24,116 @@ public class PanchoTFDeserializer extends CajalDeserializer {
 		String longitude=tokens[8];
 		// sensors
 		String flow1name=tokens[9];
-		double qfactor1 = Double.parseDouble(tokens[10]);
+		double qfactor1 =0.0;
+		try{
+			qfactor1=Double.parseDouble(tokens[10]);
+		}catch(NumberFormatException e) {
+			
+		}
 		String flow2name=tokens[11];
-		double qfactor2 = Double.parseDouble(tokens[12]);
+		double qfactor2 = 0;
+		try{
+			qfactor2=Double.parseDouble(tokens[12]);
+		}catch(NumberFormatException e) {
+			
+		}
 		String tank1name=tokens[13];
-		double tank1HeightMeters = Double.parseDouble(tokens[14]);
+		double tank1HeightMeters = 0.0;
+		try{
+			tank1HeightMeters=Double.parseDouble(tokens[14]);
+		}catch(NumberFormatException e) {
+			
+		}
 		String tank2name=tokens[15];
-		double tank2HeightMeters = Double.parseDouble(tokens[16]);
-	   
+		double tank2HeightMeters = 0.0;
+		try{
+			tank2HeightMeters=Double.parseDouble(tokens[16]);
+		}catch(NumberFormatException e) {
+			
+		}
 	    // Purpose
 		long secondsTime = Long.parseLong(tokens[17]);
 		long lastPulseTime=secondsTime*1000;
 		double temperature = Double.parseDouble(tokens[18]);
 		double rtcBatVolt = Double.parseDouble(tokens[19]);
 		int opMode = Integer.parseInt(tokens[20]);
-		double rssi = Double.parseDouble(tokens[21]);
-		double snr = Double.parseDouble(tokens[22]);
+		double rssi = 0.0;
+		try{
+			rssi=Double.parseDouble(tokens[21]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double snr =0.0;
+		try{
+			snr=Double.parseDouble(tokens[22]);
+		}catch(NumberFormatException e) {
+			
+		}
 	   
-		double flowRate = Double.parseDouble(tokens[23]);
-		int totalMilliLitres = Integer.parseInt(tokens[24]);
-		double flowRate2 = Double.parseDouble(tokens[25]);
-		int totalMilliLitres2 = Integer.parseInt(tokens[26]);
+		double flowRate = 0.0;
 		
-		double tank1PressurePsi = Double.parseDouble(tokens[27]);
-		double tank1PressureVolts = Double.parseDouble(tokens[28]);
-		double tank1WaterLevel = Double.parseDouble(tokens[29]);
+		try{
+			flowRate=Double.parseDouble(tokens[23]);
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		int totalMilliLitres =0;
+		try{
+			totalMilliLitres=Integer.parseInt(tokens[24]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double flowRate2 =0;
+		try{
+			flowRate2=Double.parseDouble(tokens[25]);
+		}catch(NumberFormatException e) {
+			
+		}
+		int totalMilliLitres2 = 90;
+		try{
+			totalMilliLitres2=Integer.parseInt(tokens[26]);
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		double tank1PressurePsi = 0.0;
+		try{
+			tank1PressurePsi=Double.parseDouble(tokens[27]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double tank1PressureVolts = 0.0;
+		try{
+			tank1PressureVolts=Double.parseDouble(tokens[28]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double tank1WaterLevel = 0.0;
+		try{
+			tank1WaterLevel=Double.parseDouble(tokens[29]);
+		}catch(NumberFormatException e) {
+			
+		}
 	     
-		double tank2PressurePsi = Double.parseDouble(tokens[30]);
-		double tank2PressureVolts = Double.parseDouble(tokens[31]);
-		double tank2WaterLevel = Double.parseDouble(tokens[32]);
+		double tank2PressurePsi = 0.0;
+		try{
+			tank2PressurePsi=Double.parseDouble(tokens[30]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double tank2PressureVolts = 0.0;
+		try{
+			tank2PressureVolts=Double.parseDouble(tokens[31]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double tank2WaterLevel = 0.0;
+		try{
+			tank2WaterLevel=Double.parseDouble(tokens[32]);
+		}catch(NumberFormatException e) {
+			
+		}
 	    
 		int operatingStatus = Integer.parseInt(tokens[33]);
 		int digitalStablesUpload = Integer.parseInt(tokens[34]);
