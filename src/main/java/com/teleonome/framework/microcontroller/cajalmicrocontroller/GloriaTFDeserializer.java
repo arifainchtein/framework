@@ -137,10 +137,17 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 			
 		}
 	    
-		int operatingStatus = Integer.parseInt(tokens[33]);
+		int operatingStatus = (int) Double.parseDouble(tokens[33]);
 		int digitalStablesUpload = Integer.parseInt(tokens[34]);
 		int secondsSinceLastPulse = Integer.parseInt(tokens[35]);
-		int sleepPingMinutes = Integer.parseInt(tokens[36]);
+		int sleepPingMinutes =0;
+		try{
+			sleepPingMinutes=Integer.parseInt(tokens[36]);
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		
 		double solarvoltage = 0.0;
 		try{
 			solarvoltage=Double.parseDouble(tokens[37]);
