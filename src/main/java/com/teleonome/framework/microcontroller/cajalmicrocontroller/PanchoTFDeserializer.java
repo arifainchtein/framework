@@ -135,7 +135,7 @@ public class PanchoTFDeserializer extends CajalDeserializer {
 			
 		}
 	    
-		int operatingStatus = Integer.parseInt(tokens[33]);
+		int operatingStatus = (int) Double.parseDouble(tokens[33]);
 		int digitalStablesUpload = Integer.parseInt(tokens[34]);
 		int secondsSinceLastPulse = Integer.parseInt(tokens[35]);
 		
