@@ -1320,7 +1320,13 @@ public class MnemosyneManager {
 
 
 
-
+	public boolean unwrapDouble( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, double value, String source, String units) {
+		return aDBManager.unwrapDouble( teleonomeName,  pulseTimeMillis,  identityString,  valueType,  value, source, units);
+	}
+	
+	public boolean unwrap( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, int value, String source, String units) {
+		return aDBManager.unwrapDouble( teleonomeName,  pulseTimeMillis,  identityString,  valueType,  (double)value, source, units);
+	}
 
 	public boolean unwrap( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value, String source, String units) {
 		return aDBManager.unwrap( teleonomeName,  pulseTimeMillis,  identityString,  valueType,  value, source, units);

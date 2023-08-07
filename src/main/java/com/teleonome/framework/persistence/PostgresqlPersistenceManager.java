@@ -4384,6 +4384,88 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}
 
+	public boolean unwrapDouble( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, double value, String source, String units) {
+		String sql="";
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		boolean toReturn=false;
+		Statement statement=null;
+		int numberCurrentConnections = connectionPool.getCurrentNumberConnections();
+		try {
+			
+			java.sql.Timestamp dateTimeValue = new java.sql.Timestamp(pulseTimeMillis);
+			Calendar cal = Calendar.getInstance();
+			String tableName = getTableNameByCalendar(TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE, cal);
+			boolean tableExists = tableExists(tableName);
+			logger.debug("line 4347 table " + tableName + "exists=" + tableExists);
+
+			logger.info("line 4340 starting unwrap before getting a connection, number current connections " + numberCurrentConnections);
+			connection = connectionPool.getConnection();
+
+			if(!tableExists) {
+				//sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.REMEMBERED_DENEWORDS_TABLE +" with no data";
+				
+				sql = "CREATE TABLE "+tableName+ " (" +
+						  "time        TIMESTAMPTZ  NOT NULL,"+
+						  "timeMillis bigint NOT NULL,"+
+						  "teleonomename    TEXT  NOT NULL,"+
+						  "identitystring TEXT NOT NULL,"+
+						  "source text not null,"+
+						  "value    DOUBLE PRECISION  NULL,"+
+						  "units text NOT NULL,"+
+						  "CONSTRAINT pk_tbl_"+ tableName +" PRIMARY KEY (timeMillis,teleonomename, identitystring)"+
+						")";
+				logger.debug("line 4260 sql " + sql);
+				
+				
+				statement = connection.createStatement();
+				int result = statement.executeUpdate(sql);
+				logger.debug("line 4264 table " + tableName + " was nt found so it was created, result=" + result);
+
+
+//				sql = "alter table " + tableName + " add CONSTRAINT pk_tbl_"+ tableName+" PRIMARY KEY (timeMillis,teleonomename, identitystring)";
+//				result = statement.executeUpdate(sql);
+//				logger.debug("created primary key command executed, result=" + result);
+			}
+
+
+			sql = "insert into "+ tableName +" (time,timeMillis, teleonomeName,identityString,value, source, units) values(?,?,?,?,?,?,?) ON CONFLICT(timeMillis, teleonomeName,identityString) DO NOTHING";
+			logger.debug("unwrap=" + sql);
+			//Calendar calendarTimeZone = Calendar.getInstance(timeZone);  
+
+			preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setTimestamp(1, dateTimeValue);
+			preparedStatement.setLong(2, pulseTimeMillis);
+
+			preparedStatement.setString(3, teleonomeName);
+			preparedStatement.setString(4, identityString);
+			preparedStatement.setDouble(5, (double) value);		
+			logger.debug("source=" + source);
+			preparedStatement.setString(6, source);
+			preparedStatement.setString(7, units);
+			int result = preparedStatement.executeUpdate();
+			
+			toReturn= true;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			System.out.println("bad sql=" + sql);
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			try {
+				if(statement!=null)statement.close();
+				if(preparedStatement!=null)preparedStatement.close();
+				if(connection!=null)connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				logger.debug(Utils.getStringException(e));
+			}
+		}
+		 numberCurrentConnections = connectionPool.getCurrentNumberConnections();
+		logger.info("line 4441 finishing unwrap  number current connections " + numberCurrentConnections);
+		
+		return toReturn;
+	}
+	
 	public boolean unwrap( String teleonomeName, long pulseTimeMillis, String identityString, String valueType, Object value, String source, String units) {
 		String sql="";
 		Connection connection = null;
