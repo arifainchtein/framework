@@ -20,54 +20,54 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 		String deviceshortname=tokens[2];
 		String serialnumber=tokens[3];
 		String groupidentifier=tokens[4];
-		int currentFunctionValue = Integer.parseInt(tokens[5]);
-		int dataSamplingSec = Integer.parseInt(tokens[6]);
+		int currentFunctionValue = Integer.parseInt(tokens[5].replaceAll("\u0000", ""));
+		int dataSamplingSec = Integer.parseInt(tokens[6].replaceAll("\u0000", ""));
 		String latitude=tokens[7];
 		String longitude=tokens[8];
 		// sensors
 		String flow1name=tokens[9];
 		double qfactor1 =0.0;
 		try{
-			qfactor1=Double.parseDouble(tokens[10]);
+			qfactor1=Double.parseDouble(tokens[10].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		String flow2name=tokens[11];
 		double qfactor2 = 0;
 		try{
-			qfactor2=Double.parseDouble(tokens[12]);
+			qfactor2=Double.parseDouble(tokens[12].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		String tank1name=tokens[13];
 		double tank1HeightMeters = 0.0;
 		try{
-			tank1HeightMeters=Double.parseDouble(tokens[14]);
+			tank1HeightMeters=Double.parseDouble(tokens[14].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		String tank2name=tokens[15];
 		double tank2HeightMeters = 0.0;
 		try{
-			tank2HeightMeters=Double.parseDouble(tokens[16]);
+			tank2HeightMeters=Double.parseDouble(tokens[16].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 	    // Purpose
-		long secondsTime = Long.parseLong(tokens[17]);
+		long secondsTime = Long.parseLong(tokens[17].replaceAll("\u0000", ""));
 		long lastPulseTime=secondsTime*1000;
-		double temperature = Double.parseDouble(tokens[18]);
-		double rtcBatVolt = Double.parseDouble(tokens[19]);
-		int opMode = Integer.parseInt(tokens[20]);
+		double temperature = Double.parseDouble(tokens[18].replaceAll("\u0000", ""));
+		double rtcBatVolt = Double.parseDouble(tokens[19].replaceAll("\u0000", ""));
+		int opMode = Integer.parseInt(tokens[20].replaceAll("\u0000", ""));
 		double rssi = 0.0;
 		try{
-			rssi=Double.parseDouble(tokens[21]);
+			rssi=Double.parseDouble(tokens[21].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double snr =0.0;
 		try{
-			snr=Double.parseDouble(tokens[22]);
+			snr=Double.parseDouble(tokens[22].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
@@ -75,74 +75,74 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 		double flowRate = 0.0;
 		
 		try{
-			flowRate=Double.parseDouble(tokens[23]);
+			flowRate=Double.parseDouble(tokens[23].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		int totalMilliLitres =0;
 		try{
-			totalMilliLitres=Integer.parseInt(tokens[24]);
+			totalMilliLitres=Integer.parseInt(tokens[24].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double flowRate2 =0;
 		try{
-			flowRate2=Double.parseDouble(tokens[25]);
+			flowRate2=Double.parseDouble(tokens[25].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		int totalMilliLitres2 = 90;
 		try{
-			totalMilliLitres2=Integer.parseInt(tokens[26]);
+			totalMilliLitres2=Integer.parseInt(tokens[26].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		double tank1PressurePsi = 0.0;
 		try{
-			tank1PressurePsi=Double.parseDouble(tokens[27]);
+			tank1PressurePsi=Double.parseDouble(tokens[27].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double tank1PressureVolts = 0.0;
 		try{
-			tank1PressureVolts=Double.parseDouble(tokens[28]);
+			tank1PressureVolts=Double.parseDouble(tokens[28].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double tank1WaterLevel = 0.0;
 		try{
-			tank1WaterLevel=Double.parseDouble(tokens[29]);
+			tank1WaterLevel=Double.parseDouble(tokens[29].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 	     
 		double tank2PressurePsi = 0.0;
 		try{
-			tank2PressurePsi=Double.parseDouble(tokens[30]);
+			tank2PressurePsi=Double.parseDouble(tokens[30].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double tank2PressureVolts = 0.0;
 		try{
-			tank2PressureVolts=Double.parseDouble(tokens[31]);
+			tank2PressureVolts=Double.parseDouble(tokens[31].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double tank2WaterLevel = 0.0;
 		try{
-			tank2WaterLevel=Double.parseDouble(tokens[32]);
+			tank2WaterLevel=Double.parseDouble(tokens[32].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 	    
-		int operatingStatus = (int) Double.parseDouble(tokens[33]);
-		int digitalStablesUpload = Integer.parseInt(tokens[34]);
-		int secondsSinceLastPulse = Integer.parseInt(tokens[35]);
+		int operatingStatus = (int) Double.parseDouble(tokens[33].replaceAll("\u0000", ""));
+		int digitalStablesUpload = Integer.parseInt(tokens[34].replaceAll("\u0000", ""));
+		int secondsSinceLastPulse = Integer.parseInt(tokens[35].replaceAll("\u0000", ""));
 		int sleepPingMinutes =0;
 		try{
-			sleepPingMinutes=Integer.parseInt(tokens[36]);
+			sleepPingMinutes=Integer.parseInt(tokens[36].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
@@ -150,13 +150,13 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 		
 		double solarvoltage = 0.0;
 		try{
-			solarvoltage=Double.parseDouble(tokens[37]);
+			solarvoltage=Double.parseDouble(tokens[37].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double capacitorvoltage = 0.0;
 		try{
-			capacitorvoltage=Double.parseDouble(tokens[38]);
+			capacitorvoltage=Double.parseDouble(tokens[38].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}

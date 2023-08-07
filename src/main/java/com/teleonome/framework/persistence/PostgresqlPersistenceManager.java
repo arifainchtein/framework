@@ -4440,7 +4440,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			preparedStatement.setString(3, teleonomeName);
 			preparedStatement.setString(4, identityString);
 
-			value = ((String) value).replaceAll("\u0000", "");
+			
 			double d = 0;
 			if(valueType.equals(TeleonomeConstants.DATATYPE_DOUBLE)) {
 
