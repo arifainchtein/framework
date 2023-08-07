@@ -33,7 +33,7 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 			
 		}
 		String flow2name=tokens[11];
-		double qfactor2 = Double.parseDouble(tokens[12]);
+		double qfactor2 = 0;
 		try{
 			qfactor2=Double.parseDouble(tokens[12]);
 		}catch(NumberFormatException e) {
@@ -59,28 +59,100 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 		double temperature = Double.parseDouble(tokens[18]);
 		double rtcBatVolt = Double.parseDouble(tokens[19]);
 		int opMode = Integer.parseInt(tokens[20]);
-		double rssi = Double.parseDouble(tokens[21]);
-		double snr = Double.parseDouble(tokens[22]);
+		double rssi = 0.0;
+		try{
+			rssi=Double.parseDouble(tokens[21]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double snr =0.0;
+		try{
+			snr=Double.parseDouble(tokens[22]);
+		}catch(NumberFormatException e) {
+			
+		}
 	   
-		double flowRate = Double.parseDouble(tokens[23]);
-		int totalMilliLitres = Integer.parseInt(tokens[24]);
-		double flowRate2 = Double.parseDouble(tokens[25]);
-		int totalMilliLitres2 = Integer.parseInt(tokens[26]);
+		double flowRate = 0.0;
 		
-		double tank1PressurePsi = Double.parseDouble(tokens[27]);
-		double tank1PressureVolts = Double.parseDouble(tokens[28]);
-		double tank1WaterLevel = Double.parseDouble(tokens[29]);
+		try{
+			flowRate=Double.parseDouble(tokens[23]);
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		int totalMilliLitres =0;
+		try{
+			totalMilliLitres=Integer.parseInt(tokens[24]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double flowRate2 =0;
+		try{
+			flowRate2=Double.parseDouble(tokens[25]);
+		}catch(NumberFormatException e) {
+			
+		}
+		int totalMilliLitres2 = 90;
+		try{
+			totalMilliLitres2=Integer.parseInt(tokens[26]);
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		double tank1PressurePsi = 0.0;
+		try{
+			tank1PressurePsi=Double.parseDouble(tokens[27]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double tank1PressureVolts = 0.0;
+		try{
+			tank1PressureVolts=Double.parseDouble(tokens[28]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double tank1WaterLevel = 0.0;
+		try{
+			tank1WaterLevel=Double.parseDouble(tokens[29]);
+		}catch(NumberFormatException e) {
+			
+		}
 	     
-		double tank2PressurePsi = Double.parseDouble(tokens[30]);
-		double tank2PressureVolts = Double.parseDouble(tokens[31]);
-		double tank2WaterLevel = Double.parseDouble(tokens[32]);
+		double tank2PressurePsi = 0.0;
+		try{
+			tank2PressurePsi=Double.parseDouble(tokens[30]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double tank2PressureVolts = 0.0;
+		try{
+			tank2PressureVolts=Double.parseDouble(tokens[31]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double tank2WaterLevel = 0.0;
+		try{
+			tank2WaterLevel=Double.parseDouble(tokens[32]);
+		}catch(NumberFormatException e) {
+			
+		}
 	    
 		int operatingStatus = Integer.parseInt(tokens[33]);
 		int digitalStablesUpload = Integer.parseInt(tokens[34]);
 		int secondsSinceLastPulse = Integer.parseInt(tokens[35]);
 		int sleepPingMinutes = Integer.parseInt(tokens[36]);
-		double solarvoltage = Double.parseDouble(tokens[37]);
-		double capacitorvoltage = Double.parseDouble(tokens[38]);
+		double solarvoltage = 0.0;
+		try{
+			solarvoltage=Double.parseDouble(tokens[37]);
+		}catch(NumberFormatException e) {
+			
+		}
+		double capacitorvoltage = 0.0;
+		try{
+			capacitorvoltage=Double.parseDouble(tokens[38]);
+		}catch(NumberFormatException e) {
+			
+		}
 		
 		toReturn.put("Name", deviceName);
 		JSONArray denes = new JSONArray();
