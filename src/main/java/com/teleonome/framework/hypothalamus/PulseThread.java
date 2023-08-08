@@ -90,7 +90,7 @@ public class PulseThread extends Thread{
 				output.write(commandToSend,0,commandToSend.length());
 				output.flush();
 				logger.debug("line 91 waiting for mama to respond1 wait 5000");
-				Thread.sleep(5000);
+				Thread.sleep(1000);
 
 			} catch (IOException e2) {
 				// TODO Auto-generated catch block

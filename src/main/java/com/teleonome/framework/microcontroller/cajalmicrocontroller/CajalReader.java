@@ -41,6 +41,9 @@ public class CajalReader extends BufferedReader{
 	}
 	public void setCurrentCommand(String s) {
 		command=s;
+		
+		logger.debug("sertting , command:" + command);
+		
 	}
 	public String readLine(){
 		logger.debug("about to send readline, command:" + command);
