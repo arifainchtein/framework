@@ -975,7 +975,8 @@ class MappedBusThread extends Thread{
 
 										}else {
 											keepGoing=true;
-											logger.info("counter=" + counter );
+											logger.debug("AsyncCycle is processing " + aMicroController.getName()  + " retrying counter=" + counter);
+											
 										}
 									}
 									if(!keepRunning) {

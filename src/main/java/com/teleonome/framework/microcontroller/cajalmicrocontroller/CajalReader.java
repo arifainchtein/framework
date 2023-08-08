@@ -44,7 +44,7 @@ public class CajalReader extends BufferedReader{
 	}
 	public String readLine(){
 		logger.debug("about to send readline, command:" + command);
-		//if(command.equals(""))return "";
+		if(command.equals(""))return "";
 		
 		String line="", className;
 		int counter=0;
