@@ -23,26 +23,27 @@ public class CajalWriter  extends BufferedWriter{
 
 		public void write(String command, int off, int len) throws IOException {
 
-			if(command.equals("GetSensorData")){
-				aCajalReader.setCurrentCommand(command);
-			}else{
-				try {
-					//
-					// the command is a hash separated string that has the 
-					// following structure:
-					// token[0]=the name of the command to be called
-					// token[1]... token[n] parameters that will be passed with the command 
-					//
-					// as an example to execute the command testping 64
-					// the actuator command true expression would be
-					//testping#64
-					ArrayList<String> results = Utils.executeCommand(command);
-					logger.info("results=" + results);
-				} catch (IOException | InterruptedException e) {
-					// TODO Auto-generated catch block
-					logger.warn(Utils.getStringException(e));
-				}
-			}
+			aCajalReader.setCurrentCommand(command);
+//			if(command.equals("GetSensorData")){
+//				aCajalReader.setCurrentCommand(command);
+//			}else{
+//				try {
+//					//
+//					// the command is a hash separated string that has the 
+//					// following structure:
+//					// token[0]=the name of the command to be called
+//					// token[1]... token[n] parameters that will be passed with the command 
+//					//
+//					// as an example to execute the command testping 64
+//					// the actuator command true expression would be
+//					//testping#64
+//					ArrayList<String> results = Utils.executeCommand(command);
+//					logger.info("results=" + results);
+//				} catch (IOException | InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					logger.warn(Utils.getStringException(e));
+//				}
+//			}
 		}
 
 	}
