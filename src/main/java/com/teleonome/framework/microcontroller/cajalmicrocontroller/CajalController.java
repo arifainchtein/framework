@@ -299,6 +299,8 @@ public class CajalController extends MotherMicroController implements SerialPort
 					logger.info("mother answered =" + inputLine);
 					
 					openAndTested=true;
+					output.close();
+					input.close();
 				}catch(IOException e) {
 					logger.warn(Utils.getStringException(e));
 				}
