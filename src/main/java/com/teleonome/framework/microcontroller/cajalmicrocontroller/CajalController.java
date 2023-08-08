@@ -544,7 +544,8 @@ public class CajalController extends MotherMicroController implements SerialPort
 		input = new CajalReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())), aDenomeManager);
 		String inputLine = input.readLine();
 		logger.debug("receivibg response :"+ inputLine);
-		
+		input.close();
+		output.close();
 		return inputLine;
 	}
 	
