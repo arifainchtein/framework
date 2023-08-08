@@ -46,7 +46,8 @@ public class CajalController extends MotherMicroController implements SerialPort
 	private CajalReader input;
 	//private InputStream input;
 	
-	private BufferedWriter output;
+	//private BufferedWriter output;
+	private CajalWriter output;
 
 	private static final int TIME_OUT = 5000;
 	private int DATA_RATE = 9600;
@@ -282,7 +283,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 				// now open and test it
 				//
 				input = new CajalReader(new BufferedReader(new InputStreamReader(serialPortInputStream)), aDenomeManager);
-				output = new BufferedWriter(new OutputStreamWriter(serialPortOutputStream));
+				output = new CajalWriter(new OutputStreamWriter(serialPortOutputStream),input);
 
 				try{
 					
@@ -340,7 +341,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 
 	public BufferedWriter getWriter() throws IOException{
 		//logger.debug("Arduino uno asking for writer1" );
-		output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
+		output = new CajalWriter(new OutputStreamWriter(serialPort.getOutputStream()),getReader() );
 
 		return output;
 	}
@@ -396,7 +397,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 	@Override
 	public String getCommandCode() throws IOException {
 		// TODO Auto-generated method stub
-		output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
+	//	output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
 		String actuatorCommand = "GetCommandCode";
 		boolean keepGoing=true;
 		String commandCode="";
@@ -430,7 +431,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 	@Override
 	public String getDigitalGeppettoCommandCode() throws IOException {
 		// TODO Auto-generated method stub
-		output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
+		//output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
 		String actuatorCommand = "GetDigitalGeppettoCommandCode";
 		boolean keepGoing=true;
 		String commandCode="";
@@ -530,7 +531,9 @@ public class CajalController extends MotherMicroController implements SerialPort
 	
 	private String sendCommand(String actuatorCommand) throws IOException {
 		// TODO Auto-generated method stub
-		output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
+		input = new CajalReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())), aDenomeManager);
+		
+		output = new CajalWriter(new OutputStreamWriter(serialPort.getOutputStream()),input);
 		logger.debug("sending command:"+ actuatorCommand);
 		output.write(actuatorCommand,0,actuatorCommand.length());
 		//serialPortOutputStream.write( actuatorCommand.getBytes() );
@@ -541,8 +544,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 			e.printStackTrace();
 		}
 		output.flush();
-		input = new CajalReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())), aDenomeManager);
-		String inputLine = input.readLine();
+			String inputLine = input.readLine();
 		logger.debug("receivibg response :"+ inputLine);
 		input.close();
 		output.close();
