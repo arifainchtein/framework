@@ -50,8 +50,8 @@ public class PulseThread extends Thread{
 	private DenomeManager aDenomeManager=null;
 	private boolean persistenceOrganismPulses=false;
 	private boolean persistencePulse=false;
-	BufferedWriter motherOutputStream = null;
-	BufferedReader motherInputStream = null;
+	//BufferedWriter motherOutputStream = null;
+	//BufferedReader motherInputStream = null;
     long pulseProduccionDuration=0;
 	public PulseThread(Hypothalamus t){
 		anHypothalamus = t;
@@ -1178,7 +1178,8 @@ public class PulseThread extends Thread{
 			//  if there is a mother,  let it know that the pulse is done
 			//
 			if(anHypothalamus.motherMicroController!=null) {
-				motherOutputStream = anHypothalamus.motherMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
+				output = anHypothalamus.motherMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
+				input = anHypothalamus.motherMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
 
 				 commandToSend="";
 				cal = Calendar.getInstance();//TimeZone.getTimeZone("GMT+10:00"));
@@ -1189,14 +1190,13 @@ public class PulseThread extends Thread{
 				String inputLine="";
 				do {
 					commandToSend = "PulseFinished#"+anHypothalamus.timeFormatter.format(cal.getTime());
-					motherOutputStream.write(commandToSend,0,commandToSend.length());
-					motherOutputStream.flush();
+					output.write(commandToSend,0,commandToSend.length());
+					output.flush();
 					Thread.sleep(3000);
-					motherInputStream = anHypothalamus.motherMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
 					try {
 
 						//if(motherInputStream.ready()) {
-						inputLine = motherInputStream.readLine();
+						inputLine = input.readLine();
 						logger.info(" telling mama pulse is done received inputLine=" + inputLine);
 						//}
 
@@ -1213,15 +1213,15 @@ public class PulseThread extends Thread{
 				}while(!inputLine.equals("Ok-PulseFinished"));
 
 
-				if(motherInputStream!=null) {
-					logger.info("about to close motherInputStream,="+ motherInputStream);	
-					motherInputStream.close();
-				}
+			//if(motherInputStream!=null) {
+					logger.info("about to close motherInputStream,="+ inputLine);	
+					input.close();
+				//}
 
-				if(motherOutputStream!=null) {
+			//	if(motherOutputStream!=null) {
 					logger.info("about to close motheroutputstream");
-					motherOutputStream.close();
-				}
+					output.close();
+			//	}
 			}
 
 			aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE, System.currentTimeMillis(), TeleonomeConstants.LIFE_CYCLE_EVENT_SYNCHRONOUS_VALUE);
