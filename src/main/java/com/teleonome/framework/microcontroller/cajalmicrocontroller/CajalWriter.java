@@ -13,6 +13,8 @@ public class CajalWriter  extends BufferedWriter{
 		CajalReader aCajalReader;
 		Logger logger;
 		Writer output;
+		long lastCommandTime=0;
+		long minimumIntervalBetweenCommands=2000;
 		
 		public CajalWriter(Writer out, CajalReader c) {
 			super(out);
@@ -32,7 +34,18 @@ public class CajalWriter  extends BufferedWriter{
 			return aCajalReader;
 		}
 		public void write(String command, int off, int len) throws IOException {
-
+			long now=System.currentTimeMillis();
+			long diff = now-lastCommandTime;
+			if(minimumIntervalBetweenCommands>diff) {
+				long sleeptime = minimumIntervalBetweenCommands-diff;
+				logger.debug("Sleeping for " + sleeptime+ "milliseconds before sending command");
+				try {
+					Thread.sleep(sleeptime);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			aCajalReader.setCurrentCommand(command);
 			logger.debug("sending  command:" + command);
 			output.write(command,0,command.length());
