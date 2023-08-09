@@ -45,6 +45,8 @@ public class CajalWriter  extends BufferedWriter{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			}else {
+				logger.debug("Sending command since its been " + diff+ "since the last  command");
 			}
 			aCajalReader.setCurrentCommand(command);
 			logger.debug("sending  command:" + command);
