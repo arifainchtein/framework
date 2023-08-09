@@ -64,9 +64,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 	public void processLifeCycleEvent(String lifeCycleEvent) {
 		// TODO Auto-generated method stub
 		logger.debug("processing life cycle event=" + lifeCycleEvent);
-		BufferedWriter writer;
 		try {
-			writer = getWriter();
 			if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE)) {
 				try {
 					//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE.length());

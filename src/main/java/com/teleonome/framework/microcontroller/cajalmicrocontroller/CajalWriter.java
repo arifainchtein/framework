@@ -22,6 +22,12 @@ public class CajalWriter  extends BufferedWriter{
 			// TODO Auto-generated constructor stub
 		}
 
+		public void close() throws IOException {
+			logger.info("about to close CajalWriter");
+			//String trace = Utils.generateMethodTrace();
+		//	logger.debug(trace);
+			super.close();
+		}
 		public CajalReader getReader() {
 			return aCajalReader;
 		}
