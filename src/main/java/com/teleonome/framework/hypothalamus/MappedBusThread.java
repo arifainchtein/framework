@@ -931,7 +931,7 @@ class MappedBusThread extends Thread{
 									output.write(asyncData,0,asyncData.length());
 									output.flush();
 									try {
-										Thread.sleep(1000);
+										Thread.sleep(2000);
 									} catch (InterruptedException e1) {
 										// TODO Auto-generated catch block
 										e1.printStackTrace();
