@@ -545,20 +545,28 @@ public class CajalController extends MotherMicroController implements SerialPort
 		}
 		output.flush();
 		String inputLine = "";
-		if(input.ready()) {
-			 inputLine = input.readLine();
-		}
-	
-		logger.debug("receivibg response :"+ inputLine);
-		input.close();
-		output.close();
+		boolean keepGoing=true;
+		while(keepGoing) {
+			if(input.ready()) {
+				 inputLine = input.readLine();
+				 logger.debug("receivibg response :"+ inputLine);
+					input.close();
+					output.close();
+					keepGoing=false;
+			}else {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+		
+		
+		
+	
 		return inputLine;
 	}
 	
