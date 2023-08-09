@@ -939,28 +939,27 @@ class MappedBusThread extends Thread{
 									//String inputLine=getInputLine( input);
 									boolean ready = false;
 									
-									gotMessage:
-									for(int ii=0;ii<3;ii++) {
-										ready = input.ready();
-										logger.debug("line 114 input.ready()=" + ready);
-										if(ready) {
-											inputLine = input.readLine();
-											logger.info(" linr 948 received inputLine=" + inputLine);
-											break gotMessage;
-										}else {
-
-											try {
-												Thread.sleep(1000);
-											} catch (InterruptedException e) {
-												// TODO Auto-generated catch block
-												e.printStackTrace();
-											}
+									
+									do{
+										try {
+											Thread.sleep(1000);
+										} catch (InterruptedException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
 										}
+										ready = input.ready();
+										logger.info(" linr 950 ready=" + ready);
+									}while(!ready);
+									
+									if(ready) {
+										inputLine = input.readLine();
+										logger.info(" linr 948 received inputLine=" + inputLine);
 									}
+									
 									if(!keepRunning) {
 										break stop;
 									}
-
+									logger.info(" linr 962 received inputLine=" + inputLine);
 									if(inputLine.startsWith("Ok") || 
 											inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE) ||
 											inputLine.startsWith("Command Not Found") 
@@ -970,7 +969,7 @@ class MappedBusThread extends Thread{
 										counter++;
 										if(counter>maxCounter) {
 											keepGoing=false;
-											logger.info("not ready closing streams" );
+											logger.info("line 972 not ready closing streams" );
 											if(input!=null)input.close();
 											if(output!=null)output.close();
 
@@ -1041,8 +1040,6 @@ class MappedBusThread extends Thread{
 
 
 
-							}else {
-								logger.debug("line 1044 input line not recognized,inputLine=" + inputLine);
 							}
 //							if(input!=null)input.close();
 //							if(output!=null)output.close();

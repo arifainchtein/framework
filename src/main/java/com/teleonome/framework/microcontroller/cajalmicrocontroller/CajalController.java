@@ -539,7 +539,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 		output.flush();
 		String inputLine = "";
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(2000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -556,7 +556,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 			}else {
 				try {
 					logger.debug("not ready sleeping 500");
-					Thread.sleep(1000);
+					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
