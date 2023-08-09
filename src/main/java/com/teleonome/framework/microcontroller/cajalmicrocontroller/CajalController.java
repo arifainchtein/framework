@@ -247,58 +247,58 @@ public class CajalController extends MotherMicroController implements SerialPort
 
 			serialPort.addEventListener(this);
 			serialPort.notifyOnDataAvailable(true);
-			
-			do {
-				
-
-				///serialPort..write().write(InetAddress.getLocalHost().toString().t());
-				serialPortInputStream = serialPort.getInputStream();
-				serialPortOutputStream = serialPort.getOutputStream();
-
-				if (serialPortInputStream == null) {
-					System.out.println("serialPortInputStream is null.");
-					logger.warn("serialPortInputStream is null.");
-					throw new SerialPortCommunicationException("SerialPortInputStream is null");
-				}
-
-				if (serialPortOutputStream == null) {
-					System.out.println("serialPortOutputStream is null.");
-					logger.warn("serialPortOutputStream is null.");
-					throw new SerialPortCommunicationException("SerialPortOutputStream is null");
-				}
-				
-				//
-				// now open and test it
-				//
-				input = new CajalReader(new BufferedReader(new InputStreamReader(serialPortInputStream)), aDenomeManager);
-				output = new CajalWriter(new OutputStreamWriter(serialPortOutputStream),input);
-
-				try{
-					
-					logger.info("About to ping");
-					String actuatorCommand="Ping";
-					output.write(actuatorCommand,0,actuatorCommand.length());
-					//serialPortOutputStream.write( actuatorCommand.getBytes() );
-					Thread.sleep(1000);
-					output.flush();
-					logger.info("waiting for mother to answer" );
-					
-					String inputLine = input.readLine();
-					logger.info("mother answered =" + inputLine);
-					
-					openAndTested=true;
-					output.close();
-					input.close();
-				}catch(IOException e) {
-					logger.warn(Utils.getStringException(e));
-				}
-				if(!openAndTested) {
-					logger.warn("Ping Failed, retrying in 10 secs, counter="+counter );
-					counter++;
-					//serialPort.close();
-					Thread.sleep(10000);
-				}
-			}while(!openAndTested);
+			connectToSerialPort();
+//			do {
+//				
+//
+//				///serialPort..write().write(InetAddress.getLocalHost().toString().t());
+//				serialPortInputStream = serialPort.getInputStream();
+//				serialPortOutputStream = serialPort.getOutputStream();
+//
+//				if (serialPortInputStream == null) {
+//					System.out.println("serialPortInputStream is null.");
+//					logger.warn("serialPortInputStream is null.");
+//					throw new SerialPortCommunicationException("SerialPortInputStream is null");
+//				}
+//
+//				if (serialPortOutputStream == null) {
+//					System.out.println("serialPortOutputStream is null.");
+//					logger.warn("serialPortOutputStream is null.");
+//					throw new SerialPortCommunicationException("SerialPortOutputStream is null");
+//				}
+//				
+//				//
+//				// now open and test it
+//				//
+//				input = new CajalReader(new BufferedReader(new InputStreamReader(serialPortInputStream)), aDenomeManager);
+//				output = new CajalWriter(new OutputStreamWriter(serialPortOutputStream),input);
+//
+//				try{
+//					
+//					logger.info("About to ping");
+//					String actuatorCommand="Ping";
+//					output.write(actuatorCommand,0,actuatorCommand.length());
+//					//serialPortOutputStream.write( actuatorCommand.getBytes() );
+//					Thread.sleep(1000);
+//					output.flush();
+//					logger.info("waiting for mother to answer" );
+//					
+//					String inputLine = input.readLine();
+//					logger.info("mother answered =" + inputLine);
+//					
+//					openAndTested=true;
+//					output.close();
+//					input.close();
+//				}catch(IOException e) {
+//					logger.warn(Utils.getStringException(e));
+//				}
+//				if(!openAndTested) {
+//					logger.warn("Ping Failed, retrying in 10 secs, counter="+counter );
+//					counter++;
+//					//serialPort.close();
+//					Thread.sleep(10000);
+//				}
+//			}while(!openAndTested);
 			
 			
 			//
@@ -317,6 +317,74 @@ public class CajalController extends MotherMicroController implements SerialPort
 		}
 	}
 
+	private void closeSerialPort() {
+		serialPort.close();
+	}
+	private void connectToSerialPort() throws IOException, SerialPortCommunicationException {
+		boolean openAndTested=false;
+		int counter=0;
+		do {
+			
+
+			///serialPort..write().write(InetAddress.getLocalHost().toString().t());
+			serialPortInputStream = serialPort.getInputStream();
+			serialPortOutputStream = serialPort.getOutputStream();
+
+			if (serialPortInputStream == null) {
+				System.out.println("serialPortInputStream is null.");
+				logger.warn("serialPortInputStream is null.");
+				throw new SerialPortCommunicationException("SerialPortInputStream is null");
+			}
+
+			if (serialPortOutputStream == null) {
+				System.out.println("serialPortOutputStream is null.");
+				logger.warn("serialPortOutputStream is null.");
+				throw new SerialPortCommunicationException("SerialPortOutputStream is null");
+			}
+			
+			//
+			// now open and test it
+			//
+			input = new CajalReader(new BufferedReader(new InputStreamReader(serialPortInputStream)), aDenomeManager);
+			output = new CajalWriter(new OutputStreamWriter(serialPortOutputStream),input);
+
+			try{
+				
+				logger.info("About to ping");
+				String actuatorCommand="Ping";
+				output.write(actuatorCommand,0,actuatorCommand.length());
+				//serialPortOutputStream.write( actuatorCommand.getBytes() );
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				output.flush();
+				logger.info("waiting for mother to answer" );
+				
+				String inputLine = input.readLine();
+				logger.info("mother answered =" + inputLine);
+				
+				openAndTested=true;
+				output.close();
+				input.close();
+			}catch(IOException e) {
+				logger.warn(Utils.getStringException(e));
+			}
+			if(!openAndTested) {
+				logger.warn("Ping Failed, retrying in 10 secs, counter="+counter );
+				counter++;
+				//serialPort.close();
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}while(!openAndTested);
+	}
 	public CajalReader getReader() throws IOException{
 		//logger.debug("Arduino uno asking for reader" );
 		//String trace = Utils.generateMethodTrace();
@@ -527,6 +595,8 @@ public class CajalController extends MotherMicroController implements SerialPort
 		out.write(actuatorCommand,0,actuatorCommand.length());
 		out.flush();
 		String inputLine = "";
+		int retriesCounter=0;
+		int numberRetriesdBeforeReconnection=10;
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
@@ -544,9 +614,20 @@ public class CajalController extends MotherMicroController implements SerialPort
 					keepGoing=false;
 			}else {
 				try {
-					logger.debug("not ready sleeping 500");
+					logger.debug("not ready sleeping 500 retriesCounter=" + retriesCounter);
+					retriesCounter++;
+					if(retriesCounter>numberRetriesdBeforeReconnection) {
+						retriesCounter=0;
+						logger.debug("restarting serialport connection");
+						closeSerialPort();
+						connectToSerialPort();
+						logger.debug("restarted serialport connection");
+					}
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SerialPortCommunicationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
