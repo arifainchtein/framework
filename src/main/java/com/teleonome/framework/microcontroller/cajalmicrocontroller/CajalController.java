@@ -64,51 +64,46 @@ public class CajalController extends MotherMicroController implements SerialPort
 	public void processLifeCycleEvent(String lifeCycleEvent) {
 		// TODO Auto-generated method stub
 		logger.debug("processing life cycle event=" + lifeCycleEvent);
-		try {
-			if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE)) {
-				try {
-					//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE.length());
-					sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					logger.warn(Utils.getStringException(e));
-				}
-			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE)) {
-				try {
-					sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE);
-					//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE.length());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					logger.warn(Utils.getStringException(e));
-				}
-			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE)) {
-				try {
-					sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE);
-				//	writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE.length());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					logger.warn(Utils.getStringException(e));
-				}
-			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE)) {
-				try {
-					sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE);
-					//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE.length());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					logger.warn(Utils.getStringException(e));
-				}
-			}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE)) {
-				try {
-					sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE);
-				//	writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE.length());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					logger.warn(Utils.getStringException(e));
-				}
+		if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE)) {
+			try {
+				//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE.length());
+				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
 			}
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE)) {
+			try {
+				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE);
+				//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE.length());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE)) {
+			try {
+				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE);
+			//	writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE.length());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE)) {
+			try {
+				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE);
+				//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE.length());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE)) {
+			try {
+				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE);
+			//	writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE.length());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
 		}
 		
 		
@@ -529,12 +524,13 @@ public class CajalController extends MotherMicroController implements SerialPort
 	
 	private String sendCommand(String actuatorCommand) throws IOException {
 		// TODO Auto-generated method stub
-		input = new CajalReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())), aDenomeManager);
+		BufferedWriter out =getWriter();
+		input = getReader();//new CajalReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())), aDenomeManager);
 		
-		output = new CajalWriter(new OutputStreamWriter(serialPort.getOutputStream()),input);
+		//output = new CajalWriter(new OutputStreamWriter(serialPort.getOutputStream()),input);
 		logger.debug("sending command:"+ actuatorCommand);
-		output.write(actuatorCommand,0,actuatorCommand.length());
-		output.flush();
+		out.write(actuatorCommand,0,actuatorCommand.length());
+		out.flush();
 		String inputLine = "";
 		try {
 			Thread.sleep(2000);
@@ -549,7 +545,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 				 inputLine = input.readLine();
 				 logger.debug("receivibg response :"+ inputLine);
 					input.close();
-					output.close();
+					out.close();
 					keepGoing=false;
 			}else {
 				try {
