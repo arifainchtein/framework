@@ -481,6 +481,7 @@ public class PulseThread extends Thread{
 			// check if there is a mother, if there is, let it know that we are starting a pulse
 			//
 			logger.debug("motherMicroController=" + anHypothalamus.motherMicroController);
+			/*
 			if(anHypothalamus.motherMicroController!=null) {
 				output = anHypothalamus.motherMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
 				input = anHypothalamus.motherMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
@@ -491,6 +492,7 @@ public class PulseThread extends Thread{
 
 				
 				String now;
+				
 				boolean waitingForMama=true;
 				do {
 					try {
@@ -525,6 +527,7 @@ public class PulseThread extends Thread{
 				input.close();
 				output.close();
 			}
+			*/
 
 			aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE,System.currentTimeMillis(), TeleonomeConstants.LIFE_CYCLE_EVENT_SYNCHRONOUS_VALUE);
 			Calendar cal = Calendar.getInstance();
@@ -1177,6 +1180,9 @@ public class PulseThread extends Thread{
 			//
 			//  if there is a mother,  let it know that the pulse is done
 			//
+			// hree starts
+			// xxx
+			/*
 			if(anHypothalamus.motherMicroController!=null) {
 				output = anHypothalamus.motherMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
 				input = anHypothalamus.motherMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
@@ -1224,6 +1230,8 @@ public class PulseThread extends Thread{
 					output.close();
 			//	}
 			}
+			*/
+			// xxx
 
 			aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE, System.currentTimeMillis(), TeleonomeConstants.LIFE_CYCLE_EVENT_SYNCHRONOUS_VALUE);
 			
