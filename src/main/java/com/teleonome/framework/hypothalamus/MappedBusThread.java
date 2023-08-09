@@ -925,6 +925,7 @@ class MappedBusThread extends Thread{
 							do {
 								try {
 									output = aMicroController.getWriter();
+									input = aMicroController.getReader();
 									logger.debug("requesting asyncdata");
 									output.write(asyncData,0,asyncData.length());
 									output.flush();
@@ -935,7 +936,7 @@ class MappedBusThread extends Thread{
 										e1.printStackTrace();
 									}
 									inputLine="";
-									input = aMicroController.getReader();
+									
 									//String inputLine=getInputLine( input);
 									boolean ready = false;
 									
