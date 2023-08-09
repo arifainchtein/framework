@@ -902,7 +902,7 @@ class MappedBusThread extends Thread{
 					break stop;
 				}
 				String asyncData="AsyncData";
-				logger.debug("line 685 microControllerPointerMicroControllerIndex=" + hypothalamus.microControllerPointerMicroControllerIndex);
+			//	logger.debug("line 685 microControllerPointerMicroControllerIndex=" + hypothalamus.microControllerPointerMicroControllerIndex);
 				long asyncRequestDelayMillis=0;
 				for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
 					microControllerPointer = (String)en.nextElement();
@@ -1044,8 +1044,8 @@ class MappedBusThread extends Thread{
 							}else {
 								logger.debug("line 1044 input line not recognized,inputLine=" + inputLine);
 							}
-							if(input!=null)input.close();
-							if(output!=null)output.close();
+//							if(input!=null)input.close();
+//							if(output!=null)output.close();
 
 
 							//}else {
