@@ -848,6 +848,7 @@ public class PulseThread extends Thread{
 				//output.flush();
 				//microprocessorResponse = input.readLine();
 				input.close();
+				output.close();
 			}
 			executedFirstPulseSinceReboot=true;
 
