@@ -22,6 +22,9 @@ public class CajalWriter  extends BufferedWriter{
 			// TODO Auto-generated constructor stub
 		}
 
+		public CajalReader getReader() {
+			return aCajalReader;
+		}
 		public void write(String command, int off, int len) throws IOException {
 
 			aCajalReader.setCurrentCommand(command);
