@@ -536,15 +536,15 @@ public class CajalController extends MotherMicroController implements SerialPort
 		output = new CajalWriter(new OutputStreamWriter(serialPort.getOutputStream()),input);
 		logger.debug("sending command:"+ actuatorCommand);
 		output.write(actuatorCommand,0,actuatorCommand.length());
-		//serialPortOutputStream.write( actuatorCommand.getBytes() );
+		output.flush();
+		String inputLine = "";
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		output.flush();
-		String inputLine = "";
+		 logger.debug("about to ask fore resppmse response ");
 		boolean keepGoing=true;
 		while(keepGoing) {
 			if(input.ready()) {
@@ -555,13 +555,13 @@ public class CajalController extends MotherMicroController implements SerialPort
 					keepGoing=false;
 			}else {
 				try {
+					logger.debug("not ready sleeping 500");
 					Thread.sleep(500);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-		
 		}
 		
 		
