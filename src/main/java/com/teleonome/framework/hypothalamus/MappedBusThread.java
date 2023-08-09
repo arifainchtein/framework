@@ -902,7 +902,7 @@ class MappedBusThread extends Thread{
 					break stop;
 				}
 				String asyncData="AsyncData";
-			//	logger.debug("line 685 microControllerPointerMicroControllerIndex=" + hypothalamus.microControllerPointerMicroControllerIndex);
+			   logger.debug("line 905 doing asyncdata");
 				long asyncRequestDelayMillis=0;
 				for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
 					microControllerPointer = (String)en.nextElement();
@@ -953,7 +953,7 @@ class MappedBusThread extends Thread{
 									
 									if(ready) {
 										inputLine = input.readLine();
-										logger.info(" linr 948 received inputLine=" + inputLine);
+										logger.info(" linr 956 received inputLine=" + inputLine);
 									}
 									
 									if(!keepRunning) {
@@ -965,6 +965,7 @@ class MappedBusThread extends Thread{
 											inputLine.startsWith("Command Not Found") 
 											) {
 										keepGoing=false;
+										logger.info(" line 968 set keep goping top false keepRunning="+ keepRunning );
 									}else {
 										counter++;
 										if(counter>maxCounter) {
@@ -994,6 +995,7 @@ class MappedBusThread extends Thread{
 								}
 							}while(keepGoing);
 
+							logger.info("liune 998");
 							input.close();
 							output.close();
 							if(!keepRunning) {
@@ -1076,7 +1078,7 @@ class MappedBusThread extends Thread{
 					break stop;
 				}
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
@@ -1084,13 +1086,13 @@ class MappedBusThread extends Thread{
 			}
 
 		logger.debug("existing run method of mapbusthread");
-		try {
-			if(input!=null)input.close();
-			if(output!=null)output.close();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+//		try {
+//			if(input!=null)input.close();
+//			if(output!=null)output.close();
+//		} catch (IOException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 		hypothalamus.aDenomeManager.storeLifeCycleEvent(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE, System.currentTimeMillis(),TeleonomeConstants.LIFE_CYCLE_EVENT_ASYNCHRONOUS_VALUE);
 
 	}
