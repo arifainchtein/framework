@@ -1197,6 +1197,8 @@ public class PulseThread extends Thread{
 						if(input.ready()) {
 							inputLine = input.readLine();
 							logger.info(" telling mama pulse is done received inputLine=" + inputLine);
+						}else {
+								Thread.sleep(1000);
 						}
 
 					}catch(IOException e) {
