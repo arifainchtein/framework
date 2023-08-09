@@ -938,13 +938,14 @@ class MappedBusThread extends Thread{
 									input = aMicroController.getReader();
 									//String inputLine=getInputLine( input);
 									boolean ready = false;
-									logger.debug("line 114 input.ready()=" + ready);
+									
 									gotMessage:
 									for(int ii=0;ii<3;ii++) {
 										ready = input.ready();
+										logger.debug("line 114 input.ready()=" + ready);
 										if(ready) {
 											inputLine = input.readLine();
-											logger.info("received inputLine=" + inputLine);
+											logger.info(" linr 948 received inputLine=" + inputLine);
 											break gotMessage;
 										}else {
 
@@ -1041,7 +1042,7 @@ class MappedBusThread extends Thread{
 
 
 							}else {
-								logger.debug("line 1044input line not recognized");
+								logger.debug("line 1044 input line not recognized,inputLine=" + inputLine);
 							}
 							if(input!=null)input.close();
 							if(output!=null)output.close();
