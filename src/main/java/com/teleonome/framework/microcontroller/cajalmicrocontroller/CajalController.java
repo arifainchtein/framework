@@ -63,7 +63,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 	
 	public void processLifeCycleEvent(String lifeCycleEvent) {
 		// TODO Auto-generated method stub
-		logger.debug("1-processing life cycle even=t=" + lifeCycleEvent);
+		logger.debug("processing life cycle event=" + lifeCycleEvent);
 		BufferedWriter writer;
 		try {
 			writer = getWriter();
@@ -556,7 +556,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 			}else {
 				try {
 					logger.debug("not ready sleeping 500");
-					Thread.sleep(500);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
