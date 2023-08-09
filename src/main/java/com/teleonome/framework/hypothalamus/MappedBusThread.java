@@ -472,7 +472,7 @@ class MappedBusThread extends Thread{
 					//
 					// now do the mutation commands
 					//
-					logger.debug("line 474 starting the mutation commands" );
+					logger.debug("line 474 starting the mutation commands witjh " + mutationCommands.size() + " to execute");
 					for(int k=0;k<mutationCommands.size();k++) {
 						try {
 							messageToSend = mutationCommands.get(k);
@@ -824,7 +824,7 @@ class MappedBusThread extends Thread{
 				//
 				do {
 					aCommandRequest = hypothalamus.aDenomeManager.getNextCommandToExecute();
-					logger.debug("line 613 next command to execute= " + aCommandRequest);
+					logger.debug("line 613 Executing Commands next command to execute= " + aCommandRequest);
 					dataPayloadJSONObject = null;
 					if(aCommandRequest!=null){
 						command = aCommandRequest.getCommand();
@@ -902,7 +902,7 @@ class MappedBusThread extends Thread{
 					break stop;
 				}
 				String asyncData="AsyncData";
-			   logger.debug("line 905 doing asyncdata");
+			   logger.debug("line 905 Executing AsyncData");
 				long asyncRequestDelayMillis=0;
 				for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
 					microControllerPointer = (String)en.nextElement();
