@@ -28,6 +28,7 @@ public class CajalWriter  extends BufferedWriter{
 		public void write(String command, int off, int len) throws IOException {
 
 			aCajalReader.setCurrentCommand(command);
+			logger.debug("sending  command:" + command);
 			output.write(command,0,command.length());
 //			if(command.equals("GetSensorData")){
 //				aCajalReader.setCurrentCommand(command);
