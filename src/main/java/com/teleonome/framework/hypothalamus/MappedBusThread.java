@@ -920,6 +920,7 @@ class MappedBusThread extends Thread{
 							//   logger.debug("about to call readline");
 							String inputLine = "";
 							keepGoing=true;
+							boolean ready;
 							counter=0;
 							maxCounter=2;
 							do {
@@ -936,20 +937,17 @@ class MappedBusThread extends Thread{
 										e1.printStackTrace();
 									}
 									inputLine="";
-									
-									//String inputLine=getInputLine( input);
-									boolean ready = false;
-									
+									ready = false;
 									
 									do{
 										try {
-											Thread.sleep(1000);
+											Thread.sleep(2000);
 										} catch (InterruptedException e) {
 											// TODO Auto-generated catch block
 											e.printStackTrace();
 										}
 										ready = input.ready();
-										logger.info(" linr 950 ready=" + ready);
+										logger.info(" line 950 ready=" + ready);
 									}while(!ready);
 									
 									if(ready) {
