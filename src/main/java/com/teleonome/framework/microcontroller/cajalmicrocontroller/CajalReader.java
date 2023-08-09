@@ -88,6 +88,7 @@ public class CajalReader extends BufferedReader{
 				// now process
 			}catch(IOException e) {
 				logger.warn("Exception reading line, counter=" + counter);
+				logger.warn(Utils.getStringException(e));
 				counter++;
 			}
 			if(counter>maxTries) {
