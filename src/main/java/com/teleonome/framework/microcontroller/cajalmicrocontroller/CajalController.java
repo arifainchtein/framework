@@ -544,7 +544,11 @@ public class CajalController extends MotherMicroController implements SerialPort
 			e.printStackTrace();
 		}
 		output.flush();
-			String inputLine = input.readLine();
+		String inputLine = "";
+		if(input.ready()) {
+			 inputLine = input.readLine();
+		}
+	
 		logger.debug("receivibg response :"+ inputLine);
 		input.close();
 		output.close();
