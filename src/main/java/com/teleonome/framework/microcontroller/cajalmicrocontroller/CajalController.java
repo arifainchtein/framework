@@ -72,26 +72,26 @@ public class CajalController extends MotherMicroController implements SerialPort
 				logger.warn(Utils.getStringException(e));
 			}
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE)) {
+			try {
+				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+			}
+		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE)) {
 //			try {
-//				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE);
+//				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE);
 //			} catch (IOException e) {
 //				// TODO Auto-generated catch block
 //				logger.warn(Utils.getStringException(e));
 //			}
-		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE)) {
-			try {
-				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
-			}
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE)) {
-			try {
-				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
-			}
+//			try {
+//				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				logger.warn(Utils.getStringException(e));
+//			}
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE)) {
 			try {
 				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE);
@@ -616,18 +616,15 @@ public class CajalController extends MotherMicroController implements SerialPort
 				try {
 					logger.debug("not ready sleeping 500 retriesCounter=" + retriesCounter);
 					retriesCounter++;
-					if(retriesCounter>numberRetriesdBeforeReconnection) {
-						retriesCounter=0;
-						logger.debug("restarting serialport connection");
-						closeSerialPort();
-						connectToSerialPort();
-						logger.debug("restarted serialport connection");
-					}
+//					if(retriesCounter>numberRetriesdBeforeReconnection) {
+//						retriesCounter=0;
+//						logger.debug("restarting serialport connection");
+//						closeSerialPort();
+//						connectToSerialPort();
+//						logger.debug("restarted serialport connection");
+//					}
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SerialPortCommunicationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
