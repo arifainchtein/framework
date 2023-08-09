@@ -272,7 +272,7 @@ public class PulseThread extends Thread{
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e));
 			}
-
+			waitingForMama=true;
 			long now = System.currentTimeMillis();
 			while(waitingForMama) {
 				try {
