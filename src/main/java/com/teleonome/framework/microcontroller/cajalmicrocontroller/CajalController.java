@@ -332,7 +332,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 	public CajalReader getReader() throws IOException{
 		//logger.debug("Arduino uno asking for reader" );
 		//String trace = Utils.generateMethodTrace();
-		//logger.debug(trace);
+		logger.debug("line 335 getting reader");
 		return output.getReader();
 	}
 	
@@ -342,7 +342,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 		//logger.debug("Arduino uno asking for writer1" );
 		input = new CajalReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())), aDenomeManager);
 		output = new CajalWriter(new OutputStreamWriter(serialPort.getOutputStream()),input );
-
+		logger.debug("line 345 getting writer");
 		return output;
 	}
 
