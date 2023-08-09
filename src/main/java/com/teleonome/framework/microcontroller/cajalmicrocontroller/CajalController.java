@@ -66,7 +66,6 @@ public class CajalController extends MotherMicroController implements SerialPort
 		logger.debug("processing life cycle event=" + lifeCycleEvent);
 		if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE)) {
 			try {
-				//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE.length());
 				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -75,23 +74,20 @@ public class CajalController extends MotherMicroController implements SerialPort
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE)) {
 			try {
 				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE);
-				//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE.length());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e));
 			}
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE)) {
-			try {
-				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE);
-			//	writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE.length());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
-			}
+//			try {
+//				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				logger.warn(Utils.getStringException(e));
+//			}
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE)) {
 			try {
 				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE);
-				//writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE.length());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e));
@@ -99,7 +95,6 @@ public class CajalController extends MotherMicroController implements SerialPort
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE)) {
 			try {
 				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE);
-			//	writer.write(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE, 0, TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE.length());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				logger.warn(Utils.getStringException(e));
