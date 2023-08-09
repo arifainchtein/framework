@@ -262,8 +262,8 @@ public class PulseThread extends Thread{
 
 				output.write(commandToSend,0,commandToSend.length());
 				output.flush();
-				logger.info("waiting for mama to respond2 wait 5000");
-				Thread.sleep(5000);
+				logger.info("waiting for mama to respond2 wait 1000");
+				Thread.sleep(1000);
 
 			} catch (IOException e2) {
 				// TODO Auto-generated catch block
