@@ -1041,7 +1041,7 @@ class MappedBusThread extends Thread{
 
 
 							}else {
-								logger.debug("input line not recognized");
+								logger.debug("line 1044input line not recognized");
 							}
 							if(input!=null)input.close();
 							if(output!=null)output.close();

@@ -549,6 +549,12 @@ public class CajalController extends MotherMicroController implements SerialPort
 		input.close();
 		output.close();
 		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return inputLine;
 	}
 	
