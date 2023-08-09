@@ -1192,13 +1192,12 @@ public class PulseThread extends Thread{
 					commandToSend = "PulseFinished#"+anHypothalamus.timeFormatter.format(cal.getTime());
 					output.write(commandToSend,0,commandToSend.length());
 					output.flush();
-					Thread.sleep(3000);
+					Thread.sleep(1000);
 					try {
-
-						//if(motherInputStream.ready()) {
-						inputLine = input.readLine();
-						logger.info(" telling mama pulse is done received inputLine=" + inputLine);
-						//}
+						if(input.ready()) {
+							inputLine = input.readLine();
+							logger.info(" telling mama pulse is done received inputLine=" + inputLine);
+						}
 
 					}catch(IOException e) {
 						logger.warn(Utils.getStringException(e));
