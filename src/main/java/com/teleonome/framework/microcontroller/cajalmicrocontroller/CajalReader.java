@@ -78,7 +78,7 @@ public class CajalReader extends BufferedReader{
 						String telepathonName = telephathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
 						aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
 						aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telephathon);
-						keepGoing=false;
+						
 					} catch (ServletProcessingException e) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e));
