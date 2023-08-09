@@ -812,44 +812,65 @@ public class PulseThread extends Thread{
 			logger.debug("microControllerPointerProcessingQueuePositionIndex=" + microControllerPointerProcessingQueuePositionIndex.size());
 
 			long  startMicroController= System.currentTimeMillis();
-
 			
-			for (Map.Entry<String, Integer> entry : microControllerPointerProcessingQueuePositionIndex) {
-				microControllerPointer = (String)entry.getKey();
-				logger.debug("line 651   microControllerPointer=" + microControllerPointer);
-				aMicroController = (MicroController)anHypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
-				aMicroControllerName = aMicroController.getName();
-				logger.debug("line 654 aMicroControllerName=" + aMicroControllerName );
-				anHypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_PULSE_STATUS_INFO, "Processing MicroController " + aMicroControllerName);
-
-				output = aMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
-				input = aMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
-				
-
-				if(!executedFirstPulseSinceReboot){
-					//public static final String DENE_TYPE_ON_START_ACTION = "On Start Action";
-					//public static final String DENE_TYPE_ON_START_SENSOR = "On Start Sensor";
-					sensorRequestQueuePositionDeneWordIndex = this.aDenomeManager.getSensorsDeneWordsBySensorRequestQueuePositionForInitialByMicroControllerPointer( microControllerPointer);
-					actuatorExecutionPositionDeneIndex = this.aDenomeManager.getActuatorExecutionPositionDeneForInitialByMicroControllerPointerIndex(microControllerPointer);
-					logger.debug("line 1858 processing initial actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
-					logger.info("In Initial Sensors and Actions,starting to process MicroController  " + aMicroController.getName());
-
-					processMicroProcessor(aMicroController, teleonomeName, sensorRequestQueuePositionDeneWordIndex, actuatorExecutionPositionDeneIndex, input, output, true);
-				}
-				sensorRequestQueuePositionDeneWordIndex = this.aDenomeManager.getSensorsDeneWordsBySensorRequestQueuePositionByMicroControllerPointer( microControllerPointer);
-				actuatorExecutionPositionDeneIndex = this.aDenomeManager.getActuatorExecutionPositionDeneByMicroControllerPointerIndex(microControllerPointer);
-				//logger.debug("line 1871 processing microcontroller normal sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex + " actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
-				logger.info("starting to process MicroController  " + aMicroController.getName());
-				logger.debug("line 697 processing microcontroller normal actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
-				
-				processMicroProcessor(aMicroController, teleonomeName,sensorRequestQueuePositionDeneWordIndex, actuatorExecutionPositionDeneIndex, input, output, false);
-
-				//output.write(TeleonomeConstants.PULSE_STATUS_FINISHED,0,TeleonomeConstants.PULSE_STATUS_FINISHED.length());
-				//output.flush();
-				//microprocessorResponse = input.readLine();
-				input.close();
-				output.close();
+			boolean sensorOperonActive=false;;
+			try {
+				Identity sensorOperonActiveIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_OPERONS,TeleonomeConstants.DENE_OPERON_CONTROL, TeleonomeConstants.DENEWORD_SENSORS_ACTIVE);
+				Identity actuatorOperonActiveIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_OPERONS,TeleonomeConstants.DENE_OPERON_CONTROL, TeleonomeConstants.DENEWORD_ACTUATORS_ACTIVE);
+			
+				sensorOperonActive = (boolean) aDenomeManager.getDeneWordAttributeByIdentity(sensorOperonActiveIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			} catch (InvalidDenomeException | JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
+
+			boolean actuatorOperonActive=false;
+			Identity actuatorOperonActiveIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_OPERONS,TeleonomeConstants.DENE_OPERON_CONTROL, TeleonomeConstants.DENEWORD_ACTUATORS_ACTIVE);
+			try {
+				actuatorOperonActive = (boolean) aDenomeManager.getDeneWordAttributeByIdentity(actuatorOperonActiveIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+			} catch (InvalidDenomeException | JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			if(sensorOperonActive || actuatorOperonActive ) {
+				for (Map.Entry<String, Integer> entry : microControllerPointerProcessingQueuePositionIndex) {
+					microControllerPointer = (String)entry.getKey();
+					logger.debug("line 651   microControllerPointer=" + microControllerPointer);
+					aMicroController = (MicroController)anHypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
+					aMicroControllerName = aMicroController.getName();
+					logger.debug("line 654 aMicroControllerName=" + aMicroControllerName );
+					anHypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_PULSE_STATUS_INFO, "Processing MicroController " + aMicroControllerName);
+
+					output = aMicroController.getWriter();//new OutputStreamWriter(serialPort.getOutputStream());
+					input = aMicroController.getReader();//new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
+					
+
+					if(!executedFirstPulseSinceReboot){
+						//public static final String DENE_TYPE_ON_START_ACTION = "On Start Action";
+						//public static final String DENE_TYPE_ON_START_SENSOR = "On Start Sensor";
+						sensorRequestQueuePositionDeneWordIndex = this.aDenomeManager.getSensorsDeneWordsBySensorRequestQueuePositionForInitialByMicroControllerPointer( microControllerPointer);
+						actuatorExecutionPositionDeneIndex = this.aDenomeManager.getActuatorExecutionPositionDeneForInitialByMicroControllerPointerIndex(microControllerPointer);
+						logger.debug("line 1858 processing initial actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
+						logger.info("In Initial Sensors and Actions,starting to process MicroController  " + aMicroController.getName());
+
+						processMicroProcessor(aMicroController, teleonomeName, sensorRequestQueuePositionDeneWordIndex, actuatorExecutionPositionDeneIndex, input, output, true);
+					}
+					sensorRequestQueuePositionDeneWordIndex = this.aDenomeManager.getSensorsDeneWordsBySensorRequestQueuePositionByMicroControllerPointer( microControllerPointer);
+					actuatorExecutionPositionDeneIndex = this.aDenomeManager.getActuatorExecutionPositionDeneByMicroControllerPointerIndex(microControllerPointer);
+					//logger.debug("line 1871 processing microcontroller normal sensorRequestQueuePositionDeneWordIndex=" + sensorRequestQueuePositionDeneWordIndex + " actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
+					logger.info("starting to process MicroController  " + aMicroController.getName());
+					logger.debug("line 697 processing microcontroller normal actuatorExecutionPositionDeneIndex=" + actuatorExecutionPositionDeneIndex);
+					
+					processMicroProcessor(aMicroController, teleonomeName,sensorRequestQueuePositionDeneWordIndex, actuatorExecutionPositionDeneIndex, input, output, false);
+
+					//output.write(TeleonomeConstants.PULSE_STATUS_FINISHED,0,TeleonomeConstants.PULSE_STATUS_FINISHED.length());
+					//output.flush();
+					//microprocessorResponse = input.readLine();
+					input.close();
+					output.close();
+				}
+			}
+			
 			executedFirstPulseSinceReboot=true;
 
 
@@ -1361,7 +1382,7 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 	boolean actuatorOperonActive=false;
 	Identity actuatorOperonActiveIdentity = new Identity(teleonomeName,TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_OPERONS,TeleonomeConstants.DENE_OPERON_CONTROL, TeleonomeConstants.DENEWORD_ACTUATORS_ACTIVE);
 	try {
-		actuatorOperonActive = (boolean) aDenomeManager.getDeneWordAttributeByIdentity(sensorOperonActiveIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+		actuatorOperonActive = (boolean) aDenomeManager.getDeneWordAttributeByIdentity(actuatorOperonActiveIdentity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 	} catch (InvalidDenomeException | JSONException e1) {
 		// TODO Auto-generated catch block
 		e1.printStackTrace();
