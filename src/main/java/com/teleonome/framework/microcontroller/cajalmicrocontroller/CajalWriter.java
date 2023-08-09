@@ -12,11 +12,12 @@ public class CajalWriter  extends BufferedWriter{
 
 		CajalReader aCajalReader;
 		Logger logger;
-		
+		Writer output;
 		
 		public CajalWriter(Writer out, CajalReader c) {
 			super(out);
 			aCajalReader=c;
+			output=out;
 			logger = Logger.getLogger(getClass());
 			// TODO Auto-generated constructor stub
 		}
@@ -24,6 +25,7 @@ public class CajalWriter  extends BufferedWriter{
 		public void write(String command, int off, int len) throws IOException {
 
 			aCajalReader.setCurrentCommand(command);
+			output.write(command,0,command.length());
 //			if(command.equals("GetSensorData")){
 //				aCajalReader.setCurrentCommand(command);
 //			}else{
