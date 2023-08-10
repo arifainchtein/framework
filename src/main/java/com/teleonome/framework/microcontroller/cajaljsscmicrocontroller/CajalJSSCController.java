@@ -175,69 +175,21 @@ public class CajalJSSCController extends MotherMicroController implements LifeCy
 		   int  counter=0;
 			boolean openAndTested=false;
 			logger.debug("about to open port , sleeping 1 sec first" );
-			serialPort = SerialPort.getCommPorts()[0];
+			//serialPort = SerialPort.getCommPorts()[0];
+			  serialPort = SerialPort.getCommPort("/dev/ttyUSB0");
+			 logger.debug("serial port name=" + serialPort.getDescriptivePortName());
+			
+			serialPort.setComPortParameters(115200, 8, 1, SerialPort.NO_PARITY);
 			serialPort.openPort();
-			serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 1000);
-			
-			
-			connectToSerialPort();
-//			do {
-//				
-//
-//				///serialPort..write().write(InetAddress.getLocalHost().toString().t());
-//				serialPortInputStream = serialPort.getInputStream();
-//				serialPortOutputStream = serialPort.getOutputStream();
-//
-//				if (serialPortInputStream == null) {
-//					System.out.println("serialPortInputStream is null.");
-//					logger.warn("serialPortInputStream is null.");
-//					throw new SerialPortCommunicationException("SerialPortInputStream is null");
-//				}
-//
-//				if (serialPortOutputStream == null) {
-//					System.out.println("serialPortOutputStream is null.");
-//					logger.warn("serialPortOutputStream is null.");
-//					throw new SerialPortCommunicationException("SerialPortOutputStream is null");
-//				}
-//				
-//				//
-//				// now open and test it
-//				//
-//				input = new CajalReader(new BufferedReader(new InputStreamReader(serialPortInputStream)), aDenomeManager);
-//				output = new CajalWriter(new OutputStreamWriter(serialPortOutputStream),input);
-//
-//				try{
-//					
-//					logger.info("About to ping");
-//					String actuatorCommand="Ping";
-//					output.write(actuatorCommand,0,actuatorCommand.length());
-//					//serialPortOutputStream.write( actuatorCommand.getBytes() );
-//					Thread.sleep(1000);
-//					output.flush();
-//					logger.info("waiting for mother to answer" );
-//					
-//					String inputLine = input.readLine();
-//					logger.info("mother answered =" + inputLine);
-//					
-//					openAndTested=true;
-//					output.close();
-//					input.close();
-//				}catch(IOException e) {
-//					logger.warn(Utils.getStringException(e));
-//				}
-//				if(!openAndTested) {
-//					logger.warn("Ping Failed, retrying in 10 secs, counter="+counter );
-//					counter++;
-//					//serialPort.close();
-//					Thread.sleep(10000);
-//				}
-//			}while(!openAndTested);
-			
-			
-			//
-			// to make sure that the serial port has not hung, do a test
-			//
-			logger.debug("finished initializing Cajal" );
+			serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 1000, 1000);
+			  if (serialPort.isOpen()) {
+			    	closeSerialPort();
+			    }
+			    serialPort.flushIOBuffers();
+			    serialPort.openPort();
+			    logger.debug("sending Ping" );
+			    sendCommand("Ping");
+			    logger.debug("finished initializing CajalJSSC" );
 
 		} catch (Exception e) {
 
@@ -250,15 +202,18 @@ public class CajalJSSCController extends MotherMicroController implements LifeCy
 		}
 	}
 
+	
 	private void closeSerialPort() {
+		  serialPort.flushIOBuffers();
 		serialPort.closePort();
 	}
+	
+
 	private void connectToSerialPort() throws IOException, SerialPortCommunicationException {
 		boolean openAndTested=false;
 		int counter=0;
 		do {
-			
-
+		
 			///serialPort..write().write(InetAddress.getLocalHost().toString().t());
 			serialPortInputStream = serialPort.getInputStream();
 			serialPortOutputStream = serialPort.getOutputStream();
@@ -299,9 +254,7 @@ public class CajalJSSCController extends MotherMicroController implements LifeCy
 				String inputLine = input.readLine();
 				logger.info("mother answered =" + inputLine);
 				
-				openAndTested=true;
-				output.close();
-				input.close();
+				closeSerialPort();
 			}catch(IOException e) {
 				logger.warn(Utils.getStringException(e));
 			}
