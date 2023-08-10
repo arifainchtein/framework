@@ -51,6 +51,7 @@ public class CajalJSSCWriter  extends BufferedWriter{
 			aCajalReader.setCurrentCommand(command);
 			logger.debug("sending  command:" + command);
 			output.write(command,0,command.length());
+			lastCommandTime = System.currentTimeMillis();
 //			if(command.equals("GetSensorData")){
 //				aCajalReader.setCurrentCommand(command);
 //			}else{
