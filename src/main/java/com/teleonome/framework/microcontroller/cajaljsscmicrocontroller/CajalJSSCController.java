@@ -126,7 +126,7 @@ public class CajalJSSCController extends MotherMicroController implements LifeCy
 			for(int i=0;i<allDenes.length();i++) {
 				microcontrollerDene = allDenes.getJSONObject(i);
 				className = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(microcontrollerDene, TeleonomeConstants.DENEWORD_TYPE_MICROCONTROLLER_PROCESSING_CLASSNAME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				if(className.equals("com.teleonome.framework.microcontroller.cajalmicrocontroller.CajalController")) {
+				if(className.equals("com.teleonome.framework.microcontroller.cajaljsscmicrocontroller.CajalJSSCController")) {
 					cajalMicrocontrollerDene=microcontrollerDene;
 				}
 			}
