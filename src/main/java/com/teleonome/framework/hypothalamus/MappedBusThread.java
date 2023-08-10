@@ -945,6 +945,9 @@ class MappedBusThread extends Thread{
 											keepGoing=false;
 									}else {
 										try {
+											if(!keepRunning) {
+												break stop;
+											}
 											logger.debug("not ready sleeping 2000");
 											Thread.sleep(2000);
 										} catch (InterruptedException e) {
