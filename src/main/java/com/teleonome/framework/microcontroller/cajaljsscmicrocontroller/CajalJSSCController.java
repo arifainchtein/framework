@@ -177,7 +177,7 @@ public class CajalJSSCController extends MotherMicroController implements LifeCy
 			logger.debug("about to open port , sleeping 1 sec first" );
 			serialPort = SerialPort.getCommPorts()[0];
 			serialPort.openPort();
-			serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0);
+			serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 1000);
 			
 			
 			connectToSerialPort();
