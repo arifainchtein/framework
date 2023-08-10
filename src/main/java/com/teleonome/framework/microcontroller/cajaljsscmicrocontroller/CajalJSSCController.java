@@ -131,7 +131,7 @@ public class CajalJSSCController extends MotherMicroController implements LifeCy
 				}
 			}
 			if(cajalMicrocontrollerDene==null) {
-				logger.warn("Could not find Cajal Microcontroller Dene");
+				logger.warn("Could not find CajalJSSC Microcontroller Dene");
 				Hashtable<String, String> h = new Hashtable();
 				h.put("message","Could not find COM port");
 				throw new MicrocontrollerCommunicationException(h);
@@ -177,7 +177,7 @@ public class CajalJSSCController extends MotherMicroController implements LifeCy
 			logger.debug("about to open port , sleeping 1 sec first" );
 			serialPort = SerialPort.getCommPorts()[0];
 			serialPort.openPort();
-			serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+			serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0);
 			
 			
 			connectToSerialPort();
