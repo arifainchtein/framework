@@ -15,6 +15,7 @@ public class PanchoTFDeserializer extends CajalDeserializer {
 		String[] tokens = line.split("#");
 		String deviceTypeId=tokens[0];
 		String deviceName=tokens[1];
+		System.out.println("line 18, PanchDeserializxer deviceName=" + deviceName);
 		String deviceshortname=tokens[2];
 		String serialnumber=tokens[3];
 		String groupidentifier=tokens[4];
