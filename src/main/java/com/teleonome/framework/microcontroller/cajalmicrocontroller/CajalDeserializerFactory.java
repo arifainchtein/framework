@@ -61,20 +61,11 @@ public class CajalDeserializerFactory extends Object {
             info.put("In Class","ProcessingFormHandlerFactory 3" );
             throw new ServletProcessingException(info);        
         }catch ( ClassNotFoundException e ) {                                                                                                                                                    
-            Hashtable info = new Hashtable();
-            info.put("Exception Thrown","ClassNotFoundException");
-            info.put("Exception",e.getMessage());
-            info.put("In Method","createObject");
-            info.put("In Class","ProcessingFormHandlerFactory 4 " + className);
-            throw new ServletProcessingException(info);
+        	aCajalDeserializer=null;
         }
        
         if (objectCreated == false) {
-            Hashtable info = new Hashtable();
-            info.put("Exception Thrown","Object Not Created");
-            info.put("In Method","createObject");
-            info.put("In Class","ProcessingFormHandlerFactory 5");
-            throw new ServletProcessingException(info);        
+        	aCajalDeserializer=null;
         }                     
        return aCajalDeserializer;
     }   

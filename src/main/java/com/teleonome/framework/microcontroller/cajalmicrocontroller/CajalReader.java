@@ -72,12 +72,16 @@ public class CajalReader extends BufferedReader{
 						className = "com.teleonome.framework.microcontroller.cajalmicrocontroller." + deviceType + "Deserializer";
 						logger.debug("className for deserializer =" + className);
 						aCajalDeserializer = CajalDeserializerFactory.createCajalDeserializer(className);
-						aCajalDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
-						String teleonomeName = aDenomeManager.getDenomeName();
-						telephathon = aCajalDeserializer.deserialise(teleonomeName,line);
-						String telepathonName = telephathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
-						aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
-						aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telephathon);
+						if(aCajalDeserializer!=null) {
+							aCajalDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
+							String teleonomeName = aDenomeManager.getDenomeName();
+							telephathon = aCajalDeserializer.deserialise(teleonomeName,line);
+							String telepathonName = telephathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
+							aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+							aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telephathon);
+						}else {
+							logger.debug("className=" + className + " does not existis");
+						}
 						
 					} catch (ServletProcessingException e) {
 						// TODO Auto-generated catch block
