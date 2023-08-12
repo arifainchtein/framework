@@ -5422,9 +5422,13 @@ public class DenomeManager {
 	}
 	
 	public void injectDeneChainIntoNucleus( String nucleusName, JSONObject deneChain) throws JSONException{
-		if(currentlyCreatingPulseJSONObject==null)return;
-		JSONObject denomeArray = currentlyCreatingPulseJSONObject.getJSONObject("Denome");
-		JSONArray nucleiArray = denomeArray.getJSONArray("Nuclei");
+		if(currentlyCreatingPulseJSONObject==null) {
+			logger.warn("injecting denechain, currentlyCreatingPulseJSONObject is nuill");
+			return;
+		}
+	//	JSONObject denomeArray = currentlyCreatingPulseJSONObject.getJSONObject("Denome");
+		JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
+		JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
 		JSONObject aNucleusJSONObject, aDeneChain;
 		JSONArray deneChains;
 		for(int i=0;i<nucleiArray.length();i++){
