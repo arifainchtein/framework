@@ -5423,7 +5423,7 @@ public class DenomeManager {
 	
 	public void injectDeneChainIntoNucleus( String nucleusName, JSONObject deneChain) throws JSONException{
 		if(currentlyCreatingPulseJSONObject==null) {
-			logger.warn("injecting denechain, currentlyCreatingPulseJSONObject is nuill");
+			logger.info("injecting denechain, currentlyCreatingPulseJSONObject is nuill");
 			return;
 		}
 	//	JSONObject denomeArray = currentlyCreatingPulseJSONObject.getJSONObject("Denome");
@@ -5431,11 +5431,15 @@ public class DenomeManager {
 		JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
 		JSONObject aNucleusJSONObject, aDeneChain;
 		JSONArray deneChains;
+		logger.info("injecting denechain, poin 1");
+		
 		for(int i=0;i<nucleiArray.length();i++){
 			aNucleusJSONObject = nucleiArray.getJSONObject(i);
+			logger.info("injecting denechain, poin 2");
 			if(aNucleusJSONObject.getString("Name").equals(nucleusName)){
 				deneChains = aNucleusJSONObject.getJSONArray("DeneChains");
 				deneChains.put(deneChain);
+				logger.info("injecting denechain, poin 3");
 			}
 		}
 		
