@@ -5432,7 +5432,7 @@ public class DenomeManager {
 		JSONObject aNucleusJSONObject, aDeneChain;
 		JSONArray deneChains;
 		logger.info("injecting denechain, poin 1");
-		
+		boolean injected=false;
 		for(int i=0;i<nucleiArray.length();i++){
 			aNucleusJSONObject = nucleiArray.getJSONObject(i);
 			logger.info("injecting denechain, poin 2");
@@ -5440,9 +5440,12 @@ public class DenomeManager {
 				deneChains = aNucleusJSONObject.getJSONArray("DeneChains");
 				deneChains.put(deneChain);
 				logger.info("injecting denechain, poin 3");
+				injected=true;
 			}
 		}
-		
+		if(injected) {
+			writeDenomeToDisk();
+		}
 	}
 	public JSONObject getDeneFromDeneChainByDeneName(JSONObject deneChain, String deneName) throws JSONException{
 		JSONArray denesJSONArray = deneChain.getJSONArray("Denes");
