@@ -79,6 +79,8 @@ public class CajalJSSCReader extends BufferedReader{
 							String teleonomeName = aDenomeManager.getDenomeName();
 							telephathon = aCajalDeserializer.deserialise(teleonomeName,line);
 							String telepathonName = telephathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
+							logger.debug("aboput remove and inject telepathonName =" + telepathonName + " telephathon=" + telephathon.toString(4));
+							
 							aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
 							aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telephathon);
 						}else {
