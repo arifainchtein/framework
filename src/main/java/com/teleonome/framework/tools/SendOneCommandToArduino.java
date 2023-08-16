@@ -25,13 +25,13 @@ public class SendOneCommandToArduino {
 	private static String buildNumber="";
 	//Logger logger;
 	String SerialPortID = "/dev/ttyUSB0";
-	private static final String PORT_NAMES[] = { "/dev/tty.usbmodem641", "/dev/ttyACM0", "/dev/ttyAMA0", "/dev/ttyACM1","/dev/ttyUSB0","/dev/cu.usbmodem1411" };
+	private static final String PORT_NAMES[] = { "/dev/ttyUSB0","/dev/ttyUSB1"};
 	SerialPort serialPort;
 	private BufferedReader input=null;
 	private BufferedWriter output=null;
 
 	private static final int TIME_OUT = 20000;
-	private int DATA_RATE = 9600;
+	private int DATA_RATE = 115200;
 	InputStream serialPortInputStream = null;
 	OutputStream serialPortOutputStream = null;
 	boolean verbose=false;
