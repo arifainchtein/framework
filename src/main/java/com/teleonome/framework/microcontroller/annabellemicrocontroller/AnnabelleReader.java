@@ -60,7 +60,7 @@ public class AnnabelleReader extends BufferedReader{
 		while(keepGoing) {
 			try {
 				line = reader.readLine().replaceAll("\u0000", "");
-				logger.debug("received line=" + line);
+				logger.debug("line 63, received line=" + line);
 				if(line==null || line.contains("Ok-") || line.contains("Failure"))
 				{
 					keepGoing=false;
@@ -69,7 +69,7 @@ public class AnnabelleReader extends BufferedReader{
 					deserializer=tokens[0];
 					
 					try {	
-						className = "com.teleonome.framework.microcontroller.annabellmicrocontroller." + deserializer;
+						className = "com.teleonome.framework.microcontroller.annabellemicrocontroller." + deserializer;
 						logger.debug("className for deserializer =" + className);
 						AnnabelleDeserializer annabellDeserializer = AnnabelleDeserializerFactory.createAnnabellDeserializer(className);
 						if(annabellDeserializer!=null) {
@@ -77,7 +77,7 @@ public class AnnabelleReader extends BufferedReader{
 							String teleonomeName = aDenomeManager.getDenomeName();
 							telephathon = annabellDeserializer.deserialise(teleonomeName,line);
 							String telepathonName = telephathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
-							logger.debug("aboput remove and inject telepathonName =" + telepathonName + " telephathon=" + telephathon.toString(4));
+							logger.debug("about remove and inject telepathonName =" + telepathonName + " telephathon=" + telephathon.toString(4));
 							aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
 							aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telephathon);
 						}else {
