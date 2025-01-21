@@ -1,4 +1,4 @@
-package com.teleonome.framework.microcontroller.cajalmicrocontroller;
+package com.teleonome.framework.microcontroller.annabellmicrocontroller;
 
 
 
@@ -13,14 +13,14 @@ import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.ServletProcessingException;
 import com.teleonome.framework.utils.Utils;
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-public class CajalReader extends BufferedReader{
+public class AnnabellReader extends BufferedReader{
 	Logger logger;
 	BufferedReader reader;
 	String command="";
 	DenomeManager aDenomeManager;
 	                                                                                                                                                                                                                               
 	private String currentCommand="";
-	public CajalReader(BufferedReader in ,DenomeManager d) {
+	public AnnabellReader(BufferedReader in ,DenomeManager d) {
 		super(in);
 		reader=in;
 		logger = Logger.getLogger(getClass().getName());
@@ -30,7 +30,7 @@ public class CajalReader extends BufferedReader{
 	}
 
 	public void close() throws IOException {
-		logger.info("about to close CajalReader");
+		logger.info("about to close AnnabellReader");
 		//String trace = Utils.generateMethodTrace();
 	//	logger.debug(trace);
 		super.close();
@@ -55,7 +55,7 @@ public class CajalReader extends BufferedReader{
 		String deviceType, deviceName;
 		String[] tokens;
 		boolean keepGoing=true;
-		CajalDeserializer aCajalDeserializer;
+		AnnabellDeserializer cc;
 		JSONObject telephathon;
 		while(keepGoing) {
 			try {
@@ -69,13 +69,13 @@ public class CajalReader extends BufferedReader{
 					deviceType=tokens[0];
 					
 					try {	
-						className = "com.teleonome.framework.microcontroller.cajalmicrocontroller." + deviceType + "Deserializer";
+						className = "com.teleonome.framework.microcontroller.annabellmicrocontroller." + deviceType + "Deserializer";
 						logger.debug("className for deserializer =" + className);
-						aCajalDeserializer = CajalDeserializerFactory.createCajalDeserializer(className);
-						if(aCajalDeserializer!=null) {
-							aCajalDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
+						AnnabellDeserializer annabellDeserializer = AnnabellDeserializerFactory.createAnnabellDeserializer(className);
+						if(annabellDeserializer!=null) {
+							annabellDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
 							String teleonomeName = aDenomeManager.getDenomeName();
-							telephathon = aCajalDeserializer.deserialise(teleonomeName,line);
+							telephathon = annabellDeserializer.deserialise(teleonomeName,line);
 							String telepathonName = telephathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
 							logger.debug("aboput remove and inject telepathonName =" + telepathonName + " telephathon=" + telephathon.toString(4));
 							aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);

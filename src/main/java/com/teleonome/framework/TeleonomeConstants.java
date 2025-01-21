@@ -7,11 +7,15 @@ public class TeleonomeConstants {
 	public static final String TELEPATHON_DENE_PURPOSE="Purpose";
 	//
 	// the Cajal Types
-	public static final int CAJAL_FUN_1_FLOW=1;
-	public static final int CAJAL_FUN_2_FLOW=2;
-	public static final int CAJAL_FUN_1_FLOW_1_TANK=3;
-	public static final int CAJAL_FUN_1_TANK =4;
-	public static final int CAJAL_FUN_2_TANK =5;
+	public static final int ANNABELL_FUN_1_FLOW=1;
+	public static final int ANNABELL_FUN_2_FLOW=2;
+	public static final int ANNABELL_FUN_1_FLOW_1_TANK=3;
+	public static final int ANNABELL_FUN_1_TANK =4;
+	public static final int ANNABELL_FUN_2_TANK =5;
+	public static final int ANNABELL_DAFFODIL_SCEPTIC_TANK =6;
+	public static final int ANNABELL_DAFFODIL_WATER_TROUGH= 7;
+	public static final int ANNABELL_TEMP_SOILMOISTURE= 8;
+	public static final int ANNABELL_LIGHT_DETECTOR= 9;
 	
 	public static final String ADA_INTERNAL_HOST_IPADDRESS="172.16.1.1";
 	

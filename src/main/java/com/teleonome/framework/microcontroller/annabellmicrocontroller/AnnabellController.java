@@ -1,4 +1,4 @@
-package com.teleonome.framework.microcontroller.cajalmicrocontroller;
+package com.teleonome.framework.microcontroller.annabellmicrocontroller;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -37,17 +37,17 @@ import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
-public class CajalController extends MotherMicroController implements SerialPortEventListener,  LifeCycleEventListener {
+public class AnnabellController extends MotherMicroController implements SerialPortEventListener,  LifeCycleEventListener {
 
 	Logger logger;
 	String SerialPortID = "/dev/ttyAMA0";
 	private static final String PORT_NAMES[] = { "/dev/tty.usbmodem641", "/dev/ttyACM0", "/dev/ttyAMA0", "/dev/ttyUSB0","/dev/ttyUSB1","/dev/cu.usbmodem1411" };
 	SerialPort serialPort=null;
-	private CajalReader input;
+	private AnnabellReader input;
 	//private InputStream input;
 	
 	//private BufferedWriter output;
-	private CajalWriter output;
+	private AnnabellWriter output;
 
 	private static final int TIME_OUT = 5000;
 	private int DATA_RATE = 9600;
@@ -55,7 +55,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 	InputStream serialPortInputStream = null;
 	OutputStream serialPortOutputStream = null;
 	
-	public CajalController(DenomeManager d, String n){
+	public AnnabellController(DenomeManager d, String n){
 		super(d,n);
 		logger = Logger.getLogger(getClass());
 		setEnableAsyncUpdate(true);
@@ -345,8 +345,8 @@ public class CajalController extends MotherMicroController implements SerialPort
 			//
 			// now open and test it
 			//
-			input = new CajalReader(new BufferedReader(new InputStreamReader(serialPortInputStream)), aDenomeManager);
-			output = new CajalWriter(new OutputStreamWriter(serialPortOutputStream),input);
+			input = new AnnabellReader(new BufferedReader(new InputStreamReader(serialPortInputStream)), aDenomeManager);
+			output = new AnnabellWriter(new OutputStreamWriter(serialPortOutputStream),input);
 
 			try{
 				
@@ -385,7 +385,7 @@ public class CajalController extends MotherMicroController implements SerialPort
 			}
 		}while(!openAndTested);
 	}
-	public CajalReader getReader() throws IOException{
+	public AnnabellReader getReader() throws IOException{
 		//logger.debug("Arduino uno asking for reader" );
 		//String trace = Utils.generateMethodTrace();
 		logger.debug("line 335 getting reader");
@@ -396,8 +396,8 @@ public class CajalController extends MotherMicroController implements SerialPort
 
 	public BufferedWriter getWriter() throws IOException{
 		//logger.debug("Arduino uno asking for writer1" );
-		input = new CajalReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())), aDenomeManager);
-		output = new CajalWriter(new OutputStreamWriter(serialPort.getOutputStream()),input );
+		input = new AnnabellReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())), aDenomeManager);
+		output = new AnnabellWriter(new OutputStreamWriter(serialPort.getOutputStream()),input );
 		logger.debug("line 345 getting writer");
 		return output;
 	}

@@ -1,4 +1,4 @@
-	package com.teleonome.framework.microcontroller.cajalmicrocontroller;
+	package com.teleonome.framework.microcontroller.annabellmicrocontroller;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -8,15 +8,15 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import com.teleonome.framework.utils.Utils;
 
-public class CajalWriter  extends BufferedWriter{
+public class AnnabellWriter  extends BufferedWriter{
 
-		CajalReader aCajalReader;
+		AnnabellReader aCajalReader;
 		Logger logger;
 		Writer output;
 		long lastCommandTime=0;
 		long minimumIntervalBetweenCommands=2000;
 		
-		public CajalWriter(Writer out, CajalReader c) {
+		public AnnabellWriter(Writer out, AnnabellReader c) {
 			super(out);
 			aCajalReader=c;
 			output=out;
@@ -30,7 +30,7 @@ public class CajalWriter  extends BufferedWriter{
 		//	logger.debug(trace);
 			super.close();
 		}
-		public CajalReader getReader() {
+		public AnnabellReader getReader() {
 			return aCajalReader;
 		}
 		public void write(String command, int off, int len) throws IOException {

@@ -11,8 +11,8 @@ import org.json.JSONObject;
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.ServletProcessingException;
-import com.teleonome.framework.microcontroller.cajalmicrocontroller.CajalDeserializer;
-import com.teleonome.framework.microcontroller.cajalmicrocontroller.CajalDeserializerFactory;
+import com.teleonome.framework.microcontroller.annabellmicrocontroller.AnnabellDeserializer;
+import com.teleonome.framework.microcontroller.annabellmicrocontroller.AnnabellDeserializerFactory;
 import com.teleonome.framework.utils.Utils;
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 public class CajalJSSCReader extends BufferedReader{
@@ -57,7 +57,7 @@ public class CajalJSSCReader extends BufferedReader{
 		String deviceType, deviceName;
 		String[] tokens;
 		boolean keepGoing=true;
-		CajalDeserializer aCajalDeserializer;
+		AnnabellDeserializer aCajalDeserializer;
 		JSONObject telephathon;
 		while(keepGoing) {
 			try {
@@ -73,7 +73,7 @@ public class CajalJSSCReader extends BufferedReader{
 					try {	
 						className = "com.teleonome.framework.microcontroller.cajalmicrocontroller." + deviceType + "Deserializer";
 						logger.debug("className for deserializer =" + className);
-						aCajalDeserializer = CajalDeserializerFactory.createCajalDeserializer(className);
+						aCajalDeserializer = AnnabellDeserializerFactory.createCajalDeserializer(className);
 						if(aCajalDeserializer!=null) {
 							aCajalDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
 							String teleonomeName = aDenomeManager.getDenomeName();

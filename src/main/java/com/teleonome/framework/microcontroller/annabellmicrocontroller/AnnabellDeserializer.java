@@ -1,10 +1,10 @@
-package com.teleonome.framework.microcontroller.cajalmicrocontroller;
+package com.teleonome.framework.microcontroller.annabellmicrocontroller;
 
 import org.json.JSONObject;
 
 import com.teleonome.framework.mnemosyne.MnemosyneManager;
 
-public abstract class CajalDeserializer {
+public abstract class AnnabellDeserializer {
 
 		protected MnemosyneManager aMnemosyneManager=null;
 		

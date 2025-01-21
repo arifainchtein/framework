@@ -1,5 +1,7 @@
 package com.teleonome.framework.microcontroller.openweathermap;
 
+
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

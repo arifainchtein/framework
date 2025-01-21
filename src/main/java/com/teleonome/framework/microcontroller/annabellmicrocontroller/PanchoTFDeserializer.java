@@ -1,4 +1,4 @@
-package com.teleonome.framework.microcontroller.cajalmicrocontroller;
+package com.teleonome.framework.microcontroller.annabellmicrocontroller;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -7,16 +7,15 @@ import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeUtils;
 import com.teleonome.framework.denome.Identity;
 
-public class GloriaTFDeserializer extends CajalDeserializer {
+public class PanchoTFDeserializer extends AnnabellDeserializer {
 
 	@Override
-	public JSONObject deserialise(String teleonomeName,String line) {
+	public JSONObject deserialise(String teleonomeName, String line) {
 		JSONObject toReturn = new JSONObject();
-		
-		
 		String[] tokens = line.split("#");
 		String deviceTypeId=tokens[0];
 		String deviceName=tokens[1];
+		System.out.println("line 18, PanchDeserializxer deviceName=" + deviceName);
 		String deviceshortname=tokens[2];
 		String serialnumber=tokens[3];
 		String groupidentifier=tokens[4];
@@ -140,26 +139,6 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 		int operatingStatus = (int) Double.parseDouble(tokens[33].replaceAll("\u0000", ""));
 		int digitalStablesUpload = Integer.parseInt(tokens[34].replaceAll("\u0000", ""));
 		int secondsSinceLastPulse = Integer.parseInt(tokens[35].replaceAll("\u0000", ""));
-		int sleepPingMinutes =0;
-		try{
-			sleepPingMinutes=Integer.parseInt(tokens[36].replaceAll("\u0000", ""));
-		}catch(NumberFormatException e) {
-			
-		}
-		
-		
-		double solarvoltage = 0.0;
-		try{
-			solarvoltage=Double.parseDouble(tokens[37].replaceAll("\u0000", ""));
-		}catch(NumberFormatException e) {
-			
-		}
-		double capacitorvoltage = 0.0;
-		try{
-			capacitorvoltage=Double.parseDouble(tokens[38].replaceAll("\u0000", ""));
-		}catch(NumberFormatException e) {
-			
-		}
 		
 		toReturn.put("Name", deviceName);
 		JSONArray denes = new JSONArray();
@@ -169,7 +148,7 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 		//
 		JSONObject configurationDene = new JSONObject();
 		denes.put(configurationDene);
-		configurationDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, TeleonomeConstants.TELEPATHON_DENE_CONFIGURATION);
+		configurationDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE,TeleonomeConstants.TELEPATHON_DENE_CONFIGURATION);
 
 		JSONArray configurationDeneWords = new JSONArray();
 		configurationDene.put("DeneWords", configurationDeneWords);
@@ -185,34 +164,34 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 
 		JSONObject sensorDene = new JSONObject();
 		denes.put(sensorDene);
-		sensorDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE,TeleonomeConstants.TELEPATHON_DENE_SENSORS);
+		sensorDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, TeleonomeConstants.TELEPATHON_DENE_SENSORS);
 		JSONArray sensorDeneWords = new JSONArray();
 		sensorDene.put("DeneWords", sensorDeneWords);
 		
 		// the Cajal Types
 				
-		if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_1_FLOW) {
+		if(currentFunctionValue==TeleonomeConstants.ANNABELL_FUN_1_FLOW) {
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow 1 Name", flow1name, null,TeleonomeConstants.DATATYPE_STRING, true));
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("QFactor 1", ""+qfactor1, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 			
-		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_2_FLOW) {
+		}else if(currentFunctionValue==TeleonomeConstants.ANNABELL_FUN_2_FLOW) {
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow 1 Name", flow1name, null,TeleonomeConstants.DATATYPE_STRING, true));
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("QFactor 1", ""+qfactor1, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow 2 Name", flow2name, null,TeleonomeConstants.DATATYPE_STRING, true));
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("QFactor 2", ""+qfactor2, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 			
-		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_1_FLOW_1_TANK) {
+		}else if(currentFunctionValue==TeleonomeConstants.ANNABELL_FUN_1_FLOW_1_TANK) {
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow 1 Name", flow1name, null,TeleonomeConstants.DATATYPE_STRING, true));
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("QFactor 1", ""+qfactor1, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 		
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Name", tank1name, null,TeleonomeConstants.DATATYPE_STRING, true));
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Height", ""+qfactor1, "Meter",TeleonomeConstants.DATATYPE_DOUBLE, true));
 			
-		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_1_TANK) {
+		}else if(currentFunctionValue==TeleonomeConstants.ANNABELL_FUN_1_TANK) {
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Name", tank1name, null,TeleonomeConstants.DATATYPE_STRING, true));
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Height", ""+tank1HeightMeters, "Meter",TeleonomeConstants.DATATYPE_DOUBLE, true));
 			
-		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_2_TANK) {
+		}else if(currentFunctionValue==TeleonomeConstants.ANNABELL_FUN_2_TANK) {
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Name", tank1name, null,TeleonomeConstants.DATATYPE_STRING, true));
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Height", ""+qfactor1, "Meter",TeleonomeConstants.DATATYPE_DOUBLE, true));
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 2 Name", tank2name, null,TeleonomeConstants.DATATYPE_STRING, true));
@@ -221,7 +200,7 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 	
 		JSONObject purposeDene = new JSONObject();
 		denes.put(purposeDene);
-		purposeDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, TeleonomeConstants.TELEPATHON_DENE_PURPOSE);
+		purposeDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE,  TeleonomeConstants.TELEPATHON_DENE_PURPOSE);
 		JSONArray purposeDeneWords = new JSONArray();
 		purposeDene.put("DeneWords", purposeDeneWords);
 		
@@ -234,30 +213,21 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 		
 		
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", ""+operatingStatus, null,TeleonomeConstants.DATATYPE_INTEGER, true));
-		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("SleepPing Minutes", ""+sleepPingMinutes, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Digital Stables Upload", ""+digitalStablesUpload, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Since Last Pulse", ""+secondsSinceLastPulse, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", ""+operatingStatus, null,TeleonomeConstants.DATATYPE_INTEGER, true));
-		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", ""+operatingStatus, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		
-
-		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Solar Voltage", ""+solarvoltage, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
-		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Capacitor Voltage", ""+capacitorvoltage, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
-
-		Identity includedRememberedIdentity = null;
-		
-		if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_1_FLOW) {
+		Identity includedRememberedIdentity;
+		if(currentFunctionValue==TeleonomeConstants.ANNABELL_FUN_1_FLOW) {
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow Rate 1", ""+flowRate, "l/m",TeleonomeConstants.DATATYPE_DOUBLE, true));
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Total Millilitres", ""+totalMilliLitres, "ml",TeleonomeConstants.DATATYPE_INTEGER, true));
 			
 			includedRememberedIdentity = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_TELEPATHONS,deviceName, "Purpose","Flow Rate 1");
-			System.out.println("line 254, flowRate="+flowRate);
 			aMnemosyneManager.unwrapDouble( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), TeleonomeConstants.DATATYPE_DOUBLE,flowRate, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, "l/m");			
 			includedRememberedIdentity = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_TELEPATHONS,deviceName, "Total Millilitres");
-			System.out.println("line 254, flowRate="+totalMilliLitres);
 			aMnemosyneManager.unwrapDouble( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), TeleonomeConstants.DATATYPE_DOUBLE,(double)totalMilliLitres, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, "l/m");			
 		
-		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_2_FLOW) {
+		}else if(currentFunctionValue==TeleonomeConstants.ANNABELL_FUN_2_FLOW) {
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow Rate 1", ""+flowRate, "l/m",TeleonomeConstants.DATATYPE_DOUBLE, true));
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Total Millilitres", ""+totalMilliLitres, "ml",TeleonomeConstants.DATATYPE_INTEGER, true));
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow Rate 2", ""+flowRate2, "l/m",TeleonomeConstants.DATATYPE_DOUBLE, true));
@@ -273,7 +243,7 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 			includedRememberedIdentity = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_TELEPATHONS,deviceName, "Total Millilitres 2");
 			aMnemosyneManager.unwrapDouble( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), TeleonomeConstants.DATATYPE_DOUBLE,(double)totalMilliLitres2, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, "l/m");			
 		
-		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_1_FLOW_1_TANK) {
+		}else if(currentFunctionValue==TeleonomeConstants.ANNABELL_FUN_1_FLOW_1_TANK) {
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow Rate 1", ""+flowRate, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Total Millilitres", ""+totalMilliLitres, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Pressure Psi", ""+tank1PressurePsi, "liters",TeleonomeConstants.DATATYPE_DOUBLE, true));
@@ -283,13 +253,13 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 			includedRememberedIdentity = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_TELEPATHONS,deviceName, "Purpose","Flow Rate 1");
 			aMnemosyneManager.unwrapDouble( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), TeleonomeConstants.DATATYPE_DOUBLE,flowRate, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, "l/m");			
 			includedRememberedIdentity = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_TELEPATHONS,deviceName, "Total Millilitres");
-			aMnemosyneManager.unwrapDouble( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), TeleonomeConstants.DATATYPE_DOUBLE,(double)totalMilliLitres, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, "l/m");			
+			aMnemosyneManager.unwrapDouble( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), TeleonomeConstants.DATATYPE_DOUBLE,totalMilliLitres, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, "l/m");			
 		
 			includedRememberedIdentity = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_TELEPATHONS,deviceName, "Tank 1 Water Level");
 			aMnemosyneManager.unwrapDouble( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), TeleonomeConstants.DATATYPE_DOUBLE,tank1WaterLevel, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, "liters");			
 			
 			
-		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_1_TANK) {
+		}else if(currentFunctionValue==TeleonomeConstants.ANNABELL_FUN_1_TANK) {
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Pressure Psi", ""+tank1PressurePsi, "liters",TeleonomeConstants.DATATYPE_DOUBLE, true));
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 PressureVolts", ""+tank1PressureVolts, "volts",TeleonomeConstants.DATATYPE_DOUBLE, true));
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Water Level", ""+tank1WaterLevel, "%",TeleonomeConstants.DATATYPE_DOUBLE, true));
@@ -298,7 +268,7 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 			aMnemosyneManager.unwrapDouble( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), TeleonomeConstants.DATATYPE_DOUBLE,tank1WaterLevel, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, "liters");			
 			
 			
-		}else if(currentFunctionValue==TeleonomeConstants.CAJAL_FUN_2_TANK) {
+		}else if(currentFunctionValue==TeleonomeConstants.ANNABELL_FUN_2_TANK) {
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Pressure Psi", ""+tank1PressurePsi, "liters",TeleonomeConstants.DATATYPE_DOUBLE, true));
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 PressureVolts", ""+tank1PressureVolts, "volts",TeleonomeConstants.DATATYPE_DOUBLE, true));
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Tank 1 Water Level", ""+tank1WaterLevel, "%",TeleonomeConstants.DATATYPE_DOUBLE, true));
@@ -313,6 +283,7 @@ public class GloriaTFDeserializer extends CajalDeserializer {
 			aMnemosyneManager.unwrapDouble( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), TeleonomeConstants.DATATYPE_DOUBLE,tank2WaterLevel, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, "liters");			
 			
 		}
+		
 		return toReturn;
 	}
 
