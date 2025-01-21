@@ -52,7 +52,7 @@ public class AnnabellReader extends BufferedReader{
 		String line="", className;
 		int counter=0;
 		int maxTries=3;
-		String deviceType, deviceName;
+		String deserializer, deviceName;
 		String[] tokens;
 		boolean keepGoing=true;
 		AnnabellDeserializer cc;
@@ -66,10 +66,10 @@ public class AnnabellReader extends BufferedReader{
 					keepGoing=false;
 				}else {
 					tokens = line.split("#");
-					deviceType=tokens[0];
+					deserializer=tokens[0];
 					
 					try {	
-						className = "com.teleonome.framework.microcontroller.annabellmicrocontroller." + deviceType + "Deserializer";
+						className = "com.teleonome.framework.microcontroller.annabellmicrocontroller." + deserializer;
 						logger.debug("className for deserializer =" + className);
 						AnnabellDeserializer annabellDeserializer = AnnabellDeserializerFactory.createAnnabellDeserializer(className);
 						if(annabellDeserializer!=null) {

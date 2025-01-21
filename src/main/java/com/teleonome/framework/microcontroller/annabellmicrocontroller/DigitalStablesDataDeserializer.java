@@ -13,79 +13,80 @@ public class DigitalStablesDataDeserializer extends AnnabellDeserializer {
 	public JSONObject deserialise(String teleonomeName, String line) {
 		JSONObject toReturn = new JSONObject();
 		String[] tokens = line.split("#");
-		String deviceTypeId=tokens[0];
-		String deviceName=tokens[1];
+		String deserializer = tokens[0];
+		String deviceTypeId=tokens[1];
+		String deviceName=tokens[2];
 		System.out.println("line 18, DigitalStablesData deviceName=" + deviceName);
-		String deviceshortname=tokens[2];
-		String serialnumber=tokens[3];
-		String groupidentifier=tokens[4];
-		int currentFunctionValue = Integer.parseInt(tokens[5].replaceAll("\u0000", ""));
-		int dataSamplingSec = Integer.parseInt(tokens[6].replaceAll("\u0000", ""));
-		String latitude=tokens[7];
-		String longitude=tokens[8];
+		String deviceshortname=tokens[3];
+		String serialnumber=tokens[4];
+		String groupidentifier=tokens[5];
+		int currentFunctionValue = Integer.parseInt(tokens[6].replaceAll("\u0000", ""));
+		int dataSamplingSec = Integer.parseInt(tokens[7].replaceAll("\u0000", ""));
+		String latitude=tokens[8];
+		String longitude=tokens[9];
 		// sensors
-		String sensor1name=tokens[9];
+		String sensor1name=tokens[10];
 		double qfactor1 =0.0;
 		try{
-			qfactor1=Double.parseDouble(tokens[10].replaceAll("\u0000", ""));
+			qfactor1=Double.parseDouble(tokens[11].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
-		String sensor2name=tokens[11];
+		String sensor2name=tokens[12];
 		double qfactor2 = 0;
 		try{
-			qfactor2=Double.parseDouble(tokens[12].replaceAll("\u0000", ""));
+			qfactor2=Double.parseDouble(tokens[13].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		double tank1HeightMeters =0.0;
 		try{
-			tank1HeightMeters=Double.parseDouble(tokens[13].replaceAll("\u0000", ""));
+			tank1HeightMeters=Double.parseDouble(tokens[14].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		double tank1maxvollit =0.0;
 		try{
-			tank1maxvollit=Double.parseDouble(tokens[14].replaceAll("\u0000", ""));
+			tank1maxvollit=Double.parseDouble(tokens[15].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double tank2HeightMeters =0.0;
 		try{
-			tank2HeightMeters=Double.parseDouble(tokens[15].replaceAll("\u0000", ""));
+			tank2HeightMeters=Double.parseDouble(tokens[16].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double tank2maxvollit =0.0;
 		try{
-			tank2maxvollit=Double.parseDouble(tokens[16].replaceAll("\u0000", ""));
+			tank2maxvollit=Double.parseDouble(tokens[17].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double maximumScepticHeight =0.0;
 		try{
-			maximumScepticHeight=Double.parseDouble(tokens[17].replaceAll("\u0000", ""));
+			maximumScepticHeight=Double.parseDouble(tokens[18].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 	    // Purpose
-		long secondsTime = Long.parseLong(tokens[18].replaceAll("\u0000", ""));
+		long secondsTime = Long.parseLong(tokens[19].replaceAll("\u0000", ""));
 		long lastPulseTime=secondsTime*1000;
-		double temperature = Double.parseDouble(tokens[19].replaceAll("\u0000", ""));
-		double rtcBatVolt = Double.parseDouble(tokens[20].replaceAll("\u0000", ""));
-		int opMode = Integer.parseInt(tokens[21].replaceAll("\u0000", ""));
+		double temperature = Double.parseDouble(tokens[20].replaceAll("\u0000", ""));
+		double rtcBatVolt = Double.parseDouble(tokens[21].replaceAll("\u0000", ""));
+		int opMode = Integer.parseInt(tokens[22].replaceAll("\u0000", ""));
 		double rssi = 0.0;
 		try{
-			rssi=Double.parseDouble(tokens[22].replaceAll("\u0000", ""));
+			rssi=Double.parseDouble(tokens[23].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double snr =0.0;
 		try{
-			snr=Double.parseDouble(tokens[23].replaceAll("\u0000", ""));
+			snr=Double.parseDouble(tokens[24].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
@@ -93,33 +94,33 @@ public class DigitalStablesDataDeserializer extends AnnabellDeserializer {
 		double flowRate = 0.0;
 		
 		try{
-			flowRate=Double.parseDouble(tokens[24].replaceAll("\u0000", ""));
+			flowRate=Double.parseDouble(tokens[25].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		int totalMilliLitres =0;
 		try{
-			totalMilliLitres=Integer.parseInt(tokens[25].replaceAll("\u0000", ""));
+			totalMilliLitres=Integer.parseInt(tokens[26].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double flowRate2 =0;
 		try{
-			flowRate2=Double.parseDouble(tokens[26].replaceAll("\u0000", ""));
+			flowRate2=Double.parseDouble(tokens[27].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		int totalMilliLitres2 = 90;
 		try{
-			totalMilliLitres2=Integer.parseInt(tokens[27].replaceAll("\u0000", ""));
+			totalMilliLitres2=Integer.parseInt(tokens[28].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		double tank1PressurePsi = 0.0;
 		try{
-			tank1PressurePsi=Double.parseDouble(tokens[28].replaceAll("\u0000", ""));
+			tank1PressurePsi=Double.parseDouble(tokens[29].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
@@ -129,7 +130,7 @@ public class DigitalStablesDataDeserializer extends AnnabellDeserializer {
 	     
 		double tank2PressurePsi = 0.0;
 		try{
-			tank2PressurePsi=Double.parseDouble(tokens[29].replaceAll("\u0000", ""));
+			tank2PressurePsi=Double.parseDouble(tokens[30].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
@@ -137,24 +138,24 @@ public class DigitalStablesDataDeserializer extends AnnabellDeserializer {
 		double tank2WaterLevel = tank1PressurePsi*.702;
 		
 	    
-		int operatingStatus = (int) Double.parseDouble(tokens[30].replaceAll("\u0000", ""));
-		int digitalStablesUpload = Integer.parseInt(tokens[31].replaceAll("\u0000", ""));
-		int secondsSinceLastPulse = Integer.parseInt(tokens[32].replaceAll("\u0000", ""));
+		int operatingStatus = (int) Double.parseDouble(tokens[31].replaceAll("\u0000", ""));
+		int digitalStablesUpload = Integer.parseInt(tokens[32].replaceAll("\u0000", ""));
+		int secondsSinceLastPulse = Integer.parseInt(tokens[33].replaceAll("\u0000", ""));
 		
 		
-		int checksum = Integer.parseInt(tokens[33].replaceAll("\u0000", ""));
-		int loraActive = Integer.parseInt(tokens[34].replaceAll("\u0000", ""));
-		long dsLastUpload = Long.parseLong(tokens[35].replaceAll("\u0000", ""));
-		double solarVoltage = Double.parseDouble(tokens[36].replaceAll("\u0000", ""));
-		double capacitorVoltage = Double.parseDouble(tokens[37].replaceAll("\u0000", ""));
-		int totpcode = Integer.parseInt(tokens[38].replaceAll("\u0000", ""));
+		int checksum = Integer.parseInt(tokens[34].replaceAll("\u0000", ""));
+		int loraActive = Integer.parseInt(tokens[35].replaceAll("\u0000", ""));
+		long dsLastUpload = Long.parseLong(tokens[36].replaceAll("\u0000", ""));
+		double solarVoltage = Double.parseDouble(tokens[37].replaceAll("\u0000", ""));
+		double capacitorVoltage = Double.parseDouble(tokens[38].replaceAll("\u0000", ""));
+		int totpcode = Integer.parseInt(tokens[39].replaceAll("\u0000", ""));
 		
-		double outdoortemperature = Double.parseDouble(tokens[39].replaceAll("\u0000", ""));
-		double outdoorhumidity = Double.parseDouble(tokens[40].replaceAll("\u0000", ""));
-		double measuredHeight = Double.parseDouble(tokens[41].replaceAll("\u0000", ""));
-		double scepticAvailablePercentage = Double.parseDouble(tokens[42].replaceAll("\u0000", ""));
-		double lux = Double.parseDouble(tokens[43].replaceAll("\u0000", ""));
-		long sleepTime = Long.parseLong(tokens[44].replaceAll("\u0000", ""));
+		double outdoortemperature = Double.parseDouble(tokens[40].replaceAll("\u0000", ""));
+		double outdoorhumidity = Double.parseDouble(tokens[41].replaceAll("\u0000", ""));
+		double measuredHeight = Double.parseDouble(tokens[42].replaceAll("\u0000", ""));
+		double scepticAvailablePercentage = Double.parseDouble(tokens[43].replaceAll("\u0000", ""));
+		double lux = Double.parseDouble(tokens[44].replaceAll("\u0000", ""));
+		long sleepTime = Long.parseLong(tokens[45].replaceAll("\u0000", ""));
 		
 		toReturn.put("Name", deviceName);
 		JSONArray denes = new JSONArray();
