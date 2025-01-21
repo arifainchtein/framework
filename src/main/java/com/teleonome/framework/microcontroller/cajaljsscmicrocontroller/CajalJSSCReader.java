@@ -11,8 +11,8 @@ import org.json.JSONObject;
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.ServletProcessingException;
-import com.teleonome.framework.microcontroller.annabellmicrocontroller.AnnabellDeserializer;
-import com.teleonome.framework.microcontroller.annabellmicrocontroller.AnnabellDeserializerFactory;
+import com.teleonome.framework.microcontroller.annabellemicrocontroller.AnnabelleDeserializer;
+import com.teleonome.framework.microcontroller.annabellemicrocontroller.AnnabelleDeserializerFactory;
 import com.teleonome.framework.utils.Utils;
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 public class CajalJSSCReader extends BufferedReader{
@@ -57,7 +57,7 @@ public class CajalJSSCReader extends BufferedReader{
 		String deviceType, deviceName;
 		String[] tokens;
 		boolean keepGoing=true;
-		AnnabellDeserializer aCajalDeserializer;
+		AnnabelleDeserializer annabellDeserializer;
 		JSONObject telephathon;
 		while(keepGoing) {
 			try {
@@ -73,11 +73,11 @@ public class CajalJSSCReader extends BufferedReader{
 					try {	
 						className = "com.teleonome.framework.microcontroller.cajalmicrocontroller." + deviceType + "Deserializer";
 						logger.debug("className for deserializer =" + className);
-						aCajalDeserializer = AnnabellDeserializerFactory.createCajalDeserializer(className);
-						if(aCajalDeserializer!=null) {
-							aCajalDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
+						annabellDeserializer = AnnabelleDeserializerFactory.createAnnabellDeserializer(className);
+						if(annabellDeserializer!=null) {
+							annabellDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
 							String teleonomeName = aDenomeManager.getDenomeName();
-							telephathon = aCajalDeserializer.deserialise(teleonomeName,line);
+							telephathon = annabellDeserializer.deserialise(teleonomeName,line);
 							String telepathonName = telephathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
 							logger.debug("aboput remove and inject telepathonName =" + telepathonName + " telephathon=" + telephathon.toString().length());
 							
