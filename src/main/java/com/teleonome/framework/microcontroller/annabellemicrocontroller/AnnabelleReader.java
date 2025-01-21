@@ -68,7 +68,7 @@ public class AnnabelleReader extends BufferedReader{
 					tokens = line.split("#");
 					deserializer=tokens[0];
 					
-					try {	
+					try {	    
 						className = "com.teleonome.framework.microcontroller.annabellemicrocontroller." + deserializer;
 						logger.debug("className for deserializer =" + className);
 						AnnabelleDeserializer annabellDeserializer = AnnabelleDeserializerFactory.createAnnabellDeserializer(className);
