@@ -50,7 +50,7 @@ public class AnnabelleController extends MotherMicroController implements Serial
 	private AnnabelleWriter output;
 
 	private static final int TIME_OUT = 5000;
-	private int DATA_RATE = 9600;
+	private int DATA_RATE = 115200;
 	private int INTER_SENSOR_READ_TIME_OUT_MILLISECONDS=100;
 	InputStream serialPortInputStream = null;
 	OutputStream serialPortOutputStream = null;
