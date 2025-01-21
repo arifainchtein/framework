@@ -177,7 +177,7 @@ public class AnnabelleController extends MotherMicroController implements Serial
 			for(int i=0;i<allDenes.length();i++) {
 				microcontrollerDene = allDenes.getJSONObject(i);
 				className = (String) aDenomeManager.getDeneWordAttributeByDeneWordTypeFromDene(microcontrollerDene, TeleonomeConstants.DENEWORD_TYPE_MICROCONTROLLER_PROCESSING_CLASSNAME, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-				if(className.equals("com.teleonome.framework.microcontroller.anabellemicrocontroller.AnnabelleController")) {
+				if(className.equals("com.teleonome.framework.microcontroller.annabellemicrocontroller.AnnabelleController")) {
 					annabelleMicrocontrollerDene=microcontrollerDene;
 				}
 			}
