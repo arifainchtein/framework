@@ -14,10 +14,13 @@ import com.teleonome.framework.utils.Utils;
 
 public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 	Logger logger;
+	
+	
 	public DigitalStablesDataDeserializer() {
 		logger = Logger.getLogger(getClass());
 	}
 
+	
 	@Override
 	public JSONObject deserialise(String teleonomeName, String line) {
 		JSONObject toReturn = new JSONObject();
@@ -87,7 +90,7 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		}
 		
 	    // Purpose
-		long secondsTime = Long.parseLong(tokens[19].replaceAll("\u0000", ""));
+		 secondsTime = Long.parseLong(tokens[19].replaceAll("\u0000", ""));
 		long lastPulseTime=secondsTime*1000;
 		double temperature = Double.parseDouble(tokens[20].replaceAll("\u0000", ""));
 		double rtcBatVolt = Double.parseDouble(tokens[21].replaceAll("\u0000", ""));
@@ -344,6 +347,13 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		}
 		
 		return toReturn;
+	}
+
+
+	@Override
+	public long getTimeSeconds() {
+		// TODO Auto-generated method stub
+		return secondsTime;
 	}
 
 }

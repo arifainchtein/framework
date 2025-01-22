@@ -4626,4 +4626,53 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	//			return arrayList;
 	//		}
 
+		//
+		// telepathons
+		//
+	public boolean storeTelepathon(long timeSeconds, String telepathonname, JSONObject telepathon){
+
+		Calendar cal = Calendar.getInstance();
+		long timestampInMills=timeSeconds*1000;
+		cal.setTimeInMillis(timestampInMills);
+
+		String sql="";
+		Connection connection=null;
+		Statement statement=null;
+		boolean toReturn=false;
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			String tableName = getTableNameByCalendar(TeleonomeConstants.TELEPATHON_TABLE,  cal);
+			if(!tableExists(tableName)) {
+				sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.TELEPATHON_TABLE +" with no data";
+				int result = statement.executeUpdate(sql);
+				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
+			}
+
+			//.replace("\"", "\\\"")
+			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
+			sql = "insert into "+ tableName+" (timeSeconds,telepathonname,data) values(" + timeSeconds + ","+telepathonname+",'" + telepathon.toString() +"')";
+			int result = statement.executeUpdate(sql);
+
+			toReturn= true;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			//System.out.println("bad sql:" + sql);
+
+			logger.warn(Utils.getStringException(e));
+		}finally{
+			if(connection!=null){
+				try {
+					statement.close();
+					connectionPool.closeConnection(connection);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+		}
+		telepathon=null;
+		return toReturn;
+	}
 }

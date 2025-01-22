@@ -8597,5 +8597,10 @@ public class DenomeManager {
 		analyticonsDataSourcesLate=l;
 	}
 
-
+	//
+	// telepathons
+	//
+	public void storeTelepathon(long timeSeconds, String telepathonname, JSONObject telepathon) throws PersistenceException{
+		aDBManager.storeTelepathon(timeSeconds,telepathonname, telepathon);
+	}
 }

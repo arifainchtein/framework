@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
+import com.teleonome.framework.exception.PersistenceException;
 import com.teleonome.framework.exception.ServletProcessingException;
 import com.teleonome.framework.utils.Utils;
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
@@ -56,7 +57,7 @@ public class AnnabelleReader extends BufferedReader{
 		String[] tokens;
 		boolean keepGoing=true;
 		AnnabelleDeserializer cc;
-		JSONObject telephathon;
+		JSONObject telepathon;
 		while(keepGoing) {
 			try {
 				line = reader.readLine().replaceAll("\u0000", "");
@@ -75,12 +76,20 @@ public class AnnabelleReader extends BufferedReader{
 						if(annabellDeserializer!=null) {
 							annabellDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
 							String teleonomeName = aDenomeManager.getDenomeName();
-							telephathon = annabellDeserializer.deserialise(teleonomeName,line);
-							if(telephathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
-								String telepathonName = telephathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
-								logger.debug("about remove and inject telepathonName =" + telepathonName + " telephathon=" + telephathon.toString(4));
+							
+							telepathon = annabellDeserializer.deserialise(teleonomeName,line);
+							long timeSeconds = annabellDeserializer.getTimeSeconds();
+							if(telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
+								String telepathonName = telepathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
+								logger.debug("about remove and inject telepathonName =" + telepathonName + " telephathon=" + telepathon.toString(4));
 								aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
-								aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telephathon);
+								aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
+								try {
+									aDenomeManager.storeTelepathon(timeSeconds,  telepathonName,  telepathon);
+								} catch (PersistenceException e) {
+									// TODO Auto-generated catch block
+									logger.warn(Utils.getStringException(e));
+								}
 							}else {
 								logger.debug("Error deserializing " + line);
 							}
