@@ -1,5 +1,6 @@
 package com.teleonome.framework.microcontroller.annabellemicrocontroller;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -9,15 +10,20 @@ import com.teleonome.framework.denome.Identity;
 import com.teleonome.framework.utils.Utils;
 
 public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
+	Logger logger;
+	public DigitalStablesDataDeserializer() {
+		logger = Logger.getLogger(getClass());
+	}
 
 	@Override
 	public JSONObject deserialise(String teleonomeName, String line) {
 		JSONObject toReturn = new JSONObject();
 		String[] tokens = line.split("#");
+		logger.debug("line 22, received =" +line + " tokens=" + tokens.length);
 		String deserializer = tokens[0];
 		String deviceTypeId=tokens[1];
 		String deviceName=tokens[2];
-		System.out.println("line 18, DigitalStablesData deviceName=" + deviceName);
+		logger.debug("line 18, DigitalStablesData deviceName=" + deviceName);
 		String deviceshortname=tokens[3];
 		String serialnumber=tokens[4];
 		String groupidentifier=tokens[5];
