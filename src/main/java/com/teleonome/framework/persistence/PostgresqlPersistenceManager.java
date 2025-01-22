@@ -4651,7 +4651,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 			//.replace("\"", "\\\"")
 			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
-			sql = "insert into "+ tableName+" (timeSeconds,telepathonname,data) values(" + timeSeconds + ","+telepathonname+",'" + telepathon.toString() +"')";
+			sql = "insert into "+ tableName+" (timeSeconds,telepathonname,data) values(" + timeSeconds + ",'"+telepathonname+"','" + telepathon.toString() +"')";
 			int result = statement.executeUpdate(sql);
 
 			toReturn= true;
