@@ -76,10 +76,15 @@ public class AnnabelleReader extends BufferedReader{
 							annabellDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
 							String teleonomeName = aDenomeManager.getDenomeName();
 							telephathon = annabellDeserializer.deserialise(teleonomeName,line);
-							String telepathonName = telephathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
-							logger.debug("about remove and inject telepathonName =" + telepathonName + " telephathon=" + telephathon.toString(4));
-							aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
-							aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telephathon);
+							if(telephathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
+								String telepathonName = telephathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
+								logger.debug("about remove and inject telepathonName =" + telepathonName + " telephathon=" + telephathon.toString(4));
+								aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+								aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telephathon);
+							}else {
+								logger.debug("Error deserializing " + line);
+							}
+							
 						}else {
 							logger.debug("className=" + className + " does not existis");
 						}

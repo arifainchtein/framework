@@ -1,5 +1,8 @@
 package com.teleonome.framework.microcontroller.annabellemicrocontroller;
 
+
+
+
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,6 +23,10 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		JSONObject toReturn = new JSONObject();
 		String[] tokens = line.split("#");
 		logger.debug("line 22, received =" +line + " tokens=" + tokens.length);
+		if(tokens.length<46) {
+			logger.debug("Bad data received");
+			return new JSONObject();
+		}
 		String deserializer = tokens[0];
 		String deviceTypeId=tokens[1];
 		String deviceName=tokens[2];
