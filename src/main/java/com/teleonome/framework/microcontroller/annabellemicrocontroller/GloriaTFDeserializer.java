@@ -55,7 +55,7 @@ public class GloriaTFDeserializer extends AnnabelleDeserializer {
 			
 		}
 	    // Purpose
-		long secondsTime = Long.parseLong(tokens[18].replaceAll("\u0000", ""));
+		secondsTime = Long.parseLong(tokens[18].replaceAll("\u0000", ""));
 		long lastPulseTime=secondsTime*1000;
 		double temperature = Double.parseDouble(tokens[19].replaceAll("\u0000", ""));
 		double rtcBatVolt = Double.parseDouble(tokens[20].replaceAll("\u0000", ""));

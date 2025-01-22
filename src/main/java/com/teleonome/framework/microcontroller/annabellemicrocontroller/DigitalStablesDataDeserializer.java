@@ -350,10 +350,6 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 	}
 
 
-	@Override
-	public long getTimeSeconds() {
-		// TODO Auto-generated method stub
-		return secondsTime;
-	}
+	
 
 }
