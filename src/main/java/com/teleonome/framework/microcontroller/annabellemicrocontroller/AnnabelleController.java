@@ -182,7 +182,7 @@ public class AnnabelleController extends MotherMicroController implements Serial
 				}
 			}
 			if(annabelleMicrocontrollerDene==null) {
-				logger.warn("Could not find Cajal Microcontroller Dene");
+				logger.warn("Could not find Annabelle Microcontroller Dene");
 				Hashtable<String, String> h = new Hashtable();
 				h.put("message","Could not find COM port");
 				throw new MicrocontrollerCommunicationException(h);
@@ -213,7 +213,7 @@ public class AnnabelleController extends MotherMicroController implements Serial
 					logger.debug(" configDene.getString(Name)= " + configDene.getString("Name"));
 					if(configDene.getString("Name").equals("Serial Data Rate")) {
 						DATA_RATE = ((Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(configDene, "Serial Data Rate", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).intValue();
-						logger.debug(" Cajal microcontroller DATA_RATE " + DATA_RATE);
+						logger.debug(" Annabelle microcontroller DATA_RATE " + DATA_RATE);
 					}
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
@@ -304,7 +304,7 @@ public class AnnabelleController extends MotherMicroController implements Serial
 			//
 			// to make sure that the serial port has not hung, do a test
 			//
-			logger.debug("finished initializing Cajal" );
+			logger.debug("finished initializing Annabelle" );
 
 		} catch (Exception e) {
 

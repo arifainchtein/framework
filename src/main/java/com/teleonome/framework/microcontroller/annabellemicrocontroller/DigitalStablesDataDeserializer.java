@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeUtils;
 import com.teleonome.framework.denome.Identity;
+import com.teleonome.framework.utils.Utils;
 
 public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 
@@ -240,6 +241,9 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		purposeDene.put("DeneWords", purposeDeneWords);
 		
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Time", ""+secondsTime, null,TeleonomeConstants.DATATYPE_LONG, true));
+		
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Local Time", Utils.epochToLocalTimeString(secondsTime), null,TeleonomeConstants.DATATYPE_LONG, true));
+		
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Internal Temperature", ""+temperature, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("RTC Battery Volt", ""+rtcBatVolt, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("OP Mode", ""+opMode, null,TeleonomeConstants.DATATYPE_INTEGER, true));

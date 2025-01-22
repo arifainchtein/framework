@@ -20,9 +20,12 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -60,6 +63,14 @@ import com.teleonome.framework.exception.InvalidDenomeException;
 public class Utils {
 
 	private static Logger logger = Logger.getLogger(com.teleonome.framework.utils.Utils.class);
+	
+	public static String epochToLocalTimeString(long epochSeconds) {
+	    LocalDateTime dateTime = LocalDateTime.ofInstant(
+	        Instant.ofEpochSecond(epochSeconds), 
+	        ZoneId.systemDefault()
+	    );
+	    return dateTime.format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
+	}
 	
 	public static long millisToNextHour(Calendar calendar) {
 	    int minutes = calendar.get(Calendar.MINUTE);
