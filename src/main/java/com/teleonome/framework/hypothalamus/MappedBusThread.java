@@ -1043,6 +1043,14 @@ class MappedBusThread extends Thread{
 
 
 
+						}else if(inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS)){
+							String[] telepathontokens = inputLine.split("#");
+							//
+							// token[0] is the HEART_TOPIC_TELEPATHON_STATUS
+							// token is the telepathon denechain
+							logger.info("publishing update to heart for telepathon AsynC Update  from " + microControllerPointer + " telepathonUpdate="+ telepathontokens[1]);
+							hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS, telepathontokens[1]);
+
 						}
 //							if(input!=null)input.close();
 //							if(output!=null)output.close();

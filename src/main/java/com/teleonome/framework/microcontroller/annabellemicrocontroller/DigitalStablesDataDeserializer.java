@@ -173,6 +173,7 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		double scepticAvailablePercentage = Double.parseDouble(tokens[43].replaceAll("\u0000", ""));
 		double lux = Double.parseDouble(tokens[44].replaceAll("\u0000", ""));
 		long sleepTime = Long.parseLong(tokens[45].replaceAll("\u0000", ""));
+		int ledBrightness = Integer.parseInt(tokens[46].replaceAll("\u0000", ""));
 		
 		toReturn.put("Name", deviceName);
 		JSONArray denes = new JSONArray();
@@ -265,6 +266,8 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("OP Mode", ""+opMode, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("rssi", ""+rssi, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("snr", ""+snr, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Led Brightness", ""+ledBrightness, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		
 		
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", ""+operatingStatus, null,TeleonomeConstants.DATATYPE_INTEGER, true));

@@ -1061,6 +1061,7 @@ public class TeleonomeConstants {
 	public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_EXTERNAL_DATA="Single Value Panel External Data";
 	public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_COMPLETE_WIDTH_EXTERNAL_DATA="Single Value Panel Complete Width External Data";
 	public static final String PANEL_VISUALIZATION_COMPLETE_DENE_STYLE_SINGLE_VALUE_PANEL_EXTERNAL_DATA="Complete Dene Single Value Panel External Data";
+		
 	public static final String PANEL_VISUALIZATION_SEARCH_PANEL="Search Panel";
 	public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL="Single Value Panel";
     public static final String PANEL_VISUALIZATION_STYLE_SINGLE_VALUE_PANEL_COMPLETE_WIDTH="Single Value Panel Complete Width";
@@ -1087,6 +1088,8 @@ public class TeleonomeConstants {
 	public static final String PANEL_VISUALIZATION_STYLE_MULTI_LINE_CHART="MultiLine Chart Panel";
 	public static final String PANEL_VISUALIZATION_STYLE_PIE_CHART="Pie Chart Panel";
 	public static final String PANEL_VISUALIZATION_ORGANISM_VIEW="Organism View Panel";
+	public static final String PANEL_VISUALIZATION_TELEPHATON_VIEW="Telepathon View Panel";
+	
 	public static final String PANEL_VISUALIZATION_STYLE_MNEMOSYNE_TABLE="Mnemosyne Table Panel";
 	public static final String PANEL_VISUALIZATION_STYLE_IMAGE="Image Panel";
 	public static final String PANEL_VISUALIZATION_STYLE_UPDATE_MULTIPLE_DENEWORDS_FORM="Update Multiple Denewords Form Panel";
@@ -1271,6 +1274,7 @@ public class TeleonomeConstants {
 	public static final String HEART_TOPIC_BLINK="Blink";
 	public static final String HEART_TOPIC_ADA_STATUS="AdaStatus";
 	public static final String HEART_TOPIC_ORGANISM_STATUS="OrganismStatus";
+	public static final String HEART_TOPIC_TELEPATHON_STATUS="TelepathonStatus";
 	public static final String HEART_TOPIC_ORGANISM_IP="OrganismIP";
 	
 	public static final String HEART_TOPIC_ORGANISM_UPDATE="OrganismUpdate";

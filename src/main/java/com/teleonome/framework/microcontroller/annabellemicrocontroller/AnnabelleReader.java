@@ -57,7 +57,7 @@ public class AnnabelleReader extends BufferedReader{
 		String[] tokens;
 		boolean keepGoing=true;
 		AnnabelleDeserializer cc;
-		JSONObject telepathon;
+		JSONObject telepathon = null;
 		while(keepGoing) {
 			try {
 				line = reader.readLine().replaceAll("\u0000", "");
@@ -117,8 +117,9 @@ public class AnnabelleReader extends BufferedReader{
 		     
 		logger.debug("the response is:   " + line);
 		String cleaned="";
-		if(line.contains("Ok-")) {
+		if(line.contains("Ok-") && telepathon!=null && telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
 			cleaned=line.substring(line.indexOf("Ok-"));;
+			cleaned=TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS+"#"+telepathon.toString();
 		}else if(line.contains("Read fail") && line.contains("#")){
 			cleaned=line.substring(line.lastIndexOf("fail")+4);
 		}else {
