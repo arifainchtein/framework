@@ -58,50 +58,62 @@ public class AnnabelleReader extends BufferedReader{
 		boolean keepGoing=true;
 		AnnabelleDeserializer cc;
 		JSONObject telepathon = null;
+		boolean appendString=false;
 		while(keepGoing) {
 			try {
-				line = reader.readLine().replaceAll("\u0000", "");
+				if(appendString) {
+					line = line + reader.readLine().replaceAll("\u0000", "");
+				}else {
+					line = reader.readLine().replaceAll("\u0000", "");
+				}
+				
 				logger.debug("line 63, received line=" + line);
 				if(line==null || line.contains("Ok-") || line.contains("Failure"))
 				{
 					keepGoing=false;
 				}else {
 					tokens = line.split("#");
-					deserializer=tokens[0];
-					
-					try {	    
-						className = "com.teleonome.framework.microcontroller.annabellemicrocontroller." + deserializer;
-						logger.debug("className for deserializer =" + className);
-						AnnabelleDeserializer annabellDeserializer = AnnabelleDeserializerFactory.createAnnabellDeserializer(className);
-						if(annabellDeserializer!=null) {
-							annabellDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
-							String teleonomeName = aDenomeManager.getDenomeName();
-							
-							telepathon = annabellDeserializer.deserialise(teleonomeName,line);
-							long timeSeconds = annabellDeserializer.getTimeSeconds();
-							if(telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
-								String telepathonName = telepathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
-								logger.debug("about remove and inject telepathonName =" + telepathonName + " telephathon=" + telepathon.toString(4));
-								aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
-								aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
-								try {
-									aDenomeManager.storeTelepathon(timeSeconds,  telepathonName,  telepathon);
-								} catch (PersistenceException e) {
-									// TODO Auto-generated catch block
-									logger.warn(Utils.getStringException(e));
+					if(tokens.length==46) {
+						appendString=false;
+						deserializer=tokens[0];
+						
+						try {	    
+							className = "com.teleonome.framework.microcontroller.annabellemicrocontroller." + deserializer;
+							logger.debug("className for deserializer =" + className);
+							AnnabelleDeserializer annabellDeserializer = AnnabelleDeserializerFactory.createAnnabellDeserializer(className);
+							if(annabellDeserializer!=null) {
+								annabellDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
+								String teleonomeName = aDenomeManager.getDenomeName();
+								
+								telepathon = annabellDeserializer.deserialise(teleonomeName,line);
+								long timeSeconds = annabellDeserializer.getTimeSeconds();
+								if(telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
+									String telepathonName = telepathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
+									logger.debug("about remove and inject telepathonName =" + telepathonName + " telephathon=" + telepathon.toString(4));
+									aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+									aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
+									try {
+										aDenomeManager.storeTelepathon(timeSeconds,  telepathonName,  telepathon);
+									} catch (PersistenceException e) {
+										// TODO Auto-generated catch block
+										logger.warn(Utils.getStringException(e));
+									}
+								}else {
+									logger.debug("Error deserializing " + line);
 								}
+								
 							}else {
-								logger.debug("Error deserializing " + line);
+								logger.debug("className=" + className + " does not existis");
 							}
 							
-						}else {
-							logger.debug("className=" + className + " does not existis");
+						} catch (ServletProcessingException e) {
+							// TODO Auto-generated catch block
+							logger.warn(Utils.getStringException(e));
 						}
-						
-					} catch (ServletProcessingException e) {
-						// TODO Auto-generated catch block
-						logger.warn(Utils.getStringException(e));
+					}else {
+						appendString=true;
 					}
+					
 				}
 				//
 				// now process
