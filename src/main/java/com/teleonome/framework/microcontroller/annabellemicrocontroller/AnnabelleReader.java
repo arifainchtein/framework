@@ -71,9 +71,10 @@ public class AnnabelleReader extends BufferedReader{
 				if(line==null || line.contains("Ok-") || line.contains("Failure"))
 				{
 					keepGoing=false;
+					appendString=false;
 				}else {
 					tokens = line.split("#");
-					if(tokens.length==46) {
+					if(tokens.length>46) {
 						appendString=false;
 						deserializer=tokens[0];
 						
