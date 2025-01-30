@@ -186,6 +186,9 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		int ledBrightness = Integer.parseInt(tokens[46].replaceAll("\u0000", ""));
 		
 		toReturn.put("Name", deviceName);
+		toReturn.put("Short Name", deviceshortname);
+		toReturn.put("Serial Number", serialnumber);
+		
 		JSONArray denes = new JSONArray();
 		toReturn.put("Denes", denes);
 		//
