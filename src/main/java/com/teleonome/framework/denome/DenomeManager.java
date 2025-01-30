@@ -5397,6 +5397,30 @@ public class DenomeManager {
 		return null;
 	}
 
+	public void removeDeneChainByAttribute( String nucleusName, String attributename,String value) throws JSONException{
+		if(currentlyCreatingPulseJSONObject==null)return;
+		JSONObject denomeArray = currentlyCreatingPulseJSONObject.getJSONObject("Denome");
+		JSONArray nucleiArray = denomeArray.getJSONArray("Nuclei");
+		JSONObject aNucleusJSONObject, aDeneChain;
+		JSONArray deneChains;
+		for(int i=0;i<nucleiArray.length();i++){
+			aNucleusJSONObject = nucleiArray.getJSONObject(i);
+			if(aNucleusJSONObject.getString("Name").equals(nucleusName)){
+				deneChains = aNucleusJSONObject.getJSONArray("DeneChains");
+				JSONObject deneChain;
+				done:
+				for(int j=0;j<deneChains.length();j++) {
+					deneChain = deneChains.getJSONObject(j);
+					if(deneChain.get(attributename).equals(value)) {
+						deneChains.remove(j);
+						logger.info("removed telepathon with " + attributename + "=" +value);
+					}
+				}
+			}
+		}
+		
+	}
+	
 	public void removeDeneChain( String nucleusName, String deneChainName) throws JSONException{
 		if(currentlyCreatingPulseJSONObject==null)return;
 		JSONObject denomeArray = currentlyCreatingPulseJSONObject.getJSONObject("Denome");

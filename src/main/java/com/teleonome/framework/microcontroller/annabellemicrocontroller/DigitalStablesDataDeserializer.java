@@ -188,6 +188,7 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		toReturn.put("Name", deviceName);
 		toReturn.put("Short Name", deviceshortname);
 		toReturn.put("Serial Number", serialnumber);
+		toReturn.put("Raw Data", line);
 		
 		JSONArray denes = new JSONArray();
 		toReturn.put("Denes", denes);
@@ -200,8 +201,7 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 
 		JSONArray configurationDeneWords = new JSONArray();
 		configurationDene.put("DeneWords", configurationDeneWords);
-		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Short Name", deviceshortname, null,TeleonomeConstants.DATATYPE_STRING, true));
-		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Serial Number", serialnumber, null,TeleonomeConstants.DATATYPE_STRING, true));
+		//configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Serial Number", serialnumber, null,TeleonomeConstants.DATATYPE_STRING, true));
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Group identifier", groupidentifier, null,TeleonomeConstants.DATATYPE_STRING, true));
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Device Type Id", deviceTypeId, null,TeleonomeConstants.DATATYPE_STRING, true));
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Data Sampling Sec", ""+dataSamplingSec, null,TeleonomeConstants.DATATYPE_INTEGER, true));
