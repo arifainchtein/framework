@@ -179,7 +179,9 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		double lux = 0;
 		try {
 			lux = Double.parseDouble(tokens[44].replaceAll("\u0000", ""));
-		}catch()
+		}catch(NumberFormatException e) {
+			
+		}
 		long sleepTime = Long.parseLong(tokens[45].replaceAll("\u0000", ""));
 		int ledBrightness = Integer.parseInt(tokens[46].replaceAll("\u0000", ""));
 		
