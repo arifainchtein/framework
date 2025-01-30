@@ -37,7 +37,12 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		String deviceshortname=tokens[3];
 		String serialnumber=tokens[4];
 		String groupidentifier=tokens[5];
-		int currentFunctionValue = Integer.parseInt(tokens[6].replaceAll("\u0000", ""));
+		int currentFunctionValue = 0;
+		try{	
+			currentFunctionValue =Integer.parseInt(tokens[6].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
 		int dataSamplingSec = Integer.parseInt(tokens[7].replaceAll("\u0000", ""));
 		String latitude=tokens[8];
 		String longitude=tokens[9];
@@ -171,7 +176,10 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		double outdoorhumidity = Double.parseDouble(tokens[41].replaceAll("\u0000", ""));
 		double measuredHeight = Double.parseDouble(tokens[42].replaceAll("\u0000", ""));
 		double scepticAvailablePercentage = Double.parseDouble(tokens[43].replaceAll("\u0000", ""));
-		double lux = Double.parseDouble(tokens[44].replaceAll("\u0000", ""));
+		double lux = 0;
+		try {
+			lux = Double.parseDouble(tokens[44].replaceAll("\u0000", ""));
+		}catch()
 		long sleepTime = Long.parseLong(tokens[45].replaceAll("\u0000", ""));
 		int ledBrightness = Integer.parseInt(tokens[46].replaceAll("\u0000", ""));
 		
