@@ -4629,6 +4629,85 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		//
 		// telepathons
 		//
+	public JSONArray getTelepathonDeneWordStart( String telepathonName, String deneName, String deneWordName,  long startTimeSeconds, long  endTimeSeconds){
+		logger.debug("enter getRemeberedDeneWordStart telepathonName="+ telepathonName + " deneName=" + deneName + " deneWordName=" + deneWordName );
+		Connection connection=null;
+		PreparedStatement preparedStatement = null; 
+		ResultSet rs=null;
+		JSONArray toReturn = new JSONArray();
+		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.TELEPATHON_TABLE, startTimeSeconds, endTimeSeconds);
+		String command = "", units="", timeString;
+		Timestamp time=null;
+		JSONObject j;
+		double value;
+		logger.debug("allTables="+ allTables.size() );
+		try {
+			connection = connectionPool.getConnection();
+			for(int i=0;i<allTables.size();i++) {
+				logger.debug("allTables.get(i)="+ allTables.get(i) );
+				
+				command = "SELECT to_timestamp(timeseconds) at time zone 'Australia/Melbourne',"+
+			   " (data->'Denes'->("+
+			       " SELECT (position-1)::int "+
+			        "FROM jsonb_array_elements(data->'Denes') WITH ORDINALITY arr(elem, position) "+
+			        "WHERE elem->>'Name' = ?"+
+			    ")->'DeneWords'->("+
+			        "SELECT (position-1)::int"+
+			        "FROM jsonb_array_elements("+
+			          "  data->'Denes'->("+
+			                "SELECT (position-1)::int "+
+			               " FROM jsonb_array_elements(data->'Denes') WITH ORDINALITY arr(elem, position) "+
+			                "WHERE elem->>'Name' = ? "+
+			           " )->'DeneWords'"+
+			        ") WITH ORDINALITY arr(elem, position)"+
+			        "WHERE elem->>'Name' = ?"+
+			    ")->>'Value') "+
+			"FROM "+allTables.get(i) +" where telepathonname=?  and timeseconds >=? and timeseconds<=? order by timeseconds desc";
+				
+				
+				
+				logger.debug("command=" + command);
+
+				preparedStatement = connection.prepareStatement(command);
+				preparedStatement.setString(1, deneName);
+				preparedStatement.setString(2, deneName);
+				preparedStatement.setString(3, deneWordName);
+				preparedStatement.setString(4, telepathonName);
+				preparedStatement.setLong(5, startTimeSeconds);
+				preparedStatement.setLong(6, endTimeSeconds);
+				rs = preparedStatement.executeQuery();
+				while(rs.next()){
+					timeString=rs.getString(1);
+					value = rs.getDouble(2);
+					//units = rs.getString(3);
+					j = new JSONObject();
+					j.put("timeString", timeString);
+					j.put("Value", value);
+					//j.put("Units", units);
+					toReturn.put(j);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			logger.warn(Utils.getStringException(e));
+
+		}finally{
+
+			if(preparedStatement!=null)
+				try {
+					if(rs!=null)rs.close();
+					preparedStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					logger.debug(Utils.getStringException(e));
+				}
+			if(connection!=null)closeConnection(connection);
+		}
+
+		return toReturn;
+
+	}
+	
 	public boolean storeTelepathon(long timeSeconds, String telepathonname, JSONObject telepathon){
 
 		Calendar cal = Calendar.getInstance();
