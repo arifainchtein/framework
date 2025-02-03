@@ -4635,7 +4635,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		PreparedStatement preparedStatement = null; 
 		ResultSet rs=null;
 		JSONArray toReturn = new JSONArray();
-		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.TELEPATHON_TABLE, startTimeSeconds, endTimeSeconds);
+		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.TELEPATHON_TABLE, startTimeSeconds*1000, endTimeSeconds*1000);
 		String command = "", units="", timeString;
 		Timestamp time=null;
 		JSONObject j;
