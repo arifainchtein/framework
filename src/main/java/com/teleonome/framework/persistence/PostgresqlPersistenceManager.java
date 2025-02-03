@@ -4667,7 +4667,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				
 				
 				logger.debug("command=" + command);
-
+				System.out.println("line 4670 command=" + command);
 				preparedStatement = connection.prepareStatement(command);
 				preparedStatement.setString(1, deneName);
 				preparedStatement.setString(2, deneName);
