@@ -288,6 +288,14 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Since Last Pulse", ""+secondsSinceLastPulse, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", ""+operatingStatus, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Lora Active", ""+loraActive, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("ds Last Upload", ""+dsLastUpload, null,TeleonomeConstants.DATATYPE_LONG, true));
+		
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Solar Voltage", ""+solarVoltage, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Capacitor Voltage", ""+capacitorVoltage, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Sleep Time", ""+sleepTime, null,TeleonomeConstants.DATATYPE_LONG, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("TOTP",""+ totpcode, null,TeleonomeConstants.DATATYPE_STRING, true));
+			
 		Identity includedRememberedIdentity;
 		if(currentFunctionValue==TeleonomeConstants.ANNABELL_FUN_1_FLOW) {
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flow Rate 1", ""+flowRate, "l/m",TeleonomeConstants.DATATYPE_DOUBLE, true));
