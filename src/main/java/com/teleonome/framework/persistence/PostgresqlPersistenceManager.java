@@ -4652,7 +4652,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			        "FROM jsonb_array_elements(data->'Denes') WITH ORDINALITY arr(elem, position) "+
 			        "WHERE elem->>'Name' = ?"+
 			    ")->'DeneWords'->("+
-			        "SELECT (position-1)::int"+
+			        "SELECT (position-1)::int "+
 			        "FROM jsonb_array_elements("+
 			          "  data->'Denes'->("+
 			                "SELECT (position-1)::int "+
