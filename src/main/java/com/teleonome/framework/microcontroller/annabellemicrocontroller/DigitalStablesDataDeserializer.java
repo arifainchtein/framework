@@ -168,8 +168,21 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		int checksum = Integer.parseInt(tokens[34].replaceAll("\u0000", ""));
 		int loraActive = Integer.parseInt(tokens[35].replaceAll("\u0000", ""));
 		long dsLastUpload = Long.parseLong(tokens[36].replaceAll("\u0000", ""));
-		double solarVoltage = Double.parseDouble(tokens[37].replaceAll("\u0000", ""));
-		double capacitorVoltage = Double.parseDouble(tokens[38].replaceAll("\u0000", ""));
+		
+		double solarVoltage = 0.0;
+		try{
+			solarVoltage=Double.parseDouble(tokens[37].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		double capacitorVoltage = 0.0;
+		try{
+			capacitorVoltage=Double.parseDouble(tokens[38].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
 		int totpcode = Integer.parseInt(tokens[39].replaceAll("\u0000", ""));
 		
 		double outdoortemperature = Double.parseDouble(tokens[40].replaceAll("\u0000", ""));
