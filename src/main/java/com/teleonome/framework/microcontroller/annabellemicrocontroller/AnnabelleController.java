@@ -346,7 +346,7 @@ public class AnnabelleController extends MotherMicroController implements Serial
 			// now open and test it
 			//
 			input = new AnnabelleReader(new BufferedReader(new InputStreamReader(serialPortInputStream)), aDenomeManager);
-			output = new AnnabelleWriter(new OutputStreamWriter(serialPortOutputStream),input);
+			output = new AnnabelleWriter(new OutputStreamWriter(serialPortOutputStream),input,aDenomeManager);
 
 			try{
 				
@@ -397,7 +397,7 @@ public class AnnabelleController extends MotherMicroController implements Serial
 	public BufferedWriter getWriter() throws IOException{
 		//logger.debug("Arduino uno asking for writer1" );
 		input = new AnnabelleReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())), aDenomeManager);
-		output = new AnnabelleWriter(new OutputStreamWriter(serialPort.getOutputStream()),input );
+		output = new AnnabelleWriter(new OutputStreamWriter(serialPort.getOutputStream()),input , aDenomeManager);
 		logger.debug("line 345 getting writer");
 		return output;
 	}
