@@ -596,9 +596,9 @@ public class AnnabelleController extends MotherMicroController implements Serial
 		out.flush();
 		String inputLine = "";
 		int retriesCounter=0;
-		int numberRetriesdBeforeReconnection=10;
+		int numberRetriesdBeforeReconnection=4;
 		try {
-			Thread.sleep(2000);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -616,17 +616,20 @@ public class AnnabelleController extends MotherMicroController implements Serial
 				try {
 					logger.debug("not ready sleeping 500 retriesCounter=" + retriesCounter);
 					retriesCounter++;
-//					if(retriesCounter>numberRetriesdBeforeReconnection) {
-//						retriesCounter=0;
-//						logger.debug("restarting serialport connection");
-//						closeSerialPort();
-//						connectToSerialPort();
-//						logger.debug("restarted serialport connection");
-//					}
+					if(retriesCounter>numberRetriesdBeforeReconnection) {
+						retriesCounter=0;
+						logger.debug("restarting serialport connection");
+						closeSerialPort();
+						connectToSerialPort();
+						logger.debug("restarted serialport connection");
+					}
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.warn(Utils.getStringException(e));
+				} catch (SerialPortCommunicationException e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
 				}
 			}
 		}
