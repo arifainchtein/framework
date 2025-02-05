@@ -59,8 +59,8 @@ public class AnnabelleWriter  extends BufferedWriter{
 					logger.debug("RemoveTelepathon telepathonName=" + telepathonName);
 					aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
 				}
-			logger.debug("sending  command:" + command);
-			output.write(command,0,command.length());
+		//	logger.debug("sending  command:" + command);
+		//	output.write(command,0,command.length());
 //			if(command.equals("GetSensorData")){
 //				aAnnabelleReader.setCurrentCommand(command);
 //			}else{

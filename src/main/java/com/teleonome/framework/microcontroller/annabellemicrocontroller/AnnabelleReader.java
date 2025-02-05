@@ -43,13 +43,13 @@ public class AnnabelleReader extends BufferedReader{
 	public void setCurrentCommand(String s) {
 		command=s;
 		
-		logger.debug("sertting , command:" + command);
+		logger.debug("setting , command:" + command);
 		
 	}
 	public String readLine(){
 		logger.debug("waiting for response for  command:" + command);
 		if(command.equals(""))return "";
-		if(command.equals(TeleonomeConstants.DELETE_TELEPATHON))return "Ok";
+		if(command.startsWith(TeleonomeConstants.DELETE_TELEPATHON))return "Ok";
 		String line="", className;
 		int counter=0;
 		int maxTries=3;
