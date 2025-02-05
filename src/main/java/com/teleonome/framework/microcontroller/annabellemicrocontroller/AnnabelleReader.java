@@ -49,7 +49,10 @@ public class AnnabelleReader extends BufferedReader{
 	public String readLine(){
 		logger.debug("waiting for response for  command:" + command);
 		if(command.equals(""))return "";
-		if(command.startsWith(TeleonomeConstants.DELETE_TELEPATHON))return "Ok";
+		if(command.startsWith(TeleonomeConstants.DELETE_TELEPATHON)) {
+			logger.debug("rreturning because its delete telepathon");
+			return "Ok";
+		}
 		String line="", className;
 		int counter=0;
 		int maxTries=3;
