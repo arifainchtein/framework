@@ -58,6 +58,9 @@ public class AnnabelleWriter  extends BufferedWriter{
 					String telepathonName=tokens[1];
 					logger.debug("RemoveTelepathon telepathonName=" + telepathonName);
 					aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+				}else {
+					logger.debug("sending  command:" + command);
+					output.write(command,0,command.length());
 				}
 		//	logger.debug("sending  command:" + command);
 		//	output.write(command,0,command.length());
