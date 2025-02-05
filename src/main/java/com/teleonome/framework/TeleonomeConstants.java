@@ -2,11 +2,13 @@ package com.teleonome.framework;
 
 public class TeleonomeConstants {
 
+	public static final String DELETE_TELEPATHON="DeleteTelepathon";
 	public static final String TELEPATHON_DENE_CONFIGURATION="Configuration";
 	public static final String TELEPATHON_DENE_SENSORS="Sensors";
 	public static final String TELEPATHON_DENE_PURPOSE="Purpose";
 	public static final int TELEPATHON_OPERATING_STATUS_FULL=3;
-	public static final int TELEPATHON_OPERATING_STATUS_PULSE_SLEEP=2;
+	public static final int TELEPATHON_OPERATING_STATUS_NO_LED=2;
+	public static final int TELEPATHON_OPERATING_STATUS_PULSE_SLEEP=1;
 	//
 	// the Cajal Types
 	public static final int ANNABELL_FUN_1_FLOW=1;
@@ -1263,6 +1265,7 @@ public class TeleonomeConstants {
 	// the topics for the heart
 	//'
 	public static int HEART_QUALITY_OF_SERVICE=1;
+	
 
 	
 	public static final String HEART_TOPIC_STATUS="Status";

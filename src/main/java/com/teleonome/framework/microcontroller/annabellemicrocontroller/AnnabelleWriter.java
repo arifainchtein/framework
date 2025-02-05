@@ -6,32 +6,36 @@ import java.io.Writer;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
+
+import com.teleonome.framework.TeleonomeConstants;
+import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.utils.Utils;
 
 public class AnnabelleWriter  extends BufferedWriter{
-
-		AnnabelleReader aCajalReader;
+		DenomeManager aDenomeManager;
+		AnnabelleReader aAnnabelleReader;
 		Logger logger;
 		Writer output;
 		long lastCommandTime=0;
 		long minimumIntervalBetweenCommands=2000;
 		
-		public AnnabelleWriter(Writer out, AnnabelleReader c) {
+		public AnnabelleWriter(Writer out, AnnabelleReader c, DenomeManager d) {
 			super(out);
-			aCajalReader=c;
+			aAnnabelleReader=c;
+			aDenomeManager=d;
 			output=out;
 			logger = Logger.getLogger(getClass());
 			// TODO Auto-generated constructor stub
 		}
 
 		public void close() throws IOException {
-			logger.info("about to close CajalWriter");
+			logger.info("about to close AnnabelleWriter");
 			//String trace = Utils.generateMethodTrace();
 		//	logger.debug(trace);
 			super.close();
 		}
 		public AnnabelleReader getReader() {
-			return aCajalReader;
+			return aAnnabelleReader;
 		}
 		public void write(String command, int off, int len) throws IOException {
 			long now=System.currentTimeMillis();
@@ -48,11 +52,17 @@ public class AnnabelleWriter  extends BufferedWriter{
 			}else {
 				logger.debug("Sending command since its been " + diff+ "since the last  command");
 			}
-			aCajalReader.setCurrentCommand(command);
+			aAnnabelleReader.setCurrentCommand(command);
+			 if(command.startsWith(TeleonomeConstants.DELETE_TELEPATHON)){
+					String[] tokens = command.split("#");
+					String telepathonName=tokens[1];
+					logger.debug("RemoveTelepathon telepathonName=" + telepathonName);
+					aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+				}
 			logger.debug("sending  command:" + command);
 			output.write(command,0,command.length());
 //			if(command.equals("GetSensorData")){
-//				aCajalReader.setCurrentCommand(command);
+//				aAnnabelleReader.setCurrentCommand(command);
 //			}else{
 //				try {
 //					//
