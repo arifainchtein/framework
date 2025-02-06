@@ -1066,8 +1066,8 @@ class MappedBusThread extends Thread{
 								break stop;
 							}
 							try {
-								logger.debug("line 1049 about to sleep  10000 not " +  asyncRequestDelayMillis);
-								Thread.sleep(10000);//asyncRequestDelayMillis);
+								logger.debug("line 1049 about to sleep  3000 not " +  asyncRequestDelayMillis);
+								Thread.sleep(3000);//asyncRequestDelayMillis);
 							} catch (InterruptedException e) {
 								// TODO Auto-generated catch block
 								logger.warn(Utils.getStringException(e));
