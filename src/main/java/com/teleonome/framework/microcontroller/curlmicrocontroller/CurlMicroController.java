@@ -22,6 +22,7 @@ import com.teleonome.framework.LifeCycleEventListener;
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.sftppublisher.SFTPPublisherReader;
 import com.teleonome.framework.microcontroller.sftppublisher.SFTPPublisherWriter;
@@ -47,8 +48,8 @@ public class CurlMicroController  extends MicroController implements LifeCycleEv
 	Logger logger;
 	JSONArray configParams;
 
-	public CurlMicroController(DenomeManager d, String n) {
-		super(d, n);
+	public CurlMicroController(Hypothalamus h,DenomeManager d, String n) {
+		super(h,d, n);
 		logger = Logger.getLogger(getClass());
 		// TODO Auto-generated constructor stub  
 	}

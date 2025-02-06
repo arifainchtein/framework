@@ -17,6 +17,7 @@ import org.json.JSONArray;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.exception.SerialPortCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.PlainReader;
 import com.teleonome.framework.utils.Utils;
@@ -42,8 +43,8 @@ public class PLSeriesMicroController extends MicroController {
 			PLSeriesWriter aPlSeriesWriter=null;
 			
 			
-			public PLSeriesMicroController(DenomeManager d, String n) {
-				super(d, n);
+			public PLSeriesMicroController(Hypothalamus h,DenomeManager d, String n) {
+				super(h,d, n);
 				setEnableAsyncUpdate(true);
 				// TODO Auto-generated constructor stub
 				logger = Logger.getLogger(getClass());

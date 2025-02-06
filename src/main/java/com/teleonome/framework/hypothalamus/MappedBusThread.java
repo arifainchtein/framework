@@ -939,7 +939,7 @@ class MappedBusThread extends Thread{
 								while(keepGoing) {
 									if(input.ready()) {
 										 inputLine = input.readLine();
-										 logger.debug("receivibg response :"+ inputLine);
+										 logger.debug("receiving response :"+ inputLine);
 											input.close();
 											output.close();
 											keepGoing=false;

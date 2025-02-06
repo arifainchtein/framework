@@ -13,6 +13,7 @@ import org.json.JSONArray;
 
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.sftppublisher.SFTPPublisherReader;
 import com.teleonome.framework.microcontroller.sftppublisher.SFTPPublisherWriter;
@@ -25,8 +26,8 @@ public class InternetAudioMicroController extends MicroController{
 	String dgTeleonomeName="";
 	Logger logger;
 	NetworkThread networkThread;
-	public InternetAudioMicroController(DenomeManager d, String n) {
-		super(d, n);
+	public InternetAudioMicroController(Hypothalamus h,DenomeManager d, String n) {
+		super(h,d, n);
 		logger = Logger.getLogger(getClass());
 		// TODO Auto-generated constructor stub  
 	}

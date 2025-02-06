@@ -30,6 +30,7 @@ import com.teleonome.framework.denome.Identity;
 import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.exception.SerialPortCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.MotherMicroController;
 import com.teleonome.framework.utils.Utils;
@@ -53,8 +54,8 @@ public class CajalJSSCController extends MotherMicroController implements LifeCy
 	InputStream serialPortInputStream = null;
 	OutputStream serialPortOutputStream = null;
 	
-	public CajalJSSCController(DenomeManager d, String n){
-		super(d,n);
+	public CajalJSSCController(Hypothalamus h,DenomeManager d, String n){
+		super(h,d,n);
 		logger = Logger.getLogger(getClass());
 		setEnableAsyncUpdate(true);
 	}

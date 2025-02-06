@@ -12,6 +12,7 @@ import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.PersistenceException;
 import com.teleonome.framework.exception.ServletProcessingException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.utils.Utils;
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 public class AnnabelleReader extends BufferedReader{
@@ -19,11 +20,12 @@ public class AnnabelleReader extends BufferedReader{
 	BufferedReader reader;
 	String command="";
 	DenomeManager aDenomeManager;
-	                                                                                                                                                                                                                               
+	Hypothalamus hypothalamus;                                                                                                                                                                                                                            
 	private String currentCommand="";
-	public AnnabelleReader(BufferedReader in ,DenomeManager d) {
+	public AnnabelleReader(BufferedReader in ,Hypothalamus h,DenomeManager d) {
 		super(in);
 		reader=in;
+		hypothalamus=h;
 		logger = Logger.getLogger(getClass().getName());
 		aDenomeManager=d;
 		// TODO Auto-generated constructor stub
@@ -50,7 +52,7 @@ public class AnnabelleReader extends BufferedReader{
 		logger.debug("waiting for response for  command:" + command);
 		if(command.equals(""))return "";
 		if(command.startsWith(TeleonomeConstants.DELETE_TELEPATHON)) {
-			logger.debug("rreturning because its delete telepathon");
+			logger.debug("returning because its delete telepathon");
 			return "Ok";
 		}
 		String line="", className;
@@ -102,6 +104,8 @@ public class AnnabelleReader extends BufferedReader{
 										// TODO Auto-generated catch block
 										logger.warn(Utils.getStringException(e));
 									}
+									
+									hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS, telepathon.toString());
 								}else {
 									logger.debug("Error deserializing " + line);
 								}

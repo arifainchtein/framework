@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.mnemosyne.MnemosyneManager;
 // com.teleonome.framework.microcontroller.networkinspectormicrocontroller.NetworkInspectorMicroController
@@ -21,8 +22,8 @@ public class NetworkInspectorMicroController extends MicroController{
 	Logger logger;
 	int arpScanRetry=8;
 	MnemosyneManager aMnemosyneManager;
-	public NetworkInspectorMicroController(DenomeManager d, String n) {
-		super(d, n);
+	public NetworkInspectorMicroController(Hypothalamus h,DenomeManager d, String n) {
+		super(h,d, n);
 		logger = Logger.getLogger(getClass());
 		aMnemosyneManager = aDenomeManager.getMnemosyneManager();
 		// TODO Auto-generated constructor stub

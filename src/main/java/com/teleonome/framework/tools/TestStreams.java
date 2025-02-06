@@ -11,7 +11,7 @@ public class TestStreams {
 
 	public TestStreams(){
 
-		CSVMicroController aMicroController = new CSVMicroController(null,null);
+		CSVMicroController aMicroController = new CSVMicroController(null,null,null);
 		BufferedWriter output=null;
 		BufferedReader reader=null;
 		String s;

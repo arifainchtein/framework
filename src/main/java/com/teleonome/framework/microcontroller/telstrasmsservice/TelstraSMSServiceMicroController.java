@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.exception.SerialPortCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.plseries.PLSeriesReader;
 import com.teleonome.framework.utils.Utils;
@@ -26,8 +27,8 @@ public class TelstraSMSServiceMicroController  extends MicroController {
 	PLSeriesReader aPLSeriesReader = null;//
 	Logger logger;
 	
-	public TelstraSMSServiceMicroController(DenomeManager d, String n) {
-		super(d, n);
+	public TelstraSMSServiceMicroController(Hypothalamus h,DenomeManager d, String n) {
+		super(h,d, n);
 		// TODO Auto-generated constructor stub
 		logger = Logger.getLogger(getClass());
 	}

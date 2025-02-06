@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 
 public class RaspberryPiCameraController  extends MicroController{
@@ -21,8 +22,8 @@ public class RaspberryPiCameraController  extends MicroController{
 	RaspberryPiCameraReader aRaspberryPiCameraReader;
 	Logger logger;
 	
-	public RaspberryPiCameraController(DenomeManager d, String n) {
-		super(d, n);
+	public RaspberryPiCameraController(Hypothalamus h,DenomeManager d, String n) {
+		super(h,d, n);
 		logger = Logger.getLogger(getClass());
 		// TODO Auto-generated constructor stub
 	}

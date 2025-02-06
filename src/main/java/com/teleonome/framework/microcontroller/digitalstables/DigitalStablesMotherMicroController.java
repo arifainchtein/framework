@@ -23,6 +23,7 @@ import com.teleonome.framework.denome.Identity;
 import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.exception.SerialPortCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.MotherMicroController;
 import com.teleonome.framework.microcontroller.gnuserialport.GNUArduinoReader;
@@ -46,8 +47,8 @@ public class DigitalStablesMotherMicroController extends MotherMicroController {
 		InputStream serialPortInputStream = null;
 		OutputStream serialPortOutputStream = null;
 		
-		public DigitalStablesMotherMicroController(DenomeManager d, String n){
-			super(d,n);
+		public DigitalStablesMotherMicroController(Hypothalamus h,DenomeManager d, String n){
+			super(h,d,n);
 			logger = Logger.getLogger(getClass());
 		}
 		

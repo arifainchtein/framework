@@ -10,16 +10,20 @@ import org.json.JSONArray;
 
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 
 public abstract class MicroController {
 	private String name;
 	protected DenomeManager aDenomeManager; 
 	protected boolean enableAsyncUpdate=false;
 	protected int asyncRequestMillisecondsDelay=1000;
+	protected final Hypothalamus hypothalamus;
 	
-	public MicroController(DenomeManager d, String n){
+	
+	public MicroController(Hypothalamus h, DenomeManager d, String n){
 		aDenomeManager=d;
 		name=n;
+		hypothalamus=h;
 	}
 	
 	public int getAsyncRequestMillisecondsDelay() {
@@ -32,6 +36,9 @@ public abstract class MicroController {
 		this.asyncRequestMillisecondsDelay = asyncRequestMillisecondsDelay;
 	}
 
+	public Hypothalamus getHypothalamus() {
+		return hypothalamus;
+	}
 
 
 	

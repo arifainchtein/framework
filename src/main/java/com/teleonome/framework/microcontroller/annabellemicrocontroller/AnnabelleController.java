@@ -29,6 +29,7 @@ import com.teleonome.framework.denome.Identity;
 import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.exception.SerialPortCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.MotherMicroController;
 import com.teleonome.framework.utils.Utils;
@@ -55,8 +56,8 @@ public class AnnabelleController extends MotherMicroController implements Serial
 	InputStream serialPortInputStream = null;
 	OutputStream serialPortOutputStream = null;
 	
-	public AnnabelleController(DenomeManager d, String n){
-		super(d,n);
+	public AnnabelleController(Hypothalamus h,DenomeManager d, String n){
+		super(h,d,n);
 		logger = Logger.getLogger(getClass());
 		setEnableAsyncUpdate(true);
 	}
@@ -345,7 +346,7 @@ public class AnnabelleController extends MotherMicroController implements Serial
 			//
 			// now open and test it
 			//
-			input = new AnnabelleReader(new BufferedReader(new InputStreamReader(serialPortInputStream)), aDenomeManager);
+			input = new AnnabelleReader(new BufferedReader(new InputStreamReader(serialPortInputStream)),hypothalamus, aDenomeManager);
 			output = new AnnabelleWriter(new OutputStreamWriter(serialPortOutputStream),input,aDenomeManager);
 
 			try{
@@ -396,7 +397,7 @@ public class AnnabelleController extends MotherMicroController implements Serial
 
 	public BufferedWriter getWriter() throws IOException{
 		//logger.debug("Arduino uno asking for writer1" );
-		input = new AnnabelleReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())), aDenomeManager);
+		input = new AnnabelleReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())),hypothalamus, aDenomeManager);
 		output = new AnnabelleWriter(new OutputStreamWriter(serialPort.getOutputStream()),input , aDenomeManager);
 		logger.debug("line 345 getting writer");
 		return output;

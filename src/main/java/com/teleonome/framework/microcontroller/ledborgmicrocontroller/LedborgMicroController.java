@@ -11,10 +11,11 @@ import org.json.JSONArray;
 
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 public class LedborgMicroController  extends MicroController{
-	public LedborgMicroController(DenomeManager d, String n) {
-		super(d, n);
+	public LedborgMicroController(Hypothalamus h,DenomeManager d, String n) {
+		super(h,d, n);
 		// TODO Auto-generated constructor stub
 	}
 

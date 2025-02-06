@@ -17,6 +17,7 @@ import com.teleonome.framework.LifeCycleEventListener;
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.utils.Utils;
 public class I2CMicroController  extends MicroController implements LifeCycleEventListener{
@@ -32,8 +33,8 @@ public class I2CMicroController  extends MicroController implements LifeCycleEve
 	public static final int I2C_ADDR = 11; 
 
 	
-	public I2CMicroController(DenomeManager d, String n) {
-		super(d, n);
+	public I2CMicroController(Hypothalamus h,DenomeManager d, String n) {
+		super(h,d, n);
 		// TODO Auto-generated constructor stub
 		logger = Logger.getLogger(getClass());
 	}

@@ -16,6 +16,7 @@ import org.json.JSONArray;
 
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 
 public class SFTPPublisherMicroController extends MicroController{
@@ -23,8 +24,8 @@ public class SFTPPublisherMicroController extends MicroController{
 	SFTPPublisherReader aSFTPReader;
 	String dgTeleonomeName="";
 	Logger logger;
-	public SFTPPublisherMicroController(DenomeManager d, String n) {
-		super(d, n);
+	public SFTPPublisherMicroController(Hypothalamus h,DenomeManager d, String n) {
+		super(h,d, n);
 		logger = Logger.getLogger(getClass());
 		// TODO Auto-generated constructor stub  
 	}

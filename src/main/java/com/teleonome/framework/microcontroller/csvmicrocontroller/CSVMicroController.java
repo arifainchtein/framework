@@ -23,6 +23,7 @@ import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.denome.DenomeUtils;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.websitemonitoring.WebsiteMonitoringPlainReader;
 import com.teleonome.framework.utils.Utils;
@@ -34,8 +35,8 @@ public class CSVMicroController extends MicroController {
 	JSONArray configParams;
 	String pathToFile="";
 	Logger logger;
-	public CSVMicroController(DenomeManager d, String n) {
-		super(d, n);
+	public CSVMicroController(Hypothalamus h,DenomeManager d, String n) {
+		super(h,d, n);
 		logger = Logger.getLogger(getClass());
 		// TODO Auto-generated constructor stub
 	}

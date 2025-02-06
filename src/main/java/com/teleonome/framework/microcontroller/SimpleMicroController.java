@@ -28,6 +28,7 @@ import org.json.JSONArray;
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.security.totp.TOTP;
 import com.teleonome.framework.utils.Utils;
 
@@ -43,8 +44,8 @@ public class SimpleMicroController extends MotherMicroController {
 	int numberOfCommandCodesInHistory=5;
 	String[] commandCodeHistory = new String[5];
 	
-	public SimpleMicroController(DenomeManager d, String n) {
-		super(d, n);
+	public SimpleMicroController(Hypothalamus h,DenomeManager d, String n) {
+		super(h,d, n);
 		// TODO Auto-generated constructor stub
 	}
 

@@ -10,6 +10,7 @@ import org.json.JSONArray;
 
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.PlainReader;
 
@@ -21,8 +22,8 @@ public class MnemotyconMicroController extends MicroController {
 			PlainReader plainReader = new PlainReader(new StringReader(dataString), sw);
 			
 			
-			public MnemotyconMicroController(DenomeManager d, String n) {
-				super(d, n);
+			public MnemotyconMicroController(Hypothalamus h,DenomeManager d, String n) {
+				super(h,d, n);
 				// TODO Auto-generated constructor stub
 			}
 

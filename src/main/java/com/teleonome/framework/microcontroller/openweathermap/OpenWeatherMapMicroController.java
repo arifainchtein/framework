@@ -17,6 +17,7 @@ import com.teleonome.framework.denome.DenomeUtils;
 import com.teleonome.framework.denome.Identity;
 import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.csvmicrocontroller.CSVReader;
 import com.teleonome.framework.utils.Utils;
@@ -32,8 +33,8 @@ public class OpenWeatherMapMicroController  extends MicroController{
 	int dailyCount=10;
 	Logger logger;
 	int connectTimeoutMilliseconds,readTimeoutMilliseconds;
-	public OpenWeatherMapMicroController(DenomeManager d, String n) {
-		super(d, n);
+	public OpenWeatherMapMicroController(Hypothalamus h,DenomeManager d, String n) {
+		super(h,d, n);
 		logger = Logger.getLogger(getClass());
 		// TODO Auto-generated constructor stub
 	}
