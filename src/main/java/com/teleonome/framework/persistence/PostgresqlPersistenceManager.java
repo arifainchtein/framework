@@ -4640,13 +4640,14 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		Timestamp time=null;
 		JSONObject j;
 		double value;
+		long timeSeconds;
 		logger.debug("allTables="+ allTables.size() );
 		try {
 			connection = connectionPool.getConnection();
 			for(int i=0;i<allTables.size();i++) {
 				logger.debug("allTables.get(i)="+ allTables.get(i) );
 				
-				command = "SELECT to_timestamp(timeseconds) at time zone 'Australia/Melbourne',"+
+				command = "SELECT timeSeconds,to_timestamp(timeseconds) at time zone 'Australia/Melbourne',"+
 			   " (data->'Denes'->("+
 			       " SELECT (position-1)::int "+
 			        "FROM jsonb_array_elements(data->'Denes') WITH ORDINALITY arr(elem, position) "+
@@ -4677,10 +4678,12 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				preparedStatement.setLong(6, endTimeSeconds);
 				rs = preparedStatement.executeQuery();
 				while(rs.next()){
-					timeString=rs.getString(1);
-					value = rs.getDouble(2);
+					timeSeconds = rs.getLong(1);
+					timeString=rs.getString(2);
+					value = rs.getDouble(3);
 					//units = rs.getString(3);
 					j = new JSONObject();
+					j.put("timeSeconds", timeSeconds);
 					j.put("timeString", timeString);
 					j.put("Value", value);
 					//j.put("Units", units);
