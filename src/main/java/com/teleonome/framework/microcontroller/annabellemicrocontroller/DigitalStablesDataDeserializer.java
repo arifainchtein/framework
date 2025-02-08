@@ -198,6 +198,24 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		long sleepTime = Long.parseLong(tokens[45].replaceAll("\u0000", ""));
 		int ledBrightness = Integer.parseInt(tokens[46].replaceAll("\u0000", ""));
 		
+		double altitude = 0;
+		try {
+			altitude = Double.parseDouble(tokens[47].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		double minimumEfficiencyForLed=.4, minimumEfficiencyForWifi=.5;
+		try {
+			minimumEfficiencyForLed = Double.parseDouble(tokens[48].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		try {
+			minimumEfficiencyForWifi = Double.parseDouble(tokens[49].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
 		toReturn.put("Name", deviceName);
 		toReturn.put("Short Name", deviceshortname);
 		toReturn.put("Serial Number", serialnumber);
@@ -221,8 +239,10 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Current Function", ""+currentFunctionValue, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Latitude",latitude, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("longitude",longitude, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
-	    
-
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("altitude",""+altitude, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("minimumEfficiencyForLed",""+minimumEfficiencyForLed, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("minimumEfficiencyForWifi",""+minimumEfficiencyForWifi, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		
 		JSONObject sensorDene = new JSONObject();
 		denes.put(sensorDene);
 		sensorDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, TeleonomeConstants.TELEPATHON_DENE_SENSORS);
