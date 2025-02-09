@@ -127,7 +127,7 @@ public class TeleonomeConstants {
 	public static final String  HEART_PROCESS_MAXIMUM_MEMORY="Maximum Memory for the Heart JVM";
 	public static final String  HEART_MESSAGES_RECEIVED="Messages Received";
 	public static final String  HEART_LAST_MESSAGE_MILLIS="Last Message Millis";
-	public static final String  HEART_LAST_MESSAGE_TIMESTAMP="Last Message Millis";
+	public static final String  HEART_LAST_MESSAGE_TIMESTAMP="Last Message Timestamp";
 	
 	public static final String DATATYPE_LONG = "long";
 	public static final String DATATYPE_FILE="File";

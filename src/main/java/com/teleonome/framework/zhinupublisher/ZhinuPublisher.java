@@ -27,7 +27,7 @@ public class ZhinuPublisher implements MqttCallback{
 		logger = Logger.getLogger(getClass());
 		connOpt = new MqttConnectOptions();
 		
-		connOpt.setCleanSession(true);
+		connOpt.setCleanSession(false);
 		connOpt.setKeepAliveInterval(30);
 		//connOpt.setUserName(userName);
 		//connOpt.setPassword(password.toCharArray());
