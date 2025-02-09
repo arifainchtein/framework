@@ -1264,7 +1264,7 @@ public class TeleonomeConstants {
 	//
 	// the topics for the heart
 	//'
-	public static int HEART_QUALITY_OF_SERVICE=1;
+	public static int HEART_QUALITY_OF_SERVICE=2;
 	
 
 	
