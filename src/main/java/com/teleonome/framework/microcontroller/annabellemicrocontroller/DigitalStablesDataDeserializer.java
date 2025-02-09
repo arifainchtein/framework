@@ -185,10 +185,37 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		
 		int totpcode = Integer.parseInt(tokens[39].replaceAll("\u0000", ""));
 		
-		double outdoortemperature = Double.parseDouble(tokens[40].replaceAll("\u0000", ""));
-		double outdoorhumidity = Double.parseDouble(tokens[41].replaceAll("\u0000", ""));
-		double measuredHeight = Double.parseDouble(tokens[42].replaceAll("\u0000", ""));
-		double scepticAvailablePercentage = Double.parseDouble(tokens[43].replaceAll("\u0000", ""));
+	
+		double outdoortemperature = 0;
+		try {
+			outdoortemperature = Double.parseDouble(tokens[40].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		double outdoorhumidity = 0;
+		try {
+			outdoorhumidity = Double.parseDouble(tokens[41].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		
+		double measuredHeight = 0;
+		try {
+			measuredHeight = Double.parseDouble(tokens[42].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		
+		double scepticAvailablePercentage = 0;
+		try {
+			scepticAvailablePercentage = Double.parseDouble(tokens[43].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
 		double lux = 0;
 		try {
 			lux = Double.parseDouble(tokens[44].replaceAll("\u0000", ""));
