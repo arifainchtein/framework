@@ -560,7 +560,8 @@ public abstract class Hypothalamus {
 	            MqttConnectOptions connOpts = new MqttConnectOptions();
 	           // connOpts.setKeepAliveInterval(120);
 	            connOpts.setAutomaticReconnect(true);
-	            connOpts.setCleanSession(true);
+	            //connOpts.setCleanSession(true);
+	            connOpts.setCleanSession(false);
 	            connOpts.setKeepAliveInterval(300);
 	           // connOpts.setMaxInflight(1000);
 	            logger.warn("Connecting to Heart: "+mqttBrokerAddress);
