@@ -95,7 +95,12 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		}
 		
 	    // Purpose
-		 secondsTime = Long.parseLong(tokens[19].replaceAll("\u0000", ""));
+		 
+		 try{
+			 secondsTime = Long.parseLong(tokens[19].replaceAll("\u0000", ""));
+			}catch(NumberFormatException e) {
+				
+			}
 		long lastPulseTime=secondsTime*1000;
 		double temperature = Double.parseDouble(tokens[20].replaceAll("\u0000", ""));
 		double rtcBatVolt = Double.parseDouble(tokens[21].replaceAll("\u0000", ""));
