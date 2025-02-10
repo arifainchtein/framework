@@ -102,9 +102,29 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 				
 			}
 		long lastPulseTime=secondsTime*1000;
-		double temperature = Double.parseDouble(tokens[20].replaceAll("\u0000", ""));
-		double rtcBatVolt = Double.parseDouble(tokens[21].replaceAll("\u0000", ""));
-		int opMode = Integer.parseInt(tokens[22].replaceAll("\u0000", ""));
+		double temperature = -99;
+		try{
+			temperature= Double.parseDouble(tokens[20].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		double rtcBatVolt = 0.0;
+		
+		try{
+			rtcBatVolt=Double.parseDouble(tokens[21].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		
+		int opMode = -1;
+		try{
+			opMode=Integer.parseInt(tokens[22].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
 		double rssi = 0.0;
 		try{
 			rssi=Double.parseDouble(tokens[23].replaceAll("\u0000", ""));
@@ -165,15 +185,47 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		double tank2WaterLevel = tank1PressurePsi*.702;
 		
 	    
-		int operatingStatus = (int) Double.parseDouble(tokens[31].replaceAll("\u0000", ""));
-		int digitalStablesUpload = Integer.parseInt(tokens[32].replaceAll("\u0000", ""));
-		int secondsSinceLastPulse = Integer.parseInt(tokens[33].replaceAll("\u0000", ""));
+		int operatingStatus = 0; 
+		try{
+			operatingStatus=Integer.parseInt(tokens[31].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
 		
+		int digitalStablesUpload = 0;
+		try{
+			digitalStablesUpload=Integer.parseInt(tokens[32].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
 		
-		int checksum = Integer.parseInt(tokens[34].replaceAll("\u0000", ""));
-		int loraActive = Integer.parseInt(tokens[35].replaceAll("\u0000", ""));
-		long dsLastUpload = Long.parseLong(tokens[36].replaceAll("\u0000", ""));
+		int secondsSinceLastPulse =0;
+		try{
+			secondsSinceLastPulse=Integer.parseInt(tokens[33].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
 		
+		int checksum =0;
+		try{
+			checksum=Integer.parseInt(tokens[34].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		int loraActive =0;
+		try{
+			loraActive=Integer.parseInt(tokens[35].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		long dsLastUpload =0;
+		try{
+			dsLastUpload= Long.parseLong(tokens[36].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
 		double solarVoltage = 0.0;
 		try{
 			solarVoltage=Double.parseDouble(tokens[37].replaceAll("\u0000", ""));
@@ -188,8 +240,12 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 			
 		}
 		
-		int totpcode = Integer.parseInt(tokens[39].replaceAll("\u0000", ""));
-		
+		int totpcode = 0;
+		try{
+			totpcode=Integer.parseInt(tokens[39].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
 	
 		double outdoortemperature = 0;
 		try {
