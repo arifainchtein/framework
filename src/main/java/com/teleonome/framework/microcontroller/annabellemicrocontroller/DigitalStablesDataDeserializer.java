@@ -283,9 +283,19 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		}catch(NumberFormatException e) {
 			
 		}
-		long sleepTime = Long.parseLong(tokens[45].replaceAll("\u0000", ""));
-		int ledBrightness = Integer.parseInt(tokens[46].replaceAll("\u0000", ""));
+		long sleepTime =0;
+		try {
+			sleepTime = Long.parseLong(tokens[45].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
 		
+		int ledBrightness =0;
+		try {
+			ledBrightness = Integer.parseInt(tokens[46].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
 		double altitude = 0;
 		try {
 			altitude = Double.parseDouble(tokens[47].replaceAll("\u0000", ""));
