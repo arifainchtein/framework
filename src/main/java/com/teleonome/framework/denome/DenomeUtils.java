@@ -1006,6 +1006,45 @@ public class DenomeUtils {
 		return null;
 	}
 
+
+	/**
+	 * you pass a dene as a first parameter and the name of the DeneWord you want and in the third parameter
+	 * you say what you want back. If you want the whole deneword you pass TeleonomeConstants.COMPLETE, otherwise
+	 * you pass one of the Teleonome constants
+	 * it reutrns what you asked for in the deneword called what you call it from the dene in the first parameter
+	 * @param deneJSONObject
+	 * @param aDeneWordName
+	 * @param whatToReturn
+	 * @return
+	 * @throws JSONException
+	 */
+
+	public static Object getDeneWordAttributeByDeneWordNameFromDeneChain(JSONObject deneChainJSONObject , String aDeneName, String aDeneWordName, String whatToReturn) throws JSONException{
+		
+		JSONArray denes = deneChainJSONObject.getJSONArray("Denes");
+		String  deneName;
+		JSONObject dene;
+		for(int h=0;h<denes.length();h++){
+			dene = denes.getJSONObject(h);
+			
+			if(aDeneName.equals(dene.getString("Name"))) {
+				JSONArray deneWords = dene.getJSONArray("DeneWords");
+				for(int i=0;i<deneWords.length();i++){
+					JSONObject deneWord = deneWords.getJSONObject(i); 
+					String deneWordName = deneWord.getString("Name");
+					if(deneWordName.equals(aDeneWordName)){
+						if(whatToReturn.equals(TeleonomeConstants.COMPLETE)){
+							return deneWord;
+						}else{
+							return deneWord.get(whatToReturn);
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * you pass a dene as a first parameter and the name of the DeneWord you want and in the third parameter
 	 * you say what you want back. If you want the whole deneword you pass TeleonomeConstants.COMPLETE, otherwise
