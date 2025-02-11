@@ -1026,7 +1026,6 @@ public class DenomeUtils {
 		JSONObject dene;
 		for(int h=0;h<denes.length();h++){
 			dene = denes.getJSONObject(h);
-			
 			if(aDeneName.equals(dene.getString("Name"))) {
 				JSONArray deneWords = dene.getJSONArray("DeneWords");
 				for(int i=0;i<deneWords.length();i++){
