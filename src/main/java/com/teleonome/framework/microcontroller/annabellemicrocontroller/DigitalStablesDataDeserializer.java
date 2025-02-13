@@ -30,6 +30,7 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 			logger.debug("Bad data received");
 			return new JSONObject();
 		}
+	
 		String deserializer = tokens[0];
 		String deviceTypeId=tokens[1];
 		String deviceName=tokens[2];
@@ -283,9 +284,9 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		}catch(NumberFormatException e) {
 			
 		}
-		long sleepTime =0;
+		int sleepTime =0;
 		try {
-			sleepTime = Long.parseLong(tokens[45].replaceAll("\u0000", ""));
+			sleepTime = Integer.parseInt(tokens[45].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
