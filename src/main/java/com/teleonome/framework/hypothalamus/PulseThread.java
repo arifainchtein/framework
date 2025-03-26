@@ -1648,7 +1648,12 @@ void processMicroProcessor(MicroController aMicroController, String teleonomeNam
 								payload="";
 								boolean restartRequired=false;
 								JSONObject responseJSON = anHypothalamus.aDBManager.requestCommandToExecute(commandToExecute,commandCode, commandCodeType, payload, "127.0.0.1", restartRequired);
-								logger.info("line 2442, stored post pulse,commandToExecute=" + commandToExecute + " commandCode=" + commandCode + " id=" + responseJSON.getInt("id") );
+								if(responseJSON.has("id")){
+									logger.info("line 1652, stored post pulse,commandToExecute=" + commandToExecute + " commandCode=" + commandCode + " id=" + responseJSON.getInt("id") );
+								}else {
+									logger.info("line 1654, response bad, ,commandToExecute=" + commandToExecute + " commandCode=" + commandCode + " id=" + responseJSON.toString() );
+									
+								}
 							}{
 
 							}
