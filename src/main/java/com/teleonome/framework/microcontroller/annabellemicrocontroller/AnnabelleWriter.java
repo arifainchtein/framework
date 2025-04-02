@@ -79,7 +79,7 @@ public class AnnabelleWriter  extends BufferedWriter{
 				Identity identity = new Identity(aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName, TeleonomeConstants.TELEPATHON_DENE_PURPOSE, TeleonomeConstants.TELEPHATON_DENEWORD_SECONDS_TIME );
 				logger.debug("line 80 identity= " + identity.toString());
 				try {
-					long secondsTime = (long)aDenomeManager.getDeneWordAttributeByIdentity(identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					int secondsTime = (int)aDenomeManager.getDeneWordAttributeByIdentity(identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 					logger.debug("line 82 secondsTime= " + secondsTime);
 					if(telepathonTime.equals(TeleonomeConstants.MNEMOSYNE_HOURLY_MUTATION)) {
 						if(System.currentTimeMillis()/1000> (secondsTime+3600) ) {
