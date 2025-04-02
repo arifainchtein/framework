@@ -95,6 +95,9 @@ public class AnnabelleWriter  extends BufferedWriter{
 				} catch (InvalidDenomeException e) {
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
+				}catch (Exception e) {
+					// TODO Auto-generated catch block
+					logger.warn(Utils.getStringException(e));
 				}
 				
 			}
