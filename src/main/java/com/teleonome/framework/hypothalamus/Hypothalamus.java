@@ -674,7 +674,7 @@ public abstract class Hypothalamus {
 		int currentDayInWeek = calendar.get(Calendar.DAY_OF_WEEK);
 		int currentDayInMonth = calendar.get(Calendar.DAY_OF_MONTH);
 		int currentMonthInYear = calendar.getMaximum(Calendar.MONTH);
-		
+		logger.info("about to get  TimeBasedMutations, ");
 		JSONArray timeBasedMutationsJSONArray = aDenomeManager.getTimeBasedMutations();
 		JSONObject timeBasedMutationJSONObject;
 		String mutationExecutionTime;
