@@ -110,7 +110,8 @@ public class DenomeManager {
 	JSONObject purposeNucleus=null;
 	JSONObject mnemosyneNucleus=null;
 	JSONObject humanInterfaceNucleus=null;
-
+	JSONObject telepathonsNucleus=null;
+	
 	JSONObject denomeJSONObject = null;
 	JSONObject currentlyCreatingPulseJSONObject=null;
 	JSONObject previousPulseJSONObject=null;
@@ -365,6 +366,8 @@ public class DenomeManager {
 					mnemosyneNucleus= aJSONObject;
 				}else if(name.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 					humanInterfaceNucleus= aJSONObject;
+				}else if(name.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)) {
+					telepathonsNucleus= aJSONObject;
 				}
 
 			}
@@ -601,6 +604,7 @@ public class DenomeManager {
 			//
 			// Telepathons
 			//
+			/*
 			JSONObject aTelepathonsDeneChainJSONObject = (JSONObject)deneChainNameDeneChainIndex.get(TeleonomeConstants.DENECHAIN_TELEPATHONS);
 			 eventDataStructureValueListPointerEventStringQueuePositionDeneWordIndex = new Hashtable();
 			
@@ -668,30 +672,6 @@ public class DenomeManager {
 							}
 							eventDataStructureValueListPointerEventStringQueuePositionDeneWordIndex.put(eventDataStructureValueListPointer, eventStringQueuePositionDeneWordIndex);
 							
-//								aDeneJSONObject = (JSONObject) v.elementAt(j);
-//								sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-//								sensorValuesJSONArray = this.loadDenesFromPointers(sensorValuesPointersJSONArray);
-//								logger.debug("sensorValuesJSONArray.length=" + sensorValuesJSONArray.length());
-//								for(int k=0;k<sensorValuesJSONArray.length();k++){
-//									aDeneValueJSONObject = (JSONObject) sensorValuesJSONArray.get(k);
-//									logger.debug("k="+ k + " aDeneValueJSONObject:" + aDeneValueJSONObject);
-//									I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneValueJSONObject, "Sensor Request Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-//									sensorRequestQueuePositionDeneWordIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(aDeneValueJSONObject, I));
-//									Collections.sort(sensorRequestQueuePositionDeneWordIndex, new Comparator<Map.Entry<?, Integer>>(){
-//										public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
-//											return o1.getValue().compareTo(o2.getValue());
-//										}});
-//								}
-//							}
-							
-							
-							
-							
-							
-							
-							
-							
-							
 							
 						}
 					} catch (InvalidDenomeException e) {
@@ -718,27 +698,9 @@ public class DenomeManager {
 				}
 				
 				pointerToMicroControllerTelepathonExecutionPositionIndex.put(pointerToMicroController, telepathonExecutionPositionDeneWordIndex);
-				
-				
-//				for(int j=0;j<v.size();j++){
-//					aDeneJSONObject = (JSONObject) v.elementAt(j);
-//					sensorValuesPointersJSONArray = DenomeUtils.getDeneWordAttributeForAllDeneWordsByDeneWordTypeFromDene(aDeneJSONObject, TeleonomeConstants.DENEWORD_TYPE_SENSOR_VALUE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-//					sensorValuesJSONArray = this.loadDenesFromPointers(sensorValuesPointersJSONArray);
-//					logger.debug("sensorValuesJSONArray.length=" + sensorValuesJSONArray.length());
-//					for(int k=0;k<sensorValuesJSONArray.length();k++){
-//						aDeneValueJSONObject = (JSONObject) sensorValuesJSONArray.get(k);
-//						logger.debug("k="+ k + " aDeneValueJSONObject:" + aDeneValueJSONObject);
-//						I = (Integer)DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(aDeneValueJSONObject, "Sensor Request Queue Position", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-//						sensorRequestQueuePositionDeneWordIndex.add(new AbstractMap.SimpleEntry<JSONObject, Integer>(aDeneValueJSONObject, I));
-//						Collections.sort(sensorRequestQueuePositionDeneWordIndex, new Comparator<Map.Entry<?, Integer>>(){
-//							public int compare(Map.Entry<?, Integer> o1, Map.Entry<?, Integer> o2) {
-//								return o1.getValue().compareTo(o2.getValue());
-//							}});
-//					}
-//				}
 			}
-
-
+*/
+			
 				//
 				// Sensors
 				//
@@ -2628,6 +2590,13 @@ public class DenomeManager {
 		return null;
 	}
 
+	public JSONArray getAllTelepathons(){
+		JSONArray telepathons = new JSONArray();
+		if(telepathonsNucleus!=null && telepathonsNucleus.has("DeneChains")) {
+			telepathons= telepathonsNucleus.getJSONArray("DeneChains");
+		}
+		return telepathons;
+	}
 
 	public JSONObject getDeneChainByName(String nucleusName, String deneChainName) throws JSONException{
 		JSONArray deneChainsArray=null;

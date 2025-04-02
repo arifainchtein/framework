@@ -3,6 +3,7 @@ package com.teleonome.framework;
 public class TeleonomeConstants {
 
 	public static final String DELETE_TELEPATHON="DeleteTelepathon";
+	public static final String DELETE_STALE_TELEPATHONS="DeleteStaleTelepathons";
 	public static final String TELEPATHON_DENE_CONFIGURATION="Configuration";
 	public static final String TELEPATHON_DENE_SENSORS="Sensors";
 	public static final String TELEPATHON_DENE_PURPOSE="Purpose";
@@ -237,9 +238,8 @@ public class TeleonomeConstants {
 	public static final String DENECHAIN_HEART = "Heart";
 	public static final String DENECHAIN_ACTUATORS = "Actuators";
 	public static final String DENECHAIN_ANALYSIS = "Analysis";
-	public static final String DENECHAIN_TELEPHATONS = "Telephatons";
 	public static final String DENECHAIN_SENSORS = "Sensors";	
-	public static final String DENECHAIN_TELEPATHONS = "Telepathons";    
+	//public static final String DENECHAIN_TELEPATHONS = "Telepathons";    
 	public static final String DENECHAIN_DESCRIPTIVE = "Descriptive";
 	public static final String DENECHAIN_COMPONENTS = "Components";
 	public static final String DENECHAIN_ANALYTICONS = "Analyticons";
@@ -1300,7 +1300,7 @@ public class TeleonomeConstants {
 	// telepathon
 	//
 	public static final String TELEPHATON_TOPIC_ANNOUNCE="TelephatonAnnounce";
-	
+	public static final String TELEPHATON_DENEWORD_SECONDS_TIME="Seconds Time";
 
 	
 
