@@ -3311,7 +3311,7 @@ public class DenomeManager {
 
 			JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
 			mutationsJSONArray = denomeObject.getJSONArray("Mutations");
-			logger.debug("readImmediateMutation mutationsJSONArray=" + mutationsJSONArray.length());
+			logger.debug("readImmediateMutation mutationsJSONArray=" + mutationsJSONArray.toString(4));
 			JSONObject mutationJSONObject;
 			for(int i=0;i<mutationsJSONArray.length();i++){
 				mutationJSONObject = (JSONObject) mutationsJSONArray.getJSONObject(i);
