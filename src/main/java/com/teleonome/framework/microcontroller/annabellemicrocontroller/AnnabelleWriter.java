@@ -76,7 +76,7 @@ public class AnnabelleWriter  extends BufferedWriter{
 				
 				telepathonName = telepathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
 				logger.debug("line 76 telepathonName= " + telepathonName);
-				Identity identity = new Identity(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName, TeleonomeConstants.TELEPATHON_DENE_PURPOSE, TeleonomeConstants.TELEPHATON_DENEWORD_SECONDS_TIME );
+				Identity identity = new Identity(aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName, TeleonomeConstants.TELEPATHON_DENE_PURPOSE, TeleonomeConstants.TELEPHATON_DENEWORD_SECONDS_TIME );
 				logger.debug("line 80 identity= " + identity.toString());
 				try {
 					long secondsTime = (long)aDenomeManager.getDeneWordAttributeByIdentity(identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
