@@ -648,8 +648,9 @@ public abstract class Hypothalamus {
 		    	
 		    	try {
 					if(aDenomeManager.getCurrentlyCreatingPulseJSONObject() != null) {
-						logger.info("about to execute TimeBasedMutations");
+						logger.info("line 651 about to execute TimeBasedMutations");
 						executeTimeBasedMutations();
+						logger.info(" line 653 executeed TimeBasedMutations");
 					}else {
 						logger.info("Did not execute TimeBasedMutations because getCurrentlyCreatingPulseJSONObject is null ");
 					}
@@ -684,7 +685,7 @@ public abstract class Hypothalamus {
 		int mutationDayInWeek=0;
 		int mutationDayInMonth=0;
 		int mutationMonthInYear=0;
-		logger.info("entering execute TimeBasedMutations");
+		logger.info("entering execute TimeBasedMutations, there are " + timeBasedMutationsJSONArray.length());
 		for(int i=0;i<timeBasedMutationsJSONArray.length();i++) {
 			timeBasedMutationJSONObject = timeBasedMutationsJSONArray.getJSONObject(i);
 			JSONArray mutationDeneChains = timeBasedMutationJSONObject.getJSONArray("DeneChains");
