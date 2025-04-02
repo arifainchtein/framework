@@ -2332,6 +2332,8 @@ public class DenomeManager {
 					mnemosyneNucleus= aJSONObject;
 				}else if(name.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 					humanInterfaceNucleus = aJSONObject;
+				}else if(name.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+					telepathonsNucleus = aJSONObject;
 				}
 
 			}
@@ -2345,6 +2347,8 @@ public class DenomeManager {
 				deneChainsArray = mnemosyneNucleus.getJSONArray("DeneChains");
 			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 				deneChainsArray = humanInterfaceNucleus.getJSONArray("DeneChains");
+			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+				deneChainsArray = telepathonsNucleus.getJSONArray("DeneChains");
 			}
 
 			JSONObject aDeneJSONObject, aDeneWordJSONObject;
@@ -2417,6 +2421,8 @@ public class DenomeManager {
 					mnemosyneNucleus= aJSONObject;
 				}else if(name.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 					humanInterfaceNucleus = aJSONObject;
+				}else if(name.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+					telepathonsNucleus = aJSONObject;
 				}
 
 			}
@@ -2430,6 +2436,8 @@ public class DenomeManager {
 				deneChainsArray = mnemosyneNucleus.getJSONArray("DeneChains");
 			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 				deneChainsArray = humanInterfaceNucleus.getJSONArray("DeneChains");
+			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+				deneChainsArray = telepathonsNucleus.getJSONArray("DeneChains");
 			}
 
 			JSONObject aDeneJSONObject, aDeneWordJSONObject;
@@ -2521,6 +2529,8 @@ public class DenomeManager {
 					mnemosyneNucleus= aJSONObject;
 				}else if(name.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 					humanInterfaceNucleus= aJSONObject;
+				}else if(name.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+					telepathonsNucleus = aJSONObject;
 				}
 
 			}
@@ -2534,6 +2544,8 @@ public class DenomeManager {
 				deneChainsArray = mnemosyneNucleus.getJSONArray("DeneChains");
 			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 				deneChainsArray = humanInterfaceNucleus.getJSONArray("DeneChains");
+			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+				deneChainsArray = telepathonsNucleus.getJSONArray("DeneChains");
 			}
 
 			JSONObject aDeneJSONObject, aDeneWordJSONObject;
@@ -2653,6 +2665,8 @@ public class DenomeManager {
 				deneChainsArray = mnemosyneNucleus.getJSONArray("DeneChains");
 			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 				deneChainsArray = humanInterfaceNucleus.getJSONArray("DeneChains");
+			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+				deneChainsArray = telepathonsNucleus.getJSONArray("DeneChains");
 			}
 
 			JSONObject aJSONObject, aDeneJSONObject, aDeneWordJSONObject;
@@ -2706,6 +2720,8 @@ public class DenomeManager {
 				toReturn = mnemosyneNucleus ;
 			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 				toReturn = humanInterfaceNucleus ;
+			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+				deneChainsArray = telepathonsNucleus.getJSONArray("DeneChains");
 			}
 
 
@@ -2742,6 +2758,8 @@ public class DenomeManager {
 				deneChainsArray = mnemosyneNucleus.getJSONArray("DeneChains");
 			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 				deneChainsArray = humanInterfaceNucleus.getJSONArray("DeneChains");
+			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+				deneChainsArray = telepathonsNucleus.getJSONArray("DeneChains");
 			}
 
 
@@ -3091,6 +3109,9 @@ public class DenomeManager {
 			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 				if(deneChainName.equals(""))return humanInterfaceNucleus;
 				deneChainsArray = humanInterfaceNucleus.getJSONArray("DeneChains");
+			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+				if(deneChainName.equals(""))return telepathonsNucleus;
+				deneChainsArray = telepathonsNucleus.getJSONArray("DeneChains");
 			}
 
 			JSONObject aJSONObject, aDeneJSONObject, aDeneWordJSONObject;
@@ -8506,7 +8527,7 @@ public class DenomeManager {
 		String deneChainName = tokens[2];
 		String deneName = tokens[3];
 		String deneWordLabel = tokens[4];
-		JSONObject aJSONObject, cpInternalNucleus=null,cpPurposeNucleus=null, cpMnemosyneNucleus=null, cpHumanInterfaceNucleus=null;
+		JSONObject aJSONObject, cptelepathonsNucleus=null, cpInternalNucleus=null,cpPurposeNucleus=null, cpMnemosyneNucleus=null, cpHumanInterfaceNucleus=null;
 
 		JSONObject denomeObject;
 		try {
@@ -8526,6 +8547,8 @@ public class DenomeManager {
 					cpMnemosyneNucleus= aJSONObject;
 				}else if(name.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 					cpHumanInterfaceNucleus= aJSONObject;
+				}else if(name.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+					cptelepathonsNucleus = aJSONObject;
 				}
 
 			}
@@ -8547,6 +8570,8 @@ public class DenomeManager {
 				deneChainsArray = cpMnemosyneNucleus.getJSONArray("DeneChains");
 			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 				deneChainsArray = cpHumanInterfaceNucleus.getJSONArray("DeneChains");
+			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+				deneChainsArray = cptelepathonsNucleus.getJSONArray("DeneChains");
 			}
 
 			JSONObject  aDeneJSONObject, aDeneWordJSONObject;
