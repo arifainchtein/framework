@@ -93,7 +93,7 @@ public class AnnabelleWriter  extends BufferedWriter{
 					}
 				} catch (InvalidDenomeException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.warn(Utils.getStringException(e));
 				}
 				
 			}
