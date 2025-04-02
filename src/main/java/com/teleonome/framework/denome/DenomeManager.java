@@ -2269,6 +2269,7 @@ public class DenomeManager {
 
 	public Object getDeneWordAttributeByIdentity(Identity identity, String whatToBring) throws InvalidDenomeException, JSONException{
 		JSONObject deneWord = getDeneWordByIdentity( identity);
+		logger.debug("line 2272, deneWord=" + deneWord);
 		if(deneWord==null)return null;
 		if(whatToBring.equals(TeleonomeConstants.COMPLETE)){
 			return deneWord;
@@ -2302,6 +2303,7 @@ public class DenomeManager {
 				return null;
 			}
 		}else{
+			logger.debug("line 2306 about to get deneword by pointer, dw name" + identity.getDeneWordName());
 			return getDeneWordByPointer(identity.getNucleusName(),identity.getDenechainName(), identity.getDeneName(), identity.getDeneWordName());
 		}
 		return null;
