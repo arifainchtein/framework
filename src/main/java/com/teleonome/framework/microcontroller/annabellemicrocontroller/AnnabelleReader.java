@@ -55,6 +55,12 @@ public class AnnabelleReader extends BufferedReader{
 			logger.debug("returning because its delete telepathon");
 			return "Ok";
 		}
+		
+		if(command.startsWith(TeleonomeConstants.DELETE_STALE_TELEPATHONS)) {
+			logger.debug("returning because its delete stale telepathon");
+			return "Ok";
+		}
+		
 		String line="", className;
 		int counter=0;
 		int maxTries=1;
