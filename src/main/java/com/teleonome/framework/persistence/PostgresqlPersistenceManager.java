@@ -4728,6 +4728,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			String tableName = getTableNameByCalendar(TeleonomeConstants.TELEPATHON_TABLE,  cal);
 			if(!tableExists(tableName)) {
 				sql = "CREATE TABLE "+tableName+ " as table "+ TeleonomeConstants.TELEPATHON_TABLE +" with no data";
+				logger.debug("line 4731, sql=" + sql);
 				int result = statement.executeUpdate(sql);
 				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
 			}

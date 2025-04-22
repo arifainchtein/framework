@@ -25,8 +25,8 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 	public JSONObject deserialise(String teleonomeName, String line) {
 		JSONObject toReturn = new JSONObject();
 		String[] tokens = line.split("#");
-		logger.debug("line 22, received =" +line + " tokens=" + tokens.length);
-		if(tokens.length<46) {
+		logger.debug("line 22,  tokens=" + tokens.length + " received =" +line );
+		if(tokens.length<49) {
 			logger.debug("Bad data received");
 			return new JSONObject();
 		}
@@ -321,6 +321,7 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		}catch(NumberFormatException e) {
 			
 		}
+		logger.debug("line 324,finished parsing");
 		
 		toReturn.put("Name", deviceName);
 		toReturn.put("Short Name", deviceshortname);

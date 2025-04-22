@@ -5430,7 +5430,7 @@ public class DenomeManager {
 					deneChain = deneChains.getJSONObject(j);
 					if(deneChain.get(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE).equals(deneChainName)) {
 						deneChains.remove(j);
-						logger.info("removed telepathon denechain " +deneChainName);
+						logger.info("	 " +deneChainName);
 					}
 				}
 			}
