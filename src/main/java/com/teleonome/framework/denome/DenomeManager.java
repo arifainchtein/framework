@@ -5420,6 +5420,7 @@ public class DenomeManager {
 		JSONArray nucleiArray = denomeArray.getJSONArray("Nuclei");
 		JSONObject aNucleusJSONObject, aDeneChain;
 		JSONArray deneChains;
+		boolean modified=false;
 		for(int i=0;i<nucleiArray.length();i++){
 			aNucleusJSONObject = nucleiArray.getJSONObject(i);
 			if(aNucleusJSONObject.getString("Name").equals(nucleusName)){
@@ -5431,11 +5432,14 @@ public class DenomeManager {
 					if(deneChain.get(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE).equals(deneChainName)) {
 						deneChains.remove(j);
 						logger.info("	 " +deneChainName);
+						modified=true;
 					}
 				}
 			}
 		}
-		
+		if(modified) {
+			writeDenomeToDisk();
+		}
 	}
 	
 	public void injectDeneChainIntoNucleus( String nucleusName, JSONObject deneChain) throws JSONException{
