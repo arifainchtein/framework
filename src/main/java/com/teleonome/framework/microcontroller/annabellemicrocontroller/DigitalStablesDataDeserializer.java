@@ -400,7 +400,7 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Maximum Height", ""+maximumScepticHeight, "Meter",TeleonomeConstants.DATATYPE_DOUBLE, true));
 
 		}else if(currentFunctionValue==TeleonomeConstants.VOLTAGE_MONITOR) {
-			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Remote Voltage", ""+flowRate, "Meter",TeleonomeConstants.DATATYPE_DOUBLE, true));
+			sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Remote Voltage", ""+flowRate, "Volts",TeleonomeConstants.DATATYPE_DOUBLE, true));
 
 		}else if(currentFunctionValue==TeleonomeConstants.ANNABELL_TEMP_SOILMOISTURE) {
 			
