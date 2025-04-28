@@ -21,7 +21,7 @@ public class TeleonomeConstants {
 	public static final int ANNABELL_DAFFODIL_WATER_TROUGH= 7;
 	public static final int ANNABELL_TEMP_SOILMOISTURE= 8;
 	public static final int ANNABELL_LIGHT_DETECTOR= 9;
-	
+	public static final int  VOLTAGE_MONITOR=10;
 	public static final String ADA_INTERNAL_HOST_IPADDRESS="172.16.1.1";
 	
 	//
