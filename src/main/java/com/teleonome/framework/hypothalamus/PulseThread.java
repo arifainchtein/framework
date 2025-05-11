@@ -118,7 +118,7 @@ public class PulseThread extends Thread{
 								logger.info("line 118 GetLifeCycleData received inputLine=" + line);
 							}else if(line.length()>5 && !line.startsWith("Ok")&& !line.startsWith("Failure")) {
 								try {
-									logger.info("GetLifeCycleData received inputLine=" + line);
+									logger.info("line 121 GetLifeCycleData received inputLine=" + line);
 									tokens = line.split("#");
 									// find which remembereddenewords come the mother and 
 									// storem them using the REMEMBERED_DENEWORD_SOURCE_WPS
@@ -127,8 +127,8 @@ public class PulseThread extends Thread{
 									eventType = tokens[1];
 									eventValue = Integer.parseInt(tokens[2]);
 									aDenomeManager.storeLifeCycleEvent(eventType, eventTimeMillis,eventValue);
-								}catch(Exception e) {
-									logger.warn(Utils.getStringException(e));
+								}catch(NumberFormatException e) {
+									//logger.warn(Utils.getStringException(e));
 								}
 								
 							}else {
