@@ -122,11 +122,11 @@ public class PulseThread extends Thread{
 									tokens = line.split("#");
 									// find which remembereddenewords come the mother and 
 									// storem them using the REMEMBERED_DENEWORD_SOURCE_WPS
-									String t0=tokens[0];
-									eventTimeMillis = 1000*Long.parseLong(t0);
-									eventType = tokens[1];
-									eventValue = Integer.parseInt(tokens[2]);
-									aDenomeManager.storeLifeCycleEvent(eventType, eventTimeMillis,eventValue);
+//									String t0=tokens[0];
+//									eventTimeMillis = 1000*Long.parseLong(t0);
+//									eventType = tokens[1];
+//									eventValue = Integer.parseInt(tokens[2]);
+//									aDenomeManager.storeLifeCycleEvent(eventType, eventTimeMillis,eventValue);
 								}catch(NumberFormatException e) {
 									//logger.warn(Utils.getStringException(e));
 								}
