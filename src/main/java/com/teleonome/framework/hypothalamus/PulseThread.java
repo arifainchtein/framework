@@ -100,13 +100,14 @@ public class PulseThread extends Thread{
 				logger.warn(Utils.getStringException(e));
 			}
 			
-			/*
-			boolean waitingForMama=true;
+			
+			boolean waitingForMama=false;
 			String[] tokens;
 			String eventType="";
 			long eventTimeMillis=0;
 			int eventValue=0;
 			String line ="";
+			/*
 			while(waitingForMama) {
 				logger.debug("line 106");
 				try {
