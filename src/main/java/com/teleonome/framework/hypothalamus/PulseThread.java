@@ -170,7 +170,7 @@ public class PulseThread extends Thread{
 				}
 
 			}
-			*/
+			
 
 			String teleonomeName = aDenomeManager.getDenomeName();
 			Hashtable<String,ArrayList> deneWordsToRememberByTeleonome = aDenomeManager.getDeneWordsToRememberByTeleonome();
@@ -256,10 +256,12 @@ public class PulseThread extends Thread{
 			}
 		} //if(teleonomeRememberedWordsA..
 			
+			*/
 			
 		//
 		// Now the rememberedvalues
 		//
+			/*
 			long recordMillis;
 			String label,   unit;
 			double value;
@@ -317,6 +319,10 @@ public class PulseThread extends Thread{
 				}
 
 			}	
+			
+			*/
+			
+			
 			
 //			try {
 //				if(input!=null)input.close();
