@@ -88,7 +88,8 @@ public class AnnabelleReader extends BufferedReader{
 					if(tokens.length>46) {
 						appendString=false;
 						deserializer=tokens[0];
-						
+						int l = "deserializer".length();
+						if(deserializer.length()>l && deserializer.contains("DigitalStablesDataDeserializer"))deserializer="DigitalStablesDataDeserializer";
 						try {	    
 							className = "com.teleonome.framework.microcontroller.annabellemicrocontroller." + deserializer;
 							logger.debug("className for deserializer =" + className);

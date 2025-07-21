@@ -493,7 +493,7 @@ public class Utils {
 			toReturn.add(line);
 		}
 		reader.close();
-		if(!process.waitFor(500, TimeUnit.MILLISECONDS)) {
+		if(!process.waitFor(10000, TimeUnit.MILLISECONDS)) {
 		    //timeout - kill the process.
 			logger.debug("executeCommand The command:" + command + " was killed after 500 milliseconds");
 			toReturn.add("executeCommand The command:" + command + " was killed after 500 milliseconds");
