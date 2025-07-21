@@ -126,7 +126,7 @@ public class AnnabelleReader extends BufferedReader{
 							logger.warn(Utils.getStringException(e));
 						}
 					}else {
-						appendString=true;
+						//appendString=true;
 					}
 					
 				}
