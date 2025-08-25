@@ -3090,7 +3090,6 @@ public class DenomeManager {
 	public boolean offuscateWifiPasswordInCommand(int id, String updatedPayload){
 		return aDBManager.offuscateWifiPasswordInCommand( id,  updatedPayload);
 	}
-
 	public JSONObject getDenomicElementByIdentity(Identity identity){
 
 		String nucleusName=identity.getNucleusName();
