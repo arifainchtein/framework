@@ -70,6 +70,7 @@ public class AnnabelleReader extends BufferedReader{
 		AnnabelleDeserializer cc;
 		JSONObject telepathon = null;
 		boolean appendString=false;
+		boolean processString=false;
 		while(keepGoing) {
 			try {
 				if(appendString) {
@@ -85,12 +86,21 @@ public class AnnabelleReader extends BufferedReader{
 					appendString=false;
 				}else {
 					tokens = line.split("#");
-					if(tokens.length>46) {
+					deserializer=tokens[0];
+					int l = "deserializer".length();
+					 processString=false;
+					if(deserializer.length()>l) {
 						appendString=false;
-						deserializer=tokens[0];
-						int l = "deserializer".length();
-						if(deserializer.length()>l && deserializer.contains("DigitalStablesDataDeserializer"))deserializer="DigitalStablesDataDeserializer";
-						else if(deserializer.length()>l && deserializer.contains("SeedlingMonitorDataDeserializer"))deserializer="SeedlingMonitorDataDeserializer";
+						if(tokens.length>46 && deserializer.contains("DigitalStablesDataDeserializer")) {
+							deserializer="DigitalStablesDataDeserializer";
+							processString=true;
+						}else if(deserializer.contains("SeedlingMonitorDataDeserializer")) {
+							deserializer="SeedlingMonitorDataDeserializer";
+							processString=true;
+						}
+					}
+					
+					if(processString) {
 						try {	    
 							className = "com.teleonome.framework.microcontroller.annabellemicrocontroller." + deserializer;
 							logger.debug("className for deserializer =" + className);
@@ -126,10 +136,7 @@ public class AnnabelleReader extends BufferedReader{
 							// TODO Auto-generated catch block
 							logger.warn(Utils.getStringException(e));
 						}
-					}else {
-						//appendString=true;
 					}
-					
 				}
 				//
 				// now process
