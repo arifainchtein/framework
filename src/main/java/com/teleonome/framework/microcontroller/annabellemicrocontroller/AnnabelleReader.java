@@ -100,7 +100,6 @@ public class AnnabelleReader extends BufferedReader{
 							deserializer="SeedlingMonitorDataDeserializer";
 							processString=true;
 							appendString=false;
-							}
 						}
 					}
 					
