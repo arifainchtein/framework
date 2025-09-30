@@ -87,16 +87,20 @@ public class AnnabelleReader extends BufferedReader{
 				}else {
 					tokens = line.split("#");
 					deserializer=tokens[0];
+					logger.debug("line 90, deserializer=" + deserializer);
 					int l = "deserializer".length();
 					 processString=false;
 					if(deserializer.length()>l) {
-						appendString=false;
+						
 						if(tokens.length>46 && deserializer.contains("DigitalStablesDataDeserializer")) {
 							deserializer="DigitalStablesDataDeserializer";
 							processString=true;
-						}else if(deserializer.contains("SeedlingMonitorDataDeserializer")) {
+							appendString=false;
+						}else if(tokens.length>24 && deserializer.contains("SeedlingMonitorDataDeserializer")) {
 							deserializer="SeedlingMonitorDataDeserializer";
 							processString=true;
+							appendString=false;
+							}
 						}
 					}
 					
