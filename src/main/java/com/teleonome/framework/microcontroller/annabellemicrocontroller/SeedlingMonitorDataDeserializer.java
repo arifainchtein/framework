@@ -39,49 +39,49 @@ public class SeedlingMonitorDataDeserializer extends AnnabelleDeserializer {
 		String serialnumber=tokens[4];
 		String groupidentifier=tokens[5];
 		
-		int dataSamplingSec = Integer.parseInt(tokens[7].replaceAll("\u0000", ""));
-		String latitude=tokens[8];
-		String longitude=tokens[9];
+		int dataSamplingSec = Integer.parseInt(tokens[6].replaceAll("\u0000", ""));
+		String latitude=tokens[7];
+		String longitude=tokens[8];
 		
 		 // Purpose
 		 
 		
 		double greenhouseTemp =0.0;
 		try{
-			greenhouseTemp=Double.parseDouble(tokens[11].replaceAll("\u0000", ""));
+			greenhouseTemp=Double.parseDouble(tokens[9].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 
 		double greenhouseHum = 0;
 		try{
-			greenhouseHum=Double.parseDouble(tokens[13].replaceAll("\u0000", ""));
+			greenhouseHum=Double.parseDouble(tokens[10].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		double temperature = 0;
 		try{
-			temperature=Double.parseDouble(tokens[13].replaceAll("\u0000", ""));
+			temperature=Double.parseDouble(tokens[11].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		double outdoorTemperature =0.0;
 		try{
-			outdoorTemperature=Double.parseDouble(tokens[14].replaceAll("\u0000", ""));
+			outdoorTemperature=Double.parseDouble(tokens[12].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		boolean humidifierstatus=false;
 		try{
-			humidifierstatus=Boolean.parseBoolean(tokens[14].replaceAll("\u0000", ""));
+			humidifierstatus=Boolean.parseBoolean(tokens[13].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 	 
 		 try{
-			 secondsTime = Long.parseLong(tokens[19].replaceAll("\u0000", ""));
+			 secondsTime = Long.parseLong(tokens[14].replaceAll("\u0000", ""));
 			}catch(NumberFormatException e) {
 				
 			}
@@ -91,7 +91,7 @@ public class SeedlingMonitorDataDeserializer extends AnnabelleDeserializer {
 		double rtcBatVolt = 0.0;
 		
 		try{
-			rtcBatVolt=Double.parseDouble(tokens[21].replaceAll("\u0000", ""));
+			rtcBatVolt=Double.parseDouble(tokens[15].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
@@ -99,13 +99,13 @@ public class SeedlingMonitorDataDeserializer extends AnnabelleDeserializer {
 		
 		double rssi = 0.0;
 		try{
-			rssi=Double.parseDouble(tokens[23].replaceAll("\u0000", ""));
+			rssi=Double.parseDouble(tokens[16].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double snr =0.0;
 		try{
-			snr=Double.parseDouble(tokens[24].replaceAll("\u0000", ""));
+			snr=Double.parseDouble(tokens[17].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
@@ -113,49 +113,49 @@ public class SeedlingMonitorDataDeserializer extends AnnabelleDeserializer {
 		
 		int operatingStatus = 0; 
 		try{
-			operatingStatus=Integer.parseInt(tokens[31].replaceAll("\u0000", ""));
+			operatingStatus=Integer.parseInt(tokens[18].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		int digitalStablesUpload = 0;
 		try{
-			digitalStablesUpload=Integer.parseInt(tokens[32].replaceAll("\u0000", ""));
+			digitalStablesUpload=Integer.parseInt(tokens[19].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		int secondsSinceLastPulse =0;
 		try{
-			secondsSinceLastPulse=Integer.parseInt(tokens[33].replaceAll("\u0000", ""));
+			secondsSinceLastPulse=Integer.parseInt(tokens[20].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		int checksum =0;
 		try{
-			checksum=Integer.parseInt(tokens[34].replaceAll("\u0000", ""));
+			checksum=Integer.parseInt(tokens[21].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		int loraActive =0;
 		try{
-			loraActive=Integer.parseInt(tokens[35].replaceAll("\u0000", ""));
+			loraActive=Integer.parseInt(tokens[22].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		long dsLastUpload =0;
 		try{
-			dsLastUpload= Long.parseLong(tokens[36].replaceAll("\u0000", ""));
+			dsLastUpload= Long.parseLong(tokens[23].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		int totpcode = 0;
 		try{
-			totpcode=Integer.parseInt(tokens[40].replaceAll("\u0000", ""));
+			totpcode=Integer.parseInt(tokens[24].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
