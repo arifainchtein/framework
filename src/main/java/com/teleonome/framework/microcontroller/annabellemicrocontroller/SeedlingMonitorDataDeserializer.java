@@ -26,7 +26,7 @@ public class SeedlingMonitorDataDeserializer extends AnnabelleDeserializer {
 		JSONObject toReturn = new JSONObject();
 		String[] tokens = line.split("#");
 		logger.debug("line 22,  tokens=" + tokens.length + " received =" +line );
-		if(tokens.length<49) {
+		if(tokens.length<24) {
 			logger.debug("Bad data received");
 			return new JSONObject();
 		}
