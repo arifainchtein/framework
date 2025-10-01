@@ -4548,8 +4548,10 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				}else {
 					d = ((Integer)value).doubleValue();
 				}
-
-
+				preparedStatement.setDouble(5, d);
+			}else if(valueType.equals(TeleonomeConstants.DATATYPE_BOOLEAN)) {
+				logger.debug("line 4553, value=" + value );
+				d = ((Integer)value).doubleValue();
 				preparedStatement.setDouble(5, d);
 			}else {
 				preparedStatement.setDouble(5, (double) value);				
