@@ -3,6 +3,7 @@ package com.teleonome.framework.tools;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,6 +12,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -93,6 +95,40 @@ public class SendOneCommandToArduino {
 						}else {
 							System.out.println(line);
 						}
+					}else if( command.equals("exportDSDCSV") ) {	
+						SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyy");
+						String currentDate = dateFormat.format(new Date());
+						String fileName = "exportDSD_" + currentDate + ".txt";	
+						FileWriter fileWriter = new FileWriter(fileName, true);
+						BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+						int counter=1;
+						do{
+							line = reader.readLine();
+							System.out.println(line);
+							bufferedWriter.write(line);
+							bufferedWriter.newLine();  // Add a newline character
+							counter++;
+						}while(!line.equals("")  );
+						// Close the resources
+						bufferedWriter.close();
+						System.out.println(counter + " lines exported to  " + fileName);
+					}else if( command.startsWith("GenerateDSDReport") ) {	
+						SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyy");
+						String currentDate = dateFormat.format(new Date());
+						String fileName = "reportDSD_" + currentDate + ".txt";	
+						FileWriter fileWriter = new FileWriter(fileName, true);
+						BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+						int counter=1;
+						do{
+							line = reader.readLine();
+							System.out.println(line);
+							bufferedWriter.write(line);
+							bufferedWriter.newLine();  // Add a newline character
+							counter++;
+						}while(!line.equals("Ok-GenerateDSDReport")  );
+						// Close the resources
+						bufferedWriter.close();
+						System.out.println(counter + " lines exported to  " + fileName);
 					}else {
 						do{
 							line = reader.readLine();
