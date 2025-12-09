@@ -200,71 +200,65 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 			
 		}
 		
-		int secondsSinceLastPulse =0;
-		try{
-			secondsSinceLastPulse=Integer.parseInt(tokens[33].replaceAll("\u0000", ""));
-		}catch(NumberFormatException e) {
-			
-		}
 		
 		int checksum =0;
 		try{
-			checksum=Integer.parseInt(tokens[34].replaceAll("\u0000", ""));
+			checksum=Integer.parseInt(tokens[33].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		int loraActive =0;
 		try{
-			loraActive=Integer.parseInt(tokens[35].replaceAll("\u0000", ""));
+			loraActive=Integer.parseInt(tokens[34].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		long dsLastUpload =0;
 		try{
-			dsLastUpload= Long.parseLong(tokens[36].replaceAll("\u0000", ""));
+			dsLastUpload= Long.parseLong(tokens[35].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double solarVoltage = 0.0;
 		try{
-			solarVoltage=Double.parseDouble(tokens[37].replaceAll("\u0000", ""));
+			solarVoltage=Double.parseDouble(tokens[36].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		double capacitorVoltage = 0.0;
 		try{
-			capacitorVoltage=Double.parseDouble(tokens[38].replaceAll("\u0000", ""));
+			capacitorVoltage=Double.parseDouble(tokens[37].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		double capacitorCurrent = 0.0;
 		try{
-			capacitorCurrent=Double.parseDouble(tokens[39].replaceAll("\u0000", ""));
+			capacitorCurrent=Double.parseDouble(tokens[38].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		int totpcode = 0;
 		try{
-			totpcode=Integer.parseInt(tokens[40].replaceAll("\u0000", ""));
+			totpcode=Integer.parseInt(tokens[39].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 	
 		double outdoortemperature = 0;
 		try {
-			outdoortemperature = Double.parseDouble(tokens[41].replaceAll("\u0000", ""));
+			outdoortemperature = Double.parseDouble(tokens[40].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		double outdoorhumidity = 0;
 		try {
-			outdoorhumidity = Double.parseDouble(tokens[42].replaceAll("\u0000", ""));
+			outdoorhumidity = Double.parseDouble(tokens[41].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
@@ -272,7 +266,7 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		
 		double measuredHeight = 0;
 		try {
-			measuredHeight = Double.parseDouble(tokens[43].replaceAll("\u0000", ""));
+			measuredHeight = Double.parseDouble(tokens[42].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
@@ -280,44 +274,44 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		
 		double scepticAvailablePercentage = 0;
 		try {
-			scepticAvailablePercentage = Double.parseDouble(tokens[44].replaceAll("\u0000", ""));
+			scepticAvailablePercentage = Double.parseDouble(tokens[43].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		double lux = 0;
 		try {
-			lux = Double.parseDouble(tokens[45].replaceAll("\u0000", ""));
+			lux = Double.parseDouble(tokens[44].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		int sleepTime =0;
 		try {
-			sleepTime = Integer.parseInt(tokens[46].replaceAll("\u0000", ""));
+			sleepTime = Integer.parseInt(tokens[45].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		
 		int ledBrightness =0;
 		try {
-			ledBrightness = Integer.parseInt(tokens[47].replaceAll("\u0000", ""));
+			ledBrightness = Integer.parseInt(tokens[46].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double altitude = 0;
 		try {
-			altitude = Double.parseDouble(tokens[48].replaceAll("\u0000", ""));
+			altitude = Double.parseDouble(tokens[47].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		double minimumEfficiencyForLed=.4, minimumEfficiencyForWifi=.5;
 		try {
-			minimumEfficiencyForLed = Double.parseDouble(tokens[49].replaceAll("\u0000", ""));
+			minimumEfficiencyForLed = Double.parseDouble(tokens[48].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
 		try {
-			minimumEfficiencyForWifi = Double.parseDouble(tokens[50].replaceAll("\u0000", ""));
+			minimumEfficiencyForWifi = Double.parseDouble(tokens[49].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
@@ -427,7 +421,6 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Led Brightness", ""+ledBrightness, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 			
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Digital Stables Upload", ""+digitalStablesUpload, null,TeleonomeConstants.DATATYPE_INTEGER, true));
-		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Since Last Pulse", ""+secondsSinceLastPulse, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", ""+operatingStatus, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Lora Active", ""+loraActive, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
