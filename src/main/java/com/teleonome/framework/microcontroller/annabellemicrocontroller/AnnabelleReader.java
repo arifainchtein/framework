@@ -100,6 +100,10 @@ public class AnnabelleReader extends BufferedReader{
 							deserializer="SeedlingMonitorDataDeserializer";
 							processString=true;
 							appendString=false;
+						}else if(tokens.length>35 && deserializer.contains("ChinampaDataDeserializer")) {
+							deserializer="ChinampaDataDeserializer";
+							processString=true;
+							appendString=false;
 						}
 					}
 					
