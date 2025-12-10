@@ -26,7 +26,7 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		JSONObject toReturn = new JSONObject();
 		String[] tokens = line.split("#");
 		logger.debug("line 22,  tokens=" + tokens.length + " received =" +line );
-		if(tokens.length<49) {
+		if(tokens.length<37) {
 			logger.debug("Bad data received");
 			return new JSONObject();
 		}
@@ -244,6 +244,12 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 			
 		}
 	
+		int operatingstatus = 0;
+		try{
+			operatingstatus=Integer.parseInt(tokens[37].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
 		
 		logger.debug("line 324,finished parsing");
 		
