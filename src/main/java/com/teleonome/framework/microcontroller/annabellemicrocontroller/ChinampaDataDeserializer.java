@@ -244,12 +244,7 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 			
 		}
 	
-		int operatingstatus = 0;
-		try{
-			operatingstatus=Integer.parseInt(tokens[37].replaceAll("\u0000", ""));
-		}catch(NumberFormatException e) {
-			
-		}
+	
 		
 		logger.debug("line 324,finished parsing");
 		
