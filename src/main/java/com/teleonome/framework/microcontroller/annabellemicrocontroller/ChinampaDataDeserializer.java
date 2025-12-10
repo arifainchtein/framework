@@ -50,14 +50,21 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		
 		boolean pumprelaystatus = false;
 		try{	
-			pumprelaystatus =Boolean.parseBoolean(tokens[9].replaceAll("\u0000", ""));
+			int i1=Integer.parseInt(tokens[9].replaceAll("\u0000", ""));
+			if(i1==1)pumprelaystatus =true;
 		}catch(NumberFormatException e) {
 			
 		}
 		
-		boolean fishtankoutflowsolenoidrelaystatus =Boolean.parseBoolean(tokens[10].replaceAll("\u0000", ""));
+		boolean fishtankoutflowsolenoidrelaystatus = false;
+		try{	
+			int i1=Integer.parseInt(tokens[10].replaceAll("\u0000", ""));
+			if(i1==1)fishtankoutflowsolenoidrelaystatus =true;
+		}catch(NumberFormatException e) {
+			
+		}
 		
-		
+	
 		double fishtankoutflowflowRate =0.0;
 		try{
 			fishtankoutflowflowRate=Double.parseDouble(tokens[11].replaceAll("\u0000", ""));
@@ -129,7 +136,7 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		
 		int sumpTroughStaleDataSeconds =0;
 		try{
-			sumpTroughHeight=Integer.parseInt(tokens[21].replaceAll("\u0000", ""));
+			sumpTroughStaleDataSeconds=Integer.parseInt(tokens[21].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
 		}
@@ -142,8 +149,16 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		}
 		
 		
-		boolean alertstatus =Boolean.parseBoolean(tokens[23].replaceAll("\u0000", ""));
+		
 
+		boolean alertstatus = false;
+		try{	
+			int i1=Integer.parseInt(tokens[23].replaceAll("\u0000", ""));
+			if(i1==1)alertstatus =true;
+		}catch(NumberFormatException e) {
+			
+		}
+		
 		int alertcode =0;
 		try{
 			alertcode=Integer.parseInt(tokens[24].replaceAll("\u0000", ""));
