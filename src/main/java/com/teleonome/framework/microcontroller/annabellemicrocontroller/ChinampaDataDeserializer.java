@@ -259,6 +259,56 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 			
 		}
 	
+		int secondsSinceLastFishTankData = 0;
+		try{
+			secondsSinceLastFishTankData=Integer.parseInt(tokens[37].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		int previousFishTankMeasuredHeight = 0;
+		try{
+			previousFishTankMeasuredHeight=Integer.parseInt(tokens[38].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		int secondsSinceLastSumpTroughData = 0;
+		try{
+			secondsSinceLastSumpTroughData=Integer.parseInt(tokens[39].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		int previousSumpTroughMeasuredHeight = 0;
+		try{
+			previousSumpTroughMeasuredHeight=Integer.parseInt(tokens[40].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+	
+		// the sensorstatus
+		boolean uTempTooHigh = Boolean.parseBoolean(tokens[41].replaceAll("\u0000", ""));
+		boolean fishTankHeightSuddenChange = Boolean.parseBoolean(tokens[42].replaceAll("\u0000", ""));
+		boolean sumpTroughHeightSuddenChange = Boolean.parseBoolean(tokens[43].replaceAll("\u0000", ""));
+		boolean fishTankWaterTemperatureSuddenChange = Boolean.parseBoolean(tokens[44].replaceAll("\u0000", ""));
+		boolean sumpTroughWaterTemperatureSuddenChange = Boolean.parseBoolean(tokens[5].replaceAll("\u0000", ""));
+		boolean TDSSuddenChange = Boolean.parseBoolean(tokens[46].replaceAll("\u0000", ""));
+		boolean ECSuddenChange = Boolean.parseBoolean(tokens[47].replaceAll("\u0000", ""));
+		boolean DOSuddenChange = Boolean.parseBoolean(tokens[48].replaceAll("\u0000", ""));
+		boolean PHSuddenChange = Boolean.parseBoolean(tokens[49].replaceAll("\u0000", ""));
+		boolean ORPSuddenChange = Boolean.parseBoolean(tokens[50].replaceAll("\u0000", ""));
+		boolean notUsed1 = Boolean.parseBoolean(tokens[51].replaceAll("\u0000", ""));
+		boolean notUsed2 = Boolean.parseBoolean(tokens[52].replaceAll("\u0000", ""));
+		
+		int microtemperatureMaximum = 0;
+		try{
+			microtemperatureMaximum=Integer.parseInt(tokens[53].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
+		
+		
 	
 		
 		logger.debug("line 324,finished parsing");
@@ -308,6 +358,7 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 	    sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Minimum Sump Trough Level", ""+minimumSumpTroughLevel, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 	    sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Maximum Sump Trough Level", ""+maximumSumpTroughLevel, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 	    sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Sump TroughHeight", ""+sumpTroughHeight, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+	    sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("u Temperature Maximum", ""+microtemperatureMaximum, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		
 		
 		JSONObject purposeDene = new JSONObject();
@@ -343,10 +394,26 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Lora Active", ""+loraActive, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("ds Last Upload", ""+dsLastUpload, null,TeleonomeConstants.DATATYPE_LONG, true));
-		
-				purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("TOTP",""+ totpcode, null,TeleonomeConstants.DATATYPE_STRING, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("TOTP",""+ totpcode, null,TeleonomeConstants.DATATYPE_STRING, true));
 			
-		Identity includedRememberedIdentity;
+		// added Dec 31 2025
+		//
+		
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Since Last Fish Tank Data", ""+secondsSinceLastFishTankData, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Previous Fish Tank Measured Height", ""+previousFishTankMeasuredHeight, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Since Last Sump Trough Data", ""+secondsSinceLastSumpTroughData, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Previous Sump Trough Measured Height", ""+previousSumpTroughMeasuredHeight, null,TeleonomeConstants.DATATYPE_INTEGER, true));
+		
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("uTemp Too High", ""+uTempTooHigh, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Fish Tank Height Sudden Change", ""+fishTankHeightSuddenChange, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Sump Trough Height Sudden Change", ""+sumpTroughHeightSuddenChange, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Fish Tank Water Temperature Sudden Change", ""+fishTankWaterTemperatureSuddenChange, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Sump Trough Water Temperature Sudden Change", ""+sumpTroughWaterTemperatureSuddenChange, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("TDS Sudden Change", ""+TDSSuddenChange, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("EC Sudden Change", ""+ECSuddenChange, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("DO Sudden Change", ""+DOSuddenChange, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("PH Sudden Change", ""+loraActive, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("ORPSuddenChange", ""+ORPSuddenChange, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
 		
 		
 		return toReturn;
