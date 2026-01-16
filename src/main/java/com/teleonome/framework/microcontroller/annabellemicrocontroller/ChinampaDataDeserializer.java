@@ -191,7 +191,13 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 				
 			}
 		long lastPulseTime=secondsTime*1000;
-	
+		boolean timeCorrected=false;
+		long sourceoriginaltime=secondsTime;
+		long now = System.currentTimeMillis();
+		if(lastPulseTime< (now - (3*60*1000))  || lastPulseTime> (now - (3*60*1000))) {
+			secondsTime=now/1000;
+			timeCorrected=true;
+		}
 		double rtcBatVolt = 0.0;
 		
 		try{
@@ -380,6 +386,11 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Sump Trough Measured Height", ""+sumpTroughMeasuredHeight, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 		
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Time", ""+secondsTime, null,TeleonomeConstants.DATATYPE_LONG, true));
+		
+		if(timeCorrected) {
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Invalid Time", "true", null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Source Original Time", ""+sourceoriginaltime, null,TeleonomeConstants.DATATYPE_LONG, true));
+		}
 		
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Local Time", Utils.epochToLocalTimeString(secondsTime), null,TeleonomeConstants.DATATYPE_STRING, true));
 		
