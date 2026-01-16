@@ -26,7 +26,7 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		JSONObject toReturn = new JSONObject();
 		String[] tokens = line.split("#");
 		logger.debug("line 22,  tokens=" + tokens.length + " received =" +line );
-		if(tokens.length<37) {
+		if(tokens.length<55) {
 			logger.debug("Bad data received");
 			return new JSONObject();
 		}
@@ -314,9 +314,19 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 			
 		}
 		
+		int outdoortemperature = 0;
+		try{
+			outdoortemperature=Integer.parseInt(tokens[54].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
 		
-	
-		
+		int outdoorhumidity = 0;
+		try{
+			outdoorhumidity=Integer.parseInt(tokens[55].replaceAll("\u0000", ""));
+		}catch(NumberFormatException e) {
+			
+		}
 		logger.debug("line 324,finished parsing");
 		
 		toReturn.put("Name", deviceName);
@@ -425,6 +435,8 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("DO Sudden Change", ""+DOSuddenChange, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("PH Sudden Change", ""+loraActive, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("ORPSuddenChange", ""+ORPSuddenChange, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Outdoor Temperature", ""+outdoortemperature, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Outdoor Humidity", ""+outdoorhumidity, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
 		
 		
 		return toReturn;
