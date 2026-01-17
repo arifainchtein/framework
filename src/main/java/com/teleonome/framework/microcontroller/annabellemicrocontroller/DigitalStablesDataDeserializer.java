@@ -46,7 +46,10 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		}
 		int dataSamplingSec = Integer.parseInt(tokens[7].replaceAll("\u0000", ""));
 		String latitude=tokens[8];
+		if(latitude.equals("ovf"))latitude="0";
 		String longitude=tokens[9];
+		if(longitude.equals("ovf"))longitude="0";
+		
 		// sensors
 		String sensor1name=tokens[10];
 		double qfactor1 =0.0;

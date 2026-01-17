@@ -44,7 +44,7 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 			dataSamplingSec =Integer.parseInt(tokens[6].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
 			
-		}
+		} 
 		String latitude=tokens[7];
 		String longitude=tokens[8];
 		
