@@ -34,11 +34,14 @@ import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.MotherMicroController;
 import com.teleonome.framework.utils.Utils;
 
-import gnu.io.CommPortIdentifier;
-import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
-public class AnnabelleController extends MotherMicroController implements SerialPortEventListener,  LifeCycleEventListener {
+//import gnu.io.CommPortIdentifier;
+//import gnu.io.SerialPort;
+//import gnu.io.SerialPortEvent;
+//import gnu.io.SerialPortEventListener;
+
+import com.fazecast.jSerialComm.*;
+
+public class AnnabelleController extends MotherMicroController implements  LifeCycleEventListener {
 
 	Logger logger;
 	String SerialPortID = "/dev/ttyAMA0";
@@ -108,7 +111,7 @@ public class AnnabelleController extends MotherMicroController implements Serial
 	@Override
 	public void init(JSONArray configParams) throws MicrocontrollerCommunicationException {
 		// TODO Auto-generated method stub
-		CommPortIdentifier portId = null;
+		//CommPortIdentifier portId = null;
 		try {
 			INTER_SENSOR_READ_TIME_OUT_MILLISECONDS = ((Integer)aDenomeManager.getDeneWordValueByName(TeleonomeConstants.NUCLEI_INTERNAL,TeleonomeConstants.DENECHAIN_DESCRIPTIVE, TeleonomeConstants.DENE_VITAL, "Inter Sensor Read Timeout Milliseconds")).intValue();
 
@@ -117,13 +120,9 @@ public class AnnabelleController extends MotherMicroController implements Serial
 			logger.warn(Utils.getStringException(e1));
 			System.exit(-1);
 		}
-		
+		/*
 		Enumeration portEnum = null;
 		CommPortIdentifier.getPortIdentifiers();
-
-		
-
-
 		CommPortIdentifier currPortId=null;
 		int counter=0;
 		int maxNumberReconnects=3;
@@ -166,7 +165,47 @@ public class AnnabelleController extends MotherMicroController implements Serial
 				keepGoing=false;
 			}
 		}while(keepGoing);
-		
+		*/
+		SerialPort portId = null;
+		SerialPort[] allPorts = null;
+		int counter=0;
+		int maxNumberReconnects=3;
+		boolean keepGoing=true;
+		do {
+			allPorts = SerialPort.getCommPorts();
+			logger.debug("looking for ports, found " + allPorts.length + " ports");
+			
+			for (SerialPort port : allPorts) {
+				logger.debug("looking for ports, currPortId=" + port.getSystemPortName());
+	
+				for (String portName : PORT_NAMES) {
+					if (port.getSystemPortName().equals(portName) || port.getSystemPortName().startsWith(portName)) {
+						portId = port;
+						break;
+					}
+				}
+				if (portId != null) break;
+			}
+			
+			if (portId == null) {
+				if(counter<=maxNumberReconnects) {
+					counter++;
+					logger.info("Could not find Serial Port," + counter + " out of " + maxNumberReconnects);
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}else {
+					logger.warn("Could not find COM port.");
+					Hashtable<String, String> h = new Hashtable();
+					h.put("message","Could not find COM port");
+					throw new MicrocontrollerCommunicationException(h);
+				}
+			}else {
+				keepGoing=false;
+			}
+		}while(keepGoing);
 		logger.debug("Found COM Port1.");
 		try {
 			//
@@ -227,81 +266,67 @@ public class AnnabelleController extends MotherMicroController implements Serial
 		    counter=0;
 			boolean openAndTested=false;
 			logger.debug("about to open port , sleeping 1 sec first" );
+			Thread.sleep(1000);
 			
-			Thread.sleep(1000);
-			serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
-			logger.debug("opened port , sleeping another  sec " );
-			Thread.sleep(1000);
-			//serialPort.disableReceiveTimeout();
-			serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
-			serialPort.enableReceiveTimeout(30000);
-			serialPort.enableReceiveThreshold(1);
-			serialPort.setSerialPortParams(DATA_RATE,
-					SerialPort.DATABITS_8,
-					SerialPort.STOPBITS_1,
-					SerialPort.PARITY_NONE);
-			//serialPort.setRTS(false);
-			//serialPort.setDTR(true);
-			//serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN |  SerialPort.FLOWCONTROL_RTSCTS_OUT);
-			serialPort.setDTR(true);
-			// open the streams
+			
+			
+//			serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
+//			logger.debug("opened port , sleeping another  sec " );
+//			Thread.sleep(1000);
+//			//serialPort.disableReceiveTimeout();
+//			serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
+//			serialPort.enableReceiveTimeout(30000);
+//			serialPort.enableReceiveThreshold(1);
+//			serialPort.setSerialPortParams(DATA_RATE,
+//					SerialPort.DATABITS_8,
+//					SerialPort.STOPBITS_1,
+//					SerialPort.PARITY_NONE);
+//			//serialPort.setRTS(false);
+//			//serialPort.setDTR(true);
+//			//serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN |  SerialPort.FLOWCONTROL_RTSCTS_OUT);
+//			serialPort.setDTR(true);
+//			// open the streams
+//
+//			serialPort.addEventListener(this);
+//			serialPort.notifyOnDataAvailable(true);
+//			connectToSerialPort();
 
-			serialPort.addEventListener(this);
-			serialPort.notifyOnDataAvailable(true);
-			connectToSerialPort();
-//			do {
-//				
-//
-//				///serialPort..write().write(InetAddress.getLocalHost().toString().t());
-//				serialPortInputStream = serialPort.getInputStream();
-//				serialPortOutputStream = serialPort.getOutputStream();
-//
-//				if (serialPortInputStream == null) {
-//					System.out.println("serialPortInputStream is null.");
-//					logger.warn("serialPortInputStream is null.");
-//					throw new SerialPortCommunicationException("SerialPortInputStream is null");
-//				}
-//
-//				if (serialPortOutputStream == null) {
-//					System.out.println("serialPortOutputStream is null.");
-//					logger.warn("serialPortOutputStream is null.");
-//					throw new SerialPortCommunicationException("SerialPortOutputStream is null");
-//				}
-//				
-//				//
-//				// now open and test it
-//				//
-//				input = new CajalReader(new BufferedReader(new InputStreamReader(serialPortInputStream)), aDenomeManager);
-//				output = new CajalWriter(new OutputStreamWriter(serialPortOutputStream),input);
-//
-//				try{
-//					
-//					logger.info("About to ping");
-//					String actuatorCommand="Ping";
-//					output.write(actuatorCommand,0,actuatorCommand.length());
-//					//serialPortOutputStream.write( actuatorCommand.getBytes() );
-//					Thread.sleep(1000);
-//					output.flush();
-//					logger.info("waiting for mother to answer" );
-//					
-//					String inputLine = input.readLine();
-//					logger.info("mother answered =" + inputLine);
-//					
-//					openAndTested=true;
-//					output.close();
-//					input.close();
-//				}catch(IOException e) {
-//					logger.warn(Utils.getStringException(e));
-//				}
-//				if(!openAndTested) {
-//					logger.warn("Ping Failed, retrying in 10 secs, counter="+counter );
-//					counter++;
-//					//serialPort.close();
-//					Thread.sleep(10000);
-//				}
-//			}while(!openAndTested);
-			
-			
+
+			// Configure and open the serial port
+						serialPort = portId;
+						serialPort.setComPortParameters(DATA_RATE, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+						serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 30000, 0);
+						serialPort.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
+						
+						if (!serialPort.openPort()) {
+							logger.warn("Failed to open serial port");
+							Hashtable<String, String> h = new Hashtable();
+							h.put("message","Failed to open serial port");
+							throw new MicrocontrollerCommunicationException(h);
+						}
+						
+						logger.debug("opened port , sleeping another  sec " );
+						Thread.sleep(1000);
+						
+						// Set DTR
+						serialPort.setDTR();
+						
+						// Add event listener for data available
+						serialPort.addDataListener(new SerialPortDataListener() {
+							@Override
+							public int getListeningEvents() {
+								return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
+							}
+							
+							@Override
+							public void serialEvent(SerialPortEvent event) {
+								if (event.getEventType() == SerialPort.LISTENING_EVENT_DATA_AVAILABLE) {
+									// Handle data available event
+									// This replaces the serialPortEventListener functionality
+								}
+							}
+						});
+						
 			//
 			// to make sure that the serial port has not hung, do a test
 			//
@@ -319,7 +344,7 @@ public class AnnabelleController extends MotherMicroController implements Serial
 	}
 
 	private void closeSerialPort() {
-		serialPort.close();
+		serialPort.closePort();
 	}
 	private void connectToSerialPort() throws IOException, SerialPortCommunicationException {
 		boolean openAndTested=false;
@@ -404,11 +429,11 @@ public class AnnabelleController extends MotherMicroController implements Serial
 	}
 
 
-	@Override
-	public void serialEvent(SerialPortEvent arg0) {
-		// TODO Auto-generated method stub
-		//logger.debug("serialEvent received " + arg0.getEventType() );
-	}
+//	@Override
+//	public void serialEvent(SerialPortEvent arg0) {
+//		// TODO Auto-generated method stub
+//		//logger.debug("serialEvent received " + arg0.getEventType() );
+//	}
 
 	public boolean verifyUserCommandCode(String userCode) throws IOException{
 		String actuatorCommand = "VerifyUserCode#" + userCode;
