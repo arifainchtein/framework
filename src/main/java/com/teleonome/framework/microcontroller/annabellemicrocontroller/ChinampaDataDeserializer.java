@@ -186,7 +186,9 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 	    // Purpose
 		 
 		 try{
+			 logger.debug("line 189,about to read secondsTime=" + secondsTime);
 			 secondsTime = Long.parseLong(tokens[27].replaceAll("\u0000", ""));
+			 logger.debug("line 191, secondsTime=" + secondsTime);
 			}catch(NumberFormatException e) {
 				
 			}
@@ -197,6 +199,7 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		if(lastPulseTime< (now - (3*60*1000))  || lastPulseTime> (now - (3*60*1000))) {
 			secondsTime=now/1000;
 			timeCorrected=true;
+			 logger.debug("line 202, corrected secondsTime=" + secondsTime);
 		}
 		double rtcBatVolt = 0.0;
 		

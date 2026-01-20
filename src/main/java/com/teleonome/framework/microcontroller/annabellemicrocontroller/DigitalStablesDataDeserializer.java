@@ -101,7 +101,9 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 	    // Purpose
 		 
 		 try{
+			 logger.debug("line 104 secondsTime=" + secondsTime);
 			 secondsTime = Long.parseLong(tokens[19].replaceAll("\u0000", ""));
+			 logger.debug("line 106,  secondsTime=" + secondsTime);
 			}catch(NumberFormatException e) {
 				
 			}
@@ -114,6 +116,7 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		if(lastPulseTime< (now - (3*60*1000))  || lastPulseTime> (now - (3*60*1000))) {
 			secondsTime=now/1000;
 			timeCorrected=true;
+			logger.debug("line 117, corrected secondsTime=" + secondsTime);
 		}
 		
 		double temperature = -99;
