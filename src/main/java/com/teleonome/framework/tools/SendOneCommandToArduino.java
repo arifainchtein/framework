@@ -16,16 +16,29 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 import org.apache.commons.io.FileUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import gnu.io.CommPortIdentifier;
-import gnu.io.SerialPort;
+import com.fazecast.jSerialComm.*;
+import com.teleonome.framework.TeleonomeConstants;
+import com.teleonome.framework.denome.DenomeUtils;
+import com.teleonome.framework.exception.InvalidDenomeException;
+import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
+import com.teleonome.framework.exception.SerialPortCommunicationException;
+import com.teleonome.framework.microcontroller.annabellemicrocontroller.AnnabelleReader;
+import com.teleonome.framework.microcontroller.annabellemicrocontroller.AnnabelleWriter;
+import com.teleonome.framework.utils.Utils;
+import org.apache.log4j.Logger;
+
 
 public class SendOneCommandToArduino {
 
 	private static String buildNumber="";
-	//Logger logger;
+	Logger logger;
 	String SerialPortID = "/dev/ttyUSB0";
 	private static final String PORT_NAMES[] = { "/dev/ttyUSB0","/dev/ttyUSB1"};
 	SerialPort serialPort;
@@ -50,7 +63,12 @@ public class SendOneCommandToArduino {
 	private void process(ArrayList<String> commands, boolean v, File file) {
 		// TODO Auto-generated constructor stub
 		verbose=v;
-		init();
+		try {
+			init();
+		} catch (MicrocontrollerCommunicationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		BufferedWriter oneCommandOutput=null;
 		BufferedReader reader=null;
@@ -164,12 +182,188 @@ public class SendOneCommandToArduino {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		if(serialPort!=null)serialPort.close();
+		if(serialPort!=null)serialPort.closePort();
 	}
 
 	public ArrayList<String> getCommandExecutionResults(){
 		return commandExecutionResults;
 	}
+
+	public void init() throws MicrocontrollerCommunicationException {
+		// TODO Auto-generated method stub
+		//CommPortIdentifier portId = null;
+		
+
+		SerialPort portId = null;
+		SerialPort[] allPorts = null;
+		int counter=0;
+		int maxNumberReconnects=3;
+		boolean keepGoing=true;
+		do {
+			allPorts = SerialPort.getCommPorts();
+			logger.debug("looking for ports, found " + allPorts.length + " ports");
+
+			for (SerialPort port : allPorts) {
+				logger.debug("looking for ports, currPortId=" + port.getSystemPortName());
+
+				for (String portName : PORT_NAMES) {
+					if (port.getSystemPortName().equals(portName) || port.getSystemPortName().startsWith(portName)) {
+						portId = port;
+						break;
+					}
+				}
+				if (portId != null) break;
+			}
+
+			if (portId == null) {
+				if(counter<=maxNumberReconnects) {
+					counter++;
+					logger.info("Could not find Serial Port," + counter + " out of " + maxNumberReconnects);
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}else {
+					logger.warn("Could not find COM port.");
+					Hashtable<String, String> h = new Hashtable();
+					h.put("message","Could not find COM port");
+					throw new MicrocontrollerCommunicationException(h);
+				}
+			}else {
+				keepGoing=false;
+			}
+		}while(keepGoing);
+		logger.debug("Found COM Port1.");
+
+
+		logger.debug("using datarate=" + DATA_RATE);
+		counter=0;
+		boolean openAndTested=false;
+		logger.debug("about to open port , sleeping 1 sec first" );
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+
+
+		// Configure and open the serial port
+		serialPort = portId;
+		serialPort.setComPortParameters(DATA_RATE, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+		serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 30000, 0);
+		serialPort.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
+
+		if (!serialPort.openPort()) {
+			logger.warn("Failed to open serial port");
+			Hashtable<String, String> h = new Hashtable();
+			h.put("message","Failed to open serial port");
+			throw new MicrocontrollerCommunicationException(h);
+		}
+
+		logger.debug("opened port , sleeping another  sec " );
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// Set DTR
+		serialPort.setDTR();
+
+		// Add event listener for data available
+		serialPort.addDataListener(new SerialPortDataListener() {
+			@Override
+			public int getListeningEvents() {
+				return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
+			}
+
+			@Override
+			public void serialEvent(SerialPortEvent event) {
+				if (event.getEventType() == SerialPort.LISTENING_EVENT_DATA_AVAILABLE) {
+					// Handle data available event
+					// This replaces the serialPortEventListener functionality
+				}
+			}
+		});
+
+		//
+		// to make sure that the serial port has not hung, do a test
+		//
+		logger.debug("finished initializing Annabelle" );
+
+	
+}
+
+private void closeSerialPort() {
+	serialPort.closePort();
+}
+private void connectToSerialPort() throws IOException, SerialPortCommunicationException {
+	boolean openAndTested=false;
+	int counter=0;
+	do {
+
+
+		///serialPort..write().write(InetAddress.getLocalHost().toString().t());
+		serialPortInputStream = serialPort.getInputStream();
+		serialPortOutputStream = serialPort.getOutputStream();
+
+		if (serialPortInputStream == null) {
+			System.out.println("serialPortInputStream is null.");
+			logger.warn("serialPortInputStream is null.");
+			throw new SerialPortCommunicationException("SerialPortInputStream is null");
+		}
+
+		if (serialPortOutputStream == null) {
+			System.out.println("serialPortOutputStream is null.");
+			logger.warn("serialPortOutputStream is null.");
+			throw new SerialPortCommunicationException("SerialPortOutputStream is null");
+		}
+
+		
+		try{
+
+			logger.info("About to ping");
+			String actuatorCommand="Ping";
+			output.write(actuatorCommand,0,actuatorCommand.length());
+			//serialPortOutputStream.write( actuatorCommand.getBytes() );
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			output.flush();
+			logger.info("waiting for mother to answer" );
+
+			String inputLine = input.readLine();
+			logger.info("mother answered =" + inputLine);
+
+			openAndTested=true;
+			output.close();
+			input.close();
+		}catch(IOException e) {
+			logger.warn(Utils.getStringException(e));
+		}
+		if(!openAndTested) {
+			logger.warn("Ping Failed, retrying in 10 secs, counter="+counter );
+			counter++;
+			//serialPort.close();
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}while(!openAndTested);
+}
+
+/*
 	public void init() {
 		// TODO Auto-generated method stub
 		Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
@@ -249,4 +443,5 @@ public class SendOneCommandToArduino {
 
 		}
 	}
+ */
 }

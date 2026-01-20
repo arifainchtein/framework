@@ -23,8 +23,7 @@ import org.json.JSONArray;
 import com.teleonome.framework.exception.SerialPortCommunicationException;
 import com.teleonome.framework.utils.Utils;
 
-import gnu.io.CommPortIdentifier;
-import gnu.io.SerialPort;;
+
 
 
 public class PLSeriesReader extends BufferedReader {
