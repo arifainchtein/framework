@@ -40,7 +40,7 @@ public class SendOneCommandToArduino {
 	private static String buildNumber="";
 	Logger logger;
 	String SerialPortID = "/dev/ttyUSB0";
-	private static final String PORT_NAMES[] = { "/dev/ttyUSB0","/dev/ttyUSB1"};
+	private static final String PORT_NAMES[] = { "ttyUSB0","/dev/ttyUSB1"};
 	SerialPort serialPort;
 	private BufferedReader input=null;
 	private BufferedWriter output=null;

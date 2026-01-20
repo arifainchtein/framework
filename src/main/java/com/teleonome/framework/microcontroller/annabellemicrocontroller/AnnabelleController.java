@@ -45,7 +45,7 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 
 	Logger logger;
 	String SerialPortID = "/dev/ttyAMA0";
-	private static final String PORT_NAMES[] = { "/dev/tty.usbmodem641", "/dev/ttyACM0", "/dev/ttyAMA0", "/dev/ttyUSB0","/dev/ttyUSB1","/dev/cu.usbmodem1411" };
+	private static final String PORT_NAMES[] = { "/dev/tty.usbmodem641", "/dev/ttyACM0", "/dev/ttyAMA0", "ttyUSB0","/dev/ttyUSB1","/dev/cu.usbmodem1411" };
 	SerialPort serialPort=null;
 	private AnnabelleReader input;
 	//private InputStream input;
