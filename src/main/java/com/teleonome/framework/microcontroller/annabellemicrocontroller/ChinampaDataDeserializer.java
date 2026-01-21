@@ -2,7 +2,6 @@ package com.teleonome.framework.microcontroller.annabellemicrocontroller;
 
 
 
-
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
