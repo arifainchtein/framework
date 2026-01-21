@@ -5417,6 +5417,7 @@ public class DenomeManager {
 		if(currentlyCreatingPulseJSONObject==null)return;
 		JSONObject denomeArray = currentlyCreatingPulseJSONObject.getJSONObject("Denome");
 		JSONArray nucleiArray = denomeArray.getJSONArray("Nuclei");
+		logger.info("line 5420 removeing nucleusName=" + nucleusName + " chain	= " +deneChainName);
 		JSONObject aNucleusJSONObject, aDeneChain;
 		JSONArray deneChains;
 		boolean modified=false;
@@ -5430,12 +5431,13 @@ public class DenomeManager {
 					deneChain = deneChains.getJSONObject(j);
 					if(deneChain.get(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE).equals(deneChainName)) {
 						deneChains.remove(j);
-						logger.info("	 " +deneChainName);
+						logger.info("line 5434 removed chain	 " +deneChainName);
 						modified=true;
 					}
 				}
 			}
 		}
+		logger.info("line 5440 modified =" + modified);
 		if(modified) {
 			writeDenomeToDisk();
 		}
