@@ -316,18 +316,18 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 			
 		}
 		
-		int outdoortemperature = 0;
+		double outdoortemperature = 0;
 		try{
-			outdoortemperature=Integer.parseInt(tokens[54].replaceAll("\u0000", ""));
+			outdoortemperature=Double.parseDouble(tokens[54].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
-			
+			logger.debug(Utils.getStringException(e));
 		}
 		
-		int outdoorhumidity = 0;
+		double outdoorhumidity = 0;
 		try{
-			outdoorhumidity=Integer.parseInt(tokens[55].replaceAll("\u0000", ""));
+			outdoorhumidity=Double.parseDouble(tokens[55].replaceAll("\u0000", ""));
 		}catch(NumberFormatException e) {
-			
+			logger.debug(Utils.getStringException(e));
 		}
 		logger.debug("line 324,finished parsing");
 		
@@ -437,8 +437,8 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("DO Sudden Change", ""+DOSuddenChange, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("PH Sudden Change", ""+loraActive, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("ORPSuddenChange", ""+ORPSuddenChange, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
-		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Outdoor Temperature", ""+outdoortemperature, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
-		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Outdoor Humidity", ""+outdoorhumidity, null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Outdoor Temperature", ""+outdoortemperature, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Outdoor Humidity", 	""+outdoorhumidity, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 		
 		
 		return toReturn;
