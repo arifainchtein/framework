@@ -4644,6 +4644,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		String command = "", units="", timeString;
 		Timestamp time=null;
 		JSONObject j;
+		Object objValue;
 		double value;
 		long timeSeconds;
 		logger.debug("allTables="+ allTables.size() );
@@ -4670,8 +4671,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			    ")->>'Value') "+
 			"FROM "+allTables.get(i) +" where telepathonname=?  and timeseconds >=? and timeseconds<=? order by timeseconds desc";
 				
-				
-				
+			
 				logger.debug("command=" + command);
 				System.out.println("line 4670 command=" + command);
 				preparedStatement = connection.prepareStatement(command);
@@ -4685,7 +4685,24 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				while(rs.next()){
 					timeSeconds = rs.getLong(1);
 					timeString=rs.getString(2);
-					value = rs.getDouble(3);
+					objValue = rs.getObject(3);// rs.getDouble(3);
+					logger.debug("line 4689 objValue=" + objValue);
+					if (objValue == null) {
+					    value = 0.0; // Or handle null as needed
+					} else if (objValue instanceof Boolean) {
+					    value = (Boolean) objValue ? 1.0 : 0.0;
+					} else if (objValue instanceof Number) {
+					    // This handles Double, Float, Integer, and BigDecimal
+					    value = ((Number) objValue).doubleValue();
+					} else {
+					    // Fallback for unexpected types
+					    try {
+					        value = Double.parseDouble(objValue.toString());
+					    } catch (NumberFormatException e) {
+					        value = 0.0; 
+					    }
+					}
+					
 					//units = rs.getString(3);
 					j = new JSONObject();
 					j.put("timeSeconds", timeSeconds);
