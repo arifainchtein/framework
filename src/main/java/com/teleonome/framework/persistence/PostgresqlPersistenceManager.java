@@ -4686,17 +4686,21 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 					timeSeconds = rs.getLong(1);
 					timeString=rs.getString(2);
 					objValue = rs.getObject(3);// rs.getDouble(3);
-					logger.debug("line 4689 objValue=" + objValue);
+					logger.debug("line 4689 objValue=" );
 					if (objValue == null) {
+						logger.debug("line 4691 objValue is null" );
 					    value = 0.0; // Or handle null as needed
 					} else if (objValue instanceof Boolean) {
+						logger.debug("line 4694 objValue is boolean" );
 					    value = (Boolean) objValue ? 1.0 : 0.0;
 					} else if (objValue instanceof Number) {
 					    // This handles Double, Float, Integer, and BigDecimal
+						logger.debug("line 4698 objValue is a number" );
 					    value = ((Number) objValue).doubleValue();
 					} else {
 					    // Fallback for unexpected types
 					    try {
+					    	logger.debug("line 4703 objValue treated as string" );
 					        value = Double.parseDouble(objValue.toString());
 					    } catch (NumberFormatException e) {
 					        value = 0.0; 
