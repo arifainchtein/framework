@@ -4697,10 +4697,22 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 					    // This handles Double, Float, Integer, and BigDecimal
 						logger.debug("line 4698 objValue is a number" );
 					    value = ((Number) objValue).doubleValue();
+					} else if (objValue instanceof String) {
+					    // This handles Double, Float, Integer, and BigDecimal
+						
+						String s = objValue.toString();
+						logger.debug("line 4704 s=" + s );
+						if(s.equals("true")) {
+							value=1.0;
+						}else if(s.equals("false")) {
+							value=0.0;
+						}else {
+							 value = Double.parseDouble(objValue.toString());
+						}
 					} else {
 					    // Fallback for unexpected types
 					    try {
-					    	logger.debug("line 4703 objValue treated as string" );
+					    	logger.debug("line 4707 objValue converted and treated as string" );
 					        value = Double.parseDouble(objValue.toString());
 					    } catch (NumberFormatException e) {
 					        value = 0.0; 
