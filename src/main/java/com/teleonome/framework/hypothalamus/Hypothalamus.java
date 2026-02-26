@@ -31,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -135,7 +137,7 @@ public abstract class Hypothalamus {
     ZMQ.Poller items;
 
 
-	
+    private JSONObject lastHippocampusHealth = null;
     
 	
 	public Hypothalamus() {
@@ -552,9 +554,6 @@ public abstract class Hypothalamus {
 
 		private void connectToHeart() {
 			 try {
-				 
-				
-				 
 	        	anMqttClient = new MqttClient(mqttBrokerAddress, mqttClientId, persistence);
 	        	
 	            MqttConnectOptions connOpts = new MqttConnectOptions();
@@ -568,6 +567,21 @@ public abstract class Hypothalamus {
 					anMqttClient.connect(connOpts);
 					//mqttToken.waitForCompletion(10000);
 					logger.warn("Connected to Heart: "+mqttBrokerAddress);
+					
+					anMqttClient.setCallback(new MqttCallback() {
+			            public void connectionLost(Throwable cause) {
+			                logger.warn("Connection to Heart lost: " + cause.getMessage());
+			            }
+
+			            public void messageArrived(String topic, MqttMessage message) {
+			                if (topic.equals("Hippocampus_Health")) {
+			                    processHippocampusHealth(new String(message.getPayload()));
+			                }
+			            }
+
+			            public void deliveryComplete(IMqttDeliveryToken token) {}
+			        });
+					
 					 try {
 						 MqttMessage message = new MqttMessage("Hello".getBytes());
 						 logger.warn("pibt1");
@@ -589,6 +603,23 @@ public abstract class Hypothalamus {
 					logger.warn(Utils.getStringException(e1));
 				}
 	        
+		}
+		
+		private void processHippocampusHealth(String payload) {
+		    try {
+		        // Update our local variable with the new data
+		        lastHippocampusHealth = new JSONObject(payload);
+		        
+		        double usedPercent = lastHippocampusHealth.getDouble("PercentageUsed");
+		        logger.debug("Hippocampus health received. Memory Used: " + usedPercent + "%");
+		        
+		        // If memory is critical, you could trigger a local alarm immediately here
+		        if (usedPercent > 95.0) {
+		            logger.error("SYSTEM ALERT: Hippocampus memory near capacity!");
+		        }
+		    } catch (Exception e) {
+		        logger.warn("Error parsing Hippocampus health: " + e.getMessage());
+		    }
 		}
 	public synchronized void publishToHeart(String topic, String messageText) {
 		

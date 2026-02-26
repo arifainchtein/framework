@@ -375,7 +375,7 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 
 	    sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Minimum Sump Trough Level", ""+minimumSumpTroughLevel, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 	    sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Maximum Sump Trough Level", ""+maximumSumpTroughLevel, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
-	    sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Sump TroughHeight", ""+sumpTroughHeight, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
+	    sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Sump Trough Height", ""+sumpTroughHeight, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 	    sensorDeneWords.put(DenomeUtils.buildDeneWordJSONObject("u Temperature Maximum", ""+microtemperatureMaximum, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		
 		
