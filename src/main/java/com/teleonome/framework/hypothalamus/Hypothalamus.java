@@ -574,6 +574,7 @@ public abstract class Hypothalamus {
 			            }
 
 			            public void messageArrived(String topic, MqttMessage message) {
+			            	logger.info("line 577, received mqttmessage topic=" + topic);
 			                if (topic.equals("Hippocampus_Status")) {
 			                    processHippocampusHealth(new String(message.getPayload()));
 			                }
