@@ -137,7 +137,7 @@ public abstract class Hypothalamus {
     ZMQ.Poller items;
 
 
-    private JSONObject lastHippocampusStatus = null;
+    private JSONObject lastHippocampusStatus = new JSONObject();
     
 	
 	public Hypothalamus() {
