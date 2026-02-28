@@ -250,7 +250,7 @@ public class TeleonomeConstants {
 	public static final String DENE_HIPPOCAMPUS_WARNING_THRESHOLD="Warning Threshold";
 	public static final String DENE_HIPPOCAMPUS_MEMORY_STATUS_DENE="Memory Status";
 	public static final String DENE_HIPPOCAMPUS_DATA_DENE="Data";
-	
+	public static final String HEART_TOPIC_HIPPOCAMPUS_RESPONSE="Hippocampus_Response";
 	
 	public static final String DENECHAIN_COMPONENTS = "Components";
 	public static final String DENECHAIN_ANALYTICONS = "Analyticons";
