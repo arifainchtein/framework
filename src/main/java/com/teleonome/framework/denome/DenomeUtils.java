@@ -474,10 +474,20 @@ public class DenomeUtils {
 						processName  =TeleonomeConstants.PROCESS_WEB_SERVER;
 
 					}
-					String user = splited[1];
-					int priority = Integer.parseInt(splited[2]);
-					int niceLevel = Integer.parseInt(splited[3]);
-					int virtualMemoryUedByProcess = Integer.parseInt(splited[4]);
+					String user ="";
+					int priority =0;
+					int niceLevel =0;
+					int virtualMemoryUedByProcess =0;
+					try{
+						 user = splited[1];
+						 priority = Integer.parseInt(splited[2]);
+						 niceLevel = Integer.parseInt(splited[3]);
+						 virtualMemoryUedByProcess =0;
+						virtualMemoryUedByProcess = Integer.parseInt(splited[4]);
+					}catch(NumberFormatException e) {
+						logger.warn("line 488 lines[i]=" + lines[i]);
+						logger.warn(Utils.getStringException(e));
+					}
 					int residentMemoryUedByProcess = 0;
 					try{
 						residentMemoryUedByProcess = Integer.parseInt(splited[5]);
