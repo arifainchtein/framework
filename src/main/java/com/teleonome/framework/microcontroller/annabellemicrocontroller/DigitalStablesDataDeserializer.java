@@ -337,7 +337,7 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		toReturn.put("Short Name", deviceshortname);
 		toReturn.put("Serial Number", serialnumber);
 		toReturn.put("Raw Data", line);
-		
+		toReturn.put("Seconds Time", secondsTime);
 		JSONArray denes = new JSONArray();
 		toReturn.put("Denes", denes);
 		//
@@ -424,7 +424,6 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		JSONArray purposeDeneWords = new JSONArray();
 		purposeDene.put("DeneWords", purposeDeneWords);
 		
-		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Time", ""+secondsTime, null,TeleonomeConstants.DATATYPE_LONG, true));
 		if(timeCorrected) {
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Invalid Time", "true", null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Source Original Time", ""+sourceoriginaltime, null,TeleonomeConstants.DATATYPE_LONG, true));
