@@ -241,6 +241,17 @@ public class TeleonomeConstants {
 	public static final String DENECHAIN_SENSORS = "Sensors";	
 	//public static final String DENECHAIN_TELEPATHONS = "Telepathons";    
 	public static final String DENECHAIN_DESCRIPTIVE = "Descriptive";
+	
+	public static final String DENECHAIN_INTERNAL_HIPPOCAMPUS = "Hippocampus";
+	public static final String DENECHAIN_PURPOSE_HIPPOCAMPUS = "Hippocampus";
+	
+	public static final String DENE_HIPPOCAMPUS_CONFIGURATION="Configuration";
+	public static final String DENE_HIPPOCAMPUS_GLOBAL_LIMITS="Global Limits";
+	public static final String DENE_HIPPOCAMPUS_WARNING_THRESHOLD="Warning Thresholds";
+	public static final String DENE_HIPPOCAMPUS_MEMORY_STATUS_DENE="Memory Status";
+	public static final String DENE_HIPPOCAMPUS_DATA_DENE="Data";
+	
+	
 	public static final String DENECHAIN_COMPONENTS = "Components";
 	public static final String DENECHAIN_ANALYTICONS = "Analyticons";
 	public static final String DENE_CONTROL_PARAMETERS = "Control Parameters";

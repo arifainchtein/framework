@@ -4618,6 +4618,20 @@ public class DenomeManager {
 		return aDBManager.storeMotherRememberedValue(importedOnMillis, recordMillis, label, value, unit);
 	}
 
+	public void updateHippocampusPurposeDene(JSONObject  status){
+		try {
+			int deneRemoved = DenomeUtils.removeDeneFromChain(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_PURPOSE_HIPPOCAMPUS, TeleonomeConstants.DENE_HIPPOCAMPUS_MEMORY_STATUS_DENE);
+			logger.debug("removing the Mempry status from  dene from hippocampus, result:" + deneRemoved);
+
+			JSONObject hippocampusDeneChain = DenomeUtils.getDeneChainByName(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_PURPOSE_HIPPOCAMPUS);
+			JSONArray hippocampusDeneChainDenes = hippocampusDeneChain.getJSONArray("Denes");
+			hippocampusDeneChainDenes.put(status);
+
+		} catch (InvalidDenomeException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
 
 	public String initializePulse() throws MissingDenomeException, IOException{
 		logger.debug("initializing pulse");

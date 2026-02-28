@@ -137,7 +137,7 @@ public abstract class Hypothalamus {
     ZMQ.Poller items;
 
 
-    private JSONObject lastHippocampusHealth = null;
+    private JSONObject lastHippocampusStatus = null;
     
 	
 	public Hypothalamus() {
@@ -574,7 +574,7 @@ public abstract class Hypothalamus {
 			            }
 
 			            public void messageArrived(String topic, MqttMessage message) {
-			                if (topic.equals("Hippocampus_Health")) {
+			                if (topic.equals("Hippocampus_Status")) {
 			                    processHippocampusHealth(new String(message.getPayload()));
 			                }
 			            }
@@ -605,18 +605,14 @@ public abstract class Hypothalamus {
 	        
 		}
 		
+		public JSONObject getHippocampusStatus() {
+		    return lastHippocampusStatus;
+		}
+		
 		private void processHippocampusHealth(String payload) {
 		    try {
 		        // Update our local variable with the new data
-		        lastHippocampusHealth = new JSONObject(payload);
-		        
-		        double usedPercent = lastHippocampusHealth.getDouble("PercentageUsed");
-		        logger.debug("Hippocampus health received. Memory Used: " + usedPercent + "%");
-		        
-		        // If memory is critical, you could trigger a local alarm immediately here
-		        if (usedPercent > 95.0) {
-		            logger.error("SYSTEM ALERT: Hippocampus memory near capacity!");
-		        }
+		    	lastHippocampusStatus  = new JSONObject(payload);
 		    } catch (Exception e) {
 		        logger.warn("Error parsing Hippocampus health: " + e.getMessage());
 		    }

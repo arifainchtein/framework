@@ -335,6 +335,7 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		toReturn.put("Short Name", deviceshortname);
 		toReturn.put("Serial Number", serialnumber);
 		toReturn.put("Raw Data", line);
+		toReturn.put("Seconds Time", secondsTime);
 		
 		JSONArray denes = new JSONArray();
 		toReturn.put("Denes", denes);
@@ -397,7 +398,6 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Fish Tank Measured Height", ""+fishTankMeasuredHeight, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Sump Trough Measured Height", ""+sumpTroughMeasuredHeight, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 		
-		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Time", ""+secondsTime, null,TeleonomeConstants.DATATYPE_LONG, true));
 		
 		if(timeCorrected) {
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Invalid Time", "true", null,TeleonomeConstants.DATATYPE_BOOLEAN, true));
