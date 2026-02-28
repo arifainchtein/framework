@@ -563,8 +563,7 @@ public abstract class Hypothalamus {
 	            connOpts.setCleanSession(false);
 	            connOpts.setKeepAliveInterval(300);
 	           // connOpts.setMaxInflight(1000);
-	            logger.warn("Connecting to Heart: "+mqttBrokerAddress);
-					anMqttClient.connect(connOpts);
+	          
 					//mqttToken.waitForCompletion(10000);
 					logger.warn("Connected to Heart: "+mqttBrokerAddress);
 					
@@ -583,6 +582,11 @@ public abstract class Hypothalamus {
 			            public void deliveryComplete(IMqttDeliveryToken token) {}
 			        });
 					
+					  logger.warn("Connecting to Heart: "+mqttBrokerAddress);
+						anMqttClient.connect(connOpts);
+						anMqttClient.subscribe("Hippocampus_Status", 1);
+				        logger.warn("Connected and Subscribed to Hippocampus_Status");
+				        
 					 try {
 						 MqttMessage message = new MqttMessage("Hello".getBytes());
 						 logger.warn("pibt1");
