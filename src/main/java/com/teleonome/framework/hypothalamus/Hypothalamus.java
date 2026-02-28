@@ -612,7 +612,9 @@ public abstract class Hypothalamus {
 		private void processHippocampusHealth(String payload) {
 		    try {
 		        // Update our local variable with the new data
+		    	
 		    	lastHippocampusStatus  = new JSONObject(payload);
+		    	logger.info("line 617, received hippocampus lastHippocampusStatus=" +lastHippocampusStatus.toString() );
 		    } catch (Exception e) {
 		        logger.warn("Error parsing Hippocampus health: " + e.getMessage());
 		    }

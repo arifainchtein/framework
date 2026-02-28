@@ -1077,6 +1077,7 @@ public class PulseThread extends Thread{
 				//FileUtils.writeByteArrayToFile(new File(Utils.getLocalDirectory() + "EndPulse.info"), (""+System.currentTimeMillis()).getBytes());
 				//logger.debug("wrote EndPulse");
 				JSONObject hippocampusStatus = anHypothalamus.getHippocampusStatus();
+				logger.info("line 1080,hippocampusStatus=" + hippocampusStatus );
 				if(hippocampusStatus.has("Name")) {
 					aDenomeManager.updateHippocampusPurposeDene(hippocampusStatus);
 				}
