@@ -835,6 +835,7 @@ public class DenomeUtils {
 		if(id.getNucleusName().equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE) ||
 				id.getNucleusName().equals(TeleonomeConstants.NUCLEI_INTERNAL) ||
 				id.getNucleusName().equals(TeleonomeConstants.NUCLEI_MNEMOSYNE) ||
+				id.getNucleusName().equals(TeleonomeConstants.NUCLEI_TELEPATHONS) ||
 				id.getNucleusName().equals(TeleonomeConstants.NUCLEI_PURPOSE)
 				) {
 			toReturn=false;
@@ -1215,7 +1216,7 @@ public class DenomeUtils {
 			JSONObject denomeObject = dataSource.getJSONObject("Denome");
 			JSONArray nucleiArray = denomeObject.getJSONArray("Nuclei");
 			String name;
-			JSONObject aJSONObject, internalNucleus = null,purposeNucleus = null,mnemosyneNucleus=null, humanInterfaceNucleus=null;
+			JSONObject aJSONObject, internalNucleus = null,purposeNucleus = null,mnemosyneNucleus=null, humanInterfaceNucleus=null, telepathonNucleus=null;
 			//	//System.out.println("poijbt 2");
 			for(int i=0;i<nucleiArray.length();i++){
 				aJSONObject = (JSONObject) nucleiArray.get(i);
@@ -1230,8 +1231,9 @@ public class DenomeUtils {
 					mnemosyneNucleus= aJSONObject;
 				}else if(name.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 					humanInterfaceNucleus= aJSONObject;
+				}else if(name.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+					telepathonNucleus= aJSONObject;
 				}
-
 			}
 			//	//System.out.println("poijbt 3");
 			if(nucleusName.equals(TeleonomeConstants.NUCLEI_INTERNAL)){
@@ -1242,6 +1244,8 @@ public class DenomeUtils {
 				deneChainsArray = mnemosyneNucleus.getJSONArray("DeneChains");
 			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 				deneChainsArray = humanInterfaceNucleus.getJSONArray("DeneChains");
+			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+				deneChainsArray = telepathonNucleus.getJSONArray("DeneChains");
 			}
 			//	//System.out.println("poijbt 4");
 			JSONObject aDeneJSONObject, aDeneWordJSONObject;
@@ -2293,7 +2297,7 @@ public class DenomeUtils {
 		String deneName = tokens[3];
 		String deneWordLabel = tokens[4];
 		System.out.println("nucleusName="+nucleusName+" deneChainName:"+deneChainName+" deneName " + deneName + " deneWordLabel " + deneWordLabel);
-		JSONObject aJSONObject, cpInternalNucleus=null,cpPurposeNucleus=null, cpMnemosyneNucleus=null, cpHumanInterfaceNucleus=null;
+		JSONObject aJSONObject, cpInternalNucleus=null,cpPurposeNucleus=null, cpMnemosyneNucleus=null, cpHumanInterfaceNucleus=null, cpTelepathonsNucleus=null;
 
 		JSONObject denomeObject;
 		try {
@@ -2313,6 +2317,8 @@ public class DenomeUtils {
 					cpMnemosyneNucleus= aJSONObject;
 				}else if(name.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 					cpHumanInterfaceNucleus= aJSONObject;
+				}else if(name.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+					cpTelepathonsNucleus= aJSONObject;
 				}
 
 			}
@@ -2334,6 +2340,8 @@ public class DenomeUtils {
 				deneChainsArray = cpMnemosyneNucleus.getJSONArray("DeneChains");
 			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_HUMAN_INTERFACE)){
 				deneChainsArray = cpHumanInterfaceNucleus.getJSONArray("DeneChains");
+			}else if(nucleusName.equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+				deneChainsArray = cpTelepathonsNucleus.getJSONArray("DeneChains");
 			}
 
 			JSONObject  aDeneJSONObject, aDeneWordJSONObject;
