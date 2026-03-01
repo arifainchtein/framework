@@ -245,12 +245,16 @@ public class TeleonomeConstants {
 	public static final String DENECHAIN_INTERNAL_HIPPOCAMPUS = "Hippocampus";
 	public static final String DENECHAIN_PURPOSE_HIPPOCAMPUS = "Hippocampus";
 	
+	public static final String DENE_HIPPOCAMPUS_PRELOAD_DATA="Preload Data";
+	public static final String DENE_HIPPOCAMPUS_PRELOAD_HOURS="Preload Hours";
 	public static final String DENE_HIPPOCAMPUS_CONFIGURATION="Configuration";
 	public static final String DENE_HIPPOCAMPUS_GLOBAL_LIMITS="Global Limit";
 	public static final String DENE_HIPPOCAMPUS_WARNING_THRESHOLD="Warning Threshold";
 	public static final String DENE_HIPPOCAMPUS_MEMORY_STATUS_DENE="Memory Status";
 	public static final String DENE_HIPPOCAMPUS_DATA_DENE="Data";
 	public static final String HEART_TOPIC_HIPPOCAMPUS_RESPONSE="Hippocampus_Response";
+	
+	
 	
 	public static final String DENECHAIN_COMPONENTS = "Components";
 	public static final String DENECHAIN_ANALYTICONS = "Analyticons";
