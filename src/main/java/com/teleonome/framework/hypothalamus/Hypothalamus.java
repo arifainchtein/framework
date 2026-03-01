@@ -632,7 +632,7 @@ public abstract class Hypothalamus {
 		int currentAttempt=0;
 		MqttMessage message = new MqttMessage(messageBytes);
 		 message.setQos(TeleonomeConstants.HEART_QUALITY_OF_SERVICE);
-	    message.setRetained(true);
+	    message.setRetained(false);
 	    
 	    try {
 			logger.debug("about to Update the Heart, topic: " + topic  + " HEART_QUALITY_OF_SERVICE=" + TeleonomeConstants.HEART_QUALITY_OF_SERVICE + " message size=" +messageBytes.length + " anMqttClient.isConnected()=" + anMqttClient.isConnected());
