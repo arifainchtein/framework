@@ -245,6 +245,10 @@ public class TeleonomeConstants {
 	public static final String DENECHAIN_INTERNAL_HIPPOCAMPUS = "Hippocampus";
 	public static final String DENECHAIN_PURPOSE_HIPPOCAMPUS = "Hippocampus";
 	
+	public static final String DENE_HIPPOCAMPUS_SACRIFIED_POINTS="Sacrificed Points";
+	public static final String DENE_HIPPOCAMPUS_TOTAL_POINTS="Total Points";
+	public static final String DENE_HIPPOCAMPUS_PRE_LOAD_DURATION="Pre Load Duration";
+	
 	public static final String DENE_HIPPOCAMPUS_PRELOAD_DATA="Preload Data";
 	public static final String DENE_HIPPOCAMPUS_PRELOAD_HOURS="Preload Hours";
 	public static final String DENE_HIPPOCAMPUS_CONFIGURATION="Configuration";
@@ -924,7 +928,10 @@ public class TeleonomeConstants {
 	public static final String PATHOLOGY_PULSE_LATE= "Pulse Late";
 	public static final String PATHOLOGY_HYPOTHALAMUS_DIED= "Hypothalamus died";
 	public static final String PATHOLOGY_HEART_DIED= "Heart died";
+	public static final String PATHOLOGY_HIPPOCAMPUS_DIED= "Hippocampus died";
+	
 	public static final String PATHOLOGY_HEART_PULSE_LATE= "Heart Pulse Late";
+	public static final String PATHOLOGY_HIPPOCAMPUS_LATE= "Hippocampus Late";
 	public static final String PATHOLOGY_HEART_CRASHED_HPROF= "Heart Crashed hprof";
 	
 	public static final String PATHOLOGY_CORRUPT_PULSE_FILE= "Corrupt Denome File";
