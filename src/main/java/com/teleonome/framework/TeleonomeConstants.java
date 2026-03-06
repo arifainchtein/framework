@@ -249,6 +249,9 @@ public class TeleonomeConstants {
 	public static final String DENE_HIPPOCAMPUS_TOTAL_POINTS="Total Points";
 	public static final String DENE_HIPPOCAMPUS_PRE_LOAD_DURATION="Pre Load Duration";
 	
+	public static final String DENE_HIPPOCAMPUS_RECOMMENDED_XMX="Recommended XMX";
+	public static final String DENE_HIPPOCAMPUS_RECOMMENDED_PRELOAD__RECOMMENDED_LIMIT="Recommended Global Limit";
+	
 	public static final String DENE_HIPPOCAMPUS_PRELOAD_DATA="Preload Data";
 	public static final String DENE_HIPPOCAMPUS_PRELOAD_HOURS="Preload Hours";
 	public static final String DENE_HIPPOCAMPUS_CONFIGURATION="Configuration";
