@@ -249,6 +249,7 @@ public class TeleonomeConstants {
 	public static final String DENE_HIPPOCAMPUS_TOTAL_POINTS="Total Points";
 	public static final String DENE_HIPPOCAMPUS_PRE_LOAD_DURATION="Pre Load Duration";
 	
+	
 	public static final String DENE_HIPPOCAMPUS_RECOMMENDED_XMX="Recommended XMX";
 	public static final String DENE_HIPPOCAMPUS_RECOMMENDED_PRELOAD__RECOMMENDED_LIMIT="Recommended Global Limit";
 	
@@ -260,7 +261,7 @@ public class TeleonomeConstants {
 	public static final String DENE_HIPPOCAMPUS_MEMORY_STATUS_DENE="Memory Status";
 	public static final String DENE_HIPPOCAMPUS_DATA_DENE="Data";
 	public static final String HEART_TOPIC_HIPPOCAMPUS_RESPONSE="Hippocampus_Response";
-	
+	public static final String HEART_TOPIC_HIPPOCAMPUS_STATUS="Hippocampus_Status";
 	
 	
 	public static final String DENECHAIN_COMPONENTS = "Components";
