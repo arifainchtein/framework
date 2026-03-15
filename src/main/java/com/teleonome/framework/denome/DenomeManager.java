@@ -16,6 +16,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -99,6 +100,8 @@ public class DenomeManager {
 	JSONObject networkAdapterInfoJSONObject;
 	String hostName="";
 	String selectedDenomeFileName="";
+	String selectedDenomeTmpFileName="";
+	
 	private final DecimalFormat decimalFormat = new DecimalFormat("0.00");
 	SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	SimpleDateFormat statusMessagedateTimeFormat = new SimpleDateFormat("HH:mm");
@@ -239,6 +242,10 @@ public class DenomeManager {
 		return selectedDenomeFileName;
 	}
 
+	public String getSelectedDenomeTmpFileName(){
+		return selectedDenomeTmpFileName;
+	}
+	
 	private void init() throws MissingDenomeException{
 		File localDir = new File(Utils.getLocalDirectory());
 		File[] files = localDir.listFiles();
@@ -251,6 +258,7 @@ public class DenomeManager {
 				if(files[i].getName().equals("Teleonome.denome")){
 
 					selectedDenomeFileName = files[i].getAbsolutePath();
+					selectedDenomeTmpFileName = selectedDenomeFileName + ".tmp";
 					logger.debug("reading denome from " +selectedDenomeFileName);
 
 					break found;
@@ -265,15 +273,38 @@ public class DenomeManager {
 	}
 
 
+	private void saveAtomically(String content, File targetFile) throws IOException {
+	    // Create a temp file in the same directory as the target
+	    File tempFile = new File(targetFile.getParent(), targetFile.getName() + ".tmp");
+	    
+	    FileUtils.writeStringToFile(tempFile, content, "UTF-8");
+	    
+	    // The "Swap": This is the atomic part
+	    Files.move(tempFile.toPath(), targetFile.toPath(), 
+	               StandardCopyOption.REPLACE_EXISTING, 
+	               StandardCopyOption.ATOMIC_MOVE);
+	}
 
-	public void writeDenomeToDisk(){
+	public void writeDenomeToDisk(boolean allFiles){
 		//
 		// now write the denome
 		//
 		try {
-			FileUtils.write(new File(selectedDenomeFileName), currentlyCreatingPulseJSONObject.toString(4));
-			FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome"), currentlyCreatingPulseJSONObject.toString(4));
-
+			File primaryDenome = new File("/home/pi/Teleonome/Teleonome.denome");
+		    File previousPulse = new File("/home/pi/Teleonome/Teleonome.previous_pulse");
+		    File webServerFile = new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome");
+		    
+		    if (primaryDenome.exists()) {
+		        Files.move(primaryDenome.toPath(), previousPulse.toPath(), 
+		                   StandardCopyOption.REPLACE_EXISTING);
+		    }
+		    String denomeContent = currentlyCreatingPulseJSONObject.toString(4);
+		    saveAtomically(denomeContent, primaryDenome);
+		    if(allFiles) {
+			    saveAtomically(denomeContent, webServerFile);		    	
+		    }
+			logger.debug("saving pusle with a timestamps of " + currentlyCreatingPulseJSONObject.getString("Pulse Timestamp"));
+			System.gc();
 		} catch (IOException | JSONException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
@@ -2031,9 +2062,8 @@ public class DenomeManager {
 					}
 				}
 			}
-			FileUtils.write(selectedFile, denomeJSONObject.toString(4));
-			FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome"), denomeJSONObject.toString(4));
-
+			writeDenomeToDisk(true);
+		
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
@@ -4337,12 +4367,14 @@ public class DenomeManager {
 					File previousPulseFile = new File(previousPulseFileName);
 					logger.debug("about to copy " + selectedDenomeFileName + " to " + previousPulseFileName);
 
-					FileUtils.copyFile(currentPulseFile, previousPulseFile);
+					FileUtils.copyFile(currentPulseFile, previousPulseFile, 
+			                   StandardCopyOption.REPLACE_EXISTING, 
+			                   StandardCopyOption.ATOMIC_MOVE);
 					//
 					// now write the denome
 					//
-					FileUtils.write(new File(selectedDenomeFileName), currentlyCreatingPulseJSONObject.toString(4));
-					logger.debug("Saved pulse to " + selectedDenomeFileName);
+					
+					writeDenomeToDisk(true);
 					//
 					// and reload the denme so that the next mutation acts over the mutated denome
 					loadDenome(selectedDenomeFileName);
@@ -4484,14 +4516,8 @@ public class DenomeManager {
 			JSONObject deneChain = (JSONObject) DenomeUtils.getDeneChainByName(denomeJSONObject, nucleusName, deneChainName);
 			JSONArray denes = deneChain.getJSONArray("Denes");
 			denes.put(newDene);
-			try {
-				FileUtils.write(selectedFile, denomeJSONObject.toString(4));
-				FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome"), denomeJSONObject.toString(4));
-
-			} catch (IOException | JSONException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
-			}
+			writeDenomeToDisk(true);
+		
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -5453,7 +5479,7 @@ public class DenomeManager {
 		}
 		logger.info("line 5440 modified =" + modified);
 		if(modified) {
-			writeDenomeToDisk();
+			writeDenomeToDisk(false);
 		}
 	}
 	
@@ -5480,7 +5506,7 @@ public class DenomeManager {
 			}
 		}
 		if(injected) {
-			writeDenomeToDisk();
+			writeDenomeToDisk(false);
 		}
 	}
 	public JSONObject getDeneFromDeneChainByDeneName(JSONObject deneChain, String deneName) throws JSONException{
@@ -8186,13 +8212,19 @@ public class DenomeManager {
 			//
 			currentlyCreatingPulseJSONObject.put(TeleonomeConstants.PULSE_CREATION_DURATION_MILLIS, pulseDuration);
 
+			File previousPulse = new File("/home/pi/Teleonome/Teleonome.previous_pulse");
+			   
+			   
 			File currentPulseFile = new File(selectedDenomeFileName);
 			String previousPulseFileName = FilenameUtils.getBaseName(selectedDenomeFileName) + ".previous_pulse";
 
 			File previousPulseFile = new File(previousPulseFileName);
 			logger.debug("about to copy " + selectedDenomeFileName + " to " + previousPulseFileName);
 
-			FileUtils.copyFile(currentPulseFile, previousPulseFile);
+			if (currentPulseFile.exists()) {
+		        Files.move(currentPulseFile.toPath(), previousPulse.toPath(), 
+		                   StandardCopyOption.REPLACE_EXISTING);
+		    }
 			//
 			// now write the denome, do it twice, first so that you can get the pulse size
 			// then modify the purpose:operational data:vital:Pulse Size Kb deneword
@@ -8208,13 +8240,14 @@ public class DenomeManager {
 				logger.warn(Utils.getStringException(e));
 			}
 
-			FileUtils.write(selectedDenomeFile, currentlyCreatingPulseJSONObject.toString(4));
+			writeDenomeToDisk(true);
 
-			logger.debug("Saved pulse to " + selectedDenomeFileName);
-			logger.debug("saving pusle with a timestamps of " + currentlyCreatingPulseJSONObject.getString("Pulse Timestamp"));
-			FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome"), currentlyCreatingPulseJSONObject.toString(4));
-			FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/" + teleonomeName + ".pulse"), currentlyCreatingPulseJSONObject.toString(4));
-			System.gc();
+//			FileUtils.write(selectedDenomeFile, currentlyCreatingPulseJSONObject.toString(4));
+//			logger.debug("Saved pulse to " + selectedDenomeFileName);
+//			logger.debug("saving pusle with a timestamps of " + currentlyCreatingPulseJSONObject.getString("Pulse Timestamp"));
+//			FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome"), currentlyCreatingPulseJSONObject.toString(4));
+//			FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/" + teleonomeName + ".pulse"), currentlyCreatingPulseJSONObject.toString(4));
+//			System.gc();
 			double afterGcMemory = Runtime.getRuntime().freeMemory()/1024000;
 
 			logger.debug("available memory after generating pulse before gc=" + availableMemory + " after gc=" + afterGcMemory);

@@ -670,7 +670,7 @@ public class PulseThread extends Thread{
 						// save the denome to disk and reboot
 						//
 						this.aDenomeManager.addExogenousMetamorphosisEventDeneToMnemosyneDeneChain(new Identity(identitySwitchEventsMnemosyneDestinationIdentityPointer));
-						this.aDenomeManager.writeDenomeToDisk();
+						this.aDenomeManager.writeDenomeToDisk(true);
 						Runtime.getRuntime().exec("sudo reboot");
 
 					}
