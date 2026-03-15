@@ -298,6 +298,12 @@ public class DenomeManager {
 		        Files.move(primaryDenome.toPath(), previousPulse.toPath(), 
 		                   StandardCopyOption.REPLACE_EXISTING);
 		    }
+		    if(currentlyCreatingPulseJSONObject==null) {
+			    String stringFormDenome = FileUtils.readFileToString(primaryDenome);
+				denomeJSONObject = new JSONObject(stringFormDenome);
+				currentlyCreatingPulseJSONObject  = new JSONObject(denomeJSONObject, JSONObject.getNames(denomeJSONObject));		    	
+		    }
+			
 		    String denomeContent = currentlyCreatingPulseJSONObject.toString(4);
 		    saveAtomically(denomeContent, primaryDenome);
 		    if(allFiles) {
