@@ -294,10 +294,6 @@ public class DenomeManager {
 		    File previousPulse = new File("/home/pi/Teleonome/Teleonome.previous_pulse");
 		    File webServerFile = new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome");
 		    
-		    if (primaryDenome.exists()) {
-		        Files.move(primaryDenome.toPath(), previousPulse.toPath(), 
-		                   StandardCopyOption.REPLACE_EXISTING);
-		    }
 		    if(currentlyCreatingPulseJSONObject==null) {
 			    String stringFormDenome = FileUtils.readFileToString(primaryDenome);
 				denomeJSONObject = new JSONObject(stringFormDenome);
@@ -305,6 +301,9 @@ public class DenomeManager {
 		    }
 			
 		    String denomeContent = currentlyCreatingPulseJSONObject.toString(4);
+		    
+			
+			saveAtomically(denomeContent, previousPulse);
 		    saveAtomically(denomeContent, primaryDenome);
 		    if(allFiles) {
 			    saveAtomically(denomeContent, webServerFile);		    	
