@@ -338,7 +338,7 @@ class MappedBusThread extends Thread{
 													// which means that whatever Denome editing has already ocurred
 													// therefore save it to disk so that the webserver can read it
 													//
-													hypothalamus.aDenomeManager.writeDenomeToDisk();
+													hypothalamus.aDenomeManager.writeDenomeToDisk(true);
 													//
 													// now store the mutation in the database
 													// as a MutationEvent
@@ -455,7 +455,7 @@ class MappedBusThread extends Thread{
 							
 							//
 							// save the denome to the drive
-							hypothalamus.aDenomeManager.writeDenomeToDisk();
+							hypothalamus.aDenomeManager.writeDenomeToDisk(true);
 							
 						}catch(IOException e) {
 							logger.warn(Utils.getStringException(e));
@@ -1261,7 +1261,7 @@ class MappedBusThread extends Thread{
 				// which means that whatever Denome editing has already ocurred
 				// therefore save it to disk so that the webserver can read it
 				//
-				hypothalamus.aDenomeManager.writeDenomeToDisk();
+				hypothalamus.aDenomeManager.writeDenomeToDisk(true);
 				//
 				// now store the mutation in the database
 				// as a MutationEvent

@@ -883,7 +883,7 @@ public abstract class Hypothalamus {
 							logger.info("the mutation contains the shutdown command");
 							//
 							// Because this method will not return, first save the denometodisk
-							aDenomeManager.writeDenomeToDisk();
+							aDenomeManager.writeDenomeToDisk(false);
 							//
 							// now update the Denome so that is ready to start next time it wakes up 
 							// this involves check to see if the action that executes the shutdown command
