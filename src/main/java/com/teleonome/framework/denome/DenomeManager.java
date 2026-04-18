@@ -60,6 +60,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import com.teleonome.framework.LifeCycleEventListener;
 import com.teleonome.framework.TeleonomeConstants;
@@ -294,12 +295,29 @@ public class DenomeManager {
 		    File previousPulse = new File("/home/pi/Teleonome/Teleonome.previous_pulse");
 		    File webServerFile = new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome");
 		    
-		    if(currentlyCreatingPulseJSONObject==null) {
-			    String stringFormDenome = FileUtils.readFileToString(primaryDenome);
-				denomeJSONObject = new JSONObject(stringFormDenome);
-				currentlyCreatingPulseJSONObject  = new JSONObject(denomeJSONObject, JSONObject.getNames(denomeJSONObject));		    	
-		    }
+//		    if(currentlyCreatingPulseJSONObject==null) {
+//			    String stringFormDenome = FileUtils.readFileToString(primaryDenome);
+//				denomeJSONObject = new JSONObject(stringFormDenome);
+//				currentlyCreatingPulseJSONObject  = new JSONObject(denomeJSONObject, JSONObject.getNames(denomeJSONObject));		    	
+//		    }
 			
+		    if (currentlyCreatingPulseJSONObject == null) {
+		        // 1. Use a FileReader with JSONTokener to stream the file
+		        // This avoids creating the 'stringFormDenome' String entirely
+		        try (FileReader reader = new FileReader(primaryDenome)) {
+		            JSONTokener tokener = new JSONTokener(reader);
+		            denomeJSONObject = new JSONObject(tokener);
+		            
+		            // 2. Clone the object more efficiently
+		            // Note: Using the names array still creates a shallow copy
+		            currentlyCreatingPulseJSONObject = new JSONObject(denomeJSONObject, JSONObject.getNames(denomeJSONObject));
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		            // Fallback: If the file is empty or corrupted
+		            denomeJSONObject = new JSONObject();
+		            currentlyCreatingPulseJSONObject = new JSONObject();
+		        }
+		    }
 		    String denomeContent = currentlyCreatingPulseJSONObject.toString(4);
 		    
 			

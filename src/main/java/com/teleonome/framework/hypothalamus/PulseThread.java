@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -1188,7 +1190,10 @@ public class PulseThread extends Thread{
 								locationDir.mkdirs();
 							}
 							otherLocationFile = new File(location + "/Teleonome.denome"); 
-							FileUtils.writeStringToFile(otherLocationFile, pulse, "UTF8");
+							//FileUtils.writeStringToFile(otherLocationFile, pulse, "UTF8");
+							try (BufferedWriter writer = Files.newBufferedWriter(otherLocationFile.toPath())) {
+								writer.write(pulse);
+							}
 						}
 					}
 					persistenceOrganismPulses = (boolean) aDenomeManager.getDeneWordAttributeByIdentity(identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
