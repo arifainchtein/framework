@@ -1192,7 +1192,7 @@ public class PulseThread extends Thread{
 							otherLocationFile = new File(location + "/Teleonome.denome"); 
 							//FileUtils.writeStringToFile(otherLocationFile, pulse, "UTF8");
 							try (BufferedWriter writer = Files.newBufferedWriter(otherLocationFile.toPath())) {
-								writer.write(pulse);
+								writer.write(pulse); // 
 							}
 						}
 					}

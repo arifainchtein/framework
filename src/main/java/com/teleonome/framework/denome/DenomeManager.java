@@ -351,25 +351,43 @@ public class DenomeManager {
 		// read the denome from the hard disk
 		//  if its not found, then read it from the db
 		//
-		String stringFormDenome="";
-		try {
-			File selectedFile = new File(fn);
-			logger.debug("reading denome from " +selectedDenomeFileName);
-
-			stringFormDenome = FileUtils.readFileToString(selectedFile);
-
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			logger.warn(Utils.getStringException(e));
+//		String stringFormDenome="";
+//		try {
+//			File selectedFile = new File(fn);
+//			logger.debug("reading denome from " +selectedDenomeFileName);
+//
+//			stringFormDenome = FileUtils.readFileToString(selectedFile);
+//
+//
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			logger.warn(Utils.getStringException(e));
+//		}
+		
+//		if(stringFormDenome.equals("")){
+//			Hashtable info = new Hashtable();
+//			info.put("message", "The denome file was not found in " + Utils.getLocalDirectory());
+//			throw new MissingDenomeException(info);
+//		}
+		File selectedFile = new File(fn);
+		logger.debug("streaming denome from " + selectedDenomeFileName);
+		// 2. Stream the file directly into the JSONObject
+		try (FileReader fr = new FileReader(selectedFile)) {
+		    JSONTokener tokener = new JSONTokener(fr);
+		    this.denomeJSONObject = new JSONObject(tokener);
+		} catch (Exception e) {
+		    logger.warn("Failed to load or parse Denome: " + Utils.getStringException(e));
+		    
+		    // Throw your custom exception if the object is still null/empty
+		    Hashtable info = new Hashtable();
+		    info.put("message", "The denome file was not found or invalid in " + fn);
+		    throw new MissingDenomeException(info);
 		}
 
-		if(stringFormDenome.equals("")){
-			Hashtable info = new Hashtable();
-			info.put("message", "The denome file was not found in " + Utils.getLocalDirectory());
-			throw new MissingDenomeException(info);
-		}
-
+		// 3. Extract core data
+		JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
+		denomeName = denomeObject.getString("Name");
+		
 		try {
 			//
 			// initialize the variables so as to not duplicate
@@ -393,14 +411,13 @@ public class DenomeManager {
 			// end of variable initialization
 			//
 
-			denomeJSONObject = new JSONObject(stringFormDenome);
-			JSONObject denomeObject = denomeJSONObject.getJSONObject("Denome");
+			
+			
 			denomeName = denomeObject.getString("Name");
 			//
 			// make sure it is garbage cllected
 			//
-			stringFormDenome=null;
-
+			
 
 			//
 			// now parse them
