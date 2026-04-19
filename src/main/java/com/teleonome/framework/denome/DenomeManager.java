@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -4565,40 +4566,82 @@ public class DenomeManager {
 		}
 	}
 
-	public boolean readAndModifyDeneWordByIdentity(Identity targetDeneWordIdentity,Object value) throws JSONException, InvalidDenomeException{
-		File selectedFile = new File(Utils.getLocalDirectory() + "Teleonome.denome");
-		String initialIdentityState="";
-		boolean toReturn=false;
-		try {
-			JSONObject localDenomeJSONObject = new JSONObject(FileUtils.readFileToString(selectedFile));
+	public boolean readAndModifyDeneWordByIdentity(Identity targetDeneWordIdentity, Object value) throws JSONException, InvalidDenomeException {
+	    File selectedFile = new File(Utils.getLocalDirectory() + "Teleonome.denome");
+	    File tomcatFile = new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome");
+	    boolean toReturn = false;
 
+	    // 1. Stream the file into a local JSONObject (Zero intermediate String)
+	    JSONObject localDenomeJSONObject = null;
+	    try (FileReader fr = new FileReader(selectedFile)) {
+	        localDenomeJSONObject = new JSONObject(new JSONTokener(fr));
+	    } catch (IOException e) {
+	        logger.warn("Could not read Denome: " + e.getMessage());
+	        return false;
+	    }
 
-			Object o =  DenomeUtils.getDeneWordByIdentity(localDenomeJSONObject, targetDeneWordIdentity, TeleonomeConstants.COMPLETE);
-			logger.debug("targetDeneWordIdentity=" + targetDeneWordIdentity.toString() + " o="+o);
-			if(o!=null) {
-				JSONObject deneWord = (JSONObject)o;
-				logger.debug("readAndModifyDeneWordByIdentity, deneWord " +deneWord + " value=" + value);
-				deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, value);
+	    // 2. Locate and modify the word
+	    Object o = DenomeUtils.getDeneWordByIdentity(localDenomeJSONObject, targetDeneWordIdentity, TeleonomeConstants.COMPLETE);
+	    if (o instanceof JSONObject) {
+	        JSONObject deneWord = (JSONObject) o;
+	        deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, value);
 
-				try {
-					FileUtils.write(selectedFile, localDenomeJSONObject.toString(4));
-					FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome"), localDenomeJSONObject.toString(4));
-					toReturn=true;
-				} catch (IOException | JSONException e) {
-					// TODO Auto-generated catch block
-					logger.warn(Utils.getStringException(e));
-				}
-				logger.debug("Saved pulse to " + selectedDenomeFileName);
-			}
-
-
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return toReturn;
+	        // 3. Stream the output directly to both files (Zero intermediate String)
+	        // We avoid .toString(4) entirely to save RAM
+	        try {
+	            writeJsonObjectToFile(localDenomeJSONObject, selectedFile);
+	            writeJsonObjectToFile(localDenomeJSONObject, tomcatFile);
+	            toReturn = true;
+	            logger.debug("Successfully modified and saved " + targetDeneWordIdentity);
+	        } catch (IOException e) {
+	            logger.warn("Failed to write updated Denome: " + Utils.getStringException(e));
+	        }
+	    }
+	    return toReturn;
 	}
+
+	// Helper method to stream JSON directly to disk
+	private void writeJsonObjectToFile(JSONObject json, File file) throws IOException {
+	    try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+	        json.write(bw); // This streams node-by-node, keeping RAM usage flat
+	        bw.flush();
+	    }
+	}
+//	
+//	public boolean readAndModifyDeneWordByIdentity(Identity targetDeneWordIdentity,Object value) throws JSONException, InvalidDenomeException{
+//		File selectedFile = new File(Utils.getLocalDirectory() + "Teleonome.denome");
+//		String initialIdentityState="";
+//		boolean toReturn=false;
+//		try {
+//			JSONObject localDenomeJSONObject = new JSONObject(FileUtils.readFileToString(selectedFile));
+//
+//
+//			Object o =  DenomeUtils.getDeneWordByIdentity(localDenomeJSONObject, targetDeneWordIdentity, TeleonomeConstants.COMPLETE);
+//			logger.debug("targetDeneWordIdentity=" + targetDeneWordIdentity.toString() + " o="+o);
+//			if(o!=null) {
+//				JSONObject deneWord = (JSONObject)o;
+//				logger.debug("readAndModifyDeneWordByIdentity, deneWord " +deneWord + " value=" + value);
+//				deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, value);
+//
+//				try {
+//					FileUtils.write(selectedFile, localDenomeJSONObject.toString(4));
+//					FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome"), localDenomeJSONObject.toString(4));
+//					toReturn=true;
+//				} catch (IOException | JSONException e) {
+//					// TODO Auto-generated catch block
+//					logger.warn(Utils.getStringException(e));
+//				}
+//				logger.debug("Saved pulse to " + selectedDenomeFileName);
+//			}
+//
+//
+//
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return toReturn;
+//	}
 
 
 	public void addLifeCycleEventListener(MicroController aMicroController) {
@@ -6067,13 +6110,36 @@ public class DenomeManager {
 				}
 
 
+//				try {
+//					FileUtils.write(new File(Utils.getLocalDirectory() + "Teleonome.denome"), denomeJSONObject.toString(4));
+//					FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome"), denomeJSONObject.toString(4));
+//
+//				} catch (IOException | JSONException e) {
+//					// TODO Auto-generated catch block
+//					logger.debug(Utils.getStringException(e));
+//				}
+				
 				try {
-					FileUtils.write(new File(Utils.getLocalDirectory() + "Teleonome.denome"), denomeJSONObject.toString(4));
-					FileUtils.write(new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome"), denomeJSONObject.toString(4));
+				    // 1. Define your files
+				    File primaryFile = new File(Utils.getLocalDirectory() + "Teleonome.denome");
+				    File tomcatFile = new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome");
+
+				    // 2. Write to the primary file using a stream
+				    try (BufferedWriter writer = new BufferedWriter(new FileWriter(primaryFile))) {
+				        denomeJSONObject.write(writer); // Streams directly, NO massive String created
+				        writer.flush();
+				    }
+
+				    // 3. Write to the tomcat file using a stream
+				    try (BufferedWriter writer = new BufferedWriter(new FileWriter(tomcatFile))) {
+				        denomeJSONObject.write(writer); 
+				        writer.flush();
+				    }
+
+				    logger.debug("Successfully saved Denome to both locations via streaming.");
 
 				} catch (IOException | JSONException e) {
-					// TODO Auto-generated catch block
-					logger.debug(Utils.getStringException(e));
+				    logger.error("Failed to save Denome: " + Utils.getStringException(e));
 				}
 			}
 
