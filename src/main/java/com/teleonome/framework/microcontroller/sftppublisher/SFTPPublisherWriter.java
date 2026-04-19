@@ -6,6 +6,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -20,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
@@ -307,8 +310,105 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 
 		return b;
 	}
-
+	
 	private boolean publishToSFTP() {
+	    // 1. Kick off the entire process in a background thread 
+	    // to stop the 20-second lag in the Thalamus.
+	    new Thread(() -> {
+	        try {
+	            String destinationDir = "/home/pi/Teleonome/" + teleonomeName;
+	            
+	            // Start Transaction: Upload 'start' file
+	            String startFilePath = Utils.getLocalDirectory() + "start";
+	            File startFile = new File(startFilePath);
+	            FileUtils.writeStringToFile(startFile, "", "UTF-8");
+	            uploadFile(destinationDir, startFilePath, "start");
+
+	            // 2. Memory-Efficient Read: Use JSONTokener instead of readFileToString
+	            File selectedFile = new File(Utils.getLocalDirectory() + "Teleonome.denome");
+	            if (!selectedFile.isFile()) {
+	                publishingResults = "Fault#DigitalGeppettoPublisher#Teleonome.denome not found";
+	                return;
+	            }
+
+	            JSONObject tempPulseJSONObject;
+	            try (FileReader reader = new FileReader(selectedFile)) {
+	                tempPulseJSONObject = new JSONObject(new JSONTokener(reader));
+	            }
+
+	            // 3. Perform Denomic Operations (Modifying the object in RAM)
+	            for (int i = 0; i < configParams.length(); i++) {
+	                JSONObject dene = configParams.getJSONObject(i);
+	                if (dene.has(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE) && 
+	                    dene.getString(TeleonomeConstants.DENE_DENE_TYPE_ATTRIBUTE).equals(TeleonomeConstants.DENE_TYPE_DENOMIC_OPERATION)) {
+	                    
+	                    JSONObject deneWordOperationJSONObject = (JSONObject) DenomeUtils.getDeneWordAttributeByDeneWordTypeFromDene(dene, TeleonomeConstants.DENEWORD_TYPE_UPDATE_DENEWORD_VALUE, TeleonomeConstants.COMPLETE);
+	                    String targetPointer = deneWordOperationJSONObject.getString(TeleonomeConstants.DENEWORD_TARGET_ATTRIBUTE);
+	                    Object targetValue = deneWordOperationJSONObject.get(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+	                    
+	                    tempPulseJSONObject = DenomeUtils.updateDeneWordByIdentity(tempPulseJSONObject, targetPointer, targetValue);
+	                }
+	            }
+
+	            // 4. Second Loop: Handle Image/Media and Pulse Uploads
+	            for (int i = 0; i < configParams.length(); i++) {
+	                JSONObject dene = configParams.getJSONObject(i);
+	                String deneName = dene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+
+	                if (deneName.startsWith("SFTP Upload Image")) {
+	                    String imagePointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "Upload Image", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+	                    String value = (String) aDenomeManager.getDeneWordAttributeByIdentity(new Identity(imagePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+	                    
+	                    String sourceFilename = "";
+	                    if (value.endsWith(".jpg") || value.endsWith(".png") || value.endsWith(".gif")) {
+	                        sourceFilename = "/home/pi/Teleonome/tomcat/webapps/ROOT/images/" + value;
+	                    } else if (value.endsWith(".wav") || value.endsWith(".mp3")) {
+	                        sourceFilename = "/home/pi/Teleonome/tomcat/webapps/ROOT/audio/" + value;
+	                    } else if (value.endsWith(".mpg")) {
+	                        sourceFilename = "/home/pi/Teleonome/tomcat/webapps/ROOT/video/" + value;
+	                    }
+
+	                    if (new File(sourceFilename).isFile()) {
+	                        uploadFile(destinationDir, sourceFilename, value);
+	                    }
+	                } else if (deneName.equals("SFTP Publish Contents")) {
+	                    String contentsPointer = (String) aDenomeManager.getDeneWordAttributeByDeneWordNameFromDene(dene, "SFTP Publish Contents", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+	                    
+	                    if (contentsPointer.equals(TeleonomeConstants.COMMANDS_PUBLISH_TELEONOME_PULSE)) {
+	                        File sourceFile = new File("/home/pi/Teleonome/Teleonome.denome.tmp");
+	                        File compressedFile = new File("/home/pi/Teleonome/Teleonome.zip");
+
+	                        // Write modified JSON to temp file using a STREAM
+	                        try (BufferedWriter writer = new BufferedWriter(new FileWriter(sourceFile))) {
+	                            tempPulseJSONObject.write(writer);
+	                            writer.flush();
+	                        }
+
+	                        // Zip and Upload
+	                        Utils.zipFile(sourceFile, compressedFile);
+	                        uploadFile(destinationDir, compressedFile.getAbsolutePath(), "Teleonome.zip");
+
+	                        sourceFile.delete();
+	                        compressedFile.delete();
+	                    }
+	                }
+	            }
+
+	            // End Transaction: Upload 'complete' file
+	            String completeFilePath = Utils.getLocalDirectory() + "complete";
+	            FileUtils.writeStringToFile(new File(completeFilePath), "", "UTF-8");
+	            uploadFile(destinationDir, completeFilePath, "complete");
+
+	        } catch (Exception e) {
+	            logger.error("Publishing Error: " + Utils.getStringException(e));
+	        }
+	    }).start();
+
+	    // Return true immediately so the main loop doesn't block!
+	    return true; 
+	}
+
+	private boolean publishToSFTPOld() {
 
 
 		Integer I;
