@@ -295,7 +295,7 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 			// Configure and open the serial port
 						serialPort = portId;
 						serialPort.setComPortParameters(DATA_RATE, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
-						serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 30000, 0);
+						serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 2000, 0);
 						serialPort.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
 						
 						if (!serialPort.openPort()) {
