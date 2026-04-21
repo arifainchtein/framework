@@ -310,30 +310,12 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 
 		return b;
 	}
-	private void ensureConnection() throws JSchException {
-	    // Check if session exists AND is actually connected
-	    if (session == null || !session.isConnected()) {
-	        logger.info("SFTP Session is down. Attempting to reconnect...");
-	        
-	        // Use your existing connection logic here
-	        // Example:
-	        // JSch jsch = new JSch();
-	        // session = jsch.getSession(user, host, port);
-	        // session.setPassword(password);
-	        
-	        // CRITICAL: Set a timeout so a bad network doesn't freeze the Pi
-	        session.connect(10000); 
-	        logger.info("SFTP Session re-established.");
-	    }
-	}
 	
 	private boolean publishToSFTP() {
 	    // 1. Kick off the entire process in a background thread 
 	    // to stop the 20-second lag in the Thalamus.
 	    new Thread(() -> {
 	        try {
-	        	ensureConnection();
-	        	
 	            String destinationDir = "/home/pi/Teleonome/" + teleonomeName;
 	            
 	            // Start Transaction: Upload 'start' file
