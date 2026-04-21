@@ -118,9 +118,8 @@ public class AnnabelleReader extends BufferedReader{
 								
 								telepathon = annabellDeserializer.deserialise(teleonomeName,line);
 								long timeSeconds = annabellDeserializer.getTimeSeconds();
-								if(telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
+								if(telepathon!=null && telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
 									String telepathonName = telepathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
-									logger.debug("about remove and inject telepathonName =" + telepathonName + " telephathon=" + telepathon.toString(4));
 									aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
 									aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
 									try {
