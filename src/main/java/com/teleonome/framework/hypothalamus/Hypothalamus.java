@@ -584,7 +584,7 @@ public abstract class Hypothalamus {
 					
 					  logger.warn("Connecting to Heart: "+mqttBrokerAddress);
 						anMqttClient.connect(connOpts);
-						anMqttClient.subscribe("Hippocampus_Status", 1);
+						anMqttClient.subscribe("Hippocampus_Status", 0);
 				        logger.warn("Connected and Subscribed to Hippocampus_Status");
 				        
 					 try {
