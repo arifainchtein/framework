@@ -63,7 +63,7 @@ public class AnnabelleReader extends BufferedReader{
 		
 		String line="", className;
 		int counter=0;
-		int maxTries=1;
+		int maxTries=10;
 		String deserializer, deviceName;
 		String[] tokens;
 		boolean keepGoing=true;
