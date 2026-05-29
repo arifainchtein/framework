@@ -19,10 +19,6 @@ public abstract class AnnabelleDeserializer {
 			return secondsTime;
 		}
 		
-		public long getTimeSeconds() {
-			// TODO Auto-generated method stub
-			return secondsTime;
-		}
 		public long getSourceoriginaltime() {
 			// TODO Auto-generated method stub
 			return sourceoriginaltime;
