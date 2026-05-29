@@ -8,6 +8,7 @@ public abstract class AnnabelleDeserializer {
 
 		protected MnemosyneManager aMnemosyneManager=null;
 		protected long secondsTime=0;
+		protected long sourceoriginaltime=0;
 		public abstract JSONObject deserialise(String teleonomeName, String line);
 		public void setMnemosyneManager(MnemosyneManager a) {
 			aMnemosyneManager=a;
@@ -16,5 +17,14 @@ public abstract class AnnabelleDeserializer {
 		public long getTimeSeconds() {
 			// TODO Auto-generated method stub
 			return secondsTime;
+		}
+		
+		public long getTimeSeconds() {
+			// TODO Auto-generated method stub
+			return secondsTime;
+		}
+		public long getSourceoriginaltime() {
+			// TODO Auto-generated method stub
+			return sourceoriginaltime;
 		}
 }

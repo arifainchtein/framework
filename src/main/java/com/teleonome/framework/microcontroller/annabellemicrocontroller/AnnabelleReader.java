@@ -117,13 +117,13 @@ public class AnnabelleReader extends BufferedReader{
 								String teleonomeName = aDenomeManager.getDenomeName();
 								
 								telepathon = annabellDeserializer.deserialise(teleonomeName,line);
-								long timeSeconds = annabellDeserializer.getTimeSeconds();
+								long sourceoriginaltime = annabellDeserializer.getSourceoriginaltime();
 								if(telepathon!=null && telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
 									String telepathonName = telepathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
 									aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
 									aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
 									try {
-										aDenomeManager.storeTelepathon(timeSeconds,  telepathonName,  telepathon);
+										aDenomeManager.storeTelepathon(sourceoriginaltime,  telepathonName,  telepathon);
 									} catch (PersistenceException e) {
 										// TODO Auto-generated catch block
 										logger.warn(Utils.getStringException(e));

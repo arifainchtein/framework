@@ -4673,7 +4673,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				
 			
 				logger.debug("command=" + command);
-				System.out.println("line 4670 command=" + command);
+			//	System.out.println("line 4670 command=" + command);
 				preparedStatement = connection.prepareStatement(command);
 				preparedStatement.setString(1, deneName);
 				preparedStatement.setString(2, deneName);
@@ -4770,12 +4770,19 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				logger.debug("table " + tableName + " was nt found so it was created, result=" + result);
 			}
 
-			//.replace("\"", "\\\"")
-			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
-			sql = "insert into "+ tableName+" (timeSeconds,telepathonname,data) values(" + timeSeconds + ",'"+telepathonname+"','" + telepathon.toString() +"')";
-			int result = statement.executeUpdate(sql);
-
-			toReturn= true;
+			sql = "SELECT COUNT(*) FROM " + tableName + " WHERE timeSeconds=" + timeSeconds + " AND telepathonname='" + telepathonname + "'";
+			ResultSet rs = statement.executeQuery(sql);
+			rs.next();
+			if(rs.getInt(1) > 0) {
+				logger.debug("storeTelepathon: duplicate record for telepathonname=" + telepathonname + " timeSeconds=" + timeSeconds + ", skipping");
+				rs.close();
+				toReturn = true;
+			} else {
+				rs.close();
+				sql = "insert into "+ tableName+" (timeSeconds,telepathonname,data) values(" + timeSeconds + ",'"+telepathonname+"','" + telepathon.toString() +"')";
+				statement.executeUpdate(sql);
+				toReturn= true;
+			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			//System.out.println("bad sql:" + sql);
