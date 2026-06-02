@@ -9,8 +9,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
 
@@ -891,30 +893,34 @@ class MappedBusThread extends Thread{
 
 				//
 				// Third get AsyncData
+				// Single-mode microcontrollers are polled once per Async Cycle.
+				// Continuous-mode microcontrollers are polled every iteration of the
+				// inner while loop until PulseThread sets keepRunning=false.
 
 				try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				if(!keepRunning) {
 					break stop;
 				}
 				String asyncData="AsyncData";
-			   logger.debug("line 905 Executing AsyncData");
+				logger.debug("Executing AsyncData");
 				long asyncRequestDelayMillis=0;
-				for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
-					microControllerPointer = (String)en.nextElement();
-					aMicroController = (MicroController)hypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
-					asyncRequestDelayMillis = aMicroController.getAsyncRequestMillisecondsDelay();
-					logger.debug("AsyncCycle is processing " + aMicroController.getName()  + " asyncRequestDelayMillis=" + asyncRequestDelayMillis);
-					if(!keepRunning) {
-						break stop;
-					}
-					if(aMicroController.isEnableAsyncUpdate()) {
-						//if(ready){
-						//   logger.debug("about to call readline");
+				Set<String> asyncSingleDone = new HashSet<>();
+				while(keepRunning) {
+					for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
+						microControllerPointer = (String)en.nextElement();
+						aMicroController = (MicroController)hypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
+						asyncRequestDelayMillis = aMicroController.getAsyncRequestMillisecondsDelay();
+						logger.debug("AsyncCycle is processing " + aMicroController.getName()  + " asyncRequestDelayMillis=" + asyncRequestDelayMillis);
+						if(!keepRunning) {
+							break stop;
+						}
+						if(!aMicroController.isEnableAsyncUpdate()) continue;
+						if(!aMicroController.isAsyncContinuous() && asyncSingleDone.contains(microControllerPointer)) continue;
+
 						String inputLine = "";
 						keepGoing=true;
 						boolean ready;
@@ -922,7 +928,7 @@ class MappedBusThread extends Thread{
 						maxCounter=2;
 						do {
 							try {
-								
+
 								output = aMicroController.getWriter();
 								input = aMicroController.getReader();
 								logger.debug("requesting asyncdata");
@@ -931,18 +937,17 @@ class MappedBusThread extends Thread{
 								try {
 									Thread.sleep(2000);
 								} catch (InterruptedException e1) {
-									// TODO Auto-generated catch block
 									e1.printStackTrace();
 								}
 								inputLine="";
-								 keepGoing=true;
+								keepGoing=true;
 								while(keepGoing) {
 									if(input.ready()) {
-										 inputLine = input.readLine();
-										 logger.debug("receiving response :"+ inputLine);
-											input.close();
-											output.close();
-											keepGoing=false;
+										inputLine = input.readLine();
+										logger.debug("receiving response :"+ inputLine);
+										input.close();
+										output.close();
+										keepGoing=false;
 									}else {
 										try {
 											if(!keepRunning) {
@@ -951,34 +956,31 @@ class MappedBusThread extends Thread{
 											logger.debug("not ready sleeping 2000");
 											Thread.sleep(2000);
 										} catch (InterruptedException e) {
-											// TODO Auto-generated catch block
 											e.printStackTrace();
 										}
 									}
 								}
-								
+
 								if(!keepRunning) {
 									break stop;
 								}
-								logger.info(" linr 962 received inputLine=" + inputLine);
-								if(inputLine.startsWith("Ok") || 
+								logger.info("received inputLine=" + inputLine);
+								if(inputLine.startsWith("Ok") ||
 										inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE) ||
-										inputLine.startsWith("Command Not Found") 
+										inputLine.startsWith("Command Not Found")
 										) {
 									keepGoing=false;
-									logger.info(" line 968 set keep goping top false keepRunning="+ keepRunning );
+									logger.info("set keepGoing=false keepRunning="+ keepRunning);
 								}else {
 									counter++;
 									if(counter>maxCounter) {
 										keepGoing=false;
-										logger.info("line 972 not ready closing streams" );
+										logger.info("max retries reached, closing streams");
 										if(input!=null)input.close();
 										if(output!=null)output.close();
-
 									}else {
 										keepGoing=true;
 										logger.debug("AsyncCycle is processing " + aMicroController.getName()  + " retrying counter=" + counter);
-										
 									}
 								}
 								if(!keepRunning) {
@@ -990,19 +992,14 @@ class MappedBusThread extends Thread{
 								try {
 									Thread.sleep(2000);
 								} catch (InterruptedException e1) {
-									// TODO Auto-generated catch block
 									e1.printStackTrace();
 								}
 							}
 						}while(keepGoing);
 
-						logger.info("liune 998");
-//							input.close();
-//							output.close();
 						if(!keepRunning) {
 							break stop;
 						}
-						//if(!inputLine.equals("")){
 						if(inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE)){
 							logger.info("receive AsynC Update  from " + microControllerPointer + " inputLine="+ inputLine);
 							ArrayList<Map.Entry<JSONObject, Integer>> sensorRequestQueuePositionDeneWordIndex = hypothalamus.aDenomeManager.getSensorsDeneWordsBySensorRequestQueuePositionByMicroControllerPointer( microControllerPointer);
@@ -1019,15 +1016,11 @@ class MappedBusThread extends Thread{
 									logger.debug("currentlyProcessingSensorValueDeneJSONObject=" + currentlyProcessingSensorValueDeneJSONObject);
 
 									adjustedIndex = ((Integer)entry2.getValue()).intValue()-1;
-									logger.debug("processing sensor token:" + adjustedIndex );   
+									logger.debug("processing sensor token:" + adjustedIndex);
 									sensorValueString = sensorDataTokens[adjustedIndex];
-									logger.debug("processing sensor token:" + adjustedIndex + " resutled in " + sensorValueString);   
-									//
-									// the sensorRequestQueuePosition starts at 1 but the sensorDataTokens start at 0 so
-									// 
-									// logger.debug("inputLIne=" + inputLine);
+									logger.debug("processing sensor token:" + adjustedIndex + " resulted in " + sensorValueString);
 									if(sensorValueString!=null && !sensorValueString.equals("")){
-										reportingAddress = (String)  hypothalamus.aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDeneJSONObject,"Reporting Address");
+										reportingAddress = (String) hypothalamus.aDenomeManager.extractDeneWordValueFromDene(currentlyProcessingSensorValueDeneJSONObject,"Reporting Address");
 										try{
 											Double parseValue = Double.parseDouble(sensorValueString.trim());
 											dataToPublishJSONObject.put(reportingAddress, parseValue);
@@ -1035,59 +1028,33 @@ class MappedBusThread extends Thread{
 											logger.debug(inputLine + " is not numeric");
 										}
 									}
-									//}
 								}
 							}
-							logger.debug("about to send asyn update to the herarrt " + dataToPublishJSONObject.toString());   
+							logger.debug("about to send async update to heart " + dataToPublishJSONObject.toString());
 							hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_ASYNC_CYCLE_UPDATE, dataToPublishJSONObject.toString());
-
-
 
 						}else if(inputLine.startsWith(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS)){
 							String[] telepathontokens = inputLine.split("#");
-							//
-							// token[0] is the HEART_TOPIC_TELEPATHON_STATUS
-							// token is the telepathon denechain
 							logger.info("publishing update to heart for telepathon AsynC Update  from " + microControllerPointer + " telepathonUpdate="+ telepathontokens[1]);
 							hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS, telepathontokens[1]);
-
 						}
-//							if(input!=null)input.close();
-//							if(output!=null)output.close();
 
+						if(!aMicroController.isAsyncContinuous()) {
+							asyncSingleDone.add(microControllerPointer);
+						}
 
-						//}else {
-						//								logger.debug("Closing input because is not ready");
-						//								if(input!=null)input.close();
-						//								if(output!=null)output.close();
-						//}
 						if(asyncRequestDelayMillis>0) {
 							if(!keepRunning) {
 								break stop;
 							}
 							try {
-								logger.debug("line 1049 about to sleep   " +  asyncRequestDelayMillis);
+								logger.debug("about to sleep " + asyncRequestDelayMillis);
 								Thread.sleep(asyncRequestDelayMillis);
 							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
 								logger.warn(Utils.getStringException(e));
 							}
 						}
 					}
-				}
-//				catch (EOFException e) {
-//				 TODO Auto-generated catch block
-//					logger.warn(Utils.getStringException(e));
-//				}
-				
-				if(!keepRunning) {
-					break stop;
-				}
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					logger.warn(Utils.getStringException(e));
 				}
 			}
 

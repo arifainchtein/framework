@@ -235,7 +235,11 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 				}else {
 					logger.info("Did not find asyncRequestMillisecondsDelay");
 				}
-				
+				Object asyncMode = DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(annabelleMicrocontrollerDene, TeleonomeConstants.DENEWORD_MICROCONTROLLER_ASYNC_EXECUTION_MODE, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+				if(TeleonomeConstants.ASYNC_EXECUTION_MODE_CONTINUOUS.equals(asyncMode)) {
+					setAsyncContinuous(true);
+					logger.info("Async Execution Mode = Continuous");
+				}
 			}catch(Exception e) {
 				logger.warn(Utils.getStringException(e));
 			}

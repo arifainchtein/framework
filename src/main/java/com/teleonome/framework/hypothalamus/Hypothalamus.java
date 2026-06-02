@@ -914,9 +914,9 @@ public abstract class Hypothalamus {
 									logger.info("Capturing solar voltage for daffodilTF device: " + deviceName);
 									java.util.Map<String,Double> voltages = aDBManager.captureSolarVoltageEvents(deviceName);
 
-									for (java.util.Map.Entry<String,Double> entry : voltages.entrySet()) {
-										String eventType = entry.getKey().equals("sunset_voltage") ? "SUNSET" : "SUNRISE";
-										double voltage   = entry.getValue();
+									for (java.util.Map.Entry<String,Double> entry2 : voltages.entrySet()) {
+										String eventType = entry2.getKey().equals("sunset_voltage") ? "SUNSET" : "SUNRISE";
+										double voltage   = entry2.getValue();
 										logger.info(deviceName + " " + eventType + " voltage=" + voltage);
 
 										// Build the solar voltage event dene

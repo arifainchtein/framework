@@ -17,6 +17,7 @@ public abstract class MicroController {
 	protected DenomeManager aDenomeManager; 
 	protected boolean enableAsyncUpdate=false;
 	protected int asyncRequestMillisecondsDelay=1000;
+	protected boolean asyncContinuous=false;
 	protected final Hypothalamus hypothalamus;
 	
 	
@@ -59,6 +60,14 @@ public abstract class MicroController {
 	
 	public void setEnableAsyncUpdate(boolean b) {
 		 enableAsyncUpdate=b;
+	}
+
+	public boolean isAsyncContinuous() {
+		return asyncContinuous;
+	}
+
+	public void setAsyncContinuous(boolean b) {
+		asyncContinuous=b;
 	}
 	
 	public abstract void init(JSONArray params) throws MicrocontrollerCommunicationException;
