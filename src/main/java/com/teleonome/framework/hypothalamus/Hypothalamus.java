@@ -873,6 +873,74 @@ public abstract class Hypothalamus {
 							cal.add(Calendar.DATE, 1);
 							logger.debug("Creating table partion for " + cal.get(Calendar.YEAR) + "/"+ cal.get(Calendar.MONTH)+ "/"+ cal.get(Calendar.DATE));
 							aDBManager.createDailyPartitions(cal);
+						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_CAPTURE_SOLAR_VOLTAGE_EVENTS)){
+							actuatorCommand=TeleonomeConstants.COMMANDS_DO_NOTHING;
+							logger.info("Capturing solar voltage events — scanning for daffodilTF telepathons");
+							try {
+								JSONArray telepathons = aDenomeManager.getAllTelepathons();
+								String teleonomeName = aDenomeManager.getDenomeName();
+								Identity todayIdentity = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_MNEMOSYNE, TeleonomeConstants.MNEMOSYNE_DENECHAIN_CURRENT_DAY);
+								Identity weekIdentity  = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_MNEMOSYNE, TeleonomeConstants.MNEMOSYNE_DENECHAIN_CURRENT_WEEK);
+								Calendar captureCal = Calendar.getInstance();
+								captureCal.add(Calendar.DATE, -1); // yesterday
+								long yesterdayMillis = captureCal.getTimeInMillis();
+								String timestampStr = simpleFormatter.format(captureCal.getTime());
+
+								for (int ti = 0; ti < telepathons.length(); ti++) {
+									JSONObject telepathon = telepathons.getJSONObject(ti);
+									String deviceName = telepathon.getString("Name");
+
+									// Find Device Type Id inside Configuration dene
+									String deviceTypeId = "";
+									if (telepathon.has("Denes")) {
+										JSONArray denes = telepathon.getJSONArray("Denes");
+										for (int di = 0; di < denes.length(); di++) {
+											JSONObject dene = denes.getJSONObject(di);
+											if ("Configuration".equals(dene.optString("Name")) && dene.has("DeneWords")) {
+												JSONArray deneWords = dene.getJSONArray("DeneWords");
+												for (int wi = 0; wi < deneWords.length(); wi++) {
+													JSONObject dw = deneWords.getJSONObject(wi);
+													if ("Device Type Id".equals(dw.optString("Name"))) {
+														deviceTypeId = dw.optString("Value", "");
+														break;
+													}
+												}
+												break;
+											}
+										}
+									}
+									if (!"daffodilTF".equals(deviceTypeId)) continue;
+
+									logger.info("Capturing solar voltage for daffodilTF device: " + deviceName);
+									java.util.Map<String,Double> voltages = aDBManager.captureSolarVoltageEvents(deviceName);
+
+									for (java.util.Map.Entry<String,Double> entry : voltages.entrySet()) {
+										String eventType = entry.getKey().equals("sunset_voltage") ? "SUNSET" : "SUNRISE";
+										double voltage   = entry.getValue();
+										logger.info(deviceName + " " + eventType + " voltage=" + voltage);
+
+										// Build the solar voltage event dene
+										JSONObject eventDene = new JSONObject();
+										eventDene.put("Name", deviceName + " " + eventType);
+										eventDene.put("Dene Type", "Solar Voltage Event");
+										eventDene.put("Timestamp Milliseconds", yesterdayMillis);
+										eventDene.put("Timestamp", timestampStr);
+										JSONArray eventDeneWords = new JSONArray();
+										eventDene.put("DeneWords", eventDeneWords);
+										eventDeneWords.put(Utils.createDeneWordJSONObject("Telepathon Name", deviceName,        null, "String", true));
+										eventDeneWords.put(Utils.createDeneWordJSONObject("Event Type",      eventType,         null, "String", true));
+										eventDeneWords.put(Utils.createDeneWordJSONObject("Battery Voltage", String.valueOf(voltage), null, "double", true));
+										eventDeneWords.put(Utils.createDeneWordJSONObject("Timestamp",       timestampStr,      null, "String", true));
+										eventDeneWords.put(Utils.createDeneWordJSONObject("Timestamp Milliseconds", String.valueOf(yesterdayMillis), null, "long", true));
+
+										// Add to Mnemosyne Today and Mnemosyne Current Week
+										aDenomeManager.readAndModifyAddDeneToDenChainByIdentity(todayIdentity, eventDene);
+										aDenomeManager.readAndModifyAddDeneToDenChainByIdentity(weekIdentity,  eventDene);
+									}
+								}
+							} catch (Exception e) {
+								logger.warn("Error capturing solar voltage events: " + e.getMessage());
+							}
 						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_DO_NOTHING)){
 							actuatorCommand=TeleonomeConstants.COMMANDS_DO_NOTHING;
 						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_SET_MICROCONTROLLER_RTC)){

@@ -198,6 +198,54 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	public boolean createDailyPartitions(Calendar cal) {
 		return true;
 	}
+
+	/**
+	 * Captures yesterday's sunset and sunrise voltage events for a single device.
+	 * Returns a map with keys "sunset_voltage" and "sunrise_voltage" (null if not found).
+	 */
+	public java.util.Map<String, Double> captureSolarVoltageEvents(String deviceName) {
+		java.util.Map<String, Double> result = new java.util.HashMap<>();
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet rs = null;
+		try {
+			connection = connectionPool.getConnection();
+
+			// Run the capture function for yesterday
+			statement = connection.prepareStatement(
+				"SELECT capture_solar_voltage_events(?, CURRENT_DATE - 1, CURRENT_DATE - 1)");
+			statement.setString(1, deviceName);
+			rs = statement.executeQuery();
+			if (rs.next()) logger.debug("captureSolarVoltageEvents device=" + deviceName + " inserted=" + rs.getInt(1));
+			rs.close();
+			statement.close();
+
+			// Read back the captured values
+			statement = connection.prepareStatement(
+				"SELECT event_type, battery_voltage FROM solar_voltage_events " +
+				"WHERE device_name = ? AND day_date = CURRENT_DATE - 1 " +
+				"AND event_type IN ('SUNSET','SUNRISE')");
+			statement.setString(1, deviceName);
+			rs = statement.executeQuery();
+			while (rs.next()) {
+				String eventType = rs.getString("event_type");
+				double voltage = rs.getDouble("battery_voltage");
+				if ("SUNSET".equals(eventType))  result.put("sunset_voltage",  voltage);
+				if ("SUNRISE".equals(eventType)) result.put("sunrise_voltage", voltage);
+			}
+		} catch (SQLException e) {
+			logger.warn(Utils.getStringException(e));
+		} finally {
+			try {
+				if (rs        != null) rs.close();
+				if (statement != null) statement.close();
+				if (connection != null) connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				logger.warn(Utils.getStringException(e));
+			}
+		}
+		return result;
+	}
 	public boolean createDailyPartitionsOld(Calendar cal) {
 		boolean toReturn=false;
 		int year = cal.get(Calendar.YEAR);

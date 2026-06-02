@@ -313,6 +313,7 @@ public class TeleonomeConstants {
 	
 	public static final String COMMANDS_GET_LAST_REMEMBERED_DENEWORD_FOR_EACH_TELEONOME="$GetLastRememberedWordForEachTeleonome";
 	public static final String COMMANDS_CREATE_DAILY_PARTITIONS="$CreateDailyPartitions";
+	public static final String COMMANDS_CAPTURE_SOLAR_VOLTAGE_EVENTS="$CaptureSolarVoltageEvents";
 	public static final String COMMANDS_ELAPSED_TIME_STRING = "$ElapsedTimeString";
 	public static final String COMMANDS_PUBLISH_TELEONOME_PULSE="$Teleonome_Pulse";
 	public static final String COMMANDS_CURRENT_HOUR = "$Current_Hour";
