@@ -1083,6 +1083,11 @@ public class PulseThread extends Thread{
 				if(hippocampusStatus.has("Name")) {
 					aDenomeManager.updateHippocampusPurposeDene(hippocampusStatus);
 				}
+				JSONObject cerebellumStatus = anHypothalamus.getCerebellumStatus();
+				logger.info("cerebellumStatus=" + cerebellumStatus.toString());
+				if(cerebellumStatus.has("Name")) {
+					aDenomeManager.updateCerebellumPurposeDene(cerebellumStatus);
+				}
 				JSONObject jsonMessage = this.aDenomeManager.generatePulse();
 				logger.debug("generated pulse");
 

@@ -244,7 +244,27 @@ public class TeleonomeConstants {
 	
 	public static final String DENECHAIN_INTERNAL_HIPPOCAMPUS = "Hippocampus";
 	public static final String DENECHAIN_PURPOSE_HIPPOCAMPUS = "Hippocampus";
-	
+
+	public static final String DENECHAIN_PURPOSE_CEREBELLUM  = "Cerebellum";
+	public static final String DENECHAIN_INTERNAL_CEREBELLUM = "Cerebellum";
+
+	// ── Cerebellum task evaluation ────────────────────────────────────────────
+	public static final String DENE_TYPE_CEREBELLUM_TASK                     = "Cerebellum Task";
+	public static final String DENEWORD_TYPE_CEREBELLUM_TELEPATHON_TYPE      = "Cerebellum Telepathon Type";
+	public static final String DENEWORD_TYPE_CEREBELLUM_TASK_CONDITION_POINTER = "Task Condition Pointer";
+	public static final String DENEWORD_CEREBELLUM_ACTIVE                    = "Active";
+	public static final String DENEWORD_CEREBELLUM_EVALUATION_POSITION       = "Evaluation Position";
+	public static final String DENEWORD_CEREBELLUM_EXPRESSION                = "Expression";
+	public static final String DENEWORD_CEREBELLUM_TASK_TRUE_EXPRESSION      = "Task True Expression";
+	public static final String DENEWORD_CEREBELLUM_TELEPATHON_TYPE           = "Telepathon Type";
+	public static final String DENEWORD_CEREBELLUM_EXECUTION_TIME                      = "Execution Time";
+	public static final String DENEWORD_CEREBELLUM_EXECUTION_TIME_SUNSET              = "Sunset";
+	public static final String DENEWORD_CEREBELLUM_EXECUTION_TIME_SUNRISE             = "Sunrise";
+	public static final String DENEWORD_CEREBELLUM_EXECUTION_FREQUENCY                = "Execution Frequency";
+	public static final String DENEWORD_CEREBELLUM_EXECUTION_FREQUENCY_DAILY          = "Daily";
+	public static final String DENEWORD_CEREBELLUM_EXECUTION_FREQUENCY_HOURS_IN_A_DAY = "Hours In A Day";
+	public static final String DENEWORD_CEREBELLUM_PATHOLOGY_MNEMOSYNE_LOCATION = "Cerebellum Pathology Mnemosyne Location";
+
 	public static final String DENE_HIPPOCAMPUS_SACRIFIED_POINTS="Sacrificed Points";
 	public static final String DENE_HIPPOCAMPUS_TOTAL_POINTS="Total Points";
 	public static final String DENE_HIPPOCAMPUS_PRE_LOAD_DURATION="Pre Load Duration";
@@ -262,6 +282,10 @@ public class TeleonomeConstants {
 	public static final String DENE_HIPPOCAMPUS_DATA_DENE="Data";
 	public static final String HEART_TOPIC_HIPPOCAMPUS_RESPONSE="Hippocampus_Response";
 	public static final String HEART_TOPIC_HIPPOCAMPUS_STATUS="Hippocampus_Status";
+
+	public static final String HEART_TOPIC_CEREBELLUM_REQUEST="Cerebellum_Request";
+	public static final String HEART_TOPIC_CEREBELLUM_RESPONSE="Cerebellum_Response";
+	public static final String HEART_TOPIC_CEREBELLUM_STATUS="Cerebellum_Status";
 	
 	
 	public static final String DENECHAIN_COMPONENTS = "Components";
@@ -937,9 +961,11 @@ public class TeleonomeConstants {
 	public static final String PATHOLOGY_HYPOTHALAMUS_DIED= "Hypothalamus died";
 	public static final String PATHOLOGY_HEART_DIED= "Heart died";
 	public static final String PATHOLOGY_HIPPOCAMPUS_DIED= "Hippocampus died";
-	
+	public static final String PATHOLOGY_CEREBELLUM_DIED= "Cerebellum died";
+
 	public static final String PATHOLOGY_HEART_PULSE_LATE= "Heart Pulse Late";
 	public static final String PATHOLOGY_HIPPOCAMPUS_LATE= "Hippocampus Late";
+	public static final String PATHOLOGY_CEREBELLUM_LATE= "Cerebellum Late";
 	public static final String PATHOLOGY_HEART_CRASHED_HPROF= "Heart Crashed hprof";
 	
 	public static final String PATHOLOGY_CORRUPT_PULSE_FILE= "Corrupt Denome File";

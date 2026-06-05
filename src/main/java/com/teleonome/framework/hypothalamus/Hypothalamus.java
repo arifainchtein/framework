@@ -137,7 +137,8 @@ public abstract class Hypothalamus {
     ZMQ.Poller items;
 
 
-    private JSONObject lastHippocampusStatus = new JSONObject();
+    private JSONObject lastHippocampusStatus  = new JSONObject();
+    private JSONObject lastCerebellumStatus   = new JSONObject();
     
 	
 	public Hypothalamus() {
@@ -576,6 +577,8 @@ public abstract class Hypothalamus {
 			            	logger.info("line 577, received mqttmessage topic=" + topic);
 			                if (topic.equals("Hippocampus_Status")) {
 			                    processHippocampusHealth(new String(message.getPayload()));
+			                } else if (topic.equals(TeleonomeConstants.HEART_TOPIC_CEREBELLUM_STATUS)) {
+			                    processCerebellumAnalysis(new String(message.getPayload()));
 			                }
 			            }
 
@@ -585,7 +588,8 @@ public abstract class Hypothalamus {
 					  logger.warn("Connecting to Heart: "+mqttBrokerAddress);
 						anMqttClient.connect(connOpts);
 						anMqttClient.subscribe("Hippocampus_Status", 0);
-				        logger.warn("Connected and Subscribed to Hippocampus_Status");
+				anMqttClient.subscribe(TeleonomeConstants.HEART_TOPIC_CEREBELLUM_STATUS, 0);
+				        logger.warn("Connected and Subscribed to Hippocampus_Status and Cerebellum_Status");
 				        
 					 try {
 						 MqttMessage message = new MqttMessage("Hello".getBytes());
@@ -613,15 +617,26 @@ public abstract class Hypothalamus {
 		public JSONObject getHippocampusStatus() {
 		    return lastHippocampusStatus;
 		}
-		
+
+		public JSONObject getCerebellumStatus() {
+		    return lastCerebellumStatus;
+		}
+
 		private void processHippocampusHealth(String payload) {
 		    try {
-		        // Update our local variable with the new data
-		    	
 		    	lastHippocampusStatus  = new JSONObject(payload);
 		    	logger.info("line 617, received hippocampus lastHippocampusStatus=" +lastHippocampusStatus.toString() );
 		    } catch (Exception e) {
 		        logger.warn("Error parsing Hippocampus health: " + e.getMessage());
+		    }
+		}
+
+		private void processCerebellumAnalysis(String payload) {
+		    try {
+		    	lastCerebellumStatus = new JSONObject(payload);
+		    	logger.info("received cerebellum status=" + lastCerebellumStatus.toString());
+		    } catch (Exception e) {
+		        logger.warn("Error parsing Cerebellum analysis: " + e.getMessage());
 		    }
 		}
 	public synchronized void publishToHeart(String topic, String messageText) {

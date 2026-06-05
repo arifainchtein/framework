@@ -4742,6 +4742,21 @@ public class DenomeManager {
 		}
 	}
 
+	public void updateCerebellumPurposeDene(JSONObject status) {
+		try {
+			JSONObject cerebellumDeneChain = DenomeUtils.getDeneChainByName(
+					currentlyCreatingPulseJSONObject,
+					TeleonomeConstants.NUCLEI_PURPOSE,
+					TeleonomeConstants.DENECHAIN_PURPOSE_CEREBELLUM);
+			if (cerebellumDeneChain != null && status.has("Denes")) {
+				cerebellumDeneChain.put("Denes", status.getJSONArray("Denes"));
+				logger.debug("updateCerebellumPurposeDene: updated " + status.getJSONArray("Denes").length() + " device dene(s)");
+			}
+		} catch (Exception e) {
+			logger.warn("updateCerebellumPurposeDene error: " + e.getMessage());
+		}
+	}
+
 	public String initializePulse() throws MissingDenomeException, IOException{
 		logger.debug("initializing pulse");
 
