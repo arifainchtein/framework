@@ -1578,6 +1578,20 @@ public class PulseThread extends Thread{
 											counter=0;
 											inputLine = input.readLine();
 											logger.debug("line 2304 actuator cmmand response=" + inputLine);
+											// Generic self-deactivation: any action with Self Deactivate=true
+											// sets itself Active=false after firing, no per-task code needed.
+											Object selfDeactivate = aDenomeManager
+												.getDeneWordAttributeByDeneWordNameFromDene(
+													actuatorActionJSONObject,
+													TeleonomeConstants.DENEWORD_SELF_DEACTIVATE,
+													TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+											if (Boolean.TRUE.equals(selfDeactivate)) {
+												aDenomeManager.setDeneWordValueInDene(
+													actuatorActionJSONObject,
+													TeleonomeConstants.DENEWORD_ACTIVE, false);
+												aDenomeManager.writeDenomeToDisk(true);
+												logger.info("Self-deactivated action after: " + actuatorCommand);
+											}
 										}
 										//
 										// now that the actuator command has been sent

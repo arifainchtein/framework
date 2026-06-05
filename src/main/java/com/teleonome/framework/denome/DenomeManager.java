@@ -4742,6 +4742,159 @@ public class DenomeManager {
 		}
 	}
 
+	/**
+	 * Sets a named DeneWord's Value attribute within a Dene JSONObject in memory.
+	 * Used by PulseThread's generic Self Deactivate mechanism.
+	 */
+	public void setDeneWordValueInDene(JSONObject dene, String deneWordName, Object value) {
+		try {
+			JSONArray words = dene.getJSONArray("DeneWords");
+			for (int i = 0; i < words.length(); i++) {
+				JSONObject w = words.getJSONObject(i);
+				if (deneWordName.equals(w.optString("Name"))) {
+					w.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, value);
+					return;
+				}
+			}
+		} catch (Exception e) {
+			logger.warn("setDeneWordValueInDene error for '" + deneWordName + "': " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Writes a structural mutation file that sets the Send Graveyard Shift Action's
+	 * command expression and ready flag. loadMutations() in the next pulse picks it
+	 * up, applies it, and renames the file to .mutated so it never re-fires.
+	 *
+	 * Called once per device that has GraveyardShift DeneWords in the Cerebellum status.
+	 */
+	public void injectGraveyardShiftMutation(JSONObject cerebellumStatus) {
+		try {
+			if (!cerebellumStatus.has("Denes")) return;
+			JSONArray denes = cerebellumStatus.getJSONArray("Denes");
+			for (int i = 0; i < denes.length(); i++) {
+				JSONObject deviceDene = denes.getJSONObject(i);
+				String command = buildGraveyardShiftCommand(deviceDene);
+				if (command == null) continue;
+
+				// Build the structural mutation
+				JSONObject onLoadDene = new JSONObject();
+				onLoadDene.put("Dene Type", "Set DeneWord");
+				onLoadDene.put("Name", "Set Graveyard Shift Data");
+
+				JSONArray words = new JSONArray();
+				JSONObject wCmd = new JSONObject();
+				wCmd.put("Injection Target",
+					"@Cleotilde:Internal:Actuators:" + TeleonomeConstants.DENE_SEND_GRAVEYARD_SHIFT_ACTION
+					+ ":" + TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_TRUE_EXPRESSION);
+				wCmd.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, command);
+				wCmd.put("Name", "Set Command");
+				words.put(wCmd);
+
+				JSONObject wFlag = new JSONObject();
+				wFlag.put("Injection Target",
+					"@Cleotilde:Internal:Actuators:" + TeleonomeConstants.DENE_SEND_GRAVEYARD_SHIFT_ACTION
+					+ ":" + TeleonomeConstants.DENEWORD_GRAVEYARD_SHIFT_COMMAND_READY);
+				wFlag.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, true);
+				wFlag.put("Name", "Set Ready");
+				words.put(wFlag);
+
+				onLoadDene.put("DeneWords", words);
+
+				JSONObject onLoadChain = new JSONObject();
+				onLoadChain.put("Name", TeleonomeConstants.DENECHAIN_ON_LOAD_MUTATION);
+				onLoadChain.put("Denes", new JSONArray().put(onLoadDene));
+
+				JSONObject mutation = new JSONObject();
+				mutation.put("Name", "Send Graveyard Shift To Daffodil");
+				mutation.put("Mutation Type", TeleonomeConstants.MUTATION_TYPE_STRUCTURE);
+				mutation.put("Active", true);
+				mutation.put("DeneChains", new JSONArray().put(onLoadChain));
+
+				JSONObject wrapper = new JSONObject();
+				wrapper.put("Mutation", mutation);
+
+				String mutationFile = Utils.getLocalDirectory() + "graveyard-shift.mutation";
+				FileUtils.writeStringToFile(new File(mutationFile), wrapper.toString(2), "UTF-8");
+				logger.info("injectGraveyardShiftMutation: wrote " + mutationFile + " for command: " + command);
+			}
+		} catch (Exception e) {
+			logger.warn("injectGraveyardShiftMutation error: " + e.getMessage());
+		}
+	}
+
+	private String buildGraveyardShiftCommand(JSONObject deviceDene) {
+		try {
+			Map<String, String> vals = new HashMap<>();
+			String deviceName = deviceDene.getString("Name");
+			JSONArray words = deviceDene.getJSONArray("DeneWords");
+			for (int i = 0; i < words.length(); i++) {
+				JSONObject w = words.getJSONObject(i);
+				vals.put(w.getString("Name"), w.optString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, "0"));
+			}
+			if (!vals.containsKey("Graveyard Voltage At Sunset")) return null;
+
+			int voltmV = (int)(Double.parseDouble(vals.getOrDefault("Graveyard Voltage At Sunset",  "0")) * 1000);
+			int soc    = (int) Double.parseDouble(vals.getOrDefault("Graveyard SOC At Sunset",       "0"));
+			int cSoc   = (int) Double.parseDouble(vals.getOrDefault("Graveyard Coulomb SOC At Sunset","0"));
+			int cMah   = (int) Double.parseDouble(vals.getOrDefault("Graveyard Coulomb mAh At Sunset","0"));
+			int dr     = (int)(Double.parseDouble(vals.getOrDefault("Graveyard Discharge Rate",       "0")) * 1000);
+			int night  = (int)(Double.parseDouble(vals.getOrDefault("Graveyard Night Duration",       "0")) * 6);
+			int tx     = (int) Double.parseDouble(vals.getOrDefault("Graveyard TX Cycles",            "0"));
+			int pvmV   = (int)(Double.parseDouble(vals.getOrDefault("Graveyard Voltage At Sunrise",   "0")) * 1000);
+			int pSoc   = (int) Double.parseDouble(vals.getOrDefault("Graveyard SOC At Sunrise",       "0"));
+			int flags  = (int) Double.parseDouble(vals.getOrDefault("Graveyard Anchor Reliable",      "0"));
+
+			return String.format("%s#%s#%d#%d#%d#%d#%d#%d#%d#%d#%d#%d",
+				TeleonomeConstants.COMMAND_SEND_GRAVEYARD_SHIFT,
+				deviceName, voltmV, soc, cSoc, cMah, dr, night, tx, pvmV, pSoc, flags);
+		} catch (Exception e) {
+			logger.warn("buildGraveyardShiftCommand error: " + e.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * Resets the Send Graveyard Shift Action's ready flag and command expression in
+	 * memory and on disk after the LoRa command has been successfully sent.
+	 * Prevents the actuator from re-firing on subsequent pulses.
+	 */
+	public void resetGraveyardShiftCommandReady() {
+		try {
+			JSONObject actuatorsDC = DenomeUtils.getDeneChainByName(
+				currentlyCreatingPulseJSONObject,
+				TeleonomeConstants.NUCLEI_INTERNAL,
+				TeleonomeConstants.DENECHAIN_ACTUATORS);
+			if (actuatorsDC == null) return;
+			JSONArray denes = actuatorsDC.getJSONArray("Denes");
+			for (int i = 0; i < denes.length(); i++) {
+				JSONObject dene = denes.getJSONObject(i);
+				if (!TeleonomeConstants.DENE_SEND_GRAVEYARD_SHIFT_ACTION.equals(dene.optString("Name"))) continue;
+				JSONArray words = dene.getJSONArray("DeneWords");
+				for (int j = 0; j < words.length(); j++) {
+					JSONObject w = words.getJSONObject(j);
+					String name = w.optString("Name");
+					if (TeleonomeConstants.DENEWORD_GRAVEYARD_SHIFT_COMMAND_READY.equals(name)) {
+						w.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, false);
+					} else if (TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_TRUE_EXPRESSION.equals(name)) {
+						w.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE,
+							TeleonomeConstants.COMMANDS_DO_NOTHING);
+					}
+				}
+			}
+			writeDenomeToDisk(true);
+			logger.info("resetGraveyardShiftCommandReady: flags cleared and denome saved");
+		} catch (Exception e) {
+			logger.warn("resetGraveyardShiftCommandReady error: " + e.getMessage());
+		}
+	}
+
+	// Tracks the Seconds Time of the last cerebellumStatus that activated each
+	// Annabelle action pointer, so repeated updateCerebellumPurposeDene() calls
+	// with the same status (same sunset's data persisting across pulses in
+	// Hypothalamus) don't re-activate the action on every pulse.
+	private final Map<String, Long> lastCerebellumActionActivationEpoch = new HashMap<>();
+
 	public void updateCerebellumPurposeDene(JSONObject status) {
 		try {
 			JSONObject cerebellumDeneChain = DenomeUtils.getDeneChainByName(
@@ -4750,7 +4903,62 @@ public class DenomeManager {
 					TeleonomeConstants.DENECHAIN_PURPOSE_CEREBELLUM);
 			if (cerebellumDeneChain != null && status.has("Denes")) {
 				cerebellumDeneChain.put("Denes", status.getJSONArray("Denes"));
-				logger.debug("updateCerebellumPurposeDene: updated " + status.getJSONArray("Denes").length() + " device dene(s)");
+				logger.debug("updateCerebellumPurposeDene: updated "
+						+ status.getJSONArray("Denes").length() + " device dene(s)");
+			}
+
+			// Generic Annabelle action activation: for each device Dene that carries
+			// an "Annabelle Action Pointer" and an "Annabelle Command", activate the
+			// named actuator action and set its command expression. Works for any task
+			// — no code change needed here when a new task is added.
+			long statusEpoch = status.optLong("Seconds Time", 0);
+			if (!status.has("Denes")) return;
+			JSONArray denes = status.getJSONArray("Denes");
+			for (int i = 0; i < denes.length(); i++) {
+				JSONObject deviceDene = denes.getJSONObject(i);
+				String actionPointer = null;
+				String annabelleCommand = null;
+				JSONArray words = deviceDene.optJSONArray("DeneWords");
+				if (words == null) continue;
+				for (int j = 0; j < words.length(); j++) {
+					JSONObject w = words.getJSONObject(j);
+					String wName = w.optString("Name");
+					if (TeleonomeConstants.DENEWORD_CEREBELLUM_ANNABELLE_ACTION_POINTER.equals(wName)) {
+						actionPointer = w.optString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					} else if (TeleonomeConstants.DENEWORD_ANNABELLE_COMMAND.equals(wName)) {
+						annabelleCommand = w.optString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					}
+				}
+				if (actionPointer == null || annabelleCommand == null) continue;
+
+				Long lastActivation = lastCerebellumActionActivationEpoch.get(actionPointer);
+				if (lastActivation != null && lastActivation >= statusEpoch) {
+					logger.debug("updateCerebellumPurposeDene: action already activated for "
+							+ actionPointer + " at epoch " + lastActivation + ", skipping");
+					continue;
+				}
+
+				// Resolve the pointer and set Active=true + command
+				try {
+					JSONObject actionDene = getDenomicElementByIdentity(new Identity(actionPointer));
+					JSONArray actionWords = actionDene.getJSONArray("DeneWords");
+					for (int j = 0; j < actionWords.length(); j++) {
+						JSONObject w = actionWords.getJSONObject(j);
+						String wName = w.optString("Name");
+						if (TeleonomeConstants.DENEWORD_ACTIVE.equals(wName)) {
+							w.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, true);
+						} else if (TeleonomeConstants.DENEWORD_ACTUATOR_COMMAND_CODE_TRUE_EXPRESSION.equals(wName)) {
+							w.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, annabelleCommand);
+						}
+					}
+					writeDenomeToDisk(true);
+					lastCerebellumActionActivationEpoch.put(actionPointer, statusEpoch);
+					logger.info("updateCerebellumPurposeDene: activated " + actionPointer
+							+ " with command: " + annabelleCommand);
+				} catch (Exception e) {
+					logger.warn("updateCerebellumPurposeDene: failed to activate "
+							+ actionPointer + ": " + e.getMessage());
+				}
 			}
 		} catch (Exception e) {
 			logger.warn("updateCerebellumPurposeDene error: " + e.getMessage());

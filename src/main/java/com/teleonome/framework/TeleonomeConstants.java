@@ -265,6 +265,13 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_CEREBELLUM_EXECUTION_FREQUENCY_HOURS_IN_A_DAY = "Hours In A Day";
 	public static final String DENEWORD_CEREBELLUM_PATHOLOGY_MNEMOSYNE_LOCATION = "Cerebellum Pathology Mnemosyne Location";
 
+	// ── Cerebellum → Annabelle action activation (generic, works for all tasks) ──
+	public static final String COMMAND_SEND_GRAVEYARD_SHIFT                  = "SendGraveyardShift";
+	public static final String DENE_SEND_GRAVEYARD_SHIFT_ACTION              = "Send Graveyard Shift Action";
+	public static final String DENEWORD_CEREBELLUM_ANNABELLE_ACTION_POINTER  = "Annabelle Action Pointer";
+	public static final String DENEWORD_ANNABELLE_COMMAND                    = "Annabelle Command";
+	public static final String DENEWORD_SELF_DEACTIVATE                      = "Self Deactivate";
+
 	public static final String DENE_HIPPOCAMPUS_SACRIFIED_POINTS="Sacrificed Points";
 	public static final String DENE_HIPPOCAMPUS_TOTAL_POINTS="Total Points";
 	public static final String DENE_HIPPOCAMPUS_PRE_LOAD_DURATION="Pre Load Duration";
