@@ -387,6 +387,7 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		purposeDene.put("DeneWords", purposeDeneWords);
 	
 
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Time", ""+secondsTime, null,TeleonomeConstants.DATATYPE_LONG, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Fish Tank Outflow Flow Rate", ""+fishtankoutflowflowRate, "l/m",TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Pump Flow Rate", ""+pumpflowRate, "l/m",TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Alert Status", ""+alertstatus, "",TeleonomeConstants.DATATYPE_BOOLEAN, true));

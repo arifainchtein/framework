@@ -74,25 +74,26 @@ public class AnnabelleWriter  extends BufferedWriter{
 			JSONArray telepathons = aDenomeManager.getAllTelepathons();
 			JSONObject telepathon;
 			String telepathonName;
+			ArrayList<String> staleTelepathons = new ArrayList<String>();
 			for(int i=0;i<telepathons.length();i++) {
 				telepathon=telepathons.getJSONObject(i);
-				
+
 				telepathonName = telepathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
 				logger.debug("line 76 telepathonName= " + telepathonName);
 				Identity identity = new Identity(aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName, TeleonomeConstants.TELEPATHON_DENE_PURPOSE, TeleonomeConstants.TELEPHATON_DENEWORD_SECONDS_TIME );
 				logger.debug("line 80 identity= " + identity.toString());
 				try {
-					int secondsTime = (int)aDenomeManager.getDeneWordAttributeByIdentity(identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					long secondsTime = ((Number)aDenomeManager.getDeneWordAttributeByIdentity(identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).longValue();
 					logger.debug("line 82 secondsTime= " + secondsTime);
 					if(telepathonTime.equals(TeleonomeConstants.MNEMOSYNE_HOURLY_MUTATION)) {
-						if(System.currentTimeMillis()/1000> (secondsTime+3600) ) {
-							logger.debug("Removing Hourly Stale  " + telepathonName);
-							aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+						if(System.currentTimeMillis()/1000 > (secondsTime+3600) ) {
+							logger.debug("Marking Hourly Stale  " + telepathonName);
+							staleTelepathons.add(telepathonName);
 						}
 					}else if(telepathonTime.equals(TeleonomeConstants.MNEMOSYNE_DAILY_MUTATION)) {
-						if(System.currentTimeMillis()/1000> (secondsTime+24*3600) ) {
-							logger.debug("Removing Daily Stale  " + telepathonName);
-							aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+						if(System.currentTimeMillis()/1000 > (secondsTime+24*3600) ) {
+							logger.debug("Marking Daily Stale  " + telepathonName);
+							staleTelepathons.add(telepathonName);
 						}
 					}
 				} catch (InvalidDenomeException e) {
@@ -102,7 +103,11 @@ public class AnnabelleWriter  extends BufferedWriter{
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
 				}
-				
+
+			}
+			for(String staleTelepathonName : staleTelepathons) {
+				logger.debug("Removing Stale  " + staleTelepathonName);
+				aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, staleTelepathonName);
 			}
 			
 		}else {
