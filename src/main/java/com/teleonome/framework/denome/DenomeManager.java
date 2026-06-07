@@ -4832,6 +4832,108 @@ public class DenomeManager {
 							+ actionPointer + ": " + e.getMessage());
 				}
 			}
+
+			// Persist each cerebellum status snapshot to the mnemosyne chains declared
+			// on the task denes (DeneWord Type = "Mnemosyne Target"). Multiple targets per
+			// task are supported. Unique targets across all active tasks are deduplicated
+			// before writing so each chain receives one entry per broadcast.
+			try {
+				JSONObject internalCerebellumChain = DenomeUtils.getDeneChainByName(
+						currentlyCreatingPulseJSONObject,
+						TeleonomeConstants.NUCLEI_INTERNAL,
+						TeleonomeConstants.DENECHAIN_INTERNAL_CEREBELLUM);
+				if (internalCerebellumChain != null && status.has("Denes")) {
+					JSONArray taskDenes = internalCerebellumChain.optJSONArray("Denes");
+					ArrayList<String> mnemosyneTargets = new ArrayList<>();
+					if (taskDenes != null) {
+						for (int i = 0; i < taskDenes.length(); i++) {
+							JSONObject taskDene = taskDenes.getJSONObject(i);
+							if (!TeleonomeConstants.DENE_TYPE_CEREBELLUM_TASK.equals(
+									taskDene.optString("DeneType"))) continue;
+							JSONArray taskWords = taskDene.optJSONArray("DeneWords");
+							if (taskWords == null) continue;
+							boolean taskActive = false;
+							ArrayList<String> taskTargets = new ArrayList<>();
+							for (int j = 0; j < taskWords.length(); j++) {
+								JSONObject w = taskWords.getJSONObject(j);
+								if (TeleonomeConstants.DENEWORD_CEREBELLUM_ACTIVE.equals(
+										w.optString("Name"))) {
+									taskActive = w.optBoolean(
+											TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, false);
+								}
+								if (TeleonomeConstants.MNEMOSYNE_DENE_WORD_TYPE_TARGET.equals(
+										w.optString(TeleonomeConstants.DENEWORD_DENEWORD_TYPE_ATTRIBUTE))) {
+									taskTargets.add(w.optString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+								}
+							}
+							if (taskActive) {
+								for (String t : taskTargets) {
+									if (!mnemosyneTargets.contains(t)) mnemosyneTargets.add(t);
+								}
+							}
+						}
+					}
+					if (!mnemosyneTargets.isEmpty()) {
+						long currentTimeMillis = System.currentTimeMillis();
+						Instant instant = Instant.ofEpochMilli(currentTimeMillis);
+						Identity tzIdentity = new Identity(teleonomeName,
+								TeleonomeConstants.NUCLEI_INTERNAL,
+								TeleonomeConstants.DENECHAIN_DESCRIPTIVE,
+								TeleonomeConstants.DENE_VITAL, "Timezone");
+						String tzId = null;
+						try {
+							tzId = (String) getDeneWordAttributeByIdentity(tzIdentity,
+									TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+						} catch (Exception ignored) {}
+						TimeZone tz = (tzId != null && !tzId.isEmpty())
+								? TimeZone.getTimeZone(tzId) : TimeZone.getDefault();
+						LocalDateTime ldt = LocalDateTime.ofInstant(instant, tz.toZoneId());
+						String formattedTimestamp = ldt.format(DateTimeFormatter.ofPattern(
+								TeleonomeConstants.MNEMOSYNE_TIMESTAMP_FORMAT));
+
+						JSONArray statusDenes = status.getJSONArray("Denes");
+						for (String targetPointer : mnemosyneTargets) {
+							try {
+								JSONObject targetChain = getDenomicElementByIdentity(
+										new Identity(targetPointer));
+								if (targetChain == null) {
+									logger.warn("updateCerebellumPurposeDene: mnemosyne target not found: "
+											+ targetPointer);
+									continue;
+								}
+								JSONArray targetDenes = targetChain.optJSONArray("Denes");
+								if (targetDenes == null) {
+									targetDenes = new JSONArray();
+									targetChain.put("Denes", targetDenes);
+								}
+								for (int i = 0; i < statusDenes.length(); i++) {
+									JSONObject deviceDene = statusDenes.getJSONObject(i);
+									String deviceName = deviceDene.optString("Name");
+									int position = getNextPostionForDeneInMnemosyneChain(
+											targetChain, deviceName);
+									JSONObject mnemosyneEntry = new JSONObject();
+									mnemosyneEntry.put("Name", deviceName);
+									mnemosyneEntry.put("Position", position);
+									mnemosyneEntry.put("Timestamp", formattedTimestamp);
+									mnemosyneEntry.put("Timestamp Milliseconds", currentTimeMillis);
+									JSONArray deviceWords = deviceDene.optJSONArray("DeneWords");
+									mnemosyneEntry.put("DeneWords",
+											deviceWords != null ? new JSONArray(deviceWords.toString())
+													: new JSONArray());
+									targetDenes.put(mnemosyneEntry);
+									logger.info("updateCerebellumPurposeDene: saved " + deviceName
+											+ " to " + targetPointer + " at position " + position);
+								}
+							} catch (Exception e) {
+								logger.warn("updateCerebellumPurposeDene: mnemosyne write failed for "
+										+ targetPointer + ": " + e.getMessage());
+							}
+						}
+					}
+				}
+			} catch (Exception e) {
+				logger.warn("updateCerebellumPurposeDene mnemosyne save error: " + e.getMessage());
+			}
 		} catch (Exception e) {
 			logger.warn("updateCerebellumPurposeDene error: " + e.getMessage());
 		}
