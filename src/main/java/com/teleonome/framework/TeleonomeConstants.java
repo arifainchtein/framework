@@ -19,6 +19,7 @@ public class TeleonomeConstants {
 	public static final int ANNABELL_FUN_2_TANK =5;
 	public static final int ANNABELL_DAFFODIL_SCEPTIC_TANK =6;
 	public static final int ANNABELL_DAFFODIL_WATER_TROUGH= 7;
+	public static final String TELEPATHON_DEVICE_TYPE_DAFFODIL = "Daffodil";
 	public static final int ANNABELL_TEMP_SOILMOISTURE= 8;
 	public static final int ANNABELL_LIGHT_DETECTOR= 9;
 	public static final int  VOLTAGE_MONITOR=10;

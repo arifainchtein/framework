@@ -890,7 +890,7 @@ public abstract class Hypothalamus {
 							aDBManager.createDailyPartitions(cal);
 						}else if(actuatorCommand.equals(TeleonomeConstants.COMMANDS_CAPTURE_SOLAR_VOLTAGE_EVENTS)){
 							actuatorCommand=TeleonomeConstants.COMMANDS_DO_NOTHING;
-							logger.info("Capturing solar voltage events — scanning for daffodilTF telepathons");
+							logger.info("Capturing solar voltage events — scanning for " + TeleonomeConstants.TELEPATHON_DEVICE_TYPE_DAFFODIL + " telepathons");
 							try {
 								JSONArray telepathons = aDenomeManager.getAllTelepathons();
 								String teleonomeName = aDenomeManager.getDenomeName();
@@ -924,9 +924,9 @@ public abstract class Hypothalamus {
 											}
 										}
 									}
-									if (!"daffodilTF".equals(deviceTypeId)) continue;
+									if (!TeleonomeConstants.TELEPATHON_DEVICE_TYPE_DAFFODIL.equals(deviceTypeId)) continue;
 
-									logger.info("Capturing solar voltage for daffodilTF device: " + deviceName);
+									logger.info("Capturing solar voltage for " + TeleonomeConstants.TELEPATHON_DEVICE_TYPE_DAFFODIL + " device: " + deviceName);
 									java.util.Map<String,Double> voltages = aDBManager.captureSolarVoltageEvents(deviceName);
 
 									for (java.util.Map.Entry<String,Double> entry2 : voltages.entrySet()) {
