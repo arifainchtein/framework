@@ -34,6 +34,10 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		String deviceTypeId=tokens[1];
 		String deviceName=tokens[2];
 		logger.debug("line 18, DigitalStablesData deviceName=" + deviceName);
+		if (!isValidName(deviceName)) {
+			logger.warn("ChinampaDataDeserializer: rejecting packet — garbled device name: '" + deviceName + "'");
+			return new JSONObject();
+		}
 		String deviceshortname=tokens[3];
 		String serialnumber=tokens[4];
 		String groupidentifier=tokens[5];
@@ -189,8 +193,11 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 			 secondsTime = Long.parseLong(tokens[27].replaceAll("\u0000", ""));
 			 logger.debug("line 191, secondsTime=" + secondsTime);
 			}catch(NumberFormatException e) {
-				
 			}
+		if (secondsTime == 0) {
+			logger.warn("ChinampaDataDeserializer: rejecting packet \u2014 unparseable seconds time token: '" + tokens[27] + "' for device: " + deviceName);
+			return new JSONObject();
+		}
 		long lastPulseTime=secondsTime*1000;
 		boolean timeCorrected=false;
 		long sourceoriginaltime=secondsTime;

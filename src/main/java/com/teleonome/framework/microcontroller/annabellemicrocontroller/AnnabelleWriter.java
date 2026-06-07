@@ -83,24 +83,28 @@ public class AnnabelleWriter  extends BufferedWriter{
 				Identity identity = new Identity(aDenomeManager.getDenomeName(),TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName, TeleonomeConstants.TELEPATHON_DENE_PURPOSE, TeleonomeConstants.TELEPHATON_DENEWORD_SECONDS_TIME );
 				logger.debug("line 80 identity= " + identity.toString());
 				try {
-					long secondsTime = ((Number)aDenomeManager.getDeneWordAttributeByIdentity(identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).longValue();
-					logger.debug("line 82 secondsTime= " + secondsTime);
-					if(telepathonTime.equals(TeleonomeConstants.MNEMOSYNE_HOURLY_MUTATION)) {
-						if(System.currentTimeMillis()/1000 > (secondsTime+3600) ) {
-							logger.debug("Marking Hourly Stale  " + telepathonName);
-							staleTelepathons.add(telepathonName);
-						}
-					}else if(telepathonTime.equals(TeleonomeConstants.MNEMOSYNE_DAILY_MUTATION)) {
-						if(System.currentTimeMillis()/1000 > (secondsTime+24*3600) ) {
-							logger.debug("Marking Daily Stale  " + telepathonName);
-							staleTelepathons.add(telepathonName);
+					Number secondsTimeNumber = (Number)aDenomeManager.getDeneWordAttributeByIdentity(identity, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+					if (secondsTimeNumber == null) {
+						logger.warn("Seconds Time missing or unresolvable for telepathon '" + telepathonName + "' — marking stale");
+						staleTelepathons.add(telepathonName);
+					} else {
+						long secondsTime = secondsTimeNumber.longValue();
+						logger.debug("line 82 secondsTime= " + secondsTime);
+						if(telepathonTime.equals(TeleonomeConstants.MNEMOSYNE_HOURLY_MUTATION)) {
+							if(System.currentTimeMillis()/1000 > (secondsTime+3600) ) {
+								logger.debug("Marking Hourly Stale  " + telepathonName);
+								staleTelepathons.add(telepathonName);
+							}
+						}else if(telepathonTime.equals(TeleonomeConstants.MNEMOSYNE_DAILY_MUTATION)) {
+							if(System.currentTimeMillis()/1000 > (secondsTime+24*3600) ) {
+								logger.debug("Marking Daily Stale  " + telepathonName);
+								staleTelepathons.add(telepathonName);
+							}
 						}
 					}
 				} catch (InvalidDenomeException e) {
-					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
 				}catch (Exception e) {
-					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
 				}
 
