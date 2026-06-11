@@ -4767,6 +4767,10 @@ public class DenomeManager {
 	// Hypothalamus) don't re-activate the action on every pulse.
 	private final Map<String, Long> lastCerebellumActionActivationEpoch = new HashMap<>();
 
+	// Tracks the Seconds Time of the last cerebellumStatus written to Mnemosyne,
+	// so the same broadcast is not appended again on every subsequent pulse.
+	private long lastCerebellumMnemosyneWriteEpoch = 0;
+
 	public void updateCerebellumPurposeDene(JSONObject status) {
 		try {
 			JSONObject cerebellumDeneChain = DenomeUtils.getDeneChainByName(
@@ -4873,7 +4877,8 @@ public class DenomeManager {
 							}
 						}
 					}
-					if (!mnemosyneTargets.isEmpty()) {
+					if (!mnemosyneTargets.isEmpty() && statusEpoch > lastCerebellumMnemosyneWriteEpoch) {
+						lastCerebellumMnemosyneWriteEpoch = statusEpoch;
 						long currentTimeMillis = System.currentTimeMillis();
 						Instant instant = Instant.ofEpochMilli(currentTimeMillis);
 						Identity tzIdentity = new Identity(teleonomeName,
