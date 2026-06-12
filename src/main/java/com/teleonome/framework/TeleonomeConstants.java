@@ -264,6 +264,7 @@ public class TeleonomeConstants {
 	public static final String DENEWORD_CEREBELLUM_EXECUTION_FREQUENCY                = "Execution Frequency";
 	public static final String DENEWORD_CEREBELLUM_EXECUTION_FREQUENCY_DAILY          = "Daily";
 	public static final String DENEWORD_CEREBELLUM_EXECUTION_FREQUENCY_HOURS_IN_A_DAY = "Hours In A Day";
+	public static final String DENEWORD_CEREBELLUM_EXECUTION_FREQUENCY_EVERY_PULSE    = "Every Pulse";
 	public static final String DENEWORD_CEREBELLUM_PATHOLOGY_MNEMOSYNE_LOCATION = "Cerebellum Pathology Mnemosyne Location";
 
 	// ── Cerebellum → Annabelle action activation (generic, works for all tasks) ──
