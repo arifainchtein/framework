@@ -4851,4 +4851,49 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		telepathon=null;
 		return toReturn;
 	}
+
+	public boolean storeCommaRecord(long timeSeconds, String devicename, JSONObject data){
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(timeSeconds * 1000);
+
+		String sql = "";
+		Connection connection = null;
+		Statement statement = null;
+		boolean toReturn = false;
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			String tableName = getTableNameByCalendar(TeleonomeConstants.COMMARECORDS_TABLE, cal);
+			if (!tableExists(tableName)) {
+				sql = "CREATE TABLE " + tableName + " as table " + TeleonomeConstants.COMMARECORDS_TABLE + " with no data";
+				statement.executeUpdate(sql);
+				logger.debug("storeCommaRecord: created table " + tableName);
+			}
+			sql = "SELECT COUNT(*) FROM " + tableName + " WHERE timeSeconds=" + timeSeconds + " AND devicename='" + devicename + "'";
+			ResultSet rs = statement.executeQuery(sql);
+			rs.next();
+			if (rs.getInt(1) > 0) {
+				logger.debug("storeCommaRecord: duplicate for devicename=" + devicename + " timeSeconds=" + timeSeconds + ", skipping");
+				rs.close();
+				toReturn = true;
+			} else {
+				rs.close();
+				sql = "insert into " + tableName + " (timeSeconds,devicename,data) values(" + timeSeconds + ",'" + devicename + "','" + data.toString() + "')";
+				statement.executeUpdate(sql);
+				toReturn = true;
+			}
+		} catch (SQLException e) {
+			logger.warn(Utils.getStringException(e));
+		} finally {
+			if (connection != null) {
+				try {
+					statement.close();
+					connectionPool.closeConnection(connection);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return toReturn;
+	}
 }

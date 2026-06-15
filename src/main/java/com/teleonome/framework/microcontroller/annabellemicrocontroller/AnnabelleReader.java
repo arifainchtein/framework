@@ -104,6 +104,10 @@ public class AnnabelleReader extends BufferedReader{
 							deserializer="ChinampaDataDeserializer";
 							processString=true;
 							appendString=false;
+						}else if(tokens.length>8 && deserializer.contains("CommaRecordDeserializer")) {
+							deserializer="CommaRecordDeserializer";
+							processString=true;
+							appendString=false;
 						}
 					}
 					
@@ -115,25 +119,43 @@ public class AnnabelleReader extends BufferedReader{
 							if(annabellDeserializer!=null) {
 								annabellDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
 								String teleonomeName = aDenomeManager.getDenomeName();
-								
-								telepathon = annabellDeserializer.deserialise(teleonomeName,line);
-								long sourceoriginaltime = annabellDeserializer.getSourceoriginaltime();
-								if(telepathon!=null && telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
-									String telepathonName = telepathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
-									aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
-									aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
-									try {
-										aDenomeManager.storeTelepathon(sourceoriginaltime,  telepathonName,  telepathon);
-									} catch (PersistenceException e) {
-										// TODO Auto-generated catch block
-										logger.warn(Utils.getStringException(e));
+
+								if(annabellDeserializer instanceof CommaRecordDeserializer) {
+									JSONObject commaData = annabellDeserializer.deserialise(teleonomeName, line);
+									long sourceoriginaltime = annabellDeserializer.getSourceoriginaltime();
+									if(commaData != null && commaData.has("devicename") && commaData.has("serialnumber")) {
+										String devicename = commaData.getString("devicename");
+										String serialnumber = commaData.getString("serialnumber");
+										if(aDenomeManager.isKnownTelepathonDevice(devicename, serialnumber)) {
+											try {
+												aDenomeManager.storeCommaRecord(sourceoriginaltime, devicename, commaData);
+											} catch (PersistenceException e) {
+												logger.warn(Utils.getStringException(e));
+											}
+										} else {
+											logger.warn("CommaRecord rejected — no known device with name='" + devicename + "' serialnumber='" + serialnumber + "'");
+										}
+									} else {
+										logger.debug("CommaRecordDeserializer returned empty result for: " + line);
 									}
-									
-									hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS, telepathon.toString());
-								}else {
-									logger.debug("Error deserializing " + line);
+								} else {
+									telepathon = annabellDeserializer.deserialise(teleonomeName,line);
+									long sourceoriginaltime = annabellDeserializer.getSourceoriginaltime();
+									if(telepathon!=null && telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
+										String telepathonName = telepathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
+										aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+										aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
+										try {
+											aDenomeManager.storeTelepathon(sourceoriginaltime,  telepathonName,  telepathon);
+										} catch (PersistenceException e) {
+											logger.warn(Utils.getStringException(e));
+										}
+										hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS, telepathon.toString());
+									}else {
+										logger.debug("Error deserializing " + line);
+									}
 								}
-								
+
 							}else {
 								logger.debug("className=" + className + " does not existis");
 							}

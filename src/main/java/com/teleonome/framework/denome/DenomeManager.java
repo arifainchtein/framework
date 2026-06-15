@@ -8984,4 +8984,22 @@ public class DenomeManager {
 	public void storeTelepathon(long timeSeconds, String telepathonname, JSONObject telepathon) throws PersistenceException{
 		aDBManager.storeTelepathon(timeSeconds,telepathonname, telepathon);
 	}
+
+	public void storeCommaRecord(long timeSeconds, String devicename, JSONObject data) throws PersistenceException{
+		aDBManager.storeCommaRecord(timeSeconds, devicename, data);
+	}
+
+	public boolean isKnownTelepathonDevice(String devicename, String serialnumber) {
+		if (telepathonsNucleus == null || !telepathonsNucleus.has("DeneChains")) return false;
+		JSONArray chains = telepathonsNucleus.getJSONArray("DeneChains");
+		for (int i = 0; i < chains.length(); i++) {
+			JSONObject chain = chains.getJSONObject(i);
+			String name = chain.optString("Name", "");
+			String sn = chain.optString("Serial Number", "");
+			if (name.equals(devicename) && sn.equals(serialnumber)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

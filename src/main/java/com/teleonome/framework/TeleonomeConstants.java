@@ -891,6 +891,7 @@ public class TeleonomeConstants {
 	public static final String TIME_UNIT_YEAR="Year";
 	public static final String PULSE_TABLE="pulse";
 	public static final String TELEPATHON_TABLE="telepathon";
+	public static final String COMMARECORDS_TABLE="commarecords";
 	
 	public static final String IP_ADDRESS="IP Address";
 	public static final String DEVICE_NAME="Device Name";
