@@ -4783,6 +4783,41 @@ public class DenomeManager {
 						+ status.getJSONArray("Denes").length() + " device dene(s)");
 			}
 
+			// Feed numeric Cerebellum task outputs (e.g. "Battery SOC Live %") into the
+			// same Mnemosyne history used by telepathon sensor DeneWords. These values
+			// never pass through a deserializer's unwrapDouble() calls, so without this
+			// the webapp's per-DeneWord graph buttons (which read identity
+			// @teleonome:NUCLEI_TELEPATHONS:device:Purpose:word) have no history to show.
+			if (status.has("Denes")) {
+				long nowMillis = System.currentTimeMillis();
+				JSONArray liveDenes = status.getJSONArray("Denes");
+				for (int i = 0; i < liveDenes.length(); i++) {
+					JSONObject deviceDene = liveDenes.getJSONObject(i);
+					String deviceName = deviceDene.optString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+					if (deviceName.isEmpty()) continue;
+					JSONArray deviceWords = deviceDene.optJSONArray("DeneWords");
+					if (deviceWords == null) continue;
+					for (int j = 0; j < deviceWords.length(); j++) {
+						JSONObject w = deviceWords.getJSONObject(j);
+						String wName = w.optString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
+						if (wName.isEmpty()
+								|| wName.endsWith("Execution Time") || wName.endsWith("Duration")
+								|| TeleonomeConstants.DENEWORD_CEREBELLUM_ANNABELLE_ACTION_POINTER.equals(wName)
+								|| TeleonomeConstants.DENEWORD_ANNABELLE_COMMAND.equals(wName)) continue;
+						try {
+							double value = w.getDouble(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+							Identity wordIdentity = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_TELEPATHONS,
+									deviceName, TeleonomeConstants.TELEPATHON_DENE_PURPOSE, wName);
+							aMnemosyneManager.unwrapDouble(teleonomeName, nowMillis, wordIdentity.toString(),
+									TeleonomeConstants.DATATYPE_DOUBLE, value,
+									TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, null);
+						} catch (Exception ignored) {
+							// non-numeric DeneWord (e.g. a string pointer) — nothing to graph
+						}
+					}
+				}
+			}
+
 			// Generic Annabelle action activation: for each device Dene that carries
 			// an "Annabelle Action Pointer" and an "Annabelle Command", activate the
 			// named actuator action and set its command expression. Works for any task
