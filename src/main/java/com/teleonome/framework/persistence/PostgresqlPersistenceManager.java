@@ -4796,7 +4796,92 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 
 	}
-	
+
+	/**
+	 * Returns every distinct telepathonname that reported data into the telepathon
+	 * managed tables within the given window, regardless of whether that telepathon
+	 * is currently present in any live Denome.
+	 */
+	public ArrayList<String> getDistinctTelepathonNames(long startTimeSeconds, long endTimeSeconds) {
+		java.util.LinkedHashSet<String> names = new java.util.LinkedHashSet<>();
+		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.TELEPATHON_TABLE, startTimeSeconds*1000, endTimeSeconds*1000);
+		Connection connection=null;
+		Statement statement=null;
+		ResultSet rs=null;
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			for (int i=0; i<allTables.size(); i++) {
+				String sql = "SELECT DISTINCT telepathonname FROM " + allTables.get(i);
+				logger.debug("getDistinctTelepathonNames, sql=" + sql);
+				rs = statement.executeQuery(sql);
+				while (rs.next()) {
+					names.add(rs.getString(1));
+				}
+				rs.close();
+			}
+		} catch (SQLException e) {
+			logger.warn(Utils.getStringException(e));
+		} finally {
+			try {
+				if (rs != null) rs.close();
+				if (statement != null) statement.close();
+			} catch (SQLException e) {
+				logger.debug(Utils.getStringException(e));
+			}
+			if (connection != null) closeConnection(connection);
+		}
+		return new ArrayList<>(names);
+	}
+
+	/**
+	 * Returns every stored snapshot (timeSeconds + full DeneChain "data" JSON) for a single
+	 * telepathon within the given window, across whichever daily tables fall in range. Unlike
+	 * getTelepathonDeneWordStart, this does not need to know the Dene/DeneWord names ahead of
+	 * time -- the full DeneChain JSON carries its own Dene/DeneWord/Value Type structure.
+	 */
+	public JSONArray getTelepathonDataStart(String telepathonName, long startTimeSeconds, long endTimeSeconds) {
+		JSONArray toReturn = new JSONArray();
+		ArrayList<String> allTables = this.getAllManagedTablesForAPeriod(TeleonomeConstants.TELEPATHON_TABLE, startTimeSeconds*1000, endTimeSeconds*1000);
+		Connection connection=null;
+		PreparedStatement preparedStatement=null;
+		ResultSet rs=null;
+		try {
+			connection = connectionPool.getConnection();
+			for (int i=0; i<allTables.size(); i++) {
+				String command = "SELECT timeSeconds, data FROM " + allTables.get(i) +
+						" WHERE telepathonname=? and timeseconds>=? and timeseconds<=? order by timeseconds asc";
+				logger.debug("getTelepathonDataStart, sql=" + command);
+				preparedStatement = connection.prepareStatement(command);
+				preparedStatement.setString(1, telepathonName);
+				preparedStatement.setLong(2, startTimeSeconds);
+				preparedStatement.setLong(3, endTimeSeconds);
+				rs = preparedStatement.executeQuery();
+				while (rs.next()) {
+					JSONObject row = new JSONObject();
+					row.put("timeSeconds", rs.getLong(1));
+					row.put("data", new JSONObject(rs.getString(2)));
+					toReturn.put(row);
+				}
+				rs.close();
+				preparedStatement.close();
+			}
+		} catch (SQLException e) {
+			logger.warn(Utils.getStringException(e));
+		} catch (JSONException e) {
+			logger.warn(Utils.getStringException(e));
+		} finally {
+			try {
+				if (rs != null) rs.close();
+				if (preparedStatement != null) preparedStatement.close();
+			} catch (SQLException e) {
+				logger.debug(Utils.getStringException(e));
+			}
+			if (connection != null) closeConnection(connection);
+		}
+		return toReturn;
+	}
+
 	public boolean storeTelepathon(long timeSeconds, String telepathonname, JSONObject telepathon){
 
 		Calendar cal = Calendar.getInstance();
