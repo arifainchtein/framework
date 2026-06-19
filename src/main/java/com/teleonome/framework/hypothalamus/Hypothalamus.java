@@ -33,6 +33,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -568,7 +569,21 @@ public abstract class Hypothalamus {
 					//mqttToken.waitForCompletion(10000);
 					logger.warn("Connected to Heart: "+mqttBrokerAddress);
 					
-					anMqttClient.setCallback(new MqttCallback() {
+					anMqttClient.setCallback(new MqttCallbackExtended() {
+			            public void connectComplete(boolean reconnect, String serverURI) {
+			                if (reconnect) {
+			                    logger.warn("Reconnected to Heart: " + serverURI + ", re-subscribing to Hippocampus_Status and Cerebellum_Status");
+			                } else {
+			                    logger.warn("Connected to Heart: " + serverURI);
+			                }
+			                try {
+			                    anMqttClient.subscribe("Hippocampus_Status", 0);
+			                    anMqttClient.subscribe(TeleonomeConstants.HEART_TOPIC_CEREBELLUM_STATUS, 0);
+			                } catch (MqttException e) {
+			                    logger.warn("Failed to (re)subscribe to Heart topics: " + Utils.getStringException(e));
+			                }
+			            }
+
 			            public void connectionLost(Throwable cause) {
 			                logger.warn("Connection to Heart lost: " + cause.getMessage());
 			            }
@@ -584,11 +599,10 @@ public abstract class Hypothalamus {
 
 			            public void deliveryComplete(IMqttDeliveryToken token) {}
 			        });
-					
+
 					  logger.warn("Connecting to Heart: "+mqttBrokerAddress);
 						anMqttClient.connect(connOpts);
-						anMqttClient.subscribe("Hippocampus_Status", 0);
-				anMqttClient.subscribe(TeleonomeConstants.HEART_TOPIC_CEREBELLUM_STATUS, 0);
+						// connectComplete callback handles initial subscriptions and all re-subscriptions after reconnect
 				        logger.warn("Connected and Subscribed to Hippocampus_Status and Cerebellum_Status");
 				        
 					 try {
