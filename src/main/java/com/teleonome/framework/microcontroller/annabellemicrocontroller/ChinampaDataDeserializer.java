@@ -200,7 +200,7 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		}
 		long lastPulseTime=secondsTime*1000;
 		boolean timeCorrected=false;
-		long sourceoriginaltime=secondsTime;
+		sourceoriginaltime=secondsTime;
 		long now = System.currentTimeMillis();
 		if(lastPulseTime< (now - (3*60*1000))  || lastPulseTime> (now - (3*60*1000))) {
 			secondsTime=now/1000;
