@@ -26,23 +26,36 @@ public class ZhinuPublisher implements MqttCallback{
 	public ZhinuPublisher() {
 		logger = Logger.getLogger(getClass());
 		connOpt = new MqttConnectOptions();
-		
+
 		connOpt.setCleanSession(false);
 		connOpt.setKeepAliveInterval(30);
+		connOpt.setConnectionTimeout(10);
 		//connOpt.setUserName(userName);
 		//connOpt.setPassword(password.toCharArray());
-		
-		// Connect to Broker
+
 		try {
 			myClient = new MqttClient(BROKER_URL, clientID);
 			myClient.setCallback(this);
-			myClient.connect(connOpt);
 		} catch (MqttException e) {
 			logger.warn(Utils.getStringException(e));
-			//System.exit(-1);
+			return;
 		}
-		
-		logger.debug("Connected to " + BROKER_URL);
+
+		//
+		// connect in the background: chilhuacle.info is an external broker over
+		// the internet, and a stalled/unreachable connect() here must never block
+		// the caller (Heart startup runs synchronously through this constructor)
+		//
+		Thread connectThread = new Thread(() -> {
+			try {
+				myClient.connect(connOpt);
+				logger.debug("Connected to " + BROKER_URL);
+			} catch (MqttException e) {
+				logger.warn(Utils.getStringException(e));
+			}
+		}, "ZhinuPublisher-connect");
+		connectThread.setDaemon(true);
+		connectThread.start();
 	}
 	/**
 	 * 
@@ -74,6 +87,10 @@ public class ZhinuPublisher implements MqttCallback{
 	
 	
 	public void publish(String topicName,String messageText) {
+		if(myClient==null) {
+			logger.warn("ZhinuPublisher has no client, skipping publish of topic " + topicName);
+			return;
+		}
 		if(!myClient.isConnected()) {
 			try {
 				myClient.connect(connOpt);
