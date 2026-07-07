@@ -108,6 +108,10 @@ public class AnnabelleReader extends BufferedReader{
 							deserializer="CommaRecordDeserializer";
 							processString=true;
 							appendString=false;
+						}else if(tokens.length>24 && deserializer.contains("LangleyDataDeserializer")) {
+							deserializer="LangleyDataDeserializer";
+							processString=true;
+							appendString=false;
 						}
 					}
 					
