@@ -1,5 +1,8 @@
 package com.teleonome.framework.zhinupublisher;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -23,6 +26,18 @@ public class ZhinuPublisher implements MqttCallback{
 	Logger logger;
 	static final Boolean subscriber = false;
 	static final Boolean publisher = true;
+	//
+	// publish() used to connect + publish + disconnect synchronously on the
+	// caller's thread (often Moquette's own message-processing thread), so a
+	// slow/unreachable chilhuacle.info stalled the whole broker. Run it here
+	// instead, on a background thread, same fix pattern as the constructor's
+	// connect.
+	//
+	private final ExecutorService publishExecutor = Executors.newSingleThreadExecutor(r -> {
+		Thread t = new Thread(r, "ZhinuPublisher-publish");
+		t.setDaemon(true);
+		return t;
+	});
 	public ZhinuPublisher() {
 		logger = Logger.getLogger(getClass());
 		connOpt = new MqttConnectOptions();
@@ -91,12 +106,16 @@ public class ZhinuPublisher implements MqttCallback{
 			logger.warn("ZhinuPublisher has no client, skipping publish of topic " + topicName);
 			return;
 		}
+		publishExecutor.submit(() -> doPublish(topicName, messageText));
+	}
+
+	private void doPublish(String topicName, String messageText) {
 		if(!myClient.isConnected()) {
 			try {
 				myClient.connect(connOpt);
 			} catch (MqttException e) {
 				logger.warn(Utils.getStringException(e));
-				//System.exit(-1);
+				return;
 			}
 		}
 
@@ -116,7 +135,7 @@ public class ZhinuPublisher implements MqttCallback{
 
 		// publish messages if publisher
 		if (publisher) {
-			
+
 		   		int pubQoS = 0;
 				MqttMessage message = new MqttMessage(messageText.getBytes());
 		    	message.setQos(pubQoS);
@@ -130,22 +149,14 @@ public class ZhinuPublisher implements MqttCallback{
 					token = topic.publish(message);
 			    	// Wait until the message has been delivered to the broker
 					token.waitForCompletion();
-					Thread.sleep(100);
 				} catch (Exception e) {
 					logger.warn(Utils.getStringException(e));
 				}
-			}			
-		
-		// disconnect
-		try {
-			// wait to ensure subscribed messages are delivered
-			if (subscriber) {
-				Thread.sleep(5000);
 			}
-			myClient.disconnect();
-		} catch (Exception e) {
-			logger.warn(Utils.getStringException(e));
-		}
+		//
+		// connection is kept open (not disconnected) so subsequent publishes
+		// don't pay the connect cost again; connectionLost()/isConnected()
+		// above handle reconnecting if chilhuacle.info drops the link.
 	}
-	
+
 }
