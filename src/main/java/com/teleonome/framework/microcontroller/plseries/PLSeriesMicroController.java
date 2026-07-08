@@ -37,7 +37,7 @@ public class PLSeriesMicroController extends MicroController {
 			String  dataString="dataString";
 			PLSeriesReader aPLSeriesReader = null;//
 			Logger logger;
-			private static final String PORT_NAMES[] = {  "/dev/ttyAMA0","/dev/ttyUSB0"};
+			private static final String PORT_NAMES[] = {  "/dev/ttyAMA0","/dev/ttyUSB0","ttyAMA0","ttyUSB0"};
 			SerialPort serialPort;
 			
 			private static final int TIME_OUT = 20000;
