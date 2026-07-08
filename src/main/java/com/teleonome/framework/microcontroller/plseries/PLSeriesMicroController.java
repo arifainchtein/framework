@@ -141,7 +141,7 @@ public class PLSeriesMicroController extends MicroController {
 					// Configure and open the serial port
 								serialPort = portId;
 								serialPort.setComPortParameters(DATA_RATE, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
-								serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 30000, 0);
+								serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING | SerialPort.TIMEOUT_WRITE_BLOCKING, 30000, 5000);
 								serialPort.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
 								
 								if (!serialPort.openPort()) {
@@ -176,9 +176,13 @@ public class PLSeriesMicroController extends MicroController {
 									throw new MicrocontrollerCommunicationException(h);
 								}
 
-								// Set DTR
+								// Set DTR and RTS - the PL-series MeterBus adapter is an unpowered
+								// cable that draws its power parasitically off these two control
+								// lines, so both must be held high or the adapter never responds.
+								// RXTX asserted both of these by default on open; jSerialComm does not.
 								serialPort.setDTR();
-								
+								serialPort.setRTS();
+
 								// Add event listener for data available
 								serialPort.addDataListener(new SerialPortDataListener() {
 									@Override
