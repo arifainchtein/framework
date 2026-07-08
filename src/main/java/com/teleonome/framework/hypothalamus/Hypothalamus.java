@@ -654,47 +654,35 @@ public abstract class Hypothalamus {
 		    }
 		}
 	public synchronized void publishToHeart(String topic, String messageText) {
-		
+
 		byte[] messageBytes = messageText.getBytes();
-		
-		int numberOfReconnectAttempt=3;
-		int currentAttempt=0;
+
 		MqttMessage message = new MqttMessage(messageBytes);
 		 message.setQos(TeleonomeConstants.HEART_QUALITY_OF_SERVICE);
 	    message.setRetained(false);
-	    
+
 	    try {
 			logger.debug("about to Update the Heart, topic: " + topic  + " HEART_QUALITY_OF_SERVICE=" + TeleonomeConstants.HEART_QUALITY_OF_SERVICE + " message size=" +messageBytes.length + " anMqttClient.isConnected()=" + anMqttClient.isConnected());
 
-			do {
-				if(!anMqttClient.isConnected()) {
-					
-					logger.warn("Reconnecting to heart, currentAttempt=" + currentAttempt);
-					anMqttClient.reconnect();
-					try {
-						currentAttempt++;
-						Thread.sleep(5000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}	
-			}while(!anMqttClient.isConnected() && (currentAttempt<numberOfReconnectAttempt) );
-			
-			
-			
+			//
+			// connOpts has setAutomaticReconnect(true), so Paho already retries
+			// in the background. Calling anMqttClient.reconnect() here too raced
+			// with it -- both would open a CONNECT with the same client ID at
+			// once, and the broker kills whichever loses, producing a rapid
+			// connect/onConnectionLost loop. Just skip the publish and let the
+			// automatic reconnect (and its connectComplete callback) do its job.
+			//
 			if(anMqttClient.isConnected()) {
 				logger.debug("heart is connected about to publish to topic " + topic);
 				anMqttClient.publish(topic, message);
 			}else {
-				logger.warn("Unable to publish to the heart");
+				logger.warn("Heart not connected, skipping publish to topic " + topic + ", automatic reconnect will re-establish the session");
 			}
-		//	logger.debug("published  to " + topic + "  in mqtt");
 
 		} catch (MqttException e) {
 			// TODO Auto-generated catch block
 			logger.warn("Exception publishing to heart:" + Utils.getStringException(e));
-			
+
 		}
 	}
 	
