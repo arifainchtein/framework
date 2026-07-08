@@ -158,7 +158,24 @@ public class PLSeriesMicroController extends MicroController {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
-								
+
+								serialPortInputStream = serialPort.getInputStream();
+								serialPortOutputStream = serialPort.getOutputStream();
+
+								if (serialPortInputStream == null) {
+									logger.warn("serialPortInputStream is null.");
+									Hashtable<String, String> h = new Hashtable();
+									h.put("message","SerialPortInputStream is null");
+									throw new MicrocontrollerCommunicationException(h);
+								}
+
+								if (serialPortOutputStream == null) {
+									logger.warn("serialPortOutputStream is null.");
+									Hashtable<String, String> h = new Hashtable();
+									h.put("message","SerialPortOutputStream is null");
+									throw new MicrocontrollerCommunicationException(h);
+								}
+
 								// Set DTR
 								serialPort.setDTR();
 								
