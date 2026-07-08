@@ -183,22 +183,6 @@ public class PLSeriesMicroController extends MicroController {
 								serialPort.setDTR();
 								serialPort.setRTS();
 
-								// Add event listener for data available
-								serialPort.addDataListener(new SerialPortDataListener() {
-									@Override
-									public int getListeningEvents() {
-										return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
-									}
-									
-									@Override
-									public void serialEvent(SerialPortEvent event) {
-										if (event.getEventType() == SerialPort.LISTENING_EVENT_DATA_AVAILABLE) {
-											// Handle data available event
-											// This replaces the serialPortEventListener functionality
-										}
-									}
-								});
-								
 					//
 					// to make sure that the serial port has not hung, do a test
 					//
