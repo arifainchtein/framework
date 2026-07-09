@@ -94,6 +94,12 @@ public abstract class Hypothalamus {
 	String mqttBrokerAddress = "tcp://localhost:1883";
     String mqttClientId = TeleonomeConstants.PROCESS_HYPOTHALAMUS;
     MemoryPersistence persistence = new MemoryPersistence();
+    //
+    // fire-and-forget only for the Heart connection -- no delivery guarantee
+    // needed, deliberately not TeleonomeConstants.HEART_QUALITY_OF_SERVICE
+    // since that constant is shared with other components that still want QoS 1
+    //
+    private static final int HEART_TO_HYPOTHALAMUS_QOS = 0;
     public boolean performTimePrunningAnalysis=false;
     int pacemakerPid=-1;
   //private String buildNumber="17/05/2017 00:52";
@@ -561,8 +567,14 @@ public abstract class Hypothalamus {
 	            MqttConnectOptions connOpts = new MqttConnectOptions();
 	           // connOpts.setKeepAliveInterval(120);
 	            connOpts.setAutomaticReconnect(true);
-	            //connOpts.setCleanSession(true);
-	            connOpts.setCleanSession(false);
+	            //
+	            // clean session + QoS 0 (see HEART_TO_HYPOTHALAMUS_QOS below): no
+	            // guaranteed delivery needed here, so don't let Heart hold a
+	            // persistent session and queue up messages while we're
+	            // disconnected -- that just dumps a backlog on reconnect instead
+	            // of reflecting current state.
+	            //
+	            connOpts.setCleanSession(true);
 	            connOpts.setKeepAliveInterval(300);
 	           // connOpts.setMaxInflight(1000);
 	          
@@ -609,7 +621,7 @@ public abstract class Hypothalamus {
 						 MqttMessage message = new MqttMessage("Hello".getBytes());
 						 logger.warn("pibt1");
 							
-						 message.setQos(TeleonomeConstants.HEART_QUALITY_OF_SERVICE);
+						 message.setQos(HEART_TO_HYPOTHALAMUS_QOS);
 						 logger.warn("pibt2");
 							
 							anMqttClient.publish("Hello", message);
@@ -658,11 +670,11 @@ public abstract class Hypothalamus {
 		byte[] messageBytes = messageText.getBytes();
 
 		MqttMessage message = new MqttMessage(messageBytes);
-		 message.setQos(TeleonomeConstants.HEART_QUALITY_OF_SERVICE);
+		 message.setQos(HEART_TO_HYPOTHALAMUS_QOS);
 	    message.setRetained(false);
 
 	    try {
-			logger.debug("about to Update the Heart, topic: " + topic  + " HEART_QUALITY_OF_SERVICE=" + TeleonomeConstants.HEART_QUALITY_OF_SERVICE + " message size=" +messageBytes.length + " anMqttClient.isConnected()=" + anMqttClient.isConnected());
+			logger.debug("about to Update the Heart, topic: " + topic  + " HEART_TO_HYPOTHALAMUS_QOS=" + HEART_TO_HYPOTHALAMUS_QOS + " message size=" +messageBytes.length + " anMqttClient.isConnected()=" + anMqttClient.isConnected());
 
 			//
 			// connOpts has setAutomaticReconnect(true), so Paho already retries
