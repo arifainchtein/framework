@@ -974,6 +974,7 @@ public class TeleonomeConstants {
 	public static final String PATHOLOGY_CEREBELLUM_DIED= "Cerebellum died";
 
 	public static final String PATHOLOGY_HEART_PULSE_LATE= "Heart Pulse Late";
+	public static final String PATHOLOGY_HEART_SESSION_LOOP_DEAD= "Heart Session Loop Dead";
 	public static final String PATHOLOGY_HIPPOCAMPUS_LATE= "Hippocampus Late";
 	public static final String PATHOLOGY_CEREBELLUM_LATE= "Cerebellum Late";
 	public static final String PATHOLOGY_HEART_CRASHED_HPROF= "Heart Crashed hprof";
