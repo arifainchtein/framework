@@ -1001,6 +1001,7 @@ public class TeleonomeConstants {
 	public static final String PATHOLOGY_DATA_OUT_OF_RANGE = "Data Out Of Range";
 	public static final String PATHOLOGY_AVAILABLE_MEMORY_BELOW_THRESHOLD = "Available Memory Below Threshold";
 	public static final String PATHOLOGY_DISK_SPACE_BELOW_THRESHOLD = "Disk Space Below Threshold";
+	public static final String PATHOLOGY_POWER_UNDERVOLTAGE = "Power Undervoltage";
 	public static final String PATHOLOGY_PULSE_DURATION_ABOVE_THRESHOLD = "Pulse Generation Above Threshold";
 	public static final String PATHOLOGY_ANALYTICON_SOURCES_LATE = "Analyticon Sources Late";
 	
