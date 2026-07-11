@@ -189,6 +189,7 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Solar Current", "" + solarCurrentMa, "mA", TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Battery Voltage", "" + batteryVoltage, "V", TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Battery Current", "" + batteryCurrentMa, "mA", TeleonomeConstants.DATATYPE_DOUBLE, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Estimated Runtime", "" + estimatedRuntime, "hours", TeleonomeConstants.DATATYPE_DOUBLE, true));
 
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Internal Temperature", "" + temperature, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", "" + operatingStatus, null, TeleonomeConstants.DATATYPE_INTEGER, true));
