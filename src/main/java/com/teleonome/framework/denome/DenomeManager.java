@@ -4814,9 +4814,12 @@ public class DenomeManager {
 							double value = w.getDouble(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 							Identity wordIdentity = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_TELEPATHONS,
 									deviceName, TeleonomeConstants.TELEPATHON_DENE_PURPOSE, wName);
+							// units is NOT NULL in the remembereddenewords table - use the
+							// DeneWord's own "Units" attribute when present, never null.
+							String units = w.optString(TeleonomeConstants.DENEWORD_UNIT_ATTRIBUTE, "");
 							aMnemosyneManager.unwrapDouble(teleonomeName, nowMillis, wordIdentity.toString(),
 									TeleonomeConstants.DATATYPE_DOUBLE, value,
-									TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, null);
+									TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, units);
 						} catch (Exception ignored) {
 							// non-numeric DeneWord (e.g. a string pointer) — nothing to graph
 						}
