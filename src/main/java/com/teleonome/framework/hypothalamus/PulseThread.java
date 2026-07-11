@@ -1305,7 +1305,15 @@ public class PulseThread extends Thread{
 			} catch (JSONException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			}	
+			} catch (Throwable t) {
+				// Catch-all so an unexpected exception (e.g. a NullPointerException from
+				// missing/optional denome structure) can never silently kill the pulse
+				// thread - without this, the thread just dies with no trace (the default
+				// uncaught-exception stack trace goes to stderr, which on some deployments
+				// is an unread pipe) and the pulse timestamp freezes until an external
+				// watchdog restarts the whole process.
+				logger.error("Uncaught exception in pulse cycle, continuing to next pulse: " + Utils.getStringException(t));
+			}
 		}while(true);
 	}
 

@@ -4729,16 +4729,22 @@ public class DenomeManager {
 
 	public void updateHippocampusPurposeDene(JSONObject  status){
 		try {
+			JSONObject hippocampusDeneChain = DenomeUtils.getDeneChainByName(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_PURPOSE_HIPPOCAMPUS);
+			if (hippocampusDeneChain == null) {
+				// This teleonome has no Hippocampus configured in its Purpose nuclei -
+				// that's a valid configuration, not an error, so just skip the update.
+				logger.debug("No Hippocampus dene chain in this denome, skipping updateHippocampusPurposeDene");
+				return;
+			}
+
 			int deneRemoved = DenomeUtils.removeDeneFromChain(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_PURPOSE_HIPPOCAMPUS, TeleonomeConstants.DENE_HIPPOCAMPUS_MEMORY_STATUS_DENE);
 			logger.debug("removing the Mempry status from  dene from hippocampus, result:" + deneRemoved);
 
-			JSONObject hippocampusDeneChain = DenomeUtils.getDeneChainByName(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_PURPOSE_HIPPOCAMPUS);
 			JSONArray hippocampusDeneChainDenes = hippocampusDeneChain.getJSONArray("Denes");
 			hippocampusDeneChainDenes.put(status);
 
 		} catch (InvalidDenomeException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.warn(Utils.getStringException(e1));
 		}
 	}
 
