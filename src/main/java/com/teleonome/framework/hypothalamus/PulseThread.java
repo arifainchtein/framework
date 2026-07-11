@@ -1356,6 +1356,12 @@ public class PulseThread extends Thread{
 
 
 		if(sensorOperonActive && sensorRequestQueuePositionDeneWordIndex!=null && sensorRequestQueuePositionDeneWordIndex.size()>0 ){
+			// Bounded, like the other retry loops fixed today - without this,
+			// a microcontroller that never sends back the expected token
+			// count would retry GetSensorData forever, hanging the pulse
+			// thread indefinitely.
+			int getSensorDataAttempts=0;
+			int maxGetSensorDataAttempts=2;
 			do{
 				//logger.debug("sending GetSensorData counter=" + counter);
 				//String commandToSend = "GetSensorData" + counter;
@@ -1369,15 +1375,20 @@ public class PulseThread extends Thread{
 				inputLine = input.readLine();
 				//logger.debug("line 1234 received inputLine=" + inputLine);
 				counter++;
+				getSensorDataAttempts++;
 				sensorDataTokens = inputLine.split("#");
 				//			for(int k=0;k<sensorDataTokens.length;k++) {
 				//				logger.debug("k=" + k + " sensorDataTokens[k]= "+ sensorDataTokens[k]);
 				//			}
 				//logger.debug("sending GetSensorData received=" + sensorDataTokens.length + " need=" +sensorRequestQueuePositionDeneWordIndex.size() + "  counter=" + counter + " inputLine=" + inputLine);
+				if(sensorDataTokens.length!=sensorRequestQueuePositionDeneWordIndex.size() && getSensorDataAttempts>=maxGetSensorDataAttempts) {
+					logger.warn("GetSensorData response token count mismatch after " + maxGetSensorDataAttempts + " attempts (got " + sensorDataTokens.length + ", expected " + sensorRequestQueuePositionDeneWordIndex.size() + "), giving up for this pulse");
+					break;
+				}
 			}while(sensorDataTokens.length!=sensorRequestQueuePositionDeneWordIndex.size());
 
 			logger.debug("inputLine.length()>0=" + (inputLine.length()>0));
-			if(inputLine.length()>0){
+			if(inputLine.length()>0 && sensorDataTokens.length==sensorRequestQueuePositionDeneWordIndex.size()){
 				for (Map.Entry<JSONObject, Integer> entry2 : sensorRequestQueuePositionDeneWordIndex) {
 					currentlyProcessingSensorValueDeneJSONObject = entry2.getKey();
 					logger.debug("currentlyProcessingSensorValueDeneJSONObject=" + currentlyProcessingSensorValueDeneJSONObject);

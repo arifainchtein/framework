@@ -74,6 +74,18 @@ public abstract class MicroController {
 	public abstract BufferedReader getReader() throws IOException;
 	//public abstract InputStream getReader() throws IOException;
 	public abstract BufferedWriter getWriter() throws IOException;
-	
-	
+
+	/**
+	 * Forces this microcontroller to drop and re-establish its underlying
+	 * connection (e.g. closing and reopening a serial port), so a caller
+	 * that has given up on a stuck/unresponsive connection (like
+	 * MappedBusThread's async data poll) can ask for a fresh one instead of
+	 * repeatedly retrying the same possibly-wedged connection. Default is a
+	 * no-op, since most microcontrollers (HTTP/API-based, etc.) have no
+	 * persistent connection to reset - override where a reconnect is
+	 * meaningful (e.g. AnnabelleController).
+	 */
+	public void reconnect() throws IOException {
+	}
+
 }

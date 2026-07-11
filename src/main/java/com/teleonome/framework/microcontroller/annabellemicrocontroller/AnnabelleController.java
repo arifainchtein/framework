@@ -106,12 +106,14 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 
 	}
 
-	// Records a pathology dene when the serial link to the device is broken
-	// (e.g. connectToSerialPort()/sendCommand() gave up after exhausting their
-	// bounded retries), so a persistently unreachable device is visible in the
-	// denome instead of only ever showing up as a warning in the log.
-	private void reportSerialCommunicationFailure(IOException e) {
+	// Records a pathology dene and flips the live "Port Status" deneword to
+	// Disconnected when the serial link to the device is broken (e.g.
+	// connectToSerialPort() gave up after exhausting its bounded retries), so
+	// a persistently unreachable device is visible both in the pathology
+	// history and as present-tense state in the denome, not just a log line.
+	private void reportSerialCommunicationFailure(Exception e) {
 		logger.warn(Utils.getStringException(e));
+		updatePortStatus(false);
 		try {
 			Calendar cal = Calendar.getInstance();
 			Vector<JSONObject> extraDeneWords = new Vector<JSONObject>();
@@ -123,6 +125,22 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 					TeleonomeConstants.PATHOLOGY_LOCATION_MICROCONTROLLER, extraDeneWords);
 		} catch (JSONException je) {
 			logger.warn(Utils.getStringException(je));
+		}
+	}
+
+	// Live present-state counterpart to the pathology dene above (which only
+	// gives history) - reflects whether the serial port is open right now.
+	// Same destination (@teleonome:Purpose:Sensor Data:Annabelle:Port Status)
+	// the GetSensorData/Ping sensor mechanism in PulseThread updates once per
+	// pulse - this lets the mother-handshake/reconnect path also flip it
+	// immediately instead of waiting for the next sensor cycle.
+	private void updatePortStatus(boolean connected) {
+		try {
+			Identity portStatusIdentity = new Identity(aDenomeManager.getDenomeName(), TeleonomeConstants.NUCLEI_PURPOSE,
+					TeleonomeConstants.DENECHAIN_SENSOR_DATA, "Annabelle", "Port Status");
+			aDenomeManager.updateDeneWordCurrentPulse(portStatusIdentity.toString(), connected);
+		} catch (InvalidDenomeException e) {
+			logger.warn("Could not update Port Status deneword: " + Utils.getStringException(e));
 		}
 	}
 	
@@ -368,6 +386,24 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 	private void closeSerialPort() {
 		serialPort.closePort();
 	}
+
+	@Override
+	public void reconnect() throws IOException {
+		logger.info("reconnect() called - closing and reopening the serial port");
+		if (serialPort != null) {
+			try {
+				closeSerialPort();
+			} catch (Exception e) {
+				logger.warn("Error closing serial port during reconnect: " + Utils.getStringException(e));
+			}
+		}
+		try {
+			connectToSerialPort();
+		} catch (SerialPortCommunicationException e) {
+			throw new IOException("Failed to reconnect to Annabelle serial port: " + e.getMessage());
+		}
+	}
+
 	private void connectToSerialPort() throws IOException, SerialPortCommunicationException {
 		boolean openAndTested=false;
 		int counter=0;
@@ -375,7 +411,7 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 		// retry below never gives up, blocking whatever thread called
 		// sendCommand()/processLifeCycleEvent() (including the pulse thread)
 		// forever if the device stays unreachable.
-		int maxNumberReconnects=5;
+		int maxNumberReconnects=2;
 		do {
 			
 
@@ -422,13 +458,16 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 				openAndTested=true;
 				output.close();
 				input.close();
+				updatePortStatus(true);
 			}catch(IOException e) {
 				logger.warn(Utils.getStringException(e));
 			}
 			if(!openAndTested) {
 				counter++;
 				if (counter > maxNumberReconnects) {
-					throw new SerialPortCommunicationException("Failed to open and verify the serial port after " + maxNumberReconnects + " attempts");
+					SerialPortCommunicationException failure = new SerialPortCommunicationException("Failed to open and verify the serial port after " + maxNumberReconnects + " attempts");
+					reportSerialCommunicationFailure(failure);
+					throw failure;
 				}
 				logger.warn("Ping Failed, retrying in 10 secs, counter="+counter );
 				//serialPort.close();

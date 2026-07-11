@@ -6111,10 +6111,12 @@ public class DenomeManager {
 
 
 													jsonObjectDeneWord.put("Value", v);
-												}else if(valueType.equals(TeleonomeConstants.DATATYPE_STRING) || 
-														valueType.equals(TeleonomeConstants.DATATYPE_IMAGE_FILE) || 
-														valueType.equals(TeleonomeConstants.DATATYPE_AUDIO_FILE) || 
-														valueType.equals(TeleonomeConstants.DATATYPE_VIDEO_FILE) 
+												}else if(valueType.equals(TeleonomeConstants.DATATYPE_BOOLEAN)) {
+													jsonObjectDeneWord.put("Value", Boolean.parseBoolean(inputLine));
+												}else if(valueType.equals(TeleonomeConstants.DATATYPE_STRING) ||
+														valueType.equals(TeleonomeConstants.DATATYPE_IMAGE_FILE) ||
+														valueType.equals(TeleonomeConstants.DATATYPE_AUDIO_FILE) ||
+														valueType.equals(TeleonomeConstants.DATATYPE_VIDEO_FILE)
 														) {
 													jsonObjectDeneWord.put("Value", inputLine);
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_JSONARRAY)) {

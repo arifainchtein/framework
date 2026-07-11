@@ -189,6 +189,13 @@ public class AnnabelleReader extends BufferedReader{
 			cleaned=TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS+"#"+telepathon.toString();
 		}else if(line.contains("Read fail") && line.contains("#")){
 			cleaned=line.substring(line.lastIndexOf("fail")+4);
+		}else if(command.equals("GetSensorData")) {
+			//
+			// AnnabelleWriter translated GetSensorData into a Ping - Ok-Ping
+			// means the serial link is alive, anything else (including an
+			// empty line from maxTries being exceeded above) means it isn't.
+			//
+			cleaned = line.contains("Ok-Ping") ? "true" : "false";
 		}else {
 			cleaned=line;
 		}

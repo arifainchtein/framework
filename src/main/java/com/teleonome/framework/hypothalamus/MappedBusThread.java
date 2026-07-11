@@ -8,6 +8,7 @@ import java.net.ConnectException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -925,7 +926,7 @@ class MappedBusThread extends Thread{
 						keepGoing=true;
 						boolean ready;
 						counter=0;
-						maxCounter=2;
+						maxCounter=1;
 						do {
 							try {
 
@@ -975,9 +976,15 @@ class MappedBusThread extends Thread{
 									counter++;
 									if(counter>maxCounter) {
 										keepGoing=false;
-										logger.info("max retries reached, closing streams");
+										logger.info("max retries reached, closing streams and reconnecting");
 										if(input!=null)input.close();
 										if(output!=null)output.close();
+										reportMicrocontrollerCommunicationFailure(aMicroController, new IOException("No recognized response after " + maxCounter + " retries, last response: " + inputLine));
+										try {
+											aMicroController.reconnect();
+										} catch (IOException re) {
+											logger.warn("Reconnect failed for " + aMicroController.getName() + ": " + Utils.getStringException(re));
+										}
 									}else {
 										keepGoing=true;
 										logger.debug("AsyncCycle is processing " + aMicroController.getName()  + " retrying counter=" + counter);
@@ -988,11 +995,23 @@ class MappedBusThread extends Thread{
 								}
 							}catch(IOException e) {
 								logger.warn(Utils.getStringException(e));
-								logger.info("After error wait 2 sec and try again");
-								try {
-									Thread.sleep(2000);
-								} catch (InterruptedException e1) {
-									e1.printStackTrace();
+								counter++;
+								if(counter>maxCounter) {
+									keepGoing=false;
+									logger.info("max retries reached after IO error for " + aMicroController.getName() + ", giving up and reconnecting");
+									reportMicrocontrollerCommunicationFailure(aMicroController, e);
+									try {
+										aMicroController.reconnect();
+									} catch (IOException re) {
+										logger.warn("Reconnect failed for " + aMicroController.getName() + ": " + Utils.getStringException(re));
+									}
+								} else {
+									logger.info("After error wait 2 sec and try again");
+									try {
+										Thread.sleep(2000);
+									} catch (InterruptedException e1) {
+										e1.printStackTrace();
+									}
 								}
 							}
 						}while(keepGoing);
@@ -1808,6 +1827,26 @@ class MappedBusThread extends Thread{
 					}
 				}
 			}
+		}
+	}
+
+	// Records a pathology dene when communication with a microcontroller
+	// is broken (e.g. the async data poll below gave up after exhausting
+	// its bounded retries), so a persistently unreachable device is visible
+	// in the denome instead of only ever showing up as a warning in the log.
+	private void reportMicrocontrollerCommunicationFailure(MicroController aMicroController, Exception e) {
+		try {
+			Calendar cal = Calendar.getInstance();
+			Vector<JSONObject> extraDeneWords = new Vector<JSONObject>();
+			extraDeneWords.addElement(Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_MILLISECONDS, "" + cal.getTime().getTime(), null, "long", true));
+			extraDeneWords.addElement(Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_TIMESTAMP, hypothalamus.simpleFormatter.format(cal.getTime()), null, "String", true));
+			extraDeneWords.addElement(Utils.createDeneWordJSONObject("Microcontroller", aMicroController.getName(), null, "String", true));
+			extraDeneWords.addElement(Utils.createDeneWordJSONObject("Message", e.getMessage(), null, "String", true));
+			hypothalamus.aDenomeManager.addPurposePathologyDene(TeleonomeConstants.PATHOLOGY_MICROCONTROLLER_COMMUNICATION_FAILED,
+					TeleonomeConstants.PATHOLOGY_MICROCONTROLLER_COMMUNICATION_FAILED,
+					TeleonomeConstants.PATHOLOGY_LOCATION_MICROCONTROLLER, extraDeneWords);
+		} catch (JSONException je) {
+			logger.warn(Utils.getStringException(je));
 		}
 	}
 }

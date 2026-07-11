@@ -114,6 +114,18 @@ public class AnnabelleWriter  extends BufferedWriter{
 				aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, staleTelepathonName);
 			}
 			
+		}else if(command.equals("GetSensorData")) {
+			//
+			// Annabelle has no native GetSensorData protocol - the only
+			// "sensor" reading it reports through this mechanism is its own
+			// Port Status, derived from a Ping round trip (Ok-Ping means the
+			// serial link is alive). AnnabelleReader.readLine() translates
+			// the raw response into true/false for the Port Status sensor
+			// value.
+			//
+			logger.debug("Translating GetSensorData to Ping to check port status");
+			String pingCommand = "Ping";
+			output.write(pingCommand,0,pingCommand.length());
 		}else {
 			logger.debug("sending  command:" + command);
 			output.write(command,0,command.length());
