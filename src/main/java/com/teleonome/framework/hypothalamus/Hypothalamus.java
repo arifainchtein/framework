@@ -24,9 +24,13 @@ import java.util.Vector;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -675,6 +679,25 @@ public abstract class Hypothalamus {
 		        logger.warn("Error parsing Cerebellum analysis: " + e.getMessage());
 		    }
 		}
+	//
+	// Paho 1.0.2's Token.waitUntilSent()/waitForCompletion() are blocking waits
+	// with no timeout exposed anywhere in the public API - and waitUntilSent()
+	// swallows InterruptedException internally (loops back to wait() again),
+	// so a Thread.interrupt() on the caller can't even force it to give up if
+	// the "sent"/"completed" notification is ever missed (observed when a
+	// disconnect races with an in-flight publish). Running the actual Paho
+	// call on this small dedicated pool, and only ever waiting on it via
+	// Future.get(timeout), means the pulse thread can never be blocked longer
+	// than HEART_PUBLISH_TIMEOUT_MILLIS by this, no matter what Paho does
+	// internally. Worst case if Paho's wait truly never wakes up: one of
+	// these (daemon) worker threads is leaked/stuck forever - that is a much
+	// smaller problem than freezing the entire pulse cycle forever.
+	private static final ExecutorService heartPublishExecutor = Executors.newFixedThreadPool(2, r -> {
+		Thread t = new Thread(r, "Heart-Publish-Worker");
+		t.setDaemon(true);
+		return t;
+	});
+
 	public synchronized void publishToHeart(String topic, String messageText) {
 
 		byte[] messageBytes = messageText.getBytes();
@@ -683,38 +706,37 @@ public abstract class Hypothalamus {
 		 message.setQos(HEART_TO_HYPOTHALAMUS_QOS);
 	    message.setRetained(false);
 
-	    try {
-			logger.debug("about to Update the Heart, topic: " + topic  + " HEART_TO_HYPOTHALAMUS_QOS=" + HEART_TO_HYPOTHALAMUS_QOS + " message size=" +messageBytes.length + " anMqttClient.isConnected()=" + anMqttClient.isConnected());
+		logger.debug("about to Update the Heart, topic: " + topic  + " HEART_TO_HYPOTHALAMUS_QOS=" + HEART_TO_HYPOTHALAMUS_QOS + " message size=" +messageBytes.length + " anMqttClient.isConnected()=" + anMqttClient.isConnected());
 
-			//
-			// connOpts has setAutomaticReconnect(true), so Paho already retries
-			// in the background. Calling anMqttClient.reconnect() here too raced
-			// with it -- both would open a CONNECT with the same client ID at
-			// once, and the broker kills whichever loses, producing a rapid
-			// connect/onConnectionLost loop. Just skip the publish and let the
-			// automatic reconnect (and its connectComplete callback) do its job.
-			//
-			if(anMqttClient.isConnected()) {
-				logger.debug("heart is connected about to publish to topic " + topic);
-				//
-				// anMqttClient.publish(topic, message) is a convenience method that
-				// waits on the delivery token with NO timeout - use the token
-				// directly so the wait is bounded, and a lost/never-arriving
-				// completion notification becomes a logged timeout instead of an
-				// indefinite hang of this (synchronized) method and its caller.
-				MqttTopic mqttTopic = anMqttClient.getTopic(topic);
-				IMqttDeliveryToken deliveryToken = mqttTopic.publish(message);
-				deliveryToken.waitForCompletion(HEART_PUBLISH_TIMEOUT_MILLIS);
-			}else {
-				logger.warn("Heart not connected, skipping publish to topic " + topic + ", automatic reconnect will re-establish the session");
-			}
+		//
+		// connOpts has setAutomaticReconnect(true), so Paho already retries
+		// in the background. Calling anMqttClient.reconnect() here too raced
+		// with it -- both would open a CONNECT with the same client ID at
+		// once, and the broker kills whichever loses, producing a rapid
+		// connect/onConnectionLost loop. Just skip the publish and let the
+		// automatic reconnect (and its connectComplete callback) do its job.
+		//
+		if(!anMqttClient.isConnected()) {
+			logger.warn("Heart not connected, skipping publish to topic " + topic + ", automatic reconnect will re-establish the session");
+			return;
+		}
 
-		} catch (MqttException e) {
-			if (e.getReasonCode() == MqttException.REASON_CODE_CLIENT_TIMEOUT) {
-				logger.warn("Timed out after " + HEART_PUBLISH_TIMEOUT_MILLIS + "ms waiting for delivery confirmation publishing to heart topic " + topic + ", continuing");
-			} else {
-				logger.warn("Exception publishing to heart:" + Utils.getStringException(e));
-			}
+		logger.debug("heart is connected about to publish to topic " + topic);
+		Future<?> publishFuture = heartPublishExecutor.submit(() -> {
+			MqttTopic mqttTopic = anMqttClient.getTopic(topic);
+			IMqttDeliveryToken deliveryToken = mqttTopic.publish(message);
+			deliveryToken.waitForCompletion(HEART_PUBLISH_TIMEOUT_MILLIS);
+			return null;
+		});
+
+		try {
+			publishFuture.get(HEART_PUBLISH_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+		} catch (TimeoutException te) {
+			logger.warn("Timed out after " + HEART_PUBLISH_TIMEOUT_MILLIS + "ms waiting to publish to heart topic " + topic + ", continuing (the worker thread may still be stuck internally in Paho and will be abandoned)");
+		} catch (ExecutionException ee) {
+			logger.warn("Exception publishing to heart topic " + topic + ": " + Utils.getStringException(ee.getCause() != null ? ee.getCause() : ee));
+		} catch (InterruptedException ie) {
+			Thread.currentThread().interrupt();
 		}
 	}
 	
