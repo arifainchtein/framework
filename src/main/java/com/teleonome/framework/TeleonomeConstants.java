@@ -1004,6 +1004,7 @@ public class TeleonomeConstants {
 	public static final String PATHOLOGY_POWER_UNDERVOLTAGE = "Power Undervoltage";
 	public static final String PATHOLOGY_PULSE_DURATION_ABOVE_THRESHOLD = "Pulse Generation Above Threshold";
 	public static final String PATHOLOGY_ANALYTICON_SOURCES_LATE = "Analyticon Sources Late";
+	public static final String PATHOLOGY_MICROCONTROLLER_COMMUNICATION_FAILED = "Microcontroller Communication Failed";
 	
 	
 	public static final String PATHOLOGY_DATA_STALE="Data Stale";

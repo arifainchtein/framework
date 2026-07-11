@@ -9,12 +9,15 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -72,40 +75,55 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 			try {
 				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_SYNCHRONOUS_CYCLE);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
+				reportSerialCommunicationFailure(e);
 			}
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE)) {
 			try {
 				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_SYNCHRONOUS_CYCLE);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
+				reportSerialCommunicationFailure(e);
 			}
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE)) {
 			try {
 				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_ASYNCHRONOUS_CYCLE);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
+				reportSerialCommunicationFailure(e);
 			}
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE)) {
 			try {
 				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_END_ASYNCHRONOUS_CYCLE);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
+				reportSerialCommunicationFailure(e);
 			}
 		}else if(lifeCycleEvent.equals(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE)) {
 			try {
 				sendCommand(TeleonomeConstants.LIFE_CYCLE_EVENT_START_AWAKE);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				logger.warn(Utils.getStringException(e));
+				reportSerialCommunicationFailure(e);
 			}
 		}
-		
-		
+
+
+	}
+
+	// Records a pathology dene when the serial link to the device is broken
+	// (e.g. connectToSerialPort()/sendCommand() gave up after exhausting their
+	// bounded retries), so a persistently unreachable device is visible in the
+	// denome instead of only ever showing up as a warning in the log.
+	private void reportSerialCommunicationFailure(IOException e) {
+		logger.warn(Utils.getStringException(e));
+		try {
+			Calendar cal = Calendar.getInstance();
+			Vector<JSONObject> extraDeneWords = new Vector<JSONObject>();
+			extraDeneWords.addElement(Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_MILLISECONDS, "" + cal.getTime().getTime(), null, "long", true));
+			extraDeneWords.addElement(Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_TIMESTAMP, new SimpleDateFormat("dd/MM/yy HH:mm").format(cal.getTime()), null, "String", true));
+			extraDeneWords.addElement(Utils.createDeneWordJSONObject("Message", e.getMessage(), null, "String", true));
+			aDenomeManager.addPurposePathologyDene(TeleonomeConstants.PATHOLOGY_MICROCONTROLLER_COMMUNICATION_FAILED,
+					TeleonomeConstants.PATHOLOGY_MICROCONTROLLER_COMMUNICATION_FAILED,
+					TeleonomeConstants.PATHOLOGY_LOCATION_MICROCONTROLLER, extraDeneWords);
+		} catch (JSONException je) {
+			logger.warn(Utils.getStringException(je));
+		}
 	}
 	
 	@Override
@@ -353,6 +371,11 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 	private void connectToSerialPort() throws IOException, SerialPortCommunicationException {
 		boolean openAndTested=false;
 		int counter=0;
+		// Bounded, like the reconnect loop in init() - without this the Ping
+		// retry below never gives up, blocking whatever thread called
+		// sendCommand()/processLifeCycleEvent() (including the pulse thread)
+		// forever if the device stays unreachable.
+		int maxNumberReconnects=5;
 		do {
 			
 
@@ -403,8 +426,11 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 				logger.warn(Utils.getStringException(e));
 			}
 			if(!openAndTested) {
-				logger.warn("Ping Failed, retrying in 10 secs, counter="+counter );
 				counter++;
+				if (counter > maxNumberReconnects) {
+					throw new SerialPortCommunicationException("Failed to open and verify the serial port after " + maxNumberReconnects + " attempts");
+				}
+				logger.warn("Ping Failed, retrying in 10 secs, counter="+counter );
 				//serialPort.close();
 				try {
 					Thread.sleep(10000);
@@ -658,8 +684,10 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e));
 				} catch (SerialPortCommunicationException e) {
-					// TODO Auto-generated catch block
-					logger.warn(Utils.getStringException(e));
+					// connectToSerialPort() already retried internally up to its
+					// own bound and gave up - propagate instead of looping here
+					// forever waiting for a response that will never come.
+					throw new IOException("Failed to reconnect to Annabelle serial port: " + e.getMessage());
 				}
 			}
 		}
