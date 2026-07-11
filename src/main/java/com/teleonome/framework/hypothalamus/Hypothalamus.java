@@ -38,6 +38,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -100,6 +101,15 @@ public abstract class Hypothalamus {
     // since that constant is shared with other components that still want QoS 1
     //
     private static final int HEART_TO_HYPOTHALAMUS_QOS = 0;
+
+    // Bound on how long publishToHeart() will block waiting for Paho to mark a
+    // publish complete. MqttClient.publish(...) waits on this token with no
+    // timeout at all, so a lost/never-arriving completion notification (broker
+    // hiccup, stale-but-"connected" socket, etc.) hangs the calling thread
+    // forever - and since publishToHeart() is synchronized, every other caller
+    // blocks behind it too. Bounding the wait turns that into a logged,
+    // recoverable timeout instead of a silent, permanent pulse-thread hang.
+    private static final long HEART_PUBLISH_TIMEOUT_MILLIS = 5000;
     public boolean performTimePrunningAnalysis=false;
     int pacemakerPid=-1;
   //private String buildNumber="17/05/2017 00:52";
@@ -686,15 +696,25 @@ public abstract class Hypothalamus {
 			//
 			if(anMqttClient.isConnected()) {
 				logger.debug("heart is connected about to publish to topic " + topic);
-				anMqttClient.publish(topic, message);
+				//
+				// anMqttClient.publish(topic, message) is a convenience method that
+				// waits on the delivery token with NO timeout - use the token
+				// directly so the wait is bounded, and a lost/never-arriving
+				// completion notification becomes a logged timeout instead of an
+				// indefinite hang of this (synchronized) method and its caller.
+				MqttTopic mqttTopic = anMqttClient.getTopic(topic);
+				IMqttDeliveryToken deliveryToken = mqttTopic.publish(message);
+				deliveryToken.waitForCompletion(HEART_PUBLISH_TIMEOUT_MILLIS);
 			}else {
 				logger.warn("Heart not connected, skipping publish to topic " + topic + ", automatic reconnect will re-establish the session");
 			}
 
 		} catch (MqttException e) {
-			// TODO Auto-generated catch block
-			logger.warn("Exception publishing to heart:" + Utils.getStringException(e));
-
+			if (e.getReasonCode() == MqttException.REASON_CODE_CLIENT_TIMEOUT) {
+				logger.warn("Timed out after " + HEART_PUBLISH_TIMEOUT_MILLIS + "ms waiting for delivery confirmation publishing to heart topic " + topic + ", continuing");
+			} else {
+				logger.warn("Exception publishing to heart:" + Utils.getStringException(e));
+			}
 		}
 	}
 	
