@@ -52,6 +52,14 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 	String host="", privateKey="";
 	DenomeManager aDenomeManager;
 	JSch jsch=new JSch();
+	//
+	// jsch is one instance reused for the life of this writer (constructed once,
+	// called once per pulse). addIdentity() used to be called on it every single
+	// pulse with no matching removal, so JSch's internal identity list grew by
+	// two entries every pulse forever -- a real unbounded leak, not just repeated
+	// work. The identity only needs to be registered once, ever.
+	//
+	boolean identityAdded=false;
 	Session session=null;
 	String teleonomeName="";
 
@@ -98,14 +106,25 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 		// this is because otherwise you run the risk of floding the serial bus
 		// so to make it standards all microcontrollers do this
 
-		if(command.equals("Publish Via SFTP")) {			
+		if(command.equals("Publish Via SFTP")) {
 			boolean createdTunnel = createTunnel();
 			logger.debug("create tunnel returned" + createdTunnel);
 
 			if(createdTunnel) {
-				boolean publishToSFTP = publishToSFTP();
-				if(publishToSFTP)publishingResults="Ok-publishing SFTP";
-				session.disconnect();
+				//
+				// session.disconnect() used to run only after publishToSFTP()
+				// returned normally, so any exception it threw (e.g. a null
+				// dereference on an unset "Upload Image" pointer) skipped
+				// disconnect entirely and left a live SSH session -- and its
+				// threads/crypto buffers -- orphaned for the rest of the
+				// process's life. finally guarantees it always runs.
+				//
+				try {
+					boolean publishToSFTP = publishToSFTP();
+					if(publishToSFTP)publishingResults="Ok-publishing SFTP";
+				} finally {
+					session.disconnect();
+				}
 			}
 		}else if(command.startsWith("Download Via SFTP")){
 			String[] tokens = command.split("#");
@@ -117,9 +136,12 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			logger.debug("create tunnel returned" + createdTunnel);
 
 			if(createdTunnel) {
-				boolean publishToSFTP = getFromSFTP(localDestinationFilename, remoteSourceFileName);
-				if(publishToSFTP)publishingResults="Ok-publishing SFTP";
-				session.disconnect();
+				try {
+					boolean publishToSFTP = getFromSFTP(localDestinationFilename, remoteSourceFileName);
+					if(publishToSFTP)publishingResults="Ok-publishing SFTP";
+				} finally {
+					session.disconnect();
+				}
 			}
 		}else {
 			publishingResults="Ok";
@@ -140,33 +162,36 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			publishingResults="Fault#DigitalGeppettoPublisher#Missing Key";
 			return false;
 		}
-		logger.debug("creating tunnel about to read key=" );
-		byte[] prvkey=null;
-		try {
-			prvkey = FileUtils.readFileToByteArray(new File(privateKey));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			logger.warn(Utils.getStringException(e));
-			publishingResults="Fault#DigitalGeppettoPublisher#Error Reading Key File";
-			return false;
+		if(!identityAdded) {
+			logger.debug("creating tunnel about to read key=" );
+			byte[] prvkey=null;
+			try {
+				prvkey = FileUtils.readFileToByteArray(new File(privateKey));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+				publishingResults="Fault#DigitalGeppettoPublisher#Error Reading Key File";
+				return false;
 
-		}
-		logger.debug("creating tunnel about to read passphrase, prvkey="  + prvkey );
+			}
+			logger.debug("creating tunnel about to read passphrase, prvkey="  + prvkey );
 
-		String passphrase="";
-		final byte[] emptyPassPhrase = passphrase.getBytes();
-		try {
-			jsch.addIdentity(
-					userName,    // String userName 
-					prvkey,          // byte[] privateKey 
-					null,            // byte[] publicKey
-					emptyPassPhrase  // byte[] passPhrase
-					);
-		} catch (JSchException e) {
-			// TODO Auto-generated catch block
-			logger.warn(Utils.getStringException(e));
-			publishingResults="Fault#DigitalGeppettoPublisher#Error Adding Identity to JSch";
-			return false;
+			String passphrase="";
+			final byte[] emptyPassPhrase = passphrase.getBytes();
+			try {
+				jsch.addIdentity(
+						userName,    // String userName
+						prvkey,          // byte[] privateKey
+						null,            // byte[] publicKey
+						emptyPassPhrase  // byte[] passPhrase
+						);
+				identityAdded=true;
+			} catch (JSchException e) {
+				// TODO Auto-generated catch block
+				logger.warn(Utils.getStringException(e));
+				publishingResults="Fault#DigitalGeppettoPublisher#Error Adding Identity to JSch";
+				return false;
+			}
 		}
 		logger.debug("creating tunnel about to get session, host=" + host + " sshPort=" + sshPort );
 
@@ -179,14 +204,6 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			return false;
 		}
 
-		try {
-			jsch.addIdentity(privateKey);
-		} catch (JSchException e) {
-			// TODO Auto-generated catch block
-			logger.warn(Utils.getStringException(e));
-			publishingResults="Fault#DigitalGeppettoPublisher#Error Adding Identity";
-			return false;
-		}
 		logger.debug("identity added, abut to connect ");
 		final Properties config = new Properties();  
 		config.put("StrictHostKeyChecking", "no");
