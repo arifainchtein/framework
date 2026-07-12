@@ -21,13 +21,13 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 	// energizerBatteryVoltage#energizerBatteryCurrent#temperature#fenceVoltage#fenceVoltageMin#
 	// fenceVoltageMax#fenceVoltageAvg#pulseCount#rssi#snr#operatingStatus#wpsFrequencySeconds#
 	// maxWPSVoltage#minWPSVoltage#secondsSinceLastPulse#solarVoltage#solarCurrentMa#batteryVoltage#
-	// batteryCurrentMa#estimatedRuntime#batteryChemistry#checksum
+	// batteryCurrentMa#estimatedRuntime#batteryChemistry#rtcBatVolt#checksum
 	@Override
 	public JSONObject deserialise(String teleonomeName, String line) {
 		JSONObject toReturn = new JSONObject();
 		String[] tokens = line.split("#");
 		logger.debug("LangleyDataDeserializer: tokens=" + tokens.length + " received=" + line);
-		if (tokens.length < 27) {
+		if (tokens.length < 28) {
 			logger.debug("Bad data received");
 			return new JSONObject();
 		}
@@ -128,8 +128,13 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		try { batteryChemistry = Integer.parseInt(tokens[25].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 		String batteryChemistryName = (batteryChemistry == 1) ? "LiFePO4" : "Lead-Acid";
 
+		// Voltage of the RTC's backup coin cell (CR1220), via Valentino's R41/R46 divider on
+		// GPIO36. -1 = ADC pinned near VCC - floating pin/divider not installed/cell missing.
+		double rtcBatVolt = 0.0;
+		try { rtcBatVolt = Double.parseDouble(tokens[26].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+
 		int checksum = 0;
-		try { checksum = Integer.parseInt(tokens[26].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { checksum = Integer.parseInt(tokens[27].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		logger.debug("LangleyDataDeserializer: finished parsing");
 
@@ -190,6 +195,7 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Battery Voltage", "" + batteryVoltage, "V", TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Battery Current", "" + batteryCurrentMa, "mA", TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Estimated Runtime", "" + estimatedRuntime, "hours", TeleonomeConstants.DATATYPE_DOUBLE, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("RTC Battery Voltage", "" + rtcBatVolt, "V", TeleonomeConstants.DATATYPE_DOUBLE, true));
 
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Internal Temperature", "" + temperature, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", "" + operatingStatus, null, TeleonomeConstants.DATATYPE_INTEGER, true));
