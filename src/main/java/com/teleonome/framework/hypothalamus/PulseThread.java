@@ -1362,6 +1362,7 @@ public class PulseThread extends Thread{
 			// thread indefinitely.
 			int getSensorDataAttempts=0;
 			int maxGetSensorDataAttempts=2;
+			sensorDataTokens = new String[0];
 			do{
 				//logger.debug("sending GetSensorData counter=" + counter);
 				//String commandToSend = "GetSensorData" + counter;
@@ -1370,19 +1371,36 @@ public class PulseThread extends Thread{
 				String commandToSend = "GetSensorData";
 
 				//output.write("GetSensorData",0,"GetSensorData".length());
-				output.write(commandToSend,0,commandToSend.length());
-				output.flush();
-				inputLine = input.readLine();
-				//logger.debug("line 1234 received inputLine=" + inputLine);
-				counter++;
 				getSensorDataAttempts++;
-				sensorDataTokens = inputLine.split("#");
+				try {
+					output.write(commandToSend,0,commandToSend.length());
+					output.flush();
+					inputLine = input.readLine();
+					//logger.debug("line 1234 received inputLine=" + inputLine);
+					counter++;
+					sensorDataTokens = inputLine.split("#");
+				} catch (IOException e) {
+					// A disconnected/shutdown port throws here (eg jSerialComm
+					// SerialPortIOException). Left uncaught, this used to escape
+					// processMicroProcessor entirely, skipping the reconnect below
+					// and every other microcontroller still left in the queue -
+					// and since the writer/reader are never reopened, the very next
+					// pulse hit the identical failure immediately, looping forever.
+					logger.warn("IOException sending GetSensorData (attempt " + getSensorDataAttempts + "): " + Utils.getStringException(e));
+					inputLine="";
+					sensorDataTokens = new String[0];
+				}
 				//			for(int k=0;k<sensorDataTokens.length;k++) {
 				//				logger.debug("k=" + k + " sensorDataTokens[k]= "+ sensorDataTokens[k]);
 				//			}
 				//logger.debug("sending GetSensorData received=" + sensorDataTokens.length + " need=" +sensorRequestQueuePositionDeneWordIndex.size() + "  counter=" + counter + " inputLine=" + inputLine);
 				if(sensorDataTokens.length!=sensorRequestQueuePositionDeneWordIndex.size() && getSensorDataAttempts>=maxGetSensorDataAttempts) {
 					logger.warn("GetSensorData response token count mismatch after " + maxGetSensorDataAttempts + " attempts (got " + sensorDataTokens.length + ", expected " + sensorRequestQueuePositionDeneWordIndex.size() + "), giving up for this pulse");
+					try {
+						aMicroController.reconnect();
+					} catch (IOException e) {
+						logger.warn("reconnect() failed for " + aMicroController.getName() + ": " + Utils.getStringException(e));
+					}
 					break;
 				}
 			}while(sensorDataTokens.length!=sensorRequestQueuePositionDeneWordIndex.size());
@@ -1590,26 +1608,45 @@ public class PulseThread extends Thread{
 											logger.debug("login 2295 deneWordOperationPointer " + deneWordOperationPointer + " returned =" + b); 
 										}else if(!actuatorCommand.equals(TeleonomeConstants.COMMANDS_DO_NOTHING) ){
 											logger.debug("line 2297 Actuator Command=" + actuatorCommand);
-											output.write(actuatorCommand,0,actuatorCommand.length());
-											//serialPortOutputStream.write( actuatorCommand.getBytes() );
-											Thread.sleep(3000);
-											output.flush();
-											counter=0;
-											inputLine = input.readLine();
-											logger.debug("line 2304 actuator cmmand response=" + inputLine);
+											boolean actuatorCommandSendFailed=false;
+											try {
+												output.write(actuatorCommand,0,actuatorCommand.length());
+												//serialPortOutputStream.write( actuatorCommand.getBytes() );
+												Thread.sleep(3000);
+												output.flush();
+												counter=0;
+												inputLine = input.readLine();
+												logger.debug("line 2304 actuator cmmand response=" + inputLine);
+											} catch (IOException e) {
+												// Same port-disconnected failure mode as GetSensorData - left
+												// uncaught this used to escape processMicroProcessor entirely,
+												// skip every remaining microcontroller in the pulse, and repeat
+												// identically on the very next pulse since the port was never
+												// reconnected.
+												logger.warn("IOException sending actuator command '" + actuatorCommand + "': " + Utils.getStringException(e));
+												inputLine="";
+												actuatorCommandSendFailed=true;
+												try {
+													aMicroController.reconnect();
+												} catch (IOException re) {
+													logger.warn("reconnect() failed for " + aMicroController.getName() + ": " + Utils.getStringException(re));
+												}
+											}
 											// Generic self-deactivation: any action with Self Deactivate=true
 											// sets itself Active=false after firing, no per-task code needed.
-											Object selfDeactivate = aDenomeManager
-												.getDeneWordAttributeByDeneWordNameFromDene(
-													actuatorActionJSONObject,
-													TeleonomeConstants.DENEWORD_SELF_DEACTIVATE,
-													TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
-											if (Boolean.TRUE.equals(selfDeactivate)) {
-												aDenomeManager.setDeneWordValueInDene(
-													actuatorActionJSONObject,
-													TeleonomeConstants.DENEWORD_ACTIVE, false);
-												aDenomeManager.writeDenomeToDisk(true);
-												logger.info("Self-deactivated action after: " + actuatorCommand);
+											if(!actuatorCommandSendFailed) {
+												Object selfDeactivate = aDenomeManager
+													.getDeneWordAttributeByDeneWordNameFromDene(
+														actuatorActionJSONObject,
+														TeleonomeConstants.DENEWORD_SELF_DEACTIVATE,
+														TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
+												if (Boolean.TRUE.equals(selfDeactivate)) {
+													aDenomeManager.setDeneWordValueInDene(
+														actuatorActionJSONObject,
+														TeleonomeConstants.DENEWORD_ACTIVE, false);
+													aDenomeManager.writeDenomeToDisk(true);
+													logger.info("Self-deactivated action after: " + actuatorCommand);
+												}
 											}
 										}
 										//

@@ -1,11 +1,15 @@
 package com.teleonome.framework.zhinupublisher;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
@@ -15,7 +19,7 @@ import org.eclipse.paho.client.mqttv3.MqttTopic;
 
 import com.teleonome.framework.utils.Utils;
 
-public class ZhinuPublisher implements MqttCallback{
+public class ZhinuPublisher implements MqttCallbackExtended{
 
 	static final String BROKER_URL = "tcp://chilhuacle.info:1883";
 	static final String clientID = "Ra";
@@ -33,11 +37,26 @@ public class ZhinuPublisher implements MqttCallback{
 	// instead, on a background thread, same fix pattern as the constructor's
 	// connect.
 	//
-	private final ExecutorService publishExecutor = Executors.newSingleThreadExecutor(r -> {
-		Thread t = new Thread(r, "ZhinuPublisher-publish");
-		t.setDaemon(true);
-		return t;
-	});
+	// This is a best-effort backup of farm data to a remote server: it must
+	// never block the caller, and if chilhuacle.info is down it must fail
+	// gracefully rather than pile up work. A plain newSingleThreadExecutor()
+	// has an unbounded queue, so a prolonged outage would queue farm data in
+	// memory forever waiting for a connection that may not come back for a
+	// long time. Bound the queue and drop the oldest queued publish once full
+	// -- keeping the most recent data is more useful than an ever-growing
+	// backlog of stale data anyway.
+	//
+	private static final int PUBLISH_QUEUE_CAPACITY = 20;
+	private final ExecutorService publishExecutor = new ThreadPoolExecutor(
+			1, 1, 0L, TimeUnit.MILLISECONDS,
+			new ArrayBlockingQueue<>(PUBLISH_QUEUE_CAPACITY),
+			r -> {
+				Thread t = new Thread(r, "ZhinuPublisher-publish");
+				t.setDaemon(true);
+				return t;
+			},
+			new ThreadPoolExecutor.DiscardOldestPolicy()
+	);
 	public ZhinuPublisher() {
 		logger = Logger.getLogger(getClass());
 		connOpt = new MqttConnectOptions();
@@ -45,6 +64,7 @@ public class ZhinuPublisher implements MqttCallback{
 		connOpt.setCleanSession(false);
 		connOpt.setKeepAliveInterval(30);
 		connOpt.setConnectionTimeout(10);
+		connOpt.setAutomaticReconnect(true);
 		//connOpt.setUserName(userName);
 		//connOpt.setPassword(password.toCharArray());
 
@@ -80,8 +100,18 @@ public class ZhinuPublisher implements MqttCallback{
 	 */
 	@Override
 	public void connectionLost(Throwable t) {
-		logger.debug("Connection lost!");
-		// code to reconnect to the broker would go here if desired
+		logger.warn("Connection to " + BROKER_URL + " lost: " + t.getMessage());
+		// connOpt.setAutomaticReconnect(true) handles reconnection itself, with
+		// Paho's own backoff -- connectComplete() below logs when it succeeds.
+	}
+
+	@Override
+	public void connectComplete(boolean reconnect, String serverURI) {
+		if (reconnect) {
+			logger.warn("Reconnected to " + serverURI);
+		} else {
+			logger.debug("Connected to " + serverURI);
+		}
 	}
 
 	@Override
@@ -110,13 +140,18 @@ public class ZhinuPublisher implements MqttCallback{
 	}
 
 	private void doPublish(String topicName, String messageText) {
+		//
+		// connOpt has setAutomaticReconnect(true), so Paho is already retrying
+		// in the background with its own backoff. Calling connect() here too
+		// (as this used to) raced with it -- both open a CONNECT with the same
+		// client ID at once, the broker kills whichever loses, and every
+		// publish() call kept re-triggering that with no backoff of its own
+		// (the same anti-pattern the SFTP publisher had). Just skip this
+		// publish and let automatic reconnect finish the job.
+		//
 		if(!myClient.isConnected()) {
-			try {
-				myClient.connect(connOpt);
-			} catch (MqttException e) {
-				logger.warn(Utils.getStringException(e));
-				return;
-			}
+			logger.warn("Not connected to " + BROKER_URL + ", skipping publish of topic " + topicName + ", automatic reconnect will re-establish the session");
+			return;
 		}
 
 		// setup topic
@@ -147,8 +182,13 @@ public class ZhinuPublisher implements MqttCallback{
 		    	try {
 		    		// publish message to broker
 					token = topic.publish(message);
-			    	// Wait until the message has been delivered to the broker
-					token.waitForCompletion();
+			    	//
+			    	// waitForCompletion() with no timeout blocks forever if the
+			    	// connection looks up but is actually degraded (half-open TCP,
+			    	// no acks coming back) -- that would stall this dedicated
+			    	// publish thread indefinitely instead of failing gracefully.
+			    	//
+					token.waitForCompletion(PUBLISH_TIMEOUT_MILLIS);
 				} catch (Exception e) {
 					logger.warn(Utils.getStringException(e));
 				}

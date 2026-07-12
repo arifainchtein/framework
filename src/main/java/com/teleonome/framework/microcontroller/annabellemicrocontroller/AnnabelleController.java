@@ -202,47 +202,7 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 			}
 		}while(keepGoing);
 		*/
-		SerialPort portId = null;
-		SerialPort[] allPorts = null;
-		int counter=0;
-		int maxNumberReconnects=3;
-		boolean keepGoing=true;
-		do {
-			allPorts = SerialPort.getCommPorts();
-			logger.debug("looking for ports, found " + allPorts.length + " ports");
-			
-			for (SerialPort port : allPorts) {
-				logger.debug("looking for ports, currPortId=" + port.getSystemPortName());
-	
-				for (String portName : PORT_NAMES) {
-					if (port.getSystemPortName().equals(portName) || port.getSystemPortName().startsWith(portName)) {
-						portId = port;
-						break;
-					}
-				}
-				if (portId != null) break;
-			}
-			
-			if (portId == null) {
-				if(counter<=maxNumberReconnects) {
-					counter++;
-					logger.info("Could not find Serial Port," + counter + " out of " + maxNumberReconnects);
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}else {
-					logger.warn("Could not find COM port.");
-					Hashtable<String, String> h = new Hashtable();
-					h.put("message","Could not find COM port");
-					throw new MicrocontrollerCommunicationException(h);
-				}
-			}else {
-				keepGoing=false;
-			}
-		}while(keepGoing);
-		logger.debug("Found COM Port1.");
+		SerialPort portId = findSerialPort();
 		try {
 			//
 			// get the data rate for the arduno ie get the DeneWord , get the dene that represents the arduino
@@ -303,70 +263,12 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 			}
 			
 			logger.debug("using datarate=" + DATA_RATE);
-		    counter=0;
-			boolean openAndTested=false;
 			logger.debug("about to open port , sleeping 1 sec first" );
 			Thread.sleep(1000);
-			
-			
-			
-//			serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
-//			logger.debug("opened port , sleeping another  sec " );
-//			Thread.sleep(1000);
-//			//serialPort.disableReceiveTimeout();
-//			serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
-//			serialPort.enableReceiveTimeout(30000);
-//			serialPort.enableReceiveThreshold(1);
-//			serialPort.setSerialPortParams(DATA_RATE,
-//					SerialPort.DATABITS_8,
-//					SerialPort.STOPBITS_1,
-//					SerialPort.PARITY_NONE);
-//			//serialPort.setRTS(false);
-//			//serialPort.setDTR(true);
-//			//serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN |  SerialPort.FLOWCONTROL_RTSCTS_OUT);
-//			serialPort.setDTR(true);
-//			// open the streams
-//
-//			serialPort.addEventListener(this);
-//			serialPort.notifyOnDataAvailable(true);
-//			connectToSerialPort();
-
 
 			// Configure and open the serial port
-						serialPort = portId;
-						serialPort.setComPortParameters(DATA_RATE, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
-						serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 2000, 0);
-						serialPort.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
-						
-						if (!serialPort.openPort()) {
-							logger.warn("Failed to open serial port");
-							Hashtable<String, String> h = new Hashtable();
-							h.put("message","Failed to open serial port");
-							throw new MicrocontrollerCommunicationException(h);
-						}
-						
-						logger.debug("opened port , sleeping another  sec " );
-						Thread.sleep(1000);
-						
-						// Set DTR
-						serialPort.setDTR();
-						
-						// Add event listener for data available
-						serialPort.addDataListener(new SerialPortDataListener() {
-							@Override
-							public int getListeningEvents() {
-								return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
-							}
-							
-							@Override
-							public void serialEvent(SerialPortEvent event) {
-								if (event.getEventType() == SerialPort.LISTENING_EVENT_DATA_AVAILABLE) {
-									// Handle data available event
-									// This replaces the serialPortEventListener functionality
-								}
-							}
-						});
-						
+			openAndConfigureSerialPort(portId);
+
 			//
 			// to make sure that the serial port has not hung, do a test
 			//
@@ -387,9 +289,99 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 		serialPort.closePort();
 	}
 
+	// Scans the OS's current port list for one matching PORT_NAMES. Used by
+	// both init() and reconnect() - critically, reconnect() must call this
+	// (rather than reusing the cached `serialPort` field) because after a
+	// physical USB unplug/replug the old SerialPort object's native handle is
+	// dead even when the device reappears under the same system port name;
+	// only a fresh SerialPort.getCommPorts() scan finds a handle that works.
+	private SerialPort findSerialPort() throws MicrocontrollerCommunicationException {
+		SerialPort portId = null;
+		SerialPort[] allPorts = null;
+		int counter=0;
+		int maxNumberReconnects=3;
+		boolean keepGoing=true;
+		do {
+			allPorts = SerialPort.getCommPorts();
+			logger.debug("looking for ports, found " + allPorts.length + " ports");
+
+			for (SerialPort port : allPorts) {
+				logger.debug("looking for ports, currPortId=" + port.getSystemPortName());
+
+				for (String portName : PORT_NAMES) {
+					if (port.getSystemPortName().equals(portName) || port.getSystemPortName().startsWith(portName)) {
+						portId = port;
+						break;
+					}
+				}
+				if (portId != null) break;
+			}
+
+			if (portId == null) {
+				if(counter<=maxNumberReconnects) {
+					counter++;
+					logger.info("Could not find Serial Port," + counter + " out of " + maxNumberReconnects);
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}else {
+					logger.warn("Could not find COM port.");
+					Hashtable<String, String> h = new Hashtable();
+					h.put("message","Could not find COM port");
+					throw new MicrocontrollerCommunicationException(h);
+				}
+			}else {
+				keepGoing=false;
+			}
+		}while(keepGoing);
+		logger.debug("Found COM Port1.");
+		return portId;
+	}
+
+	// Configures and opens a freshly-found port, assigning it to the
+	// `serialPort` field. Split out of init() so reconnect() can rebind to a
+	// newly-scanned port the same way init() does on first startup.
+	private void openAndConfigureSerialPort(SerialPort portId) throws MicrocontrollerCommunicationException, InterruptedException {
+		serialPort = portId;
+		serialPort.setComPortParameters(DATA_RATE, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+		serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 2000, 0);
+		serialPort.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
+
+		if (!serialPort.openPort()) {
+			logger.warn("Failed to open serial port");
+			Hashtable<String, String> h = new Hashtable();
+			h.put("message","Failed to open serial port");
+			throw new MicrocontrollerCommunicationException(h);
+		}
+
+		logger.debug("opened port , sleeping another  sec " );
+		Thread.sleep(1000);
+
+		// Set DTR
+		serialPort.setDTR();
+
+		// Add event listener for data available
+		serialPort.addDataListener(new SerialPortDataListener() {
+			@Override
+			public int getListeningEvents() {
+				return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
+			}
+
+			@Override
+			public void serialEvent(SerialPortEvent event) {
+				if (event.getEventType() == SerialPort.LISTENING_EVENT_DATA_AVAILABLE) {
+					// Handle data available event
+					// This replaces the serialPortEventListener functionality
+				}
+			}
+		});
+	}
+
 	@Override
 	public void reconnect() throws IOException {
-		logger.info("reconnect() called - closing and reopening the serial port");
+		logger.info("reconnect() called - rescanning for the serial port and reopening it");
 		if (serialPort != null) {
 			try {
 				closeSerialPort();
@@ -398,9 +390,21 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 			}
 		}
 		try {
+			// Re-scan and reopen from scratch (see findSerialPort()'s comment)
+			// instead of just re-fetching streams off the stale SerialPort
+			// object - that stale-handle case is exactly what used to force
+			// killing and restarting the whole Hypothalamus process after
+			// unplugging/replugging the USB cable.
+			SerialPort portId = findSerialPort();
+			openAndConfigureSerialPort(portId);
 			connectToSerialPort();
+		} catch (MicrocontrollerCommunicationException e) {
+			throw new IOException("Failed to find/open Annabelle serial port during reconnect", e);
 		} catch (SerialPortCommunicationException e) {
 			throw new IOException("Failed to reconnect to Annabelle serial port: " + e.getMessage());
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IOException("Interrupted while reconnecting to Annabelle serial port", e);
 		}
 	}
 
