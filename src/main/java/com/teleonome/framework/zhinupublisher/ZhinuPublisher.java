@@ -47,6 +47,7 @@ public class ZhinuPublisher implements MqttCallbackExtended{
 	// backlog of stale data anyway.
 	//
 	private static final int PUBLISH_QUEUE_CAPACITY = 20;
+	private static final long PUBLISH_TIMEOUT_MILLIS = 5000;
 	private final ExecutorService publishExecutor = new ThreadPoolExecutor(
 			1, 1, 0L, TimeUnit.MILLISECONDS,
 			new ArrayBlockingQueue<>(PUBLISH_QUEUE_CAPACITY),
