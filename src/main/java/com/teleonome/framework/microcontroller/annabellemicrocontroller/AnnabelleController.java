@@ -37,11 +37,6 @@ import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.MotherMicroController;
 import com.teleonome.framework.utils.Utils;
 
-//import gnu.io.CommPortIdentifier;
-//import gnu.io.SerialPort;
-//import gnu.io.SerialPortEvent;
-//import gnu.io.SerialPortEventListener;
-
 import com.fazecast.jSerialComm.*;
 
 public class AnnabelleController extends MotherMicroController implements  LifeCycleEventListener {

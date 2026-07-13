@@ -1217,6 +1217,20 @@ public class PLSeriesReader extends BufferedReader {
 		         int readResult = is.read(b, bufferOffset, readLength);
 		         if (readResult == -1) break;
 		         bufferOffset += readResult;
+		         if (readResult == 0) {
+		             // Nothing available yet. Without this pause the loop busy-spins on
+		             // is.available()/is.read(), calling into jSerialComm's native layer
+		             // tens of thousands of times per invocation -- this was driving
+		             // steady native memory growth (~2MB/pulse) with the JVM heap
+		             // staying flat. 10ms is well under the byte-transfer time at
+		             // 2400 baud (~4ms/byte), so it doesn't affect responsiveness.
+		             try {
+		                 Thread.sleep(10);
+		             } catch (InterruptedException e) {
+		                 Thread.currentThread().interrupt();
+		                 break;
+		             }
+		         }
 		     }
 		     return bufferOffset;
 		 }

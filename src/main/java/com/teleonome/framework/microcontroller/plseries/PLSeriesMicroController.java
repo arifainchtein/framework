@@ -27,9 +27,6 @@ import com.teleonome.framework.microcontroller.PlainReader;
 import com.teleonome.framework.utils.Utils;
 import com.fazecast.jSerialComm.*;
 
-//import gnu.io.CommPortIdentifier;
-//import gnu.io.SerialPort;
-
 public class PLSeriesMicroController extends MicroController {
 			
 
@@ -190,72 +187,6 @@ public class PLSeriesMicroController extends MicroController {
 
 				
 			}
-			/*
-			public void initializeSerialComm() throws SerialPortCommunicationException {
-				
-				Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
-
-				CommPortIdentifier portId = null;
-				CommPortIdentifier currPortId=null;
-				while (portId == null && portEnum.hasMoreElements()) {
-					currPortId = (CommPortIdentifier) portEnum.nextElement();
-					//System.out.println("currPortId=" + currPortId.getName());
-					logger.debug("PLA-"+"looking for ports, currPortId=" + currPortId);
-
-					for (String portName : PORT_NAMES) {
-						if ( currPortId.getName().equals(portName) || currPortId.getName().startsWith(portName) ){
-							// Try to connect to the Arduino on this port
-							portId = currPortId;
-							break;
-						}
-					}
-				}
-				if (portId == null) {
-					//System.out.println("Could not find COM port.");
-					logger.debug("PLA-"+"Could not find COM port.");
-					throw new SerialPortCommunicationException("Could not find COM port");
-				}
-				logger.debug("PLA-"+"Found COM Port.");
-				try {
-					serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
-					serialPort.setSerialPortParams(DATA_RATE,
-							SerialPort.DATABITS_8,
-							SerialPort.STOPBITS_1,
-							SerialPort.PARITY_NONE);
-
-					// open the streams
-					logger.debug("PLA-"+"serialPort, set parameters");
-					
-					serialPort.notifyOnDataAvailable(true);
-					///serialPort..write().write(InetAddress.getLocalHost().toString().t());
-					serialPortInputStream = serialPort.getInputStream();
-					serialPortOutputStream = serialPort.getOutputStream();
-					logger.debug("PLA-"+"serialPort, got streams");
-					
-					if (serialPortInputStream == null) {
-						//System.out.println("serialPortInputStream is null.");
-						logger.debug("PLA-"+"serialPortInputStream is null.");
-						throw new SerialPortCommunicationException("SerialPortInputStream is null");
-					}
-					
-					if (serialPortOutputStream == null) {
-						//System.out.println("serialPortOutputStream is null.");
-						logger.debug("PLA-"+"serialPortOutputStream is null.");
-						throw new SerialPortCommunicationException("SerialPortOutputStream is null");
-					}
-				} catch (Exception e) {
-					//System.out.println(e.toString());
-					// TODO Auto-generated catch block
-					StringWriter sw = new StringWriter();
-					e.printStackTrace( new PrintWriter( sw )    );
-					String callStack = sw.toString();
-					logger.info(callStack);
-					//System.out.println(sw.toString());
-				}
-				
-			}
-			*/
-			 
 			@Override
 			public BufferedReader getReader() throws IOException {
 				logger.info(" When asking the reader.getCurrentCommand()=" + aPlSeriesWriter.getCurrentCommand());
