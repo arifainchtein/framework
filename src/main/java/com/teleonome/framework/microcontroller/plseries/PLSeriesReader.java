@@ -1212,24 +1212,30 @@ public class PLSeriesReader extends BufferedReader {
 		     int bufferOffset = 0;
 		     long maxTimeMillis = System.currentTimeMillis() + timeoutMillis;
 		     while (System.currentTimeMillis() < maxTimeMillis && bufferOffset < b.length) {
-		         int readLength = java.lang.Math.min(is.available(),b.length-bufferOffset);
-		         // can alternatively use bufferedReader, guarded by isReady():
-		         int readResult = is.read(b, bufferOffset, readLength);
+		         // No is.available() call here on purpose. The port is configured
+		         // TIMEOUT_READ_SEMI_BLOCKING (see PLSeriesMicroController.initializeSerialComm()),
+		         // so read() already blocks until at least one byte is available (or its own
+		         // timeout elapses) and returns however much showed up -- available() was a second,
+		         // redundant native/JNI call every iteration that told us nothing read() doesn't
+		         // already give us. Halving native call volume this way is the actual fix for the
+		         // steady ~2MB/pulse native memory growth: the earlier 10ms busy-spin throttle
+		         // (see git history) cut wasted empty-poll iterations but left this per-iteration
+		         // available()+read() pair intact on every productive call, which is why the leak
+		         // rate was unchanged after that fix -- it was never the busy-spinning that leaked,
+		         // it was this call pair itself, at native-layer request volume unrelated to pacing.
+		         //
+		         // Tradeoff: the serial port's own read timeout (30s, same config line above) is
+		         // longer than the ~6s budget most callers pass as timeoutMillis. In the normal case
+		         // read() returns quickly once data shows up, same as before. But if the hardware
+		         // goes completely silent (not just slow), this blocking read() can't be preempted
+		         // by the maxTimeMillis check below mid-call, so a single attempt can now take up to
+		         // the port's full 30s instead of the caller's intended ~6s. Accepted tradeoff -- see
+		         // conversation 2026-07-15.
+		         int readResult = is.read(b, bufferOffset, b.length - bufferOffset);
 		         if (readResult == -1) break;
 		         bufferOffset += readResult;
 		         if (readResult == 0) {
-		             // Nothing available yet. Without this pause the loop busy-spins on
-		             // is.available()/is.read(), calling into jSerialComm's native layer
-		             // tens of thousands of times per invocation -- this was driving
-		             // steady native memory growth (~2MB/pulse) with the JVM heap
-		             // staying flat. 10ms is well under the byte-transfer time at
-		             // 2400 baud (~4ms/byte), so it doesn't affect responsiveness.
-		             try {
-		                 Thread.sleep(10);
-		             } catch (InterruptedException e) {
-		                 Thread.currentThread().interrupt();
-		                 break;
-		             }
+		             break;
 		         }
 		     }
 		     return bufferOffset;
