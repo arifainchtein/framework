@@ -24,13 +24,13 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 	// energizerBatteryVoltage#energizerBatteryCurrent#temperature#fenceVoltage#fenceVoltageMin#
 	// fenceVoltageMax#fenceVoltageAvg#pulseCount#rssi#snr#operatingStatus#wpsFrequencySeconds#
 	// maxWPSVoltage#minWPSVoltage#secondsSinceLastPulse#solarVoltage#solarCurrentMa#batteryVoltage#
-	// batteryCurrentMa#estimatedRuntime#batteryChemistry#rtcBatVolt#checksum
+	// batteryCurrentMa#estimatedRuntime#batteryChemistry#rtcBatVolt#overnightMah#checksum
 	@Override
 	public JSONObject deserialise(String teleonomeName, String line) {
 		JSONObject toReturn = new JSONObject();
 		String[] tokens = line.split("#");
 		logger.debug("LangleyDataDeserializer: tokens=" + tokens.length + " received=" + line);
-		if (tokens.length < 28) {
+		if (tokens.length < 29) {
 			logger.debug("Bad data received");
 			return new JSONObject();
 		}
@@ -136,8 +136,14 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		double rtcBatVolt = 0.0;
 		try { rtcBatVolt = Double.parseDouble(tokens[26].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
+		// Coulomb-counted discharge mAh since the last sunset - see overnightMah in LangleyData.h
+		// and the accumulator in Langley.ino's goToSleep(). Added for the overnight battery-sizing
+		// calibration run - see conversation 2026-07-14.
+		double overnightMah = 0.0;
+		try { overnightMah = Double.parseDouble(tokens[27].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+
 		int checksum = 0;
-		try { checksum = Integer.parseInt(tokens[27].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { checksum = Integer.parseInt(tokens[28].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		logger.debug("LangleyDataDeserializer: finished parsing");
 
@@ -199,6 +205,7 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Battery Current", "" + batteryCurrentMa, "mA", TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Estimated Runtime", "" + estimatedRuntime, "hours", TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("RTC Battery Voltage", "" + rtcBatVolt, "V", TeleonomeConstants.DATATYPE_DOUBLE, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Overnight Mah", "" + overnightMah, "mAh", TeleonomeConstants.DATATYPE_DOUBLE, true));
 
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Internal Temperature", "" + temperature, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", "" + operatingStatus, null, TeleonomeConstants.DATATYPE_INTEGER, true));
