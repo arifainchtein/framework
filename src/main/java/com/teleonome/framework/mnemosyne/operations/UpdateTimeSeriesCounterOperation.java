@@ -38,17 +38,30 @@ public class UpdateTimeSeriesCounterOperation extends MnemosyneOperation {
 			newValueJSONObject.put(TeleonomeConstants.PULSE_TIMESTAMP_MILLISECONDS, denomeManager.getcurrentlyCreatingPulseTimestampMillis());
 			Object o = denomeManager.getDeneWordAttributeByIdentity(new Identity(dataSourcePointer), TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			logger.debug("line 3476 dataSourcePointer=" + dataSourcePointer + " dataSourceValue=" + o);
+			boolean gotValue = true;
 			if(o instanceof Integer) {
 				int dataSourceValue = (int)o;
-				newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
+				newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);
 			}else if (o instanceof Double) {
 				double dataSourceValue = (double) o;
-				newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
+				newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);
 			}else if (o instanceof Long) {
 				long dataSourceValue = (long) o;
-				newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);	
+				newValueJSONObject.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataSourceValue);
+			}else {
+				// Source resolved to null (or some other unexpected type) -- most likely the
+				// pointed-to DeneWord was momentarily being rebuilt elsewhere (e.g. an async
+				// sensor refresh) at the exact moment this pulse's Actuator ran. Rather than
+				// recording a timestamp-only entry with no Value (which downstream chart code
+				// then has to defend against), skip adding this pulse to the time series data
+				// array below -- but the counter still advances on its normal cadence (see
+				// gotValue guard further down), since other Denes key off this counter's cycle
+				// (e.g. "(Counter == 0)" conditions) independently of the data array's contents.
+				gotValue = false;
+				logger.warn("UpdateTimeSeriesCounterOperation: dataSourcePointer=" + dataSourcePointer
+						+ " resolved to null or unexpected type (" + (o == null ? "null" : o.getClass().getName())
+						+ ") -- skipping this pulse for this time series");
 			}
-
 
 			logger.debug("newValueJSONObject=" + newValueJSONObject.toString(4));
 
@@ -77,7 +90,12 @@ public class UpdateTimeSeriesCounterOperation extends MnemosyneOperation {
 			//
 			// if the array has less than the limit just add the new one
 			// if it already has the limit then create a new JSONArray
-			if(dataJSONArray.length()<counterLimit) {
+			// (skipped entirely when gotValue is false -- see the instanceof checks above --
+			// so a pulse with an unreadable source just isn't represented in the data at all,
+			// rather than adding a timestamp with no Value)
+			if(!gotValue) {
+				// no-op: counter above already advanced on its normal cadence
+			}else if(dataJSONArray.length()<counterLimit) {
 				dataJSONArray.put(newValueJSONObject);
 				dataDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataJSONArray);
 			}else {
