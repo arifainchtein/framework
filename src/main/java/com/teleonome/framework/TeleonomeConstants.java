@@ -983,6 +983,7 @@ public class TeleonomeConstants {
 	public static final String PATHOLOGY_MISSING_DENOME_FILE= "Missing Denome File";
 	
 	public static final String PATHOLOGY_TOMCAT_PING_LATE= "Tomcat Ping Late";
+	public static final String PATHOLOGY_HYPOTHALAMUS_MEMORY_CEILING= "Hypothalamus Memory Ceiling Exceeded";
 	public static final String PATHOLOGY_DETAILS_LABEL= "Details";
 	
 	public static final String PATHOLOGY_MEDULA_FORCED_REBOOT="Medula Forced Reboot";
