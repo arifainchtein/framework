@@ -99,20 +99,24 @@ public class UpdateTimeSeriesCounterOperation extends MnemosyneOperation {
 				dataJSONArray.put(newValueJSONObject);
 				dataDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataJSONArray);
 			}else {
-				JSONArray newDataJSONArray = new JSONArray();
 				//
-				// put the new object in the first position
-				newDataJSONArray.put(newValueJSONObject);
+				// Buffer is full: evict the oldest entry (index 0 -- the branch above
+				// always appends, so index 0 is always the oldest) and append the new
+				// one at the end, keeping a single oldest-first ordering for the whole
+				// life of the array. The previous implementation instead built a new
+				// array with the new value prepended at index 0 and the old array's
+				// tail dropped, which silently flipped the ordering convention the
+				// moment the buffer first filled up and evicted the wrong (newest, not
+				// oldest) entry each cycle after that. Chart code reads this array in
+				// index order and doesn't re-sort, so everything before that flip stayed
+				// frozen in ascending order while everything after it grew in descending
+				// order at the front -- the same array rendering as two chronologically
+				// backwards halves stitched together (observed on ChinampaMonitor's
+				// Hypothalamus/Heart/Web Server memory charts, 2026-07-16).
 				//
-				// now put all the other elements except the last one into the new array
-				JSONObject jobj;
-				for(int i=0;i<counterLimit-1;i++) {
-					newDataJSONArray.put(dataJSONArray.get(i));
-				}
-				//
-				// and store the new array
-				//
-				dataDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, newDataJSONArray);
+				dataJSONArray.remove(0);
+				dataJSONArray.put(newValueJSONObject);
+				dataDeneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, dataJSONArray);
 			}
 		} catch (InvalidDenomeException | JSONException e) {
 			Utils.getStringException(e);
