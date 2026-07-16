@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.sql.Connection;
@@ -1768,7 +1769,18 @@ public class MnemosyneManager {
 		try {
 			logger.info("about to save denome after mnemosyne prunning");
 			denomeJSONObject.put("Mnemosyne Time Prunning Analysis Duration Millis", timePrunningAnalysisDuration);
-			FileUtils.write(new File(selectedDenomeFileName), denomeJSONObject.toString(4));
+			//
+			// Writing straight to selectedDenomeFileName truncates it in place, leaving
+			// a window where a concurrent reader (e.g. Medula's monitor cycle) sees it
+			// empty or partial. Stage to a sibling .tmp file and swap it in atomically,
+			// same pattern as DenomeManager.saveAtomically() (conversation 2026-07-16).
+			//
+			File targetDenomeFile = new File(selectedDenomeFileName);
+			File tempDenomeFile = new File(targetDenomeFile.getParent(), targetDenomeFile.getName() + ".tmp");
+			FileUtils.write(tempDenomeFile, denomeJSONObject.toString(4));
+			Files.move(tempDenomeFile.toPath(), targetDenomeFile.toPath(),
+					StandardCopyOption.REPLACE_EXISTING,
+					StandardCopyOption.ATOMIC_MOVE);
 			//FileUtils.write(new File("arijunk.json"), denomeJSONObject.toString(4));
 		} catch (JSONException e1) {
 			// TODO Auto-generated catch block

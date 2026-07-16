@@ -4600,12 +4600,24 @@ public class DenomeManager {
 	    return toReturn;
 	}
 
-	// Helper method to stream JSON directly to disk
+	// Helper method to stream JSON directly to disk, atomically.
+	// Writing straight to `file` with FileWriter truncates it to zero length the
+	// instant the stream opens, so anything reading `file` while this is in
+	// flight (e.g. Medula's monitor cycle) can see it half-written or briefly
+	// missing (see conversation 2026-07-16: Medula hit exactly this on Ra,
+	// misread the empty result as the webapp being down, and killed a healthy
+	// Tomcat). Stream to a sibling .tmp file instead and swap it into place with
+	// an atomic rename, same pattern as saveAtomically() above, so readers only
+	// ever see the old complete file or the new complete file, never a partial one.
 	private void writeJsonObjectToFile(JSONObject json, File file) throws IOException {
-	    try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+	    File tempFile = new File(file.getParent(), file.getName() + ".tmp");
+	    try (BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile))) {
 	        json.write(bw); // This streams node-by-node, keeping RAM usage flat
 	        bw.flush();
 	    }
+	    Files.move(tempFile.toPath(), file.toPath(),
+	               StandardCopyOption.REPLACE_EXISTING,
+	               StandardCopyOption.ATOMIC_MOVE);
 	}
 //	
 //	public boolean readAndModifyDeneWordByIdentity(Identity targetDeneWordIdentity,Object value) throws JSONException, InvalidDenomeException{
@@ -6372,17 +6384,11 @@ public class DenomeManager {
 				    File primaryFile = new File(Utils.getLocalDirectory() + "Teleonome.denome");
 				    File tomcatFile = new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome");
 
-				    // 2. Write to the primary file using a stream
-				    try (BufferedWriter writer = new BufferedWriter(new FileWriter(primaryFile))) {
-				        denomeJSONObject.write(writer); // Streams directly, NO massive String created
-				        writer.flush();
-				    }
-
-				    // 3. Write to the tomcat file using a stream
-				    try (BufferedWriter writer = new BufferedWriter(new FileWriter(tomcatFile))) {
-				        denomeJSONObject.write(writer); 
-				        writer.flush();
-				    }
+				    // 2 & 3. Stream to each file via a .tmp sibling + atomic rename (see
+				    // writeJsonObjectToFile above) so a reader never catches either file
+				    // truncated or briefly missing mid-write.
+				    writeJsonObjectToFile(denomeJSONObject, primaryFile);
+				    writeJsonObjectToFile(denomeJSONObject, tomcatFile);
 
 				    logger.debug("Successfully saved Denome to both locations via streaming.");
 
