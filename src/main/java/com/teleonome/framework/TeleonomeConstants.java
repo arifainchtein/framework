@@ -975,6 +975,11 @@ public class TeleonomeConstants {
 
 	public static final String PATHOLOGY_HEART_PULSE_LATE= "Heart Pulse Late";
 	public static final String PATHOLOGY_HEART_SESSION_LOOP_DEAD= "Heart Session Loop Dead";
+	// Heart's own ping (independent of anything Hypothalamus publishes) is fresh,
+	// but Heart's pulse denome is late -- Heart itself is alive, Hypothalamus is
+	// just not delivering pulses to it. Distinguished from PATHOLOGY_HEART_PULSE_LATE
+	// so Heart is not restarted for a problem that is not Heart's.
+	public static final String PATHOLOGY_HYPOTHALAMUS_NOT_PUBLISHING_TO_HEART= "Hypothalamus Not Publishing To Heart";
 	public static final String PATHOLOGY_HIPPOCAMPUS_LATE= "Hippocampus Late";
 	public static final String PATHOLOGY_CEREBELLUM_LATE= "Cerebellum Late";
 	public static final String PATHOLOGY_HEART_CRASHED_HPROF= "Heart Crashed hprof";
