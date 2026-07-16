@@ -32,6 +32,7 @@ import com.teleonome.framework.exception.InvalidDenomeException;
 import com.teleonome.framework.exception.InvalidMutation;
 import com.teleonome.framework.exception.PersistenceException;
 import com.teleonome.framework.microcontroller.MicroController;
+import com.teleonome.framework.microcontroller.annabellemicrocontroller.AnnabelleReader;
 import com.teleonome.framework.mnemosyne.MnemosyneManager;
 import com.teleonome.framework.network.NetworkUtilities;
 import com.teleonome.framework.utils.Utils;
@@ -932,6 +933,44 @@ class MappedBusThread extends Thread{
 
 								output = aMicroController.getWriter();
 								input = aMicroController.getReader();
+
+								//
+								// Ask how many data lines are coming before asking for the data
+								// itself, so the reader can bound its wait instead of reading an
+								// unknown-length response line by line and guessing when it's
+								// done. Only AnnabelleReader understands this two-step protocol;
+								// other microcontroller types just skip it and behave as before.
+								// See conversation 2026-07-16 (ChinampaMonitor Hypothalamus hangs
+								// -- AsyncData can legitimately emit one line per queued record
+								// across six device queues before its own terminal "Ok-AsyncData").
+								//
+								if(input instanceof AnnabelleReader) {
+									try {
+										String countCommand = "AsyncDataCount";
+										output.write(countCommand,0,countCommand.length());
+										output.flush();
+										try {
+											Thread.sleep(500);
+										} catch (InterruptedException ie) {
+											Thread.currentThread().interrupt();
+										}
+										String countLine = input.readLine();
+										int expectedCount = -1;
+										String marker = "AsyncDataCount#";
+										if(countLine!=null && countLine.contains(marker)) {
+											try {
+												expectedCount = Integer.parseInt(countLine.substring(countLine.indexOf(marker)+marker.length()).trim());
+											} catch (NumberFormatException nfe) {
+												logger.warn("could not parse AsyncDataCount response: " + countLine);
+											}
+										}
+										logger.debug("AsyncDataCount for " + aMicroController.getName() + " = " + expectedCount);
+										((AnnabelleReader)input).setExpectedDataLineCount(expectedCount);
+									} catch(IOException ce) {
+										logger.warn("AsyncDataCount query failed for " + aMicroController.getName() + ": " + Utils.getStringException(ce));
+									}
+								}
+
 								logger.debug("requesting asyncdata");
 								output.write(asyncData,0,asyncData.length());
 								output.flush();

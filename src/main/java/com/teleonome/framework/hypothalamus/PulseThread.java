@@ -479,9 +479,35 @@ public class PulseThread extends Thread{
 				if(anHypothalamus.aMappedBusThread!=null){
 
 					anHypothalamus.aMappedBusThread.setKeepRunning(false);
+					//
+					// This used to be an unbounded wait. AsyncCycle's own stop check is
+					// cooperative -- it's only examined between blocking I/O calls -- so
+					// a microcontroller read that never returns (no exception, just
+					// silence) leaves it stuck ignoring keepRunning=false indefinitely,
+					// and this loop had nothing to bound it either: a single wedged
+					// serial read on ChinampaMonitor held the whole pulse cycle hostage
+					// for minutes until Medula's external late-pulse check finally
+					// noticed and killed -9'd the JVM (see conversation 2026-07-16).
+					// Cap the wait instead: if AsyncCycle hasn't stopped within ~30s,
+					// something is genuinely wedged (not just slow), so exit cleanly
+					// ourselves rather than sit silently hung -- Medula's restart path
+					// already handles this JVM going away and snapshots/repairs
+					// Teleonome.denome if it catches a write in progress.
+					//
+					int mappedBusWaitAttempts=0;
+					int mappedBusMaxWaitAttempts=60;
 					while( anHypothalamus.aMappedBusThread.isAlive()){
 						logger.info("waiting for mapped bus to finish");
 						Thread.sleep(500);
+						mappedBusWaitAttempts++;
+						if(mappedBusWaitAttempts>mappedBusMaxWaitAttempts) {
+							logger.warn("AsyncCycle (aMappedBusThread) did not stop within "
+									+ (mappedBusMaxWaitAttempts/2) + "s of being asked to -- it is likely wedged on a"
+									+ " microcontroller read that is not returning. Exiting so Medula restarts"
+									+ " Hypothalamus cleanly instead of leaving the pulse hung indefinitely."
+									+ " Thread state: " + anHypothalamus.aMappedBusThread.getState());
+							System.exit(1);
+						}
 					}
 				}else {
 					logger.info("anHypothalamus.aMappedBusThread is null ");

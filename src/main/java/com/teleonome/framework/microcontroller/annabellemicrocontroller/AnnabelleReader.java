@@ -22,6 +22,19 @@ public class AnnabelleReader extends BufferedReader{
 	DenomeManager aDenomeManager;
 	Hypothalamus hypothalamus;                                                                                                                                                                                                                            
 	private String currentCommand="";
+	//
+	// Set before an AsyncData request (via AsyncDataCount, queried first) so
+	// readLine() knows how many data lines to expect before the "Ok-" sentinel.
+	// Without this, a corrupted/lost sentinel (e.g. from a stray debug line
+	// landing mid-response) left the drain loop below with no bound at all --
+	// it only gave up on repeated IOExceptions, never on a read that just never
+	// arrives. -1 means "unknown", i.e. behave as before (sentinel-only exit).
+	// See conversation 2026-07-16 (ChinampaMonitor Hypothalamus hangs).
+	//
+	private int expectedDataLineCount = -1;
+	public void setExpectedDataLineCount(int n) {
+		expectedDataLineCount = n;
+	}
 	public AnnabelleReader(BufferedReader in ,Hypothalamus h,DenomeManager d) {
 		super(in);
 		reader=in;
@@ -64,6 +77,7 @@ public class AnnabelleReader extends BufferedReader{
 		String line="", className;
 		int counter=0;
 		int maxTries=10;
+		int linesRead=0;
 		String deserializer, deviceName;
 		String[] tokens;
 		boolean keepGoing=true;
@@ -73,15 +87,35 @@ public class AnnabelleReader extends BufferedReader{
 		boolean processString=false;
 		while(keepGoing) {
 			try {
-				if(appendString) {
-					line = line + reader.readLine().replaceAll("\u0000", "");
-				}else {
-					line = reader.readLine().replaceAll("\u0000", "");
+				String rawLine = reader.readLine();
+				if(rawLine==null) {
+					logger.warn("underlying reader returned null (stream closed?), giving up on this response");
+					line=null;
+					keepGoing=false;
+					appendString=false;
+					continue;
 				}
-				
+				if(appendString) {
+					line = line + rawLine.replaceAll("\u0000", "");
+				}else {
+					line = rawLine.replaceAll("\u0000", "");
+				}
+				linesRead++;
+
 				logger.debug("line 63, received line=" + line);
-				if(line==null || line.contains("Ok-") || line.contains("Failure"))
+				if(line.contains("Ok-") || line.contains("Failure"))
 				{
+					keepGoing=false;
+					appendString=false;
+				}else if(expectedDataLineCount>=0 && linesRead>expectedDataLineCount+1) {
+					//
+					// We were told (via AsyncDataCount) to expect at most
+					// expectedDataLineCount data lines plus one terminal "Ok-"/"Failure"
+					// line. Blowing past that without hitting the sentinel means it was
+					// lost or corrupted (e.g. an unrelated debug line interleaved into
+					// the stream) -- stop waiting rather than draining forever.
+					//
+					logger.warn("exceeded expected line count (" + expectedDataLineCount + " data lines) without seeing a terminal Ok-/Failure line, giving up on this response after " + linesRead + " lines");
 					keepGoing=false;
 					appendString=false;
 				}else {
@@ -183,8 +217,11 @@ public class AnnabelleReader extends BufferedReader{
 		}
 		     
 		logger.debug("the response is:   " + line);
+		expectedDataLineCount = -1;
 		String cleaned="";
-		if(line.contains("Ok-") && telepathon!=null && telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
+		if(line==null) {
+			cleaned="";
+		}else if(line.contains("Ok-") && telepathon!=null && telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
 			cleaned=line.substring(line.indexOf("Ok-"));;
 			cleaned=TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS+"#"+telepathon.toString();
 		}else if(line.contains("Read fail") && line.contains("#")){
@@ -200,7 +237,7 @@ public class AnnabelleReader extends BufferedReader{
 			cleaned=line;
 		}
 		logger.debug("cleaned:  " + cleaned);
-		
+
 		return cleaned;
 	}
 	}
