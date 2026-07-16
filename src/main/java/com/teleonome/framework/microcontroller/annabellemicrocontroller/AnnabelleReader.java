@@ -85,6 +85,13 @@ public class AnnabelleReader extends BufferedReader{
 		JSONObject telepathon = null;
 		boolean appendString=false;
 		boolean processString=false;
+		//
+		// AsyncDataCount replies with the count on its own line, then a separate
+		// "Ok-AsyncDataCount" sentinel line. The sentinel-only match below would
+		// otherwise return "Ok-AsyncDataCount" itself and silently drop the count
+		// line as an unrecognized line -- capture it here instead.
+		//
+		String capturedAsyncDataCountValue = null;
 		while(keepGoing) {
 			try {
 				String rawLine = reader.readLine();
@@ -118,6 +125,8 @@ public class AnnabelleReader extends BufferedReader{
 					logger.warn("exceeded expected line count (" + expectedDataLineCount + " data lines) without seeing a terminal Ok-/Failure line, giving up on this response after " + linesRead + " lines");
 					keepGoing=false;
 					appendString=false;
+				}else if(command.equals("AsyncDataCount") && capturedAsyncDataCountValue==null) {
+					capturedAsyncDataCountValue = line.trim();
 				}else {
 					tokens = line.split("#");
 					deserializer=tokens[0];
@@ -226,6 +235,8 @@ public class AnnabelleReader extends BufferedReader{
 			cleaned=TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS+"#"+telepathon.toString();
 		}else if(line.contains("Read fail") && line.contains("#")){
 			cleaned=line.substring(line.lastIndexOf("fail")+4);
+		}else if(command.equals("AsyncDataCount")) {
+			cleaned = "AsyncDataCount#" + (capturedAsyncDataCountValue!=null ? capturedAsyncDataCountValue : "");
 		}else if(command.equals("GetSensorData")) {
 			//
 			// AnnabelleWriter translated GetSensorData into a Ping - Ok-Ping
