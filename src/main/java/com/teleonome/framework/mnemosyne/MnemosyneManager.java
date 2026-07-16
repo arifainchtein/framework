@@ -170,9 +170,33 @@ public class MnemosyneManager {
 	//
 	// End of Methods related to the NetworkSensor
 	//
-	
+
+	//
+	// forgetStatic()/forgetDynamic() (and their per-rule processing loops) run
+	// every pulse and used to unconditionally append a fresh "<name> Processing"
+	// Dene here with no removal of the previous one -- with 2 mnemosycons plus
+	// their rules appending ~4 denes every pulse and nothing in
+	// performTimePrunningAnalysis() ever touching Purpose:Mnemosycon Processing
+	// (it only prunes the Mnemosyne nucleus's own chains), this grew without
+	// bound for the lifetime of the denome, surviving Hypothalamus restarts
+	// since it's persisted to disk every pulse. Confirmed via heap dump on
+	// ChinampaMonitor 2026-07-16: ~30,000 live JSONObjects/HashMaps, which is
+	// what eventually OOM'd Hypothalamus itself. Replace-by-name instead of
+	// appending, since this Dene only ever represents the latest processing
+	// state, not a history.
+	//
+	private void appendOrReplaceDeneByName(JSONArray denes, String name, JSONObject newDene) {
+		for (int i = denes.length() - 1; i >= 0; i--) {
+			JSONObject existing = denes.optJSONObject(i);
+			if (existing != null && name.equals(existing.optString("Name", null))) {
+				denes.remove(i);
+			}
+		}
+		denes.put(newDene);
+	}
+
 	/**
-	 * 
+	 *
 	 * @param aMnemosyconForgetParameters
 	 * @param mnemosyconType
 	 */
@@ -296,9 +320,9 @@ public class MnemosyneManager {
 			e.printStackTrace();
 		}
 
-		JSONObject mnemosyconProcessingDene = new JSONObject();
-		mnemosyconLogicProcessingDenes.put(mnemosyconProcessingDene);
 		String mnemosyconLogicProcessingDeneName = aMnemosyconName + " "  + "Processing";
+		JSONObject mnemosyconProcessingDene = new JSONObject();
+		appendOrReplaceDeneByName(mnemosyconLogicProcessingDenes, mnemosyconLogicProcessingDeneName, mnemosyconProcessingDene);
 
 		mnemosyconProcessingDene.put("Name",mnemosyconLogicProcessingDeneName);
 		mnemosyconProcessingDene.put("Dene Type", TeleonomeConstants.DENE_TYPE_MNEMOSYCON_PROCESSING);
@@ -401,9 +425,10 @@ public class MnemosyneManager {
 			// that contains the pointer to this dene as a 
 			// deneword
 
+			String mnemosyconRuleProcessingDeneName = mnemosyconRuleJSONObject.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE) + " Processing";
 			mnemosyconRuleProcessingDene = new JSONObject();
-			mnemosyconLogicProcessingDenes.put(mnemosyconRuleProcessingDene);
-			mnemosyconRuleProcessingDene.put("Name", mnemosyconRuleJSONObject.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE) + " Processing");
+			appendOrReplaceDeneByName(mnemosyconLogicProcessingDenes, mnemosyconRuleProcessingDeneName, mnemosyconRuleProcessingDene);
+			mnemosyconRuleProcessingDene.put("Name", mnemosyconRuleProcessingDeneName);
 			mnemosyconRuleProcessingDene.put("Dene Type", TeleonomeConstants.DENE_TYPE_MNEMOSYCON_RULE_PROCESSING);
 			mnemosyconRuleProcessingDeneDeneWords = new JSONArray();
 			mnemosyconRuleProcessingDene.put("DeneWords", mnemosyconRuleProcessingDeneDeneWords);
@@ -735,9 +760,9 @@ public class MnemosyneManager {
 			e.printStackTrace();
 		}
 
-		JSONObject mnemosyconProcessingDene = new JSONObject();
-		mnemosyconLogicProcessingDenes.put(mnemosyconProcessingDene);
 		String mnemosyconLogicProcessingDeneName = aMnemosyconName + " "  + "Processing";
+		JSONObject mnemosyconProcessingDene = new JSONObject();
+		appendOrReplaceDeneByName(mnemosyconLogicProcessingDenes, mnemosyconLogicProcessingDeneName, mnemosyconProcessingDene);
 
 		mnemosyconProcessingDene.put("Name",mnemosyconLogicProcessingDeneName);
 		mnemosyconProcessingDene.put("Dene Type", TeleonomeConstants.DENE_TYPE_MNEMOSYCON_PROCESSING);
@@ -863,9 +888,10 @@ public class MnemosyneManager {
 				// that contains the pointer to this dene as a 
 				// deneword
 
+				String mnemosyconRuleProcessingDeneName = mnemosyconRuleJSONObject.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE) + " Processing";
 				mnemosyconRuleProcessingDene = new JSONObject();
-				mnemosyconLogicProcessingDenes.put(mnemosyconRuleProcessingDene);
-				mnemosyconRuleProcessingDene.put("Name", mnemosyconRuleJSONObject.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE) + " Processing");
+				appendOrReplaceDeneByName(mnemosyconLogicProcessingDenes, mnemosyconRuleProcessingDeneName, mnemosyconRuleProcessingDene);
+				mnemosyconRuleProcessingDene.put("Name", mnemosyconRuleProcessingDeneName);
 				mnemosyconRuleProcessingDene.put("Dene Type", TeleonomeConstants.DENE_TYPE_MNEMOSYCON_RULE_PROCESSING);
 				mnemosyconRuleProcessingDeneDeneWords = new JSONArray();
 				mnemosyconRuleProcessingDene.put("DeneWords", mnemosyconRuleProcessingDeneDeneWords);

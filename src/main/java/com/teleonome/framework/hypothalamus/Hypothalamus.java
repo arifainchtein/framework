@@ -627,7 +627,20 @@ public abstract class Hypothalamus {
 			        });
 
 					  logger.warn("Connecting to Heart: "+mqttBrokerAddress);
-						anMqttClient.connect(connOpts);
+					  //
+					  // setAutomaticReconnect(true) only takes over once an initial
+					  // connect has actually succeeded and is later lost via
+					  // connectionLost -- it does nothing if this very first connect()
+					  // throws (e.g. Heart's broker isn't listening yet, which happens
+					  // constantly if Heart is mid-restart when Hypothalamus starts).
+					  // Observed in production: connect() throws Connection refused
+					  // once, the exception is logged, and the client is stranded
+					  // disconnected forever with no further attempt ever made.
+					  // Retry the initial connect here in the background so a
+					  // startup-time race with Heart doesn't permanently strand us;
+					  // once connected, Paho's automatic reconnect covers future drops.
+					  //
+					  connectToHeartWithRetry(connOpts);
 						// connectComplete callback handles initial subscriptions and all re-subscriptions after reconnect
 				        logger.warn("Connected and Subscribed to Hippocampus_Status and Cerebellum_Status");
 				        
@@ -651,9 +664,36 @@ public abstract class Hypothalamus {
 					// TODO Auto-generated catch block
 					logger.warn(Utils.getStringException(e1));
 				}
-	        
+
 		}
-		
+
+		//
+		// Blocks until the initial connect() to Heart succeeds. A single failed
+		// attempt here (Connection refused, because Heart's broker happened to be
+		// mid-restart) used to strand the client disconnected forever, since
+		// Paho's automatic reconnect never engages until after a first successful
+		// connect. Retrying here means a startup race with Heart resolves itself
+		// as soon as Heart comes back up, instead of requiring a manual restart.
+		//
+		private void connectToHeartWithRetry(MqttConnectOptions connOpts) throws MqttException {
+			int attempt = 0;
+			while (true) {
+				attempt++;
+				try {
+					anMqttClient.connect(connOpts);
+					return;
+				} catch (MqttException e) {
+					logger.warn("Failed to connect to Heart (attempt " + attempt + "): " + Utils.getStringException(e) + ", retrying in 5s");
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException ie) {
+						Thread.currentThread().interrupt();
+						throw e;
+					}
+				}
+			}
+		}
+
 		public JSONObject getHippocampusStatus() {
 		    return lastHippocampusStatus;
 		}
