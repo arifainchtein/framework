@@ -281,6 +281,15 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 	}
 
 	private void closeSerialPort() {
+		//
+		// reconnect() abandons this SerialPort object and scans for a fresh one
+		// rather than reusing it (see findSerialPort()'s comment) -- but the
+		// native listener thread/buffers jSerialComm creates in addDataListener()
+		// are not released just by closePort(); without explicitly removing the
+		// listener first, each reconnect leaks a native listener behind the
+		// abandoned object instead of tearing it down.
+		//
+		serialPort.removeDataListener();
 		serialPort.closePort();
 	}
 
