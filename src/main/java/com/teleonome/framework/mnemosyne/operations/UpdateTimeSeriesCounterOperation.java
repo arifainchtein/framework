@@ -69,6 +69,20 @@ public class UpdateTimeSeriesCounterOperation extends MnemosyneOperation {
 
 			String dataPointer = (String) denomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_DATA_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			JSONObject dataDeneWord = (JSONObject) denomeManager.getDeneWordAttributeByIdentity(new Identity(dataPointer), TeleonomeConstants.COMPLETE);
+			if(dataDeneWord == null) {
+				// Same class of transient race as the dataSourcePointer null-check above
+				// (e.g. an async refresh rebuilding this DeneWord at the exact moment this
+				// pulse ran) -- previously unguarded, this NullPointerException wasn't caught
+				// by the InvalidDenomeException|JSONException handler below, so it escaped
+				// process() uncaught. PulseThread's outer catch kept the pulse LOOP alive,
+				// but this operation exited before it ever ran, which meant nothing after it
+				// in this pulse -- including the main pulse timestamp update -- ever
+				// committed, so Medula saw an ever-staler pulse and restarted Hypothalamus
+				// every cycle without it ever recovering (observed on Ra, 2026-07-18).
+				logger.warn("UpdateTimeSeriesCounterOperation: dataPointer=" + dataPointer
+						+ " resolved to null -- skipping this pulse for this time series");
+				return;
+			}
 			//
 			// the datJSONArray contains the actual timeseries array
 			//
@@ -77,6 +91,12 @@ public class UpdateTimeSeriesCounterOperation extends MnemosyneOperation {
 
 			String counterPointer = (String) denomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_COUNTER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			JSONObject counterDeneWord = (JSONObject)denomeManager.getDeneWordAttributeByIdentity(new Identity(counterPointer), TeleonomeConstants.COMPLETE);
+			if(counterDeneWord == null) {
+				// Same transient-race guard as dataDeneWord above.
+				logger.warn("UpdateTimeSeriesCounterOperation: counterPointer=" + counterPointer
+						+ " resolved to null -- skipping this pulse for this time series");
+				return;
+			}
 
 			int counterCurrentValue = counterDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 
