@@ -101,6 +101,13 @@ public class CopyTimeseriesElementToTimeseriesOperation extends MnemosyneOperati
 
 			String dataPointer = (String) denomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_DATA_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			JSONObject dataDeneWord = (JSONObject) denomeManager.getDeneWordAttributeByIdentity(new Identity(dataPointer), TeleonomeConstants.COMPLETE);
+			if(dataDeneWord == null) {
+				// dataPointer didn't resolve to a DeneWord (dangling/unresolvable pointer) --
+				// skip this pulse for this time series instead of NPEing below (same fix as
+				// UpdateTimeSeriesCounterOperation, observed on Ra, 2026-07-18).
+				logger.warn("CopyTimeseriesElementToTimeseriesOperation: dataPointer=" + dataPointer + " resolved to null -- skipping this pulse for this time series");
+				return;
+			}
 			//
 			// the datJSONArray contains the actual timeseries array
 			//
@@ -109,6 +116,10 @@ public class CopyTimeseriesElementToTimeseriesOperation extends MnemosyneOperati
 
 			String counterPointer = (String) denomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_TIMESERIES_COUNTER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			JSONObject counterDeneWord = (JSONObject) denomeManager.getDeneWordAttributeByIdentity(new Identity(counterPointer), TeleonomeConstants.COMPLETE);
+			if(counterDeneWord == null) {
+				logger.warn("CopyTimeseriesElementToTimeseriesOperation: counterPointer=" + counterPointer + " resolved to null -- skipping this pulse for this time series");
+				return;
+			}
 
 			int counterCurrentValue = counterDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 

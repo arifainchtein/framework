@@ -30,6 +30,13 @@ public class ResetCounterOperation extends MnemosyneOperation {
 			String counterPointer = (String) denomeManager.getDeneWordAttributeByDeneWordTypeFromDene(mnemosyneDene, TeleonomeConstants.DENEWORD_TYPE_MNEMOSYNE_OPERATION_COUNTER_POINTER, TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			//
 			JSONObject counterDeneWord = (JSONObject) denomeManager.getDeneWordAttributeByIdentity(new Identity(counterPointer), TeleonomeConstants.COMPLETE);
+			if(counterDeneWord == null) {
+				// counterPointer didn't resolve to a DeneWord (dangling/unresolvable pointer) --
+				// skip this pulse rather than NPEing below (see UpdateTimeSeriesCounterOperation
+				// for the same fix, observed on Ra, 2026-07-18).
+				logger.warn("ResetCounterOperation: counterPointer=" + counterPointer + " resolved to null -- skipping this pulse");
+				return;
+			}
 			int counterCurrentValue = counterDeneWord.getInt(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);
 			logger.debug("line 2933, reset counter counterPointer=" + counterPointer );
 
