@@ -7556,6 +7556,20 @@ public class DenomeManager {
 						actuatorActionConditionVariableJSONObject= (JSONObject) pair.getValue();
 						it.remove(); // avoids a ConcurrentModificationException
 
+						if(actuatorActionConditionVariableJSONObject == null) {
+							//
+							// deneWordPointer didn't resolve to a DeneWord (dangling/unresolvable
+							// pointer, e.g. pointing at something removed from the denome) -- treat
+							// like any other "data not available" case rather than NPEing on
+							// .getString() below, which used to escape uncaught and interrupt the
+							// whole pulse cycle before it could persist the pulse timestamp
+							// (observed on Ra, 2026-07-18).
+							//
+							allVariableInConditionRenderedSuccesfully=false;
+							logger.warn("actuatorActionConditionVariableJSONObject is null for deneWordPointer=" + deneWordPointer + " -- skipping this variable");
+							continue;
+						}
+
 						actuatorActionConditionVariable_Name = actuatorActionConditionVariableJSONObject.getString("Name");
 						actuatorActionConditionVariable_Type = actuatorActionConditionVariableJSONObject.getString("Value Type");
 
