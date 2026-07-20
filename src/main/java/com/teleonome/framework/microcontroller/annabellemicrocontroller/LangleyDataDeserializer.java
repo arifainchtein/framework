@@ -20,17 +20,22 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 	}
 
 	// Wire format (see LangleyDataSerializer.cpp in DigitalStablesEsp32Lib):
-	// LangleyDataDeserializer#devicename#deviceshortname#secondsTime#externalBatteryVoltage#
+	// LangleyDataDeserializer#devicename#deviceshortname#serialnumber#secondsTime#externalBatteryVoltage#
 	// energizerBatteryVoltage#energizerBatteryCurrent#temperature#fenceVoltage#fenceVoltageMin#
 	// fenceVoltageMax#fenceVoltageAvg#pulseCount#rssi#snr#operatingStatus#wpsFrequencySeconds#
 	// maxWPSVoltage#minWPSVoltage#secondsSinceLastPulse#solarVoltage#solarCurrentMa#batteryVoltage#
 	// batteryCurrentMa#estimatedRuntime#batteryChemistry#rtcBatVolt#overnightMah#checksum
+	//
+	// serialnumber is the DS18B20's OneWire ROM address (hex string, same convention as
+	// ChinampaData/DigitalStablesData's serialnumberarray) - added 2026-07-20 so a device is
+	// identified by more than just its free-text name, which weak-signal LoRa corruption can
+	// mangle. See conversation 2026-07-20.
 	@Override
 	public JSONObject deserialise(String teleonomeName, String line) {
 		JSONObject toReturn = new JSONObject();
 		String[] tokens = line.split("#");
 		logger.debug("LangleyDataDeserializer: tokens=" + tokens.length + " received=" + line);
-		if (tokens.length < 29) {
+		if (tokens.length < 30) {
 			logger.debug("Bad data received");
 			return new JSONObject();
 		}
@@ -41,14 +46,15 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 			return new JSONObject();
 		}
 		String deviceshortname = tokens[2];
+		String serialNumber = tokens[3];
 
 		try {
-			secondsTime = Long.parseLong(tokens[3].replaceAll(" ", ""));
+			secondsTime = Long.parseLong(tokens[4].replaceAll(" ", ""));
 		} catch (NumberFormatException e) {
 			secondsTime = 0;
 		}
 		if (secondsTime == 0) {
-			logger.warn("LangleyDataDeserializer: rejecting packet — unparseable seconds time token: '" + tokens[3] + "' for device: " + deviceName);
+			logger.warn("LangleyDataDeserializer: rejecting packet — unparseable seconds time token: '" + tokens[4] + "' for device: " + deviceName);
 			return new JSONObject();
 		}
 		sourceoriginaltime = secondsTime;
@@ -62,93 +68,96 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		}
 
 		double externalBatteryVoltage = 0.0;
-		try { externalBatteryVoltage = Double.parseDouble(tokens[4].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { externalBatteryVoltage = Double.parseDouble(tokens[5].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double energizerBatteryVoltage = 0.0;
-		try { energizerBatteryVoltage = Double.parseDouble(tokens[5].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { energizerBatteryVoltage = Double.parseDouble(tokens[6].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double energizerBatteryCurrent = 0.0;
-		try { energizerBatteryCurrent = Double.parseDouble(tokens[6].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { energizerBatteryCurrent = Double.parseDouble(tokens[7].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double temperature = 0.0;
-		try { temperature = Double.parseDouble(tokens[7].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { temperature = Double.parseDouble(tokens[8].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double fenceVoltage = 0.0;
-		try { fenceVoltage = Double.parseDouble(tokens[8].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { fenceVoltage = Double.parseDouble(tokens[9].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double fenceVoltageMin = 0.0;
-		try { fenceVoltageMin = Double.parseDouble(tokens[9].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { fenceVoltageMin = Double.parseDouble(tokens[10].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double fenceVoltageMax = 0.0;
-		try { fenceVoltageMax = Double.parseDouble(tokens[10].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { fenceVoltageMax = Double.parseDouble(tokens[11].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double fenceVoltageAvg = 0.0;
-		try { fenceVoltageAvg = Double.parseDouble(tokens[11].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { fenceVoltageAvg = Double.parseDouble(tokens[12].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		int pulseCount = 0;
-		try { pulseCount = Integer.parseInt(tokens[12].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { pulseCount = Integer.parseInt(tokens[13].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double rssi = 0.0;
-		try { rssi = Double.parseDouble(tokens[13].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { rssi = Double.parseDouble(tokens[14].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double snr = 0.0;
-		try { snr = Double.parseDouble(tokens[14].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { snr = Double.parseDouble(tokens[15].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		int operatingStatus = 0;
-		try { operatingStatus = (int) Double.parseDouble(tokens[15].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { operatingStatus = (int) Double.parseDouble(tokens[16].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double wpsFrequencySeconds = 0.0;
-		try { wpsFrequencySeconds = Double.parseDouble(tokens[16].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { wpsFrequencySeconds = Double.parseDouble(tokens[17].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double maxWPSVoltage = 0.0;
-		try { maxWPSVoltage = Double.parseDouble(tokens[17].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { maxWPSVoltage = Double.parseDouble(tokens[18].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double minWPSVoltage = 0.0;
-		try { minWPSVoltage = Double.parseDouble(tokens[18].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { minWPSVoltage = Double.parseDouble(tokens[19].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		long secondsSinceLastPulse = 0;
-		try { secondsSinceLastPulse = Long.parseLong(tokens[19].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { secondsSinceLastPulse = Long.parseLong(tokens[20].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double solarVoltage = 0.0;
-		try { solarVoltage = Double.parseDouble(tokens[20].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { solarVoltage = Double.parseDouble(tokens[21].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double solarCurrentMa = 0.0;
-		try { solarCurrentMa = Double.parseDouble(tokens[21].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { solarCurrentMa = Double.parseDouble(tokens[22].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double batteryVoltage = 0.0;
-		try { batteryVoltage = Double.parseDouble(tokens[22].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { batteryVoltage = Double.parseDouble(tokens[23].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double batteryCurrentMa = 0.0;
-		try { batteryCurrentMa = Double.parseDouble(tokens[23].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { batteryCurrentMa = Double.parseDouble(tokens[24].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		double estimatedRuntime = 0.0;
-		try { estimatedRuntime = Double.parseDouble(tokens[24].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { estimatedRuntime = Double.parseDouble(tokens[25].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		// 0 = lead-acid, 1 = LiFePO4 - matches the BatteryChemistry enum in BatteryPowerManager.h
 		// (DigitalStablesEsp32Lib). Read from hardware at boot, not user-set - see
 		// detectBatteryChemistry() in Langley.ino.
 		int batteryChemistry = 0;
-		try { batteryChemistry = Integer.parseInt(tokens[25].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { batteryChemistry = Integer.parseInt(tokens[26].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 		String batteryChemistryName = (batteryChemistry == 1) ? "LiFePO4" : "Lead-Acid";
 
 		// Voltage of the RTC's backup coin cell (CR1220), via Valentino's R41/R46 divider on
 		// GPIO36. -1 = ADC pinned near VCC - floating pin/divider not installed/cell missing.
 		double rtcBatVolt = 0.0;
-		try { rtcBatVolt = Double.parseDouble(tokens[26].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { rtcBatVolt = Double.parseDouble(tokens[27].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		// Coulomb-counted discharge mAh since the last sunset - see overnightMah in LangleyData.h
 		// and the accumulator in Langley.ino's goToSleep(). Added for the overnight battery-sizing
 		// calibration run - see conversation 2026-07-14.
 		double overnightMah = 0.0;
-		try { overnightMah = Double.parseDouble(tokens[27].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { overnightMah = Double.parseDouble(tokens[28].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		int checksum = 0;
-		try { checksum = Integer.parseInt(tokens[28].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { checksum = Integer.parseInt(tokens[29].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		logger.debug("LangleyDataDeserializer: finished parsing");
 
 		toReturn.put("Name", deviceName);
 		toReturn.put("Short Name", deviceshortname);
+		// Top-level, not just a Configuration DeneWord, since DenomeManager.isKnownTelepathonDevice()
+		// reads "Serial Number" directly off the DeneChain - see conversation 2026-07-20.
+		toReturn.put("Serial Number", serialNumber);
 		toReturn.put("Raw Data", line);
 		toReturn.put("Seconds Time", secondsTime);
 
@@ -165,6 +174,7 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		JSONArray configurationDeneWords = new JSONArray();
 		configurationDene.put("DeneWords", configurationDeneWords);
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Device Type Id", "Langley", null, TeleonomeConstants.DATATYPE_STRING, true));
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Serial Number", serialNumber, null, TeleonomeConstants.DATATYPE_STRING, true));
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Battery Chemistry", batteryChemistryName, null, TeleonomeConstants.DATATYPE_STRING, true));
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("WPS Frequency Seconds", "" + wpsFrequencySeconds, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Max WPS Voltage", "" + maxWPSVoltage, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
