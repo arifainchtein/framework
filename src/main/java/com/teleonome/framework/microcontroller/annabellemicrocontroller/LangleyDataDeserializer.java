@@ -57,7 +57,6 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 			logger.warn("LangleyDataDeserializer: rejecting packet — unparseable seconds time token: '" + tokens[4] + "' for device: " + deviceName);
 			return new JSONObject();
 		}
-		sourceoriginaltime = secondsTime;
 		long lastPulseTime = secondsTime * 1000;
 		boolean timeCorrected = false;
 		long now = System.currentTimeMillis();
@@ -66,6 +65,8 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 			timeCorrected = true;
 			logger.debug("LangleyDataDeserializer: corrected secondsTime=" + secondsTime);
 		}
+		// captured after correction - see matching comment in DigitalStablesDataDeserializer.
+		sourceoriginaltime = secondsTime;
 
 		double externalBatteryVoltage = 0.0;
 		try { externalBatteryVoltage = Double.parseDouble(tokens[5].replaceAll(" ", "")); } catch (NumberFormatException e) {}

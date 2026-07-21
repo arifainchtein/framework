@@ -200,13 +200,14 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		}
 		long lastPulseTime=secondsTime*1000;
 		boolean timeCorrected=false;
-		sourceoriginaltime=secondsTime;
 		long now = System.currentTimeMillis();
-		if(lastPulseTime< (now - (3*60*1000))  || lastPulseTime> (now - (3*60*1000))) {
+		if(Math.abs(lastPulseTime - now) > 3*60*1000) {
 			secondsTime=now/1000;
 			timeCorrected=true;
 			 logger.debug("line 202, corrected secondsTime=" + secondsTime);
 		}
+		// captured after correction - see matching comment in DigitalStablesDataDeserializer.
+		sourceoriginaltime=secondsTime;
 		double rtcBatVolt = 0.0;
 		
 		try{
