@@ -190,14 +190,35 @@ public class AnnabelleReader extends BufferedReader{
 									long sourceoriginaltime = annabellDeserializer.getSourceoriginaltime();
 									if(telepathon!=null && telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
 										String telepathonName = telepathon.getString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
-										aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
-										aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
-										try {
-											aDenomeManager.storeTelepathon(sourceoriginaltime,  telepathonName,  telepathon);
-										} catch (PersistenceException e) {
-											logger.warn(Utils.getStringException(e));
+										// Occasional serial-line corruption truncates/garbles the device name
+										// token (e.g. "TopTank" -> "TOPT", "Chinampa" -> "ghSUMP") while the
+										// serial number token survives intact -- observed 2026-07-21/22, two
+										// bad rows landed in telepathon_2026_7_21 as their own phantom
+										// telepathons. Where the deserializer reports a Serial Number, only
+										// accept the record if name+serial match an already-configured
+										// telepathon, mirroring the same guard CommaRecordDeserializer already
+										// has above. Deserializers that don't report a Serial Number keep the
+										// prior unvalidated behaviour.
+										boolean accept = true;
+										if (telepathon.has("Serial Number")) {
+											String serialNumber = telepathon.getString("Serial Number");
+											accept = aDenomeManager.isKnownTelepathonDevice(telepathonName, serialNumber);
+											if (!accept) {
+												logger.warn("Telepathon record rejected -- name='" + telepathonName
+														+ "' serialnumber='" + serialNumber
+														+ "' does not match any known configured telepathon (likely corrupted serial line): " + line);
+											}
 										}
-										hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS, telepathon.toString());
+										if (accept) {
+											aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+											aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
+											try {
+												aDenomeManager.storeTelepathon(sourceoriginaltime,  telepathonName,  telepathon);
+											} catch (PersistenceException e) {
+												logger.warn(Utils.getStringException(e));
+											}
+											hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS, telepathon.toString());
+										}
 									}else {
 										logger.debug("Error deserializing " + line);
 									}
