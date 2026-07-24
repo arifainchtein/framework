@@ -380,27 +380,32 @@ public class PLSeriesReader extends BufferedReader {
 			// for pla
 			//
 			
+			long rssBeforeWrite = getProcessRssKb();
 			serialPortOutputStream.write( 20 );
 			serialPortOutputStream.write( 101 );
 			serialPortOutputStream.write( 0 );
 			serialPortOutputStream.write( 125 );
 			serialPortOutputStream.write( 4);
-			
+
 			serialPortOutputStream.flush();
-			
+			long rssAfterWrite = getProcessRssKb();
+			logger.warn("RSS-INSTRUMENT method=getNewBatteryState phase=write beforeKb=" + rssBeforeWrite + " afterKb=" + rssAfterWrite + " deltaKb=" + (rssAfterWrite - rssBeforeWrite));
+
 			try {
 				Thread.sleep(170);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			byte[] buffer = new byte[2];
 			logger.debug("getNewBatteryState about to read");
-			
+
+			long rssBeforeRead = getProcessRssKb();
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+			long rssAfterRead = getProcessRssKb();
+			logger.warn("RSS-INSTRUMENT method=getNewBatteryState phase=read beforeKb=" + rssBeforeRead + " afterKb=" + rssAfterRead + " deltaKb=" + (rssAfterRead - rssBeforeRead));
 			logger.debug("readCount=" + readCount);
-		
 
 			String hex = DatatypeConverter.printHexBinary(buffer);
 			logger.debug("getNewBatteryState  2byte hex=" + hex);
@@ -463,28 +468,34 @@ public class PLSeriesReader extends BufferedReader {
 			//
 			
 			
+			long rssBeforeWrite = getProcessRssKb();
 			serialPortOutputStream.write( 20 );
 			serialPortOutputStream.write( 206 );
 			serialPortOutputStream.write( 0 );
 			serialPortOutputStream.write( 230 );
 			serialPortOutputStream.write( 4);
 			serialPortOutputStream.flush();
-			
+			long rssAfterWrite = getProcessRssKb();
+			logger.warn("RSS-INSTRUMENT method=getNewCurrentLoad phase=write beforeKb=" + rssBeforeWrite + " afterKb=" + rssAfterWrite + " deltaKb=" + (rssAfterWrite - rssBeforeWrite));
+
 			try {
 				Thread.sleep(70);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			byte[] buffer = new byte[2];
 			logger.debug("about to read new wy with byte[2]");
 			//serialPortInputStream.read(buffer);
-			
-			
+
+
+			long rssBeforeRead = getProcessRssKb();
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+			long rssAfterRead = getProcessRssKb();
+			logger.warn("RSS-INSTRUMENT method=getNewCurrentLoad phase=read beforeKb=" + rssBeforeRead + " afterKb=" + rssAfterRead + " deltaKb=" + (rssAfterRead - rssBeforeRead));
 			logger.debug("readCount=" + readCount);
-		
+
 
 			String hex = DatatypeConverter.printHexBinary(buffer);
 			logger.debug("load  2byte hex=" + hex);
@@ -525,34 +536,40 @@ public class PLSeriesReader extends BufferedReader {
 			//
 			// for pla
 			//
+			long rssBeforeWrite = getProcessRssKb();
 			serialPortOutputStream.write( 20 );
 			serialPortOutputStream.write( 50 );
 			serialPortOutputStream.write( 0 );
 			serialPortOutputStream.write( 74 );
 			serialPortOutputStream.write( 4 );
-			
-			
+
+
 			serialPortOutputStream.flush();
+			long rssAfterWrite = getProcessRssKb();
+			logger.warn("RSS-INSTRUMENT method=getNewCurrentVoltage phase=write beforeKb=" + rssBeforeWrite + " afterKb=" + rssAfterWrite + " deltaKb=" + (rssAfterWrite - rssBeforeWrite));
 			try {
 				Thread.sleep(70);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		    logger.debug("about to read data after sending");
-			
+
 			byte[] buffer = new byte[2];
 			logger.debug("point 3c");
 		//	serialPortInputStream.read(buffer);
+			long rssBeforeRead = getProcessRssKb();
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+			long rssAfterRead = getProcessRssKb();
+			logger.warn("RSS-INSTRUMENT method=getNewCurrentVoltage phase=read beforeKb=" + rssBeforeRead + " afterKb=" + rssAfterRead + " deltaKb=" + (rssAfterRead - rssBeforeRead));
 			logger.debug("readCount=" + readCount);
-			
+
 			String hex = DatatypeConverter.printHexBinary(buffer);
 			logger.debug("voltage  4byte hex=" + hex);
 			String firstByte=hex.substring(0, 2);
 			String secondByte=hex.substring(2, 4);
-			
+
 			double voltage=-99;
 			if(firstByte.equals("C8")) {
 				int voltageUnprocessed = Integer.parseInt(secondByte.trim(), 16 );
@@ -583,20 +600,26 @@ public class PLSeriesReader extends BufferedReader {
 			// for pla
 			//
 			
+			long rssBeforeWrite = getProcessRssKb();
 			serialPortOutputStream.write( 20 );
 			serialPortOutputStream.write( 181 );
 			serialPortOutputStream.write( 0 );
 			serialPortOutputStream.write( 205 );
 			serialPortOutputStream.write( 4);
-			
+
 			serialPortOutputStream.flush();
-			
-			
+			long rssAfterWrite = getProcessRssKb();
+			logger.warn("RSS-INSTRUMENT method=getNewCurrentStateOfCharge phase=write beforeKb=" + rssBeforeWrite + " afterKb=" + rssAfterWrite + " deltaKb=" + (rssAfterWrite - rssBeforeWrite));
+
+
 			byte[] buffer = new byte[2];
 			////logger.debug("point 3c");
 			//serialPortInputStream.read(buffer);
+			long rssBeforeRead = getProcessRssKb();
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
-			
+			long rssAfterRead = getProcessRssKb();
+			logger.warn("RSS-INSTRUMENT method=getNewCurrentStateOfCharge phase=read beforeKb=" + rssBeforeRead + " afterKb=" + rssAfterRead + " deltaKb=" + (rssAfterRead - rssBeforeRead));
+
 			double newCurrentStateOfCharge=-99;
 			String hex = DatatypeConverter.printHexBinary(buffer);
 			logger.debug("currentStateOfCharge  2byte hex=" + hex);
@@ -908,26 +931,31 @@ public class PLSeriesReader extends BufferedReader {
 			// for pla
 			//
 			
+			long rssBeforeWrite = getProcessRssKb();
 			serialPortOutputStream.write( 20 );
 			serialPortOutputStream.write( 205 );
 			serialPortOutputStream.write( 0 );
 			serialPortOutputStream.write( 229 );
 			serialPortOutputStream.write( 4);
-			
+
 			serialPortOutputStream.flush();
+			long rssAfterWrite = getProcessRssKb();
+			logger.warn("RSS-INSTRUMENT method=getNewCurrentCharge phase=write beforeKb=" + rssBeforeWrite + " afterKb=" + rssAfterWrite + " deltaKb=" + (rssAfterWrite - rssBeforeWrite));
 			try {
 				Thread.sleep(70);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			byte[] buffer = new byte[2];
 			logger.debug("getNewCurrentCharge about to read");
-			
+
+			long rssBeforeRead = getProcessRssKb();
 			int readCount = readInputStreamWithTimeout(serialPortInputStream, buffer, SERIAL_PORT_READ_TIMEOUT);  // 6 second timeout
+			long rssAfterRead = getProcessRssKb();
+			logger.warn("RSS-INSTRUMENT method=getNewCurrentCharge phase=read beforeKb=" + rssBeforeRead + " afterKb=" + rssAfterRead + " deltaKb=" + (rssAfterRead - rssBeforeRead));
 			logger.debug("readCount=" + readCount);
-		
 
 			String hex = DatatypeConverter.printHexBinary(buffer);
 			logger.debug("getNewCurrentCharge  2byte hex=" + hex);
@@ -1207,6 +1235,28 @@ public class PLSeriesReader extends BufferedReader {
 	}
 
 	
+	// Instrumentation only, added 2026-07-25 to find out whether the ongoing
+	// Hypothalamus RSS growth on Ra is coming from the write side (5x write(int) +
+	// flush() per command, ~25-30 native calls/pulse across the 5 data points below)
+	// rather than the read side, whose leak-suspect available() call was already
+	// removed on 2026-07-15 without the growth actually stopping. Reads
+	// /proc/self/status directly (no native library involved), so this cannot itself
+	// be the thing it's trying to measure. Remove once the write-path hypothesis is
+	// confirmed or ruled out.
+	private static long getProcessRssKb() {
+		try {
+			for (String line : java.nio.file.Files.readAllLines(java.nio.file.Paths.get("/proc/self/status"))) {
+				if (line.startsWith("VmRSS:")) {
+					String digits = line.replaceAll("[^0-9]", "");
+					return digits.isEmpty() ? -1 : Long.parseLong(digits);
+				}
+			}
+		} catch (IOException e) {
+			// instrumentation only, never let it break the actual read/write path
+		}
+		return -1;
+	}
+
 	public static int readInputStreamWithTimeout(InputStream is, byte[] b, int timeoutMillis)
 		     throws IOException  {
 		     int bufferOffset = 0;
