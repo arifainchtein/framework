@@ -200,15 +200,15 @@ public class AnnabelleReader extends BufferedReader{
 										// has above. Deserializers that don't report a Serial Number keep the
 										// prior unvalidated behaviour.
 										boolean accept = true;
-										if (telepathon.has("Serial Number")) {
-											String serialNumber = telepathon.getString("Serial Number");
-											accept = aDenomeManager.isKnownTelepathonDevice(telepathonName, serialNumber);
-											if (!accept) {
-												logger.warn("Telepathon record rejected -- name='" + telepathonName
-														+ "' serialnumber='" + serialNumber
-														+ "' does not match any known configured telepathon (likely corrupted serial line): " + line);
-											}
-										}
+//										if (telepathon.has("Serial Number")) {
+//											String serialNumber = telepathon.getString("Serial Number");
+//											accept = aDenomeManager.isKnownTelepathonDevice(telepathonName, serialNumber);
+//											if (!accept) {
+//												logger.warn("Telepathon record rejected -- name='" + telepathonName
+//														+ "' serialnumber='" + serialNumber
+//														+ "' does not match any known configured telepathon (likely corrupted serial line): " + line);
+//											}
+//										}
 										if (accept) {
 											aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
 											aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
