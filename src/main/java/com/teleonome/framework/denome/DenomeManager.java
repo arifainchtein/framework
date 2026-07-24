@@ -9068,4 +9068,25 @@ public class DenomeManager {
 		}
 		return false;
 	}
+
+	// Returns the Name already on record for this serial number, or null if this serial number
+	// has never been seen before. Unlike isKnownTelepathonDevice() (which requires an exact
+	// name+serial pair to already be registered -- a deadlock for any brand-new device, since it
+	// can never become "known" without first being accepted), this only requires the serial
+	// number to be recognised, so a first-time device with an unfamiliar serial can bootstrap
+	// its own DeneChain. Still lets callers detect the actual corruption case this was guarding
+	// against: an already-known serial number showing up with a different/garbled name.
+	public String getKnownNameForSerial(String serialnumber) {
+		if (serialnumber == null || serialnumber.isEmpty()) return null;
+		if (telepathonsNucleus == null || !telepathonsNucleus.has("DeneChains")) return null;
+		JSONArray chains = telepathonsNucleus.getJSONArray("DeneChains");
+		for (int i = 0; i < chains.length(); i++) {
+			JSONObject chain = chains.getJSONObject(i);
+			String sn = chain.optString("Serial Number", "");
+			if (sn.equals(serialnumber)) {
+				return chain.optString("Name", "");
+			}
+		}
+		return null;
+	}
 }

@@ -194,21 +194,27 @@ public class AnnabelleReader extends BufferedReader{
 										// token (e.g. "TopTank" -> "TOPT", "Chinampa" -> "ghSUMP") while the
 										// serial number token survives intact -- observed 2026-07-21/22, two
 										// bad rows landed in telepathon_2026_7_21 as their own phantom
-										// telepathons. Where the deserializer reports a Serial Number, only
-										// accept the record if name+serial match an already-configured
-										// telepathon, mirroring the same guard CommaRecordDeserializer already
-										// has above. Deserializers that don't report a Serial Number keep the
-										// prior unvalidated behaviour.
+										// telepathons. Where the deserializer reports a Serial Number, reject
+										// only if that serial number is already registered under a *different*
+										// name (the actual corruption signature) -- a serial number never seen
+										// before is treated as a legitimate new device and allowed to bootstrap
+										// its own DeneChain. (An earlier version of this guard required an
+										// exact name+serial match against an already-known telepathon, which
+										// deadlocked every brand-new device: it could never become "known"
+										// without first being accepted. Fixed 2026-07-24.) Deserializers that
+										// don't report a Serial Number keep the prior unvalidated behaviour.
 										boolean accept = true;
-//										if (telepathon.has("Serial Number")) {
-//											String serialNumber = telepathon.getString("Serial Number");
-//											accept = aDenomeManager.isKnownTelepathonDevice(telepathonName, serialNumber);
-//											if (!accept) {
-//												logger.warn("Telepathon record rejected -- name='" + telepathonName
-//														+ "' serialnumber='" + serialNumber
-//														+ "' does not match any known configured telepathon (likely corrupted serial line): " + line);
-//											}
-//										}
+										if (telepathon.has("Serial Number")) {
+											String serialNumber = telepathon.getString("Serial Number");
+											String knownName = aDenomeManager.getKnownNameForSerial(serialNumber);
+											accept = (knownName == null) || knownName.equals(telepathonName);
+											if (!accept) {
+												logger.warn("Telepathon record rejected -- serialnumber='" + serialNumber
+														+ "' is already registered under name='" + knownName
+														+ "' but this record reports name='" + telepathonName
+														+ "' (likely corrupted device-name token): " + line);
+											}
+										}
 										if (accept) {
 											aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
 											aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
