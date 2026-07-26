@@ -24,7 +24,12 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 	// energizerBatteryVoltage#energizerBatteryCurrent#temperature#fenceVoltage#fenceVoltageMin#
 	// fenceVoltageMax#fenceVoltageAvg#pulseCount#rssi#snr#operatingStatus#wpsFrequencySeconds#
 	// maxWPSVoltage#minWPSVoltage#secondsSinceLastPulse#solarVoltage#solarCurrentMa#batteryVoltage#
-	// batteryCurrentMa#estimatedRuntime#batteryChemistry#rtcBatVolt#overnightMah#checksum
+	// batteryCurrentMa#estimatedRuntime#batteryChemistry#rtcBatVolt#overnightMah#
+	// parentShortname#branchLabel#latitude#longitude#altitude#checksum
+	//
+	// parentShortname/branchLabel/latitude/longitude/altitude added 2026-07-26 for fence
+	// topology mapping - see LangleyData.h. parentShortname/branchLabel can change at runtime
+	// (a unit can be re-parented), so they're read as Purpose DeneWords, not Configuration.
 	//
 	// serialnumber is the DS18B20's OneWire ROM address (hex string, same convention as
 	// ChinampaData/DigitalStablesData's serialnumberarray) - added 2026-07-20 so a device is
@@ -35,7 +40,7 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		JSONObject toReturn = new JSONObject();
 		String[] tokens = line.split("#");
 		logger.debug("LangleyDataDeserializer: tokens=" + tokens.length + " received=" + line);
-		if (tokens.length < 30) {
+		if (tokens.length < 35) {
 			logger.debug("Bad data received");
 			return new JSONObject();
 		}
@@ -149,8 +154,23 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		double overnightMah = 0.0;
 		try { overnightMah = Double.parseDouble(tokens[28].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
+		// Fence topology mapping - see LangleyData.h. parentShortname empty = this unit IS the
+		// energizer/id-0 node. branchLabel blank = inherit the parent's label unchanged (no fork
+		// here) - see conversation 2026-07-26.
+		String parentShortname = tokens[29];
+		String branchLabel = tokens[30];
+
+		double latitude = 0.0;
+		try { latitude = Double.parseDouble(tokens[31].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+
+		double longitude = 0.0;
+		try { longitude = Double.parseDouble(tokens[32].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+
+		double altitude = 0.0;
+		try { altitude = Double.parseDouble(tokens[33].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+
 		int checksum = 0;
-		try { checksum = Integer.parseInt(tokens[29].replaceAll(" ", "")); } catch (NumberFormatException e) {}
+		try { checksum = Integer.parseInt(tokens[34].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
 		logger.debug("LangleyDataDeserializer: finished parsing");
 
@@ -180,6 +200,11 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("WPS Frequency Seconds", "" + wpsFrequencySeconds, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Max WPS Voltage", "" + maxWPSVoltage, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
 		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Min WPS Voltage", "" + minWPSVoltage, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
+		// Casing matches the existing convention read by GraveyardShift.java etc: capital
+		// "Latitude", lowercase "longitude"/"altitude".
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Latitude", "" + latitude, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("longitude", "" + longitude, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
+		configurationDeneWords.put(DenomeUtils.buildDeneWordJSONObject("altitude", "" + altitude, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
 
 		JSONObject sensorDene = new JSONObject();
 		denes.put(sensorDene);
@@ -205,6 +230,11 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Fence Voltage Max", "" + fenceVoltageMax, "kV", TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Fence Voltage Avg", "" + fenceVoltageAvg, "kV", TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Pulse Count", "" + pulseCount, null, TeleonomeConstants.DATATYPE_INTEGER, true));
+
+		// Fence topology mapping - runtime (a unit can be re-parented), so Purpose not
+		// Configuration - see conversation 2026-07-26.
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Parent Short Name", parentShortname, null, TeleonomeConstants.DATATYPE_STRING, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Branch Label", branchLabel, null, TeleonomeConstants.DATATYPE_STRING, true));
 
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Energizer Battery Voltage", "" + energizerBatteryVoltage, "V", TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Energizer Battery Current", "" + energizerBatteryCurrent, "mA", TeleonomeConstants.DATATYPE_DOUBLE, true));
