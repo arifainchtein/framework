@@ -13,6 +13,7 @@ import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.exception.PersistenceException;
 import com.teleonome.framework.exception.ServletProcessingException;
 import com.teleonome.framework.hypothalamus.Hypothalamus;
+import com.teleonome.framework.persistence.PostgresqlPersistenceManager;
 import com.teleonome.framework.utils.Utils;
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 public class AnnabelleReader extends BufferedReader{
@@ -20,7 +21,8 @@ public class AnnabelleReader extends BufferedReader{
 	BufferedReader reader;
 	String command="";
 	DenomeManager aDenomeManager;
-	Hypothalamus hypothalamus;                                                                                                                                                                                                                            
+	PostgresqlPersistenceManager aDBManager;
+	Hypothalamus hypothalamus;
 	private String currentCommand="";
 	//
 	// Set before an AsyncData request (via AsyncDataCount, queried first) so
@@ -35,14 +37,15 @@ public class AnnabelleReader extends BufferedReader{
 	public void setExpectedDataLineCount(int n) {
 		expectedDataLineCount = n;
 	}
-	public AnnabelleReader(BufferedReader in ,Hypothalamus h,DenomeManager d) {
+	public AnnabelleReader(BufferedReader in ,Hypothalamus h,DenomeManager d, PostgresqlPersistenceManager db) {
 		super(in);
 		reader=in;
 		hypothalamus=h;
 		logger = Logger.getLogger(getClass().getName());
 		aDenomeManager=d;
+		aDBManager=db;
 		// TODO Auto-generated constructor stub
-		
+
 	}
 
 	public void close() throws IOException {
@@ -73,7 +76,12 @@ public class AnnabelleReader extends BufferedReader{
 			logger.debug("returning because its delete stale telepathon");
 			return "Ok";
 		}
-		
+
+		if(command.startsWith(TeleonomeConstants.RENAME_TELEPATHON)) {
+			logger.debug("returning because its rename telepathon");
+			return "Ok";
+		}
+
 		String line="", className;
 		int counter=0;
 		int maxTries=10;

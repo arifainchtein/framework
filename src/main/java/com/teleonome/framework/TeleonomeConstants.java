@@ -4,6 +4,8 @@ public class TeleonomeConstants {
 
 	public static final String DELETE_TELEPATHON="DeleteTelepathon";
 	public static final String DELETE_STALE_TELEPATHONS="DeleteStaleTelepathons";
+	public static final String RENAME_TELEPATHON="RenameTelepathon";
+	public static final String DENEWORD_TELEPATHON_REPORTED_NAME="Telepathon Reported Name";
 	public static final String TELEPATHON_DENE_CONFIGURATION="Configuration";
 	public static final String TELEPATHON_DENE_SENSORS="Sensors";
 	public static final String TELEPATHON_DENE_PURPOSE="Purpose";

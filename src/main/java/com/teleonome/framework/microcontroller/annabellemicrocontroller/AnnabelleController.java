@@ -35,6 +35,7 @@ import com.teleonome.framework.exception.SerialPortCommunicationException;
 import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
 import com.teleonome.framework.microcontroller.MotherMicroController;
+import com.teleonome.framework.persistence.PostgresqlPersistenceManager;
 import com.teleonome.framework.utils.Utils;
 
 import com.fazecast.jSerialComm.*;
@@ -56,11 +57,18 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 	private int INTER_SENSOR_READ_TIME_OUT_MILLISECONDS=100;
 	InputStream serialPortInputStream = null;
 	OutputStream serialPortOutputStream = null;
-	
+	private PostgresqlPersistenceManager aDBManager;
+
 	public AnnabelleController(Hypothalamus h,DenomeManager d, String n){
 		super(h,d,n);
 		logger = Logger.getLogger(getClass());
 		setEnableAsyncUpdate(true);
+		//
+		// own dependency, not a reach-through into hypothalamus.aDBManager -
+		// PostgresqlPersistenceManager is a lazy singleton so this returns the
+		// same already-initialized connection pool either way, without an
+		// implicit ordering dependency on Hypothalamus's own field
+		aDBManager = PostgresqlPersistenceManager.instance();
 	}
 	
 	public void processLifeCycleEvent(String lifeCycleEvent) {
@@ -442,8 +450,8 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 			//
 			// now open and test it
 			//
-			input = new AnnabelleReader(new BufferedReader(new InputStreamReader(serialPortInputStream)),hypothalamus, aDenomeManager);
-			output = new AnnabelleWriter(new OutputStreamWriter(serialPortOutputStream),input,aDenomeManager);
+			input = new AnnabelleReader(new BufferedReader(new InputStreamReader(serialPortInputStream)),hypothalamus, aDenomeManager, aDBManager);
+			output = new AnnabelleWriter(new OutputStreamWriter(serialPortOutputStream),input,aDenomeManager, aDBManager);
 
 			try{
 				
@@ -499,8 +507,8 @@ public class AnnabelleController extends MotherMicroController implements  LifeC
 
 	public BufferedWriter getWriter() throws IOException{
 		//logger.debug("Arduino uno asking for writer1" );
-		input = new AnnabelleReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())),hypothalamus, aDenomeManager);
-		output = new AnnabelleWriter(new OutputStreamWriter(serialPort.getOutputStream()),input , aDenomeManager);
+		input = new AnnabelleReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())),hypothalamus, aDenomeManager, aDBManager);
+		output = new AnnabelleWriter(new OutputStreamWriter(serialPort.getOutputStream()),input , aDenomeManager, aDBManager);
 		logger.debug("line 345 getting writer");
 		return output;
 	}

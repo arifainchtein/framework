@@ -6,7 +6,12 @@ package com.teleonome.framework.microcontroller.annabellemicrocontroller;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -16,20 +21,23 @@ import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.denome.Identity;
 import com.teleonome.framework.exception.InvalidDenomeException;
+import com.teleonome.framework.persistence.PostgresqlPersistenceManager;
 import com.teleonome.framework.utils.Utils;
 
 public class AnnabelleWriter  extends BufferedWriter{
 	DenomeManager aDenomeManager;
+	PostgresqlPersistenceManager aDBManager;
 	AnnabelleReader aAnnabelleReader;
 	Logger logger;
 	Writer output;
 	long lastCommandTime=0;
 	long minimumIntervalBetweenCommands=2000;
 
-	public AnnabelleWriter(Writer out, AnnabelleReader c, DenomeManager d) {
+	public AnnabelleWriter(Writer out, AnnabelleReader c, DenomeManager d, PostgresqlPersistenceManager db) {
 		super(out);
 		aAnnabelleReader=c;
 		aDenomeManager=d;
+		aDBManager=db;
 		output=out;
 		logger = Logger.getLogger(getClass());
 		// TODO Auto-generated constructor stub
@@ -113,7 +121,65 @@ public class AnnabelleWriter  extends BufferedWriter{
 				logger.debug("Removing Stale  " + staleTelepathonName);
 				aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, staleTelepathonName);
 			}
-			
+
+		}else if(command.startsWith(TeleonomeConstants.RENAME_TELEPATHON)){
+			String[] tokens = command.split("#");
+			String oldName = tokens[1];
+			String newName = tokens[2];
+			logger.debug("RenameTelepathon " + oldName + " -> " + newName);
+
+			Identity telepathonIdentity = new Identity(aDenomeManager.getDenomeName(), TeleonomeConstants.NUCLEI_TELEPATHONS, oldName);
+			JSONObject telepathonDeneChain = aDenomeManager.getDenomicElementByIdentity(telepathonIdentity);
+			if(telepathonDeneChain!=null){
+				//
+				// record the corrupted name Cerebellum flagged before renaming the
+				// DeneChain out from under it, so the correction stays visible in
+				// the denome itself rather than only in whatever triggered it
+				try {
+					JSONArray telepathonDenes = telepathonDeneChain.getJSONArray("Denes");
+					for(int i=0;i<telepathonDenes.length();i++){
+						JSONObject aDene = telepathonDenes.getJSONObject(i);
+						if(TeleonomeConstants.TELEPATHON_DENE_CONFIGURATION.equals(aDene.optString("Name"))){
+							JSONArray configDeneWords = aDene.getJSONArray("DeneWords");
+							configDeneWords.put(Utils.createDeneWordJSONObject(TeleonomeConstants.DENEWORD_TELEPATHON_REPORTED_NAME, oldName, null, "String", true));
+							break;
+						}
+					}
+				} catch (Exception e) {
+					logger.warn(Utils.getStringException(e));
+				}
+
+				telepathonDeneChain.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, newName);
+				logger.info("Renamed telepathon DeneChain " + oldName + " -> " + newName + " (corrected by Cerebellum)");
+			}else{
+				logger.warn("RenameTelepathon: could not find DeneChain '" + oldName + "' under Telepathons nucleus, nothing to rename");
+			}
+
+			//
+			// keep today's partition consistent with the denome - historical
+			// partitions from before the correction keep the old name, same as
+			// any other point-in-time record
+			try {
+				Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Australia/Melbourne"));
+				String tableName = "telepathon_" + cal.get(Calendar.YEAR) + "_" + (cal.get(Calendar.MONTH)+1) + "_" + cal.get(Calendar.DAY_OF_MONTH);
+				Connection conn = aDBManager.getConnection();
+				try {
+					PreparedStatement ps = conn.prepareStatement("UPDATE " + tableName + " SET telepathonname=? WHERE telepathonname=?");
+					try {
+						ps.setString(1, newName);
+						ps.setString(2, oldName);
+						int updated = ps.executeUpdate();
+						logger.info("RenameTelepathon: updated " + updated + " row(s) in " + tableName);
+					} finally {
+						ps.close();
+					}
+				} finally {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.warn(Utils.getStringException(e));
+			}
+
 		}else if(command.equals("GetSensorData")) {
 			//
 			// Annabelle has no native GetSensorData protocol - the only
