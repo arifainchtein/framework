@@ -1367,7 +1367,8 @@ public class TeleonomeConstants {
 	public static final String HEART_TOPIC_AVAILABLE_SSIDS="Available SSID";
 	public static final String HEART_TOPIC_EXECUTE_MANUAL_ACTION="Manual Action";
 	public static final String HEART_TOPIC_RESIGNAL="Resignal";
-	
+	public static final String HEART_TOPIC_EMERGENCY_CHANNEL="Emergency Channel";
+
 	public static final String PROCESS_HYPOTHALAMUS="Hypothalamus";
 	public static final String PROCESS_HEART="Heart";
 	public static final String PROCESS_WEB_SERVER="Web Server";
