@@ -276,15 +276,26 @@ public class DenomeManager {
 
 
 	private void saveAtomically(String content, File targetFile) throws IOException {
-	    // Create a temp file in the same directory as the target
-	    File tempFile = new File(targetFile.getParent(), targetFile.getName() + ".tmp");
-	    
-	    FileUtils.writeStringToFile(tempFile, content, "UTF-8");
-	    
-	    // The "Swap": This is the atomic part
-	    Files.move(tempFile.toPath(), targetFile.toPath(), 
-	               StandardCopyOption.REPLACE_EXISTING, 
-	               StandardCopyOption.ATOMIC_MOVE);
+	    // Create a temp file in the same directory as the target. Must be unique per
+	    // call -- a fixed "<name>.tmp" path let two overlapping writers (e.g. a stray
+	    // duplicate Hypothalamus process, see 2026-08-04 ChinampaMonitor incident)
+	    // truncate and stream into the SAME temp file concurrently, so whichever one
+	    // called Files.move() last atomically swapped in a file that was itself an
+	    // interleaved mix of both writers' content -- valid JSON up to wherever one
+	    // writer's data ended, garbage tacked on after. ATOMIC_MOVE only guarantees the
+	    // swap is atomic; it says nothing about the coherence of what's being swapped in.
+	    // File.createTempFile guarantees a unique path even across concurrent JVMs.
+	    File tempFile = File.createTempFile(targetFile.getName(), ".tmp", targetFile.getParentFile());
+	    try {
+	        FileUtils.writeStringToFile(tempFile, content, "UTF-8");
+
+	        // The "Swap": This is the atomic part
+	        Files.move(tempFile.toPath(), targetFile.toPath(),
+	                   StandardCopyOption.REPLACE_EXISTING,
+	                   StandardCopyOption.ATOMIC_MOVE);
+	    } finally {
+	        FileUtils.deleteQuietly(tempFile);
+	    }
 	}
 
 	public void writeDenomeToDisk(boolean allFiles){
@@ -4610,14 +4621,23 @@ public class DenomeManager {
 	// an atomic rename, same pattern as saveAtomically() above, so readers only
 	// ever see the old complete file or the new complete file, never a partial one.
 	private void writeJsonObjectToFile(JSONObject json, File file) throws IOException {
-	    File tempFile = new File(file.getParent(), file.getName() + ".tmp");
-	    try (BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile))) {
-	        json.write(bw); // This streams node-by-node, keeping RAM usage flat
-	        bw.flush();
+	    // Unique per call, same reasoning as saveAtomically() above -- a fixed
+	    // "<name>.tmp" path here used to collide with saveAtomically()'s temp file for
+	    // the same target (both derived it as file.getName() + ".tmp"), so this method
+	    // and the routine per-pulse write could stomp on each other's temp file too,
+	    // not just overlapping calls to the same method.
+	    File tempFile = File.createTempFile(file.getName(), ".tmp", file.getParentFile());
+	    try {
+	        try (BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile))) {
+	            json.write(bw); // This streams node-by-node, keeping RAM usage flat
+	            bw.flush();
+	        }
+	        Files.move(tempFile.toPath(), file.toPath(),
+	                   StandardCopyOption.REPLACE_EXISTING,
+	                   StandardCopyOption.ATOMIC_MOVE);
+	    } finally {
+	        FileUtils.deleteQuietly(tempFile);
 	    }
-	    Files.move(tempFile.toPath(), file.toPath(),
-	               StandardCopyOption.REPLACE_EXISTING,
-	               StandardCopyOption.ATOMIC_MOVE);
 	}
 //	
 //	public boolean readAndModifyDeneWordByIdentity(Identity targetDeneWordIdentity,Object value) throws JSONException, InvalidDenomeException{
@@ -5823,7 +5843,42 @@ public class DenomeManager {
 			writeDenomeToDisk(false);
 		}
 	}
-	
+
+	//
+	// Read-only lookup mirroring removeDeneChain()'s exact traversal (same
+	// currentlyCreatingPulseJSONObject, same nucleus/chain-name match) so a
+	// staleness check here is guaranteed consistent with whatever
+	// removeDeneChain()/injectDeneChainIntoNucleus() would actually replace.
+	// Added 2026-08-04 for idempotent Telepathon updates -- a duplicate or
+	// out-of-order record (LoRa repeater re-transmitting an old packet,
+	// Annabelle's flash overflow tier resending a backlog after an
+	// interrupted drain) should never regress live denome state to something
+	// older than what's already there, even though the underlying database
+	// insert (storeTelepathon/storeCommaRecord) is already safe to repeat.
+	// Returns -1 if the chain doesn't exist yet or has no "Seconds Time".
+	//
+	public long getTelepathonSecondsTime(String telepathonName) throws JSONException{
+		if(currentlyCreatingPulseJSONObject==null) return -1;
+		JSONObject denomeArray = currentlyCreatingPulseJSONObject.getJSONObject("Denome");
+		JSONArray nucleiArray = denomeArray.getJSONArray("Nuclei");
+		JSONObject aNucleusJSONObject;
+		JSONArray deneChains;
+		for(int i=0;i<nucleiArray.length();i++){
+			aNucleusJSONObject = nucleiArray.getJSONObject(i);
+			if(aNucleusJSONObject.getString("Name").equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+				deneChains = aNucleusJSONObject.getJSONArray("DeneChains");
+				JSONObject deneChain;
+				for(int j=0;j<deneChains.length();j++) {
+					deneChain = deneChains.getJSONObject(j);
+					if(deneChain.get(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE).equals(telepathonName)) {
+						return deneChain.optLong("Seconds Time", -1);
+					}
+				}
+			}
+		}
+		return -1;
+	}
+
 	public void injectDeneChainIntoNucleus( String nucleusName, JSONObject deneChain) throws JSONException{
 		if(currentlyCreatingPulseJSONObject==null) {
 			logger.info("injecting denechain, currentlyCreatingPulseJSONObject is nuill");

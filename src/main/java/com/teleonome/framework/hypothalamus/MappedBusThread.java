@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
@@ -935,6 +936,15 @@ class MappedBusThread extends Thread{
 								input = aMicroController.getReader();
 
 								//
+								// Built up across both the AsyncDataCount and AsyncData blocks
+								// below (added 2026-08-04, see conversation), then written to the
+								// denome once, after both have run -- avoids writing the whole
+								// denome to disk twice per microcontroller per cycle just for this.
+								//
+								JSONObject annabelleQueueStatusChain = null;
+								Map<String, JSONObject> annabelleQueueStatusDeneByType = null;
+
+								//
 								// Ask how many data lines are coming before asking for the data
 								// itself, so the reader can bound its wait instead of reading an
 								// unknown-length response line by line and guessing when it's
@@ -959,13 +969,68 @@ class MappedBusThread extends Thread{
 										String marker = "AsyncDataCount#";
 										if(countLine!=null && countLine.contains(marker)) {
 											try {
-												expectedCount = Integer.parseInt(countLine.substring(countLine.indexOf(marker)+marker.length()).trim());
+												//
+												// The count value is now followed by "|QueueStatus#..."
+												// (added 2026-08-04, see conversation) -- take only up to
+												// the next "|", not the whole remainder, or this throws
+												// NumberFormatException on every call and silently falls
+												// back to expectedCount=-1 (unbounded reads).
+												//
+												String afterMarker = countLine.substring(countLine.indexOf(marker)+marker.length());
+												String countPart = afterMarker.contains("|") ? afterMarker.substring(0, afterMarker.indexOf("|")) : afterMarker;
+												expectedCount = Integer.parseInt(countPart.trim());
 											} catch (NumberFormatException nfe) {
 												logger.warn("could not parse AsyncDataCount response: " + countLine);
 											}
 										}
 										logger.debug("AsyncDataCount for " + aMicroController.getName() + " = " + expectedCount);
 										((AnnabelleReader)input).setExpectedDataLineCount(expectedCount);
+
+										//
+										// Per-type available/dropped/flash-health-days breakdown,
+										// added 2026-08-04 -- "DS=<available>,<dropped>,<flashHealthDays>
+										// |Gloria=...|Seedling=...|Chinampa=...|Comma=...|Langley=...".
+										// Built into a DeneChain here; "Items Downloaded" gets added to
+										// each type's Dene later, from AsyncData's reply below, before
+										// the whole thing is written to the denome once.
+										//
+										String queueStatusMarker = "QueueStatus#";
+										if(countLine!=null && countLine.contains(queueStatusMarker)) {
+											String queueStatus = countLine.substring(countLine.indexOf(queueStatusMarker)+queueStatusMarker.length());
+
+											annabelleQueueStatusChain = new JSONObject();
+											annabelleQueueStatusChain.put(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE, "Annabelle Queue Status");
+											JSONArray annabelleQueueStatusDenes = new JSONArray();
+											annabelleQueueStatusChain.put("Denes", annabelleQueueStatusDenes);
+											annabelleQueueStatusDeneByType = new HashMap<String, JSONObject>();
+
+											for(String segment : queueStatus.split("\\|")) {
+												int eq = segment.indexOf('=');
+												if(eq<0) continue;
+												String typeName = segment.substring(0, eq);
+												String[] values = segment.substring(eq+1).split(",");
+												if(values.length<3) continue;
+												try {
+													int available = Integer.parseInt(values[0].trim());
+													long dropped = Long.parseLong(values[1].trim());
+													long flashHealthDays = Long.parseLong(values[2].trim());
+
+													JSONObject typeDene = new JSONObject();
+													annabelleQueueStatusDenes.put(typeDene);
+													typeDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, typeName);
+													JSONArray typeDeneWords = new JSONArray();
+													typeDene.put("DeneWords", typeDeneWords);
+													typeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Items Available", ""+available, null, TeleonomeConstants.DATATYPE_INTEGER, true));
+													typeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Items Dropped", ""+dropped, null, TeleonomeConstants.DATATYPE_LONG, true));
+													typeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Flash Health Days Remaining", ""+flashHealthDays, null, TeleonomeConstants.DATATYPE_LONG, true));
+													annabelleQueueStatusDeneByType.put(typeName, typeDene);
+												} catch (NumberFormatException nfe) {
+													logger.warn("could not parse queue status segment '" + segment + "': " + Utils.getStringException(nfe));
+												} catch (JSONException je) {
+													logger.warn("could not build queue status Dene for segment '" + segment + "': " + Utils.getStringException(je));
+												}
+											}
+										}
 									} catch(IOException ce) {
 										logger.warn("AsyncDataCount query failed for " + aMicroController.getName() + ": " + Utils.getStringException(ce));
 									}
@@ -985,6 +1050,58 @@ class MappedBusThread extends Thread{
 									if(input.ready()) {
 										inputLine = input.readLine();
 										logger.debug("receiving response :"+ inputLine);
+										//
+										// Per-type downloaded-record counts, added 2026-08-04 --
+										// "Ok-AsyncData#DS=<n>|Gloria=<n>|Seedling=<n>|Chinampa=<n>
+										// |Comma=<n>|Langley=<n>". Added to each type's Dene (built
+										// from AsyncDataCount above) as "Items Downloaded", then the
+										// whole chain is written to the denome once, below.
+										//
+										String downloadedMarker = "Ok-AsyncData#";
+										if(inputLine!=null && inputLine.contains(downloadedMarker)) {
+											String downloaded = inputLine.substring(inputLine.indexOf(downloadedMarker)+downloadedMarker.length());
+											for(String segment : downloaded.split("\\|")) {
+												int eq = segment.indexOf('=');
+												if(eq<0) continue;
+												String typeName = segment.substring(0, eq);
+												try {
+													int downloadedCount = Integer.parseInt(segment.substring(eq+1).trim());
+													if(downloadedCount>0) {
+														logger.info("Annabelle downloaded for " + aMicroController.getName() + " " + typeName + ": " + downloadedCount);
+													}
+													if(annabelleQueueStatusDeneByType!=null && annabelleQueueStatusDeneByType.containsKey(typeName)) {
+														JSONObject typeDene = annabelleQueueStatusDeneByType.get(typeName);
+														JSONArray typeDeneWords = typeDene.getJSONArray("DeneWords");
+														typeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Items Downloaded", ""+downloadedCount, null, TeleonomeConstants.DATATYPE_INTEGER, true));
+													}
+												} catch (NumberFormatException nfe) {
+													logger.warn("could not parse downloaded segment '" + segment + "': " + Utils.getStringException(nfe));
+												} catch (JSONException je) {
+													logger.warn("could not add Items Downloaded for segment '" + segment + "': " + Utils.getStringException(je));
+												}
+											}
+										}
+
+										//
+										// Write the combined per-type queue status (available/dropped/
+										// flash-health from AsyncDataCount + downloaded from AsyncData,
+										// above) to the denome once per cycle, added 2026-08-04.
+										// Telepathons, not Purpose/Internal -- this is Annabelle's own
+										// device-reception health, the same category as every other
+										// Telepathon DeneChain (Chinampa, Langley_West, etc.), and it
+										// directly gates whether their data reaches the denome at all --
+										// same spirit as Cerebellum's Telepathon Registry, which tracks
+										// reception-layer device status separately from the parsed data.
+										//
+										if(annabelleQueueStatusChain!=null) {
+											try {
+												hypothalamus.aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, "Annabelle Queue Status");
+												hypothalamus.aDenomeManager.injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS, annabelleQueueStatusChain);
+											} catch (JSONException je) {
+												logger.warn("could not write Annabelle Queue Status to the denome: " + Utils.getStringException(je));
+											}
+										}
+
 										input.close();
 										output.close();
 										keepGoing=false;

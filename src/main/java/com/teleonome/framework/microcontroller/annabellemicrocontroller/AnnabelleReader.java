@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.teleonome.framework.TeleonomeConstants;
@@ -86,6 +87,26 @@ public class AnnabelleReader extends BufferedReader{
 		int counter=0;
 		int maxTries=10;
 		int linesRead=0;
+		//
+		// Neither maxTries (IOExceptions only) nor expectedDataLineCount (opt-in,
+		// only set before AsyncDataCount-style requests) bounds a degraded/noisy
+		// radio link that keeps producing plausible-looking lines that never hit
+		// an "Ok-"/"Failure" sentinel -- this loop could otherwise drain lines
+		// indefinitely, relying entirely on PulseThread's blunt 30s whole-process
+		// watchdog to notice and kill Hypothalamus. Give it its own deadline so a
+		// stuck read fails fast, here, at the actual point of failure. This has to
+		// be an INACTIVITY timeout, reset on every successfully-read line, not a
+		// fixed deadline for the whole call -- AsyncData can legitimately emit one
+		// line per queued record across six device queues (see MappedBusThread's
+		// AsyncDataCount comment), and at 115200 baud a real backlog after a radio
+		// outage (already seen repeatedly on this host today) can easily take
+		// longer than 10s to drain even though every line is arriving fine. A flat
+		// deadline would kill exactly the bulk catch-up transfer you want to
+		// survive; measuring silence instead of total duration only catches an
+		// actually-wedged read. See conversation 2026-08-04 (ChinampaMonitor
+		// AsyncCycle wedges).
+		//
+		long readLineDeadlineMillis = System.currentTimeMillis() + 10000;
 		String deserializer, deviceName;
 		String[] tokens;
 		boolean keepGoing=true;
@@ -100,6 +121,7 @@ public class AnnabelleReader extends BufferedReader{
 		// line as an unrecognized line -- capture it here instead.
 		//
 		String capturedAsyncDataCountValue = null;
+		String capturedQueueStatusValue = null;
 		while(keepGoing) {
 			try {
 				String rawLine = reader.readLine();
@@ -116,6 +138,12 @@ public class AnnabelleReader extends BufferedReader{
 					line = rawLine.replaceAll("\u0000", "");
 				}
 				linesRead++;
+				//
+				// Forward progress -- push the deadline out another 10s so a large
+				// but healthily-progressing transfer never trips it, no matter how
+				// long the whole response takes.
+				//
+				readLineDeadlineMillis = System.currentTimeMillis() + 10000;
 
 				logger.debug("line 63, received line=" + line);
 				if(line.contains("Ok-") || line.contains("Failure"))
@@ -135,6 +163,14 @@ public class AnnabelleReader extends BufferedReader{
 					appendString=false;
 				}else if(command.equals("AsyncDataCount") && capturedAsyncDataCountValue==null) {
 					capturedAsyncDataCountValue = line.trim();
+				}else if(command.equals("AsyncDataCount") && line.startsWith("QueueStatus#") && capturedQueueStatusValue==null) {
+					//
+					// Per-type available/dropped/flash-health-days breakdown, added
+					// 2026-08-04 (see conversation) -- the second line of the
+					// AsyncDataCount reply, after the bare total captured above and
+					// before the "Ok-AsyncDataCount" sentinel.
+					//
+					capturedQueueStatusValue = line.trim();
 				}else {
 					tokens = line.split("#");
 					deserializer=tokens[0];
@@ -224,8 +260,34 @@ public class AnnabelleReader extends BufferedReader{
 											}
 										}
 										if (accept) {
-											aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
-											aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
+											//
+											// Idempotency guard, added 2026-08-04 (see conversation).
+											// storeTelepathon() below is already safe to call twice for
+											// the same reading (it checks for an existing row before
+											// inserting), but this live-state overwrite wasn't -- a
+											// duplicate or out-of-order record (a LoRa repeater
+											// re-transmitting a packet it heard from the origin device,
+											// or Annabelle's flash overflow tier resending a backlog
+											// after an interrupted drain) could otherwise regress the
+											// live denome to a stale reading after a newer one already
+											// landed. Skip the live-state overwrite when what's already
+											// there is at least as fresh; history still gets stored
+											// either way, below.
+											//
+											long existingSecondsTime = -1;
+											try {
+												existingSecondsTime = aDenomeManager.getTelepathonSecondsTime(telepathonName);
+											} catch (JSONException je) {
+												logger.warn("could not check existing telepathon timestamp for '" + telepathonName + "': " + Utils.getStringException(je));
+											}
+											if (existingSecondsTime >= sourceoriginaltime) {
+												logger.debug("Telepathon '" + telepathonName + "' record (sourceoriginaltime=" + sourceoriginaltime
+														+ ") is not newer than current live state (Seconds Time=" + existingSecondsTime
+														+ ") -- skipping live-state overwrite, likely a repeater or overflow-resend duplicate");
+											} else {
+												aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+												aDenomeManager. injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS,telepathon);
+											}
 											try {
 												aDenomeManager.storeTelepathon(sourceoriginaltime,  telepathonName,  telepathon);
 											} catch (PersistenceException e) {
@@ -258,6 +320,12 @@ public class AnnabelleReader extends BufferedReader{
 			if(counter>maxTries) {
 				keepGoing=false;
 			}
+			if(keepGoing && System.currentTimeMillis()>readLineDeadlineMillis) {
+				logger.warn("readLine saw no forward progress for 10s (" + linesRead + " line(s) read so far, no terminal Ok-/Failure line) -- likely a wedged read, giving up on this response");
+				keepGoing=false;
+				appendString=false;
+				line=null;
+			}
 		}
 		     
 		logger.debug("the response is:   " + line);
@@ -265,13 +333,26 @@ public class AnnabelleReader extends BufferedReader{
 		String cleaned="";
 		if(line==null) {
 			cleaned="";
+		}else if(command.equals("AsyncData")) {
+			//
+			// Must be checked before the telepathon shortcut below -- DSD (or any
+			// non-Comma type) is almost always present in a real AsyncData batch,
+			// which leaves `telepathon` non-null with a "Name" field by the time
+			// the sentinel line is reached, so that branch would otherwise hijack
+			// and discard the per-type downloaded-counts now appended to
+			// "Ok-AsyncData#..." (added 2026-08-04), replacing it with an
+			// unrelated leftover telepathon JSON blob. Return the raw sentinel
+			// line as-is so the caller (MappedBusThread) can parse it directly.
+			//
+			cleaned = line;
 		}else if(line.contains("Ok-") && telepathon!=null && telepathon.has(TeleonomeConstants.DENE_NAME_ATTRIBUTE)) {
 			cleaned=line.substring(line.indexOf("Ok-"));;
 			cleaned=TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS+"#"+telepathon.toString();
 		}else if(line.contains("Read fail") && line.contains("#")){
 			cleaned=line.substring(line.lastIndexOf("fail")+4);
 		}else if(command.equals("AsyncDataCount")) {
-			cleaned = "AsyncDataCount#" + (capturedAsyncDataCountValue!=null ? capturedAsyncDataCountValue : "");
+			cleaned = "AsyncDataCount#" + (capturedAsyncDataCountValue!=null ? capturedAsyncDataCountValue : "")
+				+ (capturedQueueStatusValue!=null ? ("|" + capturedQueueStatusValue) : "");
 		}else if(command.equals("GetSensorData")) {
 			//
 			// AnnabelleWriter translated GetSensorData into a Ping - Ok-Ping
