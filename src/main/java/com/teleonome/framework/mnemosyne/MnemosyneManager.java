@@ -46,7 +46,7 @@ import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.JexlContext;
 import org.apache.commons.jexl2.MapContext;
 import org.apache.log4j.Logger;
-import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONArray;
@@ -79,8 +79,8 @@ public class MnemosyneManager {
 	SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss",Locale.US);
 
 	Socket exoZeroPublisher=null;
-	MqttClient anMqttClient=null;
-	public MnemosyneManager(DenomeManager d, MqttClient m){
+	MqttAsyncClient anMqttClient=null;
+	public MnemosyneManager(DenomeManager d, MqttAsyncClient m){
 		logger = Logger.getLogger(getClass());
 		logger.info("Initiating MnemosyneManager Manager");
 		aDenomeManager = d;
@@ -96,7 +96,7 @@ public class MnemosyneManager {
 	 * @return
 	 * @throws MissingDenomeException
 	 */
-	public static MnemosyneManager instance(DenomeManager d, MqttClient m) throws MissingDenomeException {
+	public static MnemosyneManager instance(DenomeManager d, MqttAsyncClient m) throws MissingDenomeException {
 
 		if(aMnemosyneManager==null){
 			aMnemosyneManager = new MnemosyneManager(d,m);

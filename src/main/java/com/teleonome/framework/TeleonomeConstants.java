@@ -133,6 +133,12 @@ public class TeleonomeConstants {
 	public static final String  HEART_CLIENTS_CONNECTED="Clients Connected";
 	public static final String  HEART_LAST_MESSAGE_MILLIS="Last Message Millis";
 	public static final String  HEART_LAST_MESSAGE_TIMESTAMP="Last Message Timestamp";
+	//
+	// Self-reported leading indicator of Metaspace/GC pressure -- see
+	// Heart.java's PingThread. Read via JMX in-process, no sudo/jstat needed.
+	//
+	public static final String  HEART_METASPACE_PERCENT_USED="Heart Metaspace Percent Used";
+	public static final String  HEART_FULL_GC_COUNT="Heart Full GC Count";
 	
 	public static final String DATATYPE_LONG = "long";
 	public static final String DATATYPE_FILE="File";
@@ -990,6 +996,15 @@ public class TeleonomeConstants {
 	// restarting Hypothalamus did not clear it (the trigger was Heart's own
 	// Metaspace/GC pressure), so this pathology restarts Heart, not Hypothalamus.
 	public static final String PATHOLOGY_HEART_PUBLISH_POOL_EXHAUSTED= "Heart Publish Pool Exhausted";
+	// Heart's own self-reported Metaspace percent-used (HeartPing.info) is chronically
+	// high -- the leading indicator behind the publish-freeze incidents above, now
+	// visible directly instead of only inferred after it cascades. Logged for
+	// visibility/trend-tracking only as of 2026-08-05; deliberately NOT wired into
+	// the restart-triggering "late" chain yet -- Metaspace has been observed reaching
+	// this range within hours of a fresh restart and holding there without causing an
+	// immediate failure, so treating it as an unconditional restart trigger risked a
+	// restart loop before there was a validated safe threshold.
+	public static final String PATHOLOGY_HEART_METASPACE_PRESSURE= "Heart Metaspace Pressure";
 	public static final String PATHOLOGY_HIPPOCAMPUS_LATE= "Hippocampus Late";
 	public static final String PATHOLOGY_CEREBELLUM_LATE= "Cerebellum Late";
 	public static final String PATHOLOGY_HEART_CRASHED_HPROF= "Heart Crashed hprof";
@@ -1376,6 +1391,12 @@ public class TeleonomeConstants {
 	public static final String HEART_TOPIC_EXECUTE_MANUAL_ACTION="Manual Action";
 	public static final String HEART_TOPIC_RESIGNAL="Resignal";
 	public static final String HEART_TOPIC_EMERGENCY_CHANNEL="Emergency Channel";
+	// Heart's own self-reported health (Metaspace/GC pressure, session-loop thread
+	// health) and Hypothalamus's Heart-publish health (consecutive failures) --
+	// broadcast live so the webapp's Heart modal can show them, not just Medula.
+	// See conversation 2026-08-05.
+	public static final String HEART_TOPIC_HEART_HEALTH_STATUS="HeartHealthStatus";
+	public static final String HEART_TOPIC_HYPOTHALAMUS_HEALTH_STATUS="HypothalamusHealthStatus";
 
 	public static final String PROCESS_HYPOTHALAMUS="Hypothalamus";
 	public static final String PROCESS_HEART="Heart";

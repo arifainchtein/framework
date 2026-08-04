@@ -23,28 +23,23 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.Map.Entry;
 import java.util.TimeZone;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
-import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,7 +72,7 @@ public abstract class Hypothalamus {
 	
 	public DenomeManager aDenomeManager=null;
 	public Logger logger=null;
-	MqttClient anMqttClient ;
+	MqttAsyncClient anMqttClient ;
 	//
 	// primaryIpAddress represents the variable that will be sent to
 	// the mother to be displayed in an lcd
@@ -104,18 +99,22 @@ public abstract class Hypothalamus {
     //
     // fire-and-forget only for the Heart connection -- no delivery guarantee
     // needed, deliberately not TeleonomeConstants.HEART_QUALITY_OF_SERVICE
-    // since that constant is shared with other components that still want QoS 1
+    // since that constant is shared with other components that still want QoS 1.
+    // This was in fact tried at QoS 1 previously and reverted: with a persistent
+    // (non-clean) session, a QoS 1 publish gets queued by the broker for any
+    // subscriber that's offline, and dumped as a backlog the moment they
+    // reconnect -- for a browser opening the webapp, that meant waiting on a
+    // pile of stale backlog messages before seeing current state. QoS 0 has to
+    // stay for that reason, which is also why the Heart-publish thread-leak
+    // (see publishToHeart()) can't be fixed by raising the QoS -- see
+    // conversation 2026-08-05.
     //
     private static final int HEART_TO_HYPOTHALAMUS_QOS = 0;
 
-    // Bound on how long publishToHeart() will block waiting for Paho to mark a
-    // publish complete. MqttClient.publish(...) waits on this token with no
-    // timeout at all, so a lost/never-arriving completion notification (broker
-    // hiccup, stale-but-"connected" socket, etc.) hangs the calling thread
-    // forever - and since publishToHeart() is synchronized, every other caller
-    // blocks behind it too. Bounding the wait turns that into a logged,
-    // recoverable timeout instead of a silent, permanent pulse-thread hang.
-    private static final long HEART_PUBLISH_TIMEOUT_MILLIS = 5000;
+    // Timeout for the one-off blocking operations we still deliberately wait
+    // on (initial connect, subscribe) -- as opposed to publishToHeart(), which
+    // no longer waits on anything at all (see that method's comment).
+    private static final long HEART_MQTT_OPERATION_TIMEOUT_MILLIS = 5000;
     public boolean performTimePrunningAnalysis=false;
     int pacemakerPid=-1;
   //private String buildNumber="17/05/2017 00:52";
@@ -579,7 +578,7 @@ public abstract class Hypothalamus {
 
 		private void connectToHeart() {
 			 try {
-	        	anMqttClient = new MqttClient(mqttBrokerAddress, mqttClientId, persistence);
+	        	anMqttClient = new MqttAsyncClient(mqttBrokerAddress, mqttClientId, persistence);
 	        	
 	            MqttConnectOptions connOpts = new MqttConnectOptions();
 	           // connOpts.setKeepAliveInterval(120);
@@ -606,8 +605,8 @@ public abstract class Hypothalamus {
 			                    logger.warn("Connected to Heart: " + serverURI);
 			                }
 			                try {
-			                    anMqttClient.subscribe("Hippocampus_Status", 0);
-			                    anMqttClient.subscribe(TeleonomeConstants.HEART_TOPIC_CEREBELLUM_STATUS, 0);
+			                    anMqttClient.subscribe("Hippocampus_Status", 0).waitForCompletion(HEART_MQTT_OPERATION_TIMEOUT_MILLIS);
+			                    anMqttClient.subscribe(TeleonomeConstants.HEART_TOPIC_CEREBELLUM_STATUS, 0).waitForCompletion(HEART_MQTT_OPERATION_TIMEOUT_MILLIS);
 			                } catch (MqttException e) {
 			                    logger.warn("Failed to (re)subscribe to Heart topics: " + Utils.getStringException(e));
 			                }
@@ -683,7 +682,7 @@ public abstract class Hypothalamus {
 			while (true) {
 				attempt++;
 				try {
-					anMqttClient.connect(connOpts);
+					anMqttClient.connect(connOpts).waitForCompletion(HEART_MQTT_OPERATION_TIMEOUT_MILLIS);
 					return;
 				} catch (MqttException e) {
 					logger.warn("Failed to connect to Heart (attempt " + attempt + "): " + Utils.getStringException(e) + ", retrying in 5s");
@@ -727,52 +726,45 @@ public abstract class Hypothalamus {
 	// with no timeout exposed anywhere in the public API - and waitUntilSent()
 	// swallows InterruptedException internally (loops back to wait() again),
 	// so a Thread.interrupt() on the caller can't even force it to give up if
-	// the "sent"/"completed" notification is ever missed (observed when a
-	// disconnect races with an in-flight publish). Running the actual Paho
-	// call on this small dedicated pool, and only ever waiting on it via
-	// Future.get(timeout), means the pulse thread can never be blocked longer
-	// than HEART_PUBLISH_TIMEOUT_MILLIS by this, no matter what Paho does
-	// internally. Worst case if Paho's wait truly never wakes up: one of
-	// these (daemon) worker threads is leaked/stuck forever - that is a much
-	// smaller problem than freezing the entire pulse cycle forever.
+	// the "sent"/"completed" notification is ever missed. Traced the actual
+	// root cause 2026-08-05: MqttTopic.publish() (what the old code called)
+	// internally calls waitUntilSent(), and that wait can only be woken by
+	// Paho's own reconnect-recovery path -- which only notifies tokens it has
+	// registered in its internal tokenStore. Read the Paho 1.2.5 source
+	// (ClientState.send()): QoS 1/2 publishes get tokenStore.saveToken()
+	// called for them; QoS 0 publishes never do. Since HEART_TO_HYPOTHALAMUS_QOS
+	// is 0 (and has to stay 0, see that constant's comment), every publish to
+	// Heart is exactly the kind of message Paho's own crash recovery is
+	// structurally blind to -- so a publish that loses the race against a
+	// reconnect (Heart's chronic Metaspace/GC pressure drives frequent
+	// reconnects -- see the ChinampaMonitor investigation) is *permanently*
+	// orphaned, not just delayed. No timeout or Future.cancel(true) wrapped
+	// around the old blocking call could ever recover from that, since the
+	// interrupt is swallowed and nothing else will ever notify it.
 	//
-	// 4, not 2 (as originally sized) -- added 2026-08-04, see conversation.
-	// Every stuck Paho wait (the comment above explains why one can hang
-	// forever) permanently consumes one of these threads, with no recovery
-	// short of a process restart. At 2 threads, exactly two unlucky
-	// disconnect-during-publish races -- which *do* happen, see the
-	// ChinampaMonitor Heart Metaspace/GC-pressure investigation the same
-	// day -- permanently disables all Heart publishing with zero warning.
-	// 4 buys more margin before total exhaustion; it does not fix the
-	// underlying Paho/Heart-side trigger. getHeartPublishActiveWorkers()
-	// below is the actual fix: making exhaustion an observable, external
-	// signal instead of a silent structural failure.
+	// The only real fix is to never let a thread block on it in the first
+	// place. anMqttClient is now an MqttAsyncClient (previously the
+	// MqttClient synchronous wrapper around one) so publish() below returns
+	// immediately -- it hands the message to Paho's internal send queue via
+	// comms.sendNoWait() and nothing waits on any token at all. No thread
+	// pool needed anymore since nothing can block; see
+	// heartPublishConsecutiveFailures below for how Heart-publish health is
+	// now observed instead (replaces the old pool-exhaustion signal).
 	//
-	private static final int HEART_PUBLISH_POOL_SIZE = 4;
-	private static final ThreadPoolExecutor heartPublishExecutor = new ThreadPoolExecutor(
-			HEART_PUBLISH_POOL_SIZE, HEART_PUBLISH_POOL_SIZE, 0L, TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<Runnable>(), r -> {
-		Thread t = new Thread(r, "Heart-Publish-Worker");
-		t.setDaemon(true);
-		return t;
-	});
+	private static final AtomicInteger heartPublishConsecutiveFailures = new AtomicInteger(0);
 
-	//
-	// Externally observable proxy for "how many of the fixed publish workers
-	// are currently permanently stuck" -- a thread blocked forever inside
-	// Paho's wait shows up here as perpetually "active" (ThreadPoolExecutor
-	// counts a thread as active for the entire duration it's running a task,
-	// which for a stuck task is forever). Written to disk periodically (see
-	// startHeartPublishHealthMonitor()) so Medula -- a separate process --
-	// can read it and detect pool exhaustion, something it currently has no
-	// way to distinguish from ordinary transient slowness. See conversation
-	// 2026-08-04.
-	//
-	public int getHeartPublishActiveWorkers() {
-		return heartPublishExecutor.getActiveCount();
-	}
-	public int getHeartPublishPoolSize() {
-		return HEART_PUBLISH_POOL_SIZE;
+	private final IMqttActionListener heartPublishListener = new IMqttActionListener() {
+		public void onSuccess(IMqttToken asyncActionToken) {
+			heartPublishConsecutiveFailures.set(0);
+		}
+		public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+			int failures = heartPublishConsecutiveFailures.incrementAndGet();
+			logger.warn("Heart publish failed (consecutive failures=" + failures + "): " + Utils.getStringException(exception));
+		}
+	};
+
+	public int getHeartPublishConsecutiveFailures() {
+		return heartPublishConsecutiveFailures.get();
 	}
 
 	private void startHeartPublishHealthMonitor() {
@@ -784,17 +776,19 @@ public abstract class Hypothalamus {
 		monitor.scheduleAtFixedRate(() -> {
 			try {
 				JSONObject pingInfo = new JSONObject();
-				pingInfo.put("heartPublishActiveWorkers", getHeartPublishActiveWorkers());
-				pingInfo.put("heartPublishPoolSize", getHeartPublishPoolSize());
+				pingInfo.put("heartPublishConsecutiveFailures", getHeartPublishConsecutiveFailures());
 				pingInfo.put(TeleonomeConstants.DATATYPE_TIMESTAMP_MILLISECONDS, System.currentTimeMillis());
 				FileUtils.writeStringToFile(new File(Utils.getLocalDirectory() + "HypothalamusPing.info"), pingInfo.toString());
+				// Also broadcast it live so the webapp's Heart modal can show it,
+				// not just Medula polling the file.
+				publishToHeart(TeleonomeConstants.HEART_TOPIC_HYPOTHALAMUS_HEALTH_STATUS, pingInfo.toString());
 			} catch (Exception e) {
 				logger.warn("Heart-Publish-Health-Monitor failed to write HypothalamusPing.info: " + Utils.getStringException(e));
 			}
 		}, 0, 60, TimeUnit.SECONDS);
 	}
 
-	public synchronized void publishToHeart(String topic, String messageText) {
+	public void publishToHeart(String topic, String messageText) {
 
 		byte[] messageBytes = messageText.getBytes();
 
@@ -818,24 +812,14 @@ public abstract class Hypothalamus {
 		}
 
 		logger.debug("heart is connected about to publish to topic " + topic);
-		Future<?> publishFuture = heartPublishExecutor.submit(() -> {
-			MqttTopic mqttTopic = anMqttClient.getTopic(topic);
-			IMqttDeliveryToken deliveryToken = mqttTopic.publish(message);
-			deliveryToken.waitForCompletion(HEART_PUBLISH_TIMEOUT_MILLIS);
-			return null;
-		});
-
 		try {
-			publishFuture.get(HEART_PUBLISH_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-		} catch (TimeoutException te) {
-			logger.warn("Timed out after " + HEART_PUBLISH_TIMEOUT_MILLIS + "ms waiting to publish to heart topic " + topic + ", continuing (the worker thread may still be stuck internally in Paho and will be abandoned)");
-		} catch (ExecutionException ee) {
-			logger.warn("Exception publishing to heart topic " + topic + ": " + Utils.getStringException(ee.getCause() != null ? ee.getCause() : ee));
-		} catch (InterruptedException ie) {
-			Thread.currentThread().interrupt();
+			anMqttClient.publish(topic, message, null, heartPublishListener);
+		} catch (MqttException e) {
+			int failures = heartPublishConsecutiveFailures.incrementAndGet();
+			logger.warn("Failed to hand off publish to topic " + topic + " to Heart (consecutive failures=" + failures + "): " + Utils.getStringException(e));
 		}
 	}
-	
+
 
 	public class TimeBasedMutationsTask implements Runnable {
 
