@@ -982,6 +982,14 @@ public class TeleonomeConstants {
 	// just not delivering pulses to it. Distinguished from PATHOLOGY_HEART_PULSE_LATE
 	// so Heart is not restarted for a problem that is not Heart's.
 	public static final String PATHOLOGY_HYPOTHALAMUS_NOT_PUBLISHING_TO_HEART= "Hypothalamus Not Publishing To Heart";
+	// Hypothalamus's own small fixed Heart-publish worker pool is fully occupied --
+	// every worker is either genuinely busy or, more likely, permanently stuck
+	// inside a Paho wait that will never return (see Hypothalamus.java's
+	// heartPublishExecutor comment). Unlike PATHOLOGY_HYPOTHALAMUS_NOT_PUBLISHING_TO_HEART,
+	// this is Heart-actionable: added 2026-08-04 after tracing a live incident where
+	// restarting Hypothalamus did not clear it (the trigger was Heart's own
+	// Metaspace/GC pressure), so this pathology restarts Heart, not Hypothalamus.
+	public static final String PATHOLOGY_HEART_PUBLISH_POOL_EXHAUSTED= "Heart Publish Pool Exhausted";
 	public static final String PATHOLOGY_HIPPOCAMPUS_LATE= "Hippocampus Late";
 	public static final String PATHOLOGY_CEREBELLUM_LATE= "Cerebellum Late";
 	public static final String PATHOLOGY_HEART_CRASHED_HPROF= "Heart Crashed hprof";

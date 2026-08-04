@@ -28,7 +28,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -188,7 +190,8 @@ public abstract class Hypothalamus {
 			startEndoZeroPublisher();
 			
            connectToHeart();
-            
+           startHeartPublishHealthMonitor();
+
 			aDBManager = PostgresqlPersistenceManager.instance();
 			aDenomeManager = DenomeManager.instance();
 			aMnemosyneManager = MnemosyneManager.instance(aDenomeManager, anMqttClient);
@@ -732,11 +735,64 @@ public abstract class Hypothalamus {
 	// internally. Worst case if Paho's wait truly never wakes up: one of
 	// these (daemon) worker threads is leaked/stuck forever - that is a much
 	// smaller problem than freezing the entire pulse cycle forever.
-	private static final ExecutorService heartPublishExecutor = Executors.newFixedThreadPool(2, r -> {
+	//
+	// 4, not 2 (as originally sized) -- added 2026-08-04, see conversation.
+	// Every stuck Paho wait (the comment above explains why one can hang
+	// forever) permanently consumes one of these threads, with no recovery
+	// short of a process restart. At 2 threads, exactly two unlucky
+	// disconnect-during-publish races -- which *do* happen, see the
+	// ChinampaMonitor Heart Metaspace/GC-pressure investigation the same
+	// day -- permanently disables all Heart publishing with zero warning.
+	// 4 buys more margin before total exhaustion; it does not fix the
+	// underlying Paho/Heart-side trigger. getHeartPublishActiveWorkers()
+	// below is the actual fix: making exhaustion an observable, external
+	// signal instead of a silent structural failure.
+	//
+	private static final int HEART_PUBLISH_POOL_SIZE = 4;
+	private static final ThreadPoolExecutor heartPublishExecutor = new ThreadPoolExecutor(
+			HEART_PUBLISH_POOL_SIZE, HEART_PUBLISH_POOL_SIZE, 0L, TimeUnit.MILLISECONDS,
+			new LinkedBlockingQueue<Runnable>(), r -> {
 		Thread t = new Thread(r, "Heart-Publish-Worker");
 		t.setDaemon(true);
 		return t;
 	});
+
+	//
+	// Externally observable proxy for "how many of the fixed publish workers
+	// are currently permanently stuck" -- a thread blocked forever inside
+	// Paho's wait shows up here as perpetually "active" (ThreadPoolExecutor
+	// counts a thread as active for the entire duration it's running a task,
+	// which for a stuck task is forever). Written to disk periodically (see
+	// startHeartPublishHealthMonitor()) so Medula -- a separate process --
+	// can read it and detect pool exhaustion, something it currently has no
+	// way to distinguish from ordinary transient slowness. See conversation
+	// 2026-08-04.
+	//
+	public int getHeartPublishActiveWorkers() {
+		return heartPublishExecutor.getActiveCount();
+	}
+	public int getHeartPublishPoolSize() {
+		return HEART_PUBLISH_POOL_SIZE;
+	}
+
+	private void startHeartPublishHealthMonitor() {
+		ScheduledExecutorService monitor = Executors.newSingleThreadScheduledExecutor(r -> {
+			Thread t = new Thread(r, "Heart-Publish-Health-Monitor");
+			t.setDaemon(true);
+			return t;
+		});
+		monitor.scheduleAtFixedRate(() -> {
+			try {
+				JSONObject pingInfo = new JSONObject();
+				pingInfo.put("heartPublishActiveWorkers", getHeartPublishActiveWorkers());
+				pingInfo.put("heartPublishPoolSize", getHeartPublishPoolSize());
+				pingInfo.put(TeleonomeConstants.DATATYPE_TIMESTAMP_MILLISECONDS, System.currentTimeMillis());
+				FileUtils.writeStringToFile(new File(Utils.getLocalDirectory() + "HypothalamusPing.info"), pingInfo.toString());
+			} catch (Exception e) {
+				logger.warn("Heart-Publish-Health-Monitor failed to write HypothalamusPing.info: " + Utils.getStringException(e));
+			}
+		}, 0, 60, TimeUnit.SECONDS);
+	}
 
 	public synchronized void publishToHeart(String topic, String messageText) {
 
