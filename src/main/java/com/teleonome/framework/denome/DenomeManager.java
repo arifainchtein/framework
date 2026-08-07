@@ -3584,6 +3584,28 @@ public class DenomeManager {
 		}
 		return (currentMaximum+1);
 	}
+
+	/**
+	 * Replaces any existing Dene(s) with the given Name in denes with newDene, instead of
+	 * appending alongside them. Used for chains that should hold one current entry per Name
+	 * (e.g. Cerebellum device status under Mnemosyne Today) rather than unbounded history --
+	 * see updateCerebellumPurposeDene, which previously appended a new entry every pulse and
+	 * caused Mnemosyne Today to balloon from ~500KB to 3.6MB+ within a single day on
+	 * ChinampaMonitor (2026-08-06), eventually causing Hypothalamus to fall behind its pulse
+	 * deadline and get killed/restarted by Medula in a repeating cycle. Mirrors
+	 * MnemosyneManager.appendOrReplaceDeneByName, which fixed the same bug pattern for
+	 * Mnemosycon Processing on 2026-07-16.
+	 */
+	private void appendOrReplaceDeneByName(JSONArray denes, String name, JSONObject newDene) {
+		for (int i = denes.length() - 1; i >= 0; i--) {
+			JSONObject existing = denes.optJSONObject(i);
+			if (existing != null && name.equals(existing.optString("Name", null))) {
+				denes.remove(i);
+			}
+		}
+		denes.put(newDene);
+	}
+
 	/**
 	 *  this method returns the dene with the dene name required that has the position as passed by the parameter
 	 * the postion parameter is String because it can be a command like COMMAND_MNEMOSYNE_LAST_DENE_POSITION or
@@ -4990,20 +5012,18 @@ public class DenomeManager {
 								for (int i = 0; i < statusDenes.length(); i++) {
 									JSONObject deviceDene = statusDenes.getJSONObject(i);
 									String deviceName = deviceDene.optString("Name");
-									int position = getNextPostionForDeneInMnemosyneChain(
-											targetChain, deviceName);
 									JSONObject mnemosyneEntry = new JSONObject();
 									mnemosyneEntry.put("Name", deviceName);
-									mnemosyneEntry.put("Position", position);
+									mnemosyneEntry.put("Position", 1);
 									mnemosyneEntry.put("Timestamp", formattedTimestamp);
 									mnemosyneEntry.put("Timestamp Milliseconds", currentTimeMillis);
 									JSONArray deviceWords = deviceDene.optJSONArray("DeneWords");
 									mnemosyneEntry.put("DeneWords",
 											deviceWords != null ? new JSONArray(deviceWords.toString())
 													: new JSONArray());
-									targetDenes.put(mnemosyneEntry);
+									appendOrReplaceDeneByName(targetDenes, deviceName, mnemosyneEntry);
 									logger.info("updateCerebellumPurposeDene: saved " + deviceName
-											+ " to " + targetPointer + " at position " + position);
+											+ " to " + targetPointer + " (upsert, current value only)");
 								}
 							} catch (Exception e) {
 								logger.warn("updateCerebellumPurposeDene: mnemosyne write failed for "

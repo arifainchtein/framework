@@ -351,6 +351,10 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				tableName = rs.getString(1);
 				logger.debug("line 299, tableName=" + tableName);
 				tableDate = this.getDateForManagedTable(prefix, tableName);
+				if(tableDate==null){
+					logger.warn("getAllTableNamesForManagedTable skipping table with unparseable date: " + tableName);
+					continue;
+				}
 				arrayList.add(new AbstractMap.SimpleEntry<String,Date>(tableName, tableDate));
 				Collections.sort(arrayList, new Comparator<Map.Entry<?, Date>>(){
 					public int compare(Map.Entry<?, Date> o1, Map.Entry<?, Date> o2) {

@@ -60,6 +60,15 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 	// work. The identity only needs to be registered once, ever.
 	//
 	boolean identityAdded=false;
+	//
+	// Same idea as identityAdded above: the remote per-Teleonome directory,
+	// once it exists, doesn't need re-checking on every pulse. createTunnel()
+	// used to run a full remote sftp.ls(".") (listing every Teleonome host's
+	// directory on the server) plus a possible mkdir on every single pulse
+	// just to confirm something that's true forever after the first time --
+	// real added latency on every publish cycle for zero benefit after day one.
+	//
+	boolean remoteDirectoryConfirmed=false;
 	Session session=null;
 	String teleonomeName="";
 
@@ -223,42 +232,46 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 
 		logger.debug(" connected" );
 
-		// make sure that there us the directory for this teleonome
+		// make sure that there us the directory for this teleonome -- only
+		// actually checked once per process lifetime, see remoteDirectoryConfirmed
 		//
+		teleonomeName =  aDenomeManager.getDenomeName();
 		Channel channel;
 		try {
-			channel = session.openChannel("sftp");
-			ChannelSftp sftp = (ChannelSftp) channel;
-			sftp.connect();
-			teleonomeName =  aDenomeManager.getDenomeName();
-			String currentRemoteDir = sftp.pwd();
-			logger.debug("creating teleonome directory currentRemoteDir" + currentRemoteDir);
+			if(!remoteDirectoryConfirmed) {
+				channel = session.openChannel("sftp");
+				ChannelSftp sftp = (ChannelSftp) channel;
+				sftp.connect();
+				String currentRemoteDir = sftp.pwd();
+				logger.debug("creating teleonome directory currentRemoteDir" + currentRemoteDir);
 
-			sftp.cd("Teleonome");
-			//
-			// now chck to see if the directory exists
-			//
-			boolean found=false;
-			Vector files = sftp.ls(".");
-			ChannelSftp.LsEntry fileName=null;
+				sftp.cd("Teleonome");
+				//
+				// now chck to see if the directory exists
+				//
+				boolean found=false;
+				Vector files = sftp.ls(".");
+				ChannelSftp.LsEntry fileName=null;
 
-			Iterator itFiles = files.iterator();
-			while (itFiles.hasNext()) {
-				try{
-					fileName = (ChannelSftp.LsEntry)itFiles.next();
-					logger.debug("fileName=" + fileName.getFilename());
-					if(fileName.getFilename().equals(teleonomeName)){
-						logger.debug("found directory " + teleonomeName);
-						found=true;
+				Iterator itFiles = files.iterator();
+				while (itFiles.hasNext()) {
+					try{
+						fileName = (ChannelSftp.LsEntry)itFiles.next();
+						logger.debug("fileName=" + fileName.getFilename());
+						if(fileName.getFilename().equals(teleonomeName)){
+							logger.debug("found directory " + teleonomeName);
+							found=true;
+						}
+					}catch(NoSuchElementException e){
+						logger.debug("exception e=" + e.getMessage());
 					}
-				}catch(NoSuchElementException e){
-					logger.debug("exception e=" + e.getMessage());
+
 				}
 
+				if(!found)sftp.mkdir(teleonomeName);
+				sftp.disconnect();
+				remoteDirectoryConfirmed=true;
 			}
-
-			if(!found)sftp.mkdir(teleonomeName);
-			sftp.disconnect();
 
 		} catch (JSchException e) {
 			// TODO Auto-generated catch block
