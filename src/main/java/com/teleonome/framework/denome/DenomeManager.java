@@ -8656,24 +8656,8 @@ public class DenomeManager {
 		// now save it to the hard drive
 		//
 		try {
-			//
-			// Copy the currentpulse to be the previous pulse
-			//
 			currentlyCreatingPulseJSONObject.put(TeleonomeConstants.PULSE_CREATION_DURATION_MILLIS, pulseDuration);
 
-			File previousPulse = new File("/home/pi/Teleonome/Teleonome.previous_pulse");
-			   
-			   
-			File currentPulseFile = new File(selectedDenomeFileName);
-			String previousPulseFileName = FilenameUtils.getBaseName(selectedDenomeFileName) + ".previous_pulse";
-
-			File previousPulseFile = new File(previousPulseFileName);
-			logger.debug("about to copy " + selectedDenomeFileName + " to " + previousPulseFileName);
-
-			if (currentPulseFile.exists()) {
-		        Files.move(currentPulseFile.toPath(), previousPulse.toPath(), 
-		                   StandardCopyOption.REPLACE_EXISTING);
-		    }
 			//
 			// now write the denome, do it twice, first so that you can get the pulse size
 			// then modify the purpose:operational data:vital:Pulse Size Kb deneword
