@@ -4620,7 +4620,7 @@ public class DenomeManager {
 	        deneWord.put(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE, value);
 
 	        // 3. Stream the output directly to both files (Zero intermediate String)
-	        // We avoid .toString(4) entirely to save RAM
+	        // Streams node-by-node instead of building a .toString(4) String first, to save RAM
 	        try {
 	            writeJsonObjectToFile(localDenomeJSONObject, selectedFile);
 	            writeJsonObjectToFile(localDenomeJSONObject, tomcatFile);
@@ -4651,7 +4651,7 @@ public class DenomeManager {
 	    File tempFile = File.createTempFile(file.getName(), ".tmp", file.getParentFile());
 	    try {
 	        try (BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile))) {
-	            json.write(bw); // This streams node-by-node, keeping RAM usage flat
+	            json.write(bw, 4, 0); // Streams node-by-node (flat RAM) while still pretty-printing like toString(4)
 	            bw.flush();
 	        }
 	        Files.move(tempFile.toPath(), file.toPath(),
@@ -8686,7 +8686,7 @@ public class DenomeManager {
 			logger.debug("available memory after generating pulse before gc=" + availableMemory + " after gc=" + afterGcMemory);
 
 
-		} catch (IOException | JSONException e) {
+		} catch ( JSONException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
 		}
