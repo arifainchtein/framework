@@ -1013,6 +1013,14 @@ public class TeleonomeConstants {
 	public static final String PATHOLOGY_MISSING_DENOME_FILE= "Missing Denome File";
 	
 	public static final String PATHOLOGY_TOMCAT_PING_LATE= "Tomcat Ping Late";
+	//
+	// distinct from PATHOLOGY_TOMCAT_PING_LATE: the root page can return 200
+	// (Tomcat itself is up) while TeleonomeServlet still 500s on every real data
+	// request, e.g. WebAppContextListener.contextInitialized() bailing out early
+	// on a denome read race and leaving the "TeleonomeName" servlet context
+	// attribute permanently null. See conversation 2026-08-14 (Tlaloc).
+	//
+	public static final String PATHOLOGY_TOMCAT_SERVLET_ERROR= "Tomcat Servlet Error";
 	public static final String PATHOLOGY_HYPOTHALAMUS_MEMORY_CEILING= "Hypothalamus Memory Ceiling Exceeded";
 	public static final String PATHOLOGY_DETAILS_LABEL= "Details";
 	
