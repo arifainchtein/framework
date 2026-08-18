@@ -4886,6 +4886,89 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}
 
+	// How far back getLastTelepathonData() searches for a device's most recent
+	// reading before giving up - matches TelepathonRegistryTask's own
+	// HISTORY_LOOKBACK_DAYS convention (cerebellum repo) for consistency.
+	private static final int DEFAULT_LAST_TELEPATHON_LOOKBACK_DAYS = 90;
+
+	/**
+	 * Returns the single most recent stored snapshot (timeSeconds + full DeneChain
+	 * "data" JSON) for a telepathon, searching the daily telepathon_<date> tables
+	 * newest-first and stopping at the first one that has any row for this name -
+	 * at most one row read per table, unlike getTelepathonDataStart (which returns
+	 * every row in a window; fine for a bounded recent-hours query, but far too much
+	 * data to pull back just to find the single latest row over a many-day lookback
+	 * for a device that pulses every few seconds, e.g. Langley).
+	 *
+	 * Used by the Telepathon Registry popup (teleonomewebapp) to show a device's
+	 * last-known reading even once it has aged out of the live, self-pruning denome.
+	 */
+	public JSONObject getLastTelepathonData(String telepathonName, int lookbackDays) {
+		long nowMillis = System.currentTimeMillis();
+		long startMillis = nowMillis - lookbackDays * 24L * 3600L * 1000L;
+		ArrayList<String> tables = getAllManagedTablesForAPeriod(TeleonomeConstants.TELEPATHON_TABLE, startMillis, nowMillis);
+
+		// Table names are "telepathon_YYYY_M_D" with no leading zeros, so a plain
+		// string sort orders them wrong (e.g. "_10_" sorts before "_2_") - sort by
+		// the actual encoded date instead, most recent first, so the loop below
+		// stops at the first table that actually has data for this name.
+		tables.sort((a, b) -> Long.compare(
+				parseManagedTableDateMillis(b, TeleonomeConstants.TELEPATHON_TABLE),
+				parseManagedTableDateMillis(a, TeleonomeConstants.TELEPATHON_TABLE)));
+
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		ResultSet rs = null;
+		try {
+			connection = connectionPool.getConnection();
+			for (String table : tables) {
+				String command = "SELECT timeSeconds, data FROM " + table
+						+ " WHERE telepathonname=? ORDER BY timeseconds DESC LIMIT 1";
+				preparedStatement = connection.prepareStatement(command);
+				preparedStatement.setString(1, telepathonName);
+				rs = preparedStatement.executeQuery();
+				if (rs.next()) {
+					JSONObject row = new JSONObject();
+					row.put("timeSeconds", rs.getLong(1));
+					row.put("data", new JSONObject(rs.getString(2)));
+					return row;
+				}
+				rs.close();
+				preparedStatement.close();
+			}
+		} catch (SQLException e) {
+			logger.warn(Utils.getStringException(e));
+		} catch (JSONException e) {
+			logger.warn(Utils.getStringException(e));
+		} finally {
+			try {
+				if (rs != null) rs.close();
+				if (preparedStatement != null) preparedStatement.close();
+			} catch (SQLException e) {
+				logger.debug(Utils.getStringException(e));
+			}
+			if (connection != null) closeConnection(connection);
+		}
+		return null;
+	}
+
+	public JSONObject getLastTelepathonData(String telepathonName) {
+		return getLastTelepathonData(telepathonName, DEFAULT_LAST_TELEPATHON_LOOKBACK_DAYS);
+	}
+
+	/** Mirrors the date-parsing getAllManagedTablesForAPeriod() does inline, exposed
+	 * separately so getLastTelepathonData() can sort tables newest-first. */
+	private long parseManagedTableDateMillis(String managedTableName, String baseTableName) {
+		String dateString = managedTableName.substring(baseTableName.length() + 1);
+		String[] tokens = dateString.split("_");
+		Calendar cal = Calendar.getInstance();
+		cal.clear();
+		cal.set(Calendar.YEAR, Integer.parseInt(tokens[0]));
+		cal.set(Calendar.MONTH, Integer.parseInt(tokens[1]) - 1);
+		cal.set(Calendar.DATE, Integer.parseInt(tokens[2]));
+		return cal.getTimeInMillis();
+	}
+
 	public boolean storeTelepathon(long timeSeconds, String telepathonname, JSONObject telepathon){
 
 		Calendar cal = Calendar.getInstance();
