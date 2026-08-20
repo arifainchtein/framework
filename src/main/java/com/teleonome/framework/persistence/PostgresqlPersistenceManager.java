@@ -432,7 +432,18 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		Date date=null;
 		try {
 			logger.debug("line 376 dateString=" + dateString);
-			date = managedTableDateFormat.parse(dateString);
+			// SimpleDateFormat.parse()/format() are not thread-safe - managedTableDateFormat
+			// is one shared instance field, and multiple threads within the same organ
+			// process (e.g. Hippocampus's MQTT message thread and its PingThread) can call
+			// into this class concurrently via the PostgresqlPersistenceManager singleton.
+			// Concurrent use corrupts SimpleDateFormat's internal Calendar and produces
+			// intermittent NullPointerException/NumberFormatException/ArrayIndexOutOfBounds -
+			// exactly the sporadic "Backfill from Postgres failed: NullPointerException"
+			// seen in Hippocampus's logs. Synchronizing on the shared instance serializes
+			// access without needing a new SimpleDateFormat per call.
+			synchronized (managedTableDateFormat) {
+				date = managedTableDateFormat.parse(dateString);
+			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
@@ -959,8 +970,13 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		String order="asc";
 		if(last)order="desc";
 		ArrayList<String> allTables = getAllManagedTablesForAPeriod(TeleonomeConstants.ORGANISMPULSE_TABLE,startTime.getTime(), endTime.getTime());
-		String createdOnStart = managedTableDateFormat.format(startTime);
-		String createdOnEnd = managedTableDateFormat.format(endTime);
+		String createdOnStart, createdOnEnd;
+		// See getDateForManagedTable()'s comment - managedTableDateFormat is shared and
+		// SimpleDateFormat isn't thread-safe, so concurrent callers must serialize on it.
+		synchronized (managedTableDateFormat) {
+			createdOnStart = managedTableDateFormat.format(startTime);
+			createdOnEnd = managedTableDateFormat.format(endTime);
+		}
 		String sql ="";
 		Connection connection = null;
 		Statement statement = null;
@@ -1304,7 +1320,12 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			dailyTableName = ((String)allTables.get(i));
 			dateString = dailyTableName.substring(tableName.length()+1);
 			try {
-				date = managedTableDateFormat.parse(dateString);
+				// See getDateForManagedTable()'s comment - managedTableDateFormat is shared
+				// and SimpleDateFormat isn't thread-safe, so concurrent callers must
+				// serialize on it.
+				synchronized (managedTableDateFormat) {
+					date = managedTableDateFormat.parse(dateString);
+				}
 				logger.debug("getManagedTablesByRange, date=" + date);
 				if(date.after(fromDate) && date.before(untilDate)) {
 					toReturn.add(dailyTableName);
