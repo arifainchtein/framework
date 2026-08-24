@@ -45,9 +45,15 @@ public class ArduinoUno extends MotherMicroController implements LifeCycleEventL
 	// (e.g. "ttyACM0"), not the /dev/-prefixed path RXTX's CommPortIdentifier
 	// used - PLSeriesMicroController already carries both forms for the same
 	// reason, see its PORT_NAMES.
+	//
+	// Order matters here (see the search loop below, which now checks names in
+	// this priority order): ttyAMA0 is the Pi's onboard UART, not the USB Arduino,
+	// and must never be matched ahead of the ACM/USB entries or a Pi with both
+	// present will lock onto ttyAMA0 and retry forever against a port nothing is
+	// listening on.
 	private static final String PORT_NAMES[] = { "/dev/tty.usbmodem641", "/dev/ttyACM0", "ttyACM0",
-			"/dev/ttyAMA0", "ttyAMA0", "/dev/ttyUSB0", "ttyUSB0", "/dev/ttyUSB1", "ttyUSB1",
-			"/dev/cu.usbmodem1411" };
+			"/dev/ttyUSB0", "ttyUSB0", "/dev/ttyUSB1", "ttyUSB1", "/dev/cu.usbmodem1411",
+			"/dev/ttyAMA0", "ttyAMA0" };
 	SerialPort serialPort = null;
 	private ArduinoUnoReader input;
 	private BufferedWriter output;
@@ -103,7 +109,11 @@ public class ArduinoUno extends MotherMicroController implements LifeCycleEventL
 			logger.debug("looking for ports, found " + allPorts.length + " ports");
 			for (SerialPort port : allPorts) {
 				logger.debug("looking for ports, currPortId=" + port.getSystemPortName());
-				for (String portName : PORT_NAMES) {
+			}
+			// Iterate PORT_NAMES in priority order (not port-enumeration order) so
+			// the Arduino's USB names always win over ttyAMA0 when both are present.
+			for (String portName : PORT_NAMES) {
+				for (SerialPort port : allPorts) {
 					if (port.getSystemPortName().equals(portName) || port.getSystemPortName().startsWith(portName)) {
 						portId = port;
 						break;
