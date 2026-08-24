@@ -41,8 +41,13 @@ import com.teleonome.framework.utils.Utils;
 public class ArduinoUno extends MotherMicroController implements LifeCycleEventListener {
 
 	Logger logger;
-	private static final String PORT_NAMES[] = { "/dev/tty.usbmodem641", "/dev/ttyACM0", "/dev/ttyAMA0",
-			"/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/cu.usbmodem1411" };
+	// jSerialComm's getSystemPortName() returns the bare device name on Linux
+	// (e.g. "ttyACM0"), not the /dev/-prefixed path RXTX's CommPortIdentifier
+	// used - PLSeriesMicroController already carries both forms for the same
+	// reason, see its PORT_NAMES.
+	private static final String PORT_NAMES[] = { "/dev/tty.usbmodem641", "/dev/ttyACM0", "ttyACM0",
+			"/dev/ttyAMA0", "ttyAMA0", "/dev/ttyUSB0", "ttyUSB0", "/dev/ttyUSB1", "ttyUSB1",
+			"/dev/cu.usbmodem1411" };
 	SerialPort serialPort = null;
 	private ArduinoUnoReader input;
 	private BufferedWriter output;
