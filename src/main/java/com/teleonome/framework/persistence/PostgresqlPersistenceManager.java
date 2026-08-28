@@ -4434,7 +4434,8 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 			preparedStatement.setLong(2, recordMillis);
 
 			preparedStatement.setString(3, label);
-			preparedStatement.setDouble(4, (double)value);
+			double motherRememberedValue = (value instanceof Number) ? ((Number)value).doubleValue() : (double)value;
+			preparedStatement.setDouble(4, motherRememberedValue);
 			preparedStatement.setString(5, unit);
 
 			int result = preparedStatement.executeUpdate();
@@ -4513,7 +4514,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 			preparedStatement.setString(3, teleonomeName);
 			preparedStatement.setString(4, identityString);
-			preparedStatement.setDouble(5, (double) value);		
+			preparedStatement.setDouble(5, value);
 			logger.debug("source=" + source);
 			preparedStatement.setString(6, source);
 			preparedStatement.setString(7, units);
@@ -4605,8 +4606,15 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				}else if(value instanceof Integer) {
 					//
 					// if the value is rendered as 0 and the value type is double
-					// it gets interpreted as an integer, 
+					// it gets interpreted as an integer,
 					d = ((Integer)value).doubleValue();
+				}else if(value instanceof Number) {
+					//
+					// covers Double as well as BigDecimal -- pgjdbc 42.7.13 returns
+					// NUMERIC columns as BigDecimal where 42.7.7 returned Double for
+					// some of them, and a direct (double)value unboxing cast only
+					// works for an actual Double, not any other Number subclass
+					d = ((Number)value).doubleValue();
 				}else {
 					d = (double)value;
 				}
@@ -4629,7 +4637,7 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 				if(b)d=1.0;
 				preparedStatement.setDouble(5, d);
 			}else {
-				preparedStatement.setDouble(5, (double) value);				
+				preparedStatement.setDouble(5, (value instanceof Number) ? ((Number)value).doubleValue() : (double) value);
 			}
 			logger.debug("source=" + source);
 			preparedStatement.setString(6, source);
