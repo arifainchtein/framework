@@ -264,10 +264,12 @@ public class ArduinoUno extends MotherMicroController implements LifeCycleEventL
 	}
 
 	public ArduinoUnoReader getReader() throws IOException {
+		input = new ArduinoUnoReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())));
 		return input;
 	}
 
 	public BufferedWriter getWriter() throws IOException {
+		output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
 		return output;
 	}
 
@@ -428,6 +430,7 @@ public class ArduinoUno extends MotherMicroController implements LifeCycleEventL
 	}
 
 	private String sendCommand(String actuatorCommand) throws IOException {
+		output = new BufferedWriter(new OutputStreamWriter(serialPort.getOutputStream()));
 		logger.debug("sending command:" + actuatorCommand);
 		output.write(actuatorCommand, 0, actuatorCommand.length());
 		try {
@@ -436,6 +439,7 @@ public class ArduinoUno extends MotherMicroController implements LifeCycleEventL
 			e.printStackTrace();
 		}
 		output.flush();
+		input = new ArduinoUnoReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream())));
 		String inputLine = input.readLine();
 		logger.debug("receiving response :" + inputLine);
 
