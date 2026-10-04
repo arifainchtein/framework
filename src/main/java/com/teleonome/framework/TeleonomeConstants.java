@@ -25,6 +25,9 @@ public class TeleonomeConstants {
 	public static final int ANNABELL_TEMP_SOILMOISTURE= 8;
 	public static final int ANNABELL_LIGHT_DETECTOR= 9;
 	public static final int  VOLTAGE_MONITOR=10;
+	public static final int ANNABELL_DAFFODIL_WATER_TROUGH_TANK1=11;      // tank1 pressure on terminal 18 + trough ultrasonic on 33
+	public static final int ANNABELL_DAFFODIL_2_WATER_TROUGH=12;          // two troughs: measuredHeight + measuredHeight2
+	public static final int ANNABELL_DAFFODIL_WATER_TROUGH_WATER_TEMP=13; // trough ultrasonic + DS18B20 water temp, temp (degrees C) sent in measuredHeight2
 	public static final String ADA_INTERNAL_HOST_IPADDRESS="172.16.1.1";
 	
 	//
@@ -1044,6 +1047,7 @@ public class TeleonomeConstants {
 	public static final String PATHOLOGY_PULSE_DURATION_ABOVE_THRESHOLD = "Pulse Generation Above Threshold";
 	public static final String PATHOLOGY_ANALYTICON_SOURCES_LATE = "Analyticon Sources Late";
 	public static final String PATHOLOGY_MICROCONTROLLER_COMMUNICATION_FAILED = "Microcontroller Communication Failed";
+	public static final String PATHOLOGY_MICROCONTROLLER_RESET = "Microcontroller Reset";
 	
 	
 	public static final String PATHOLOGY_DATA_STALE="Data Stale";

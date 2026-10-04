@@ -52,6 +52,18 @@ class MappedBusThread extends Thread{
 	BufferedWriter output=null;
 	Logger logger=null;
 	JSONObject lastPulseJSONObject;
+	//
+	// Microcontroller reset diagnostics, added 2026-10-05. Serial (AnnabelleReader)
+	// boards may append "ResetInfo=<reason>,<bootCount>,<prevUptimeSeconds>,<uptimeSeconds>"
+	// (prevUptimeSeconds=-1 when unknown) as a "|"- or "#"-delimited segment of their
+	// AsyncData terminator line -- see recordMicrocontrollerResetInfo(). Static so
+	// the last-seen uptime survives this thread being recreated between pulses;
+	// an uptime lower than the last one seen means the board reset in between.
+	//
+	static final String RESET_INFO_KEY = "ResetInfo";
+	static final String RESET_INFO_DENECHAIN_NAME = "Microcontroller Reset Info";
+	private static final Map<String, Long> lastUptimeSecondsByMicroController = new HashMap<String, Long>();
+	private static final Map<String, JSONObject> resetInfoDeneByMicroController = new HashMap<String, JSONObject>();
 	public MappedBusThread(Hypothalamus h){
 		hypothalamus = h;
 		keepRunning=true;
@@ -1051,6 +1063,14 @@ class MappedBusThread extends Thread{
 										inputLine = input.readLine();
 										logger.debug("receiving response :"+ inputLine);
 										//
+										// Reset diagnostics only mean something for a physical board, so
+										// like AsyncDataCount above this is limited to AnnabelleReader
+										// (serial ESP32 boards) -- software microcontrollers are untouched.
+										//
+										if(input instanceof AnnabelleReader) {
+											recordMicrocontrollerResetInfo(aMicroController, inputLine);
+										}
+										//
 										// Per-type downloaded-record counts, added 2026-08-04 --
 										// "Ok-AsyncData#DS=<n>|Gloria=<n>|Seedling=<n>|Chinampa=<n>
 										// |Comma=<n>|Langley=<n>". Added to each type's Dene (built
@@ -1064,6 +1084,7 @@ class MappedBusThread extends Thread{
 												int eq = segment.indexOf('=');
 												if(eq<0) continue;
 												String typeName = segment.substring(0, eq);
+												if(typeName.equals(RESET_INFO_KEY)) continue;  // handled by recordMicrocontrollerResetInfo()
 												try {
 													int downloadedCount = Integer.parseInt(segment.substring(eq+1).trim());
 													if(downloadedCount>0) {
@@ -1983,6 +2004,94 @@ class MappedBusThread extends Thread{
 					}
 				}
 			}
+		}
+	}
+
+	//
+	// Parses an optional "ResetInfo=<reason>,<bootCount>,<prevUptimeSeconds>,<uptimeSeconds>"
+	// segment out of a serial board's AsyncData response (optional -- boards whose
+	// firmware doesn't send it are simply ignored). Keeps one Dene
+	// per microcontroller in the Purpose "Microcontroller Reset Info" DeneChain,
+	// and adds a "Microcontroller Reset" pathology when the uptime went backwards
+	// since the last Async Cycle, i.e. the board reset in between -- so a reset
+	// that nobody happened to see is still recorded, with its reason.
+	//
+	private void recordMicrocontrollerResetInfo(MicroController aMicroController, String line) {
+		if(line==null) return;
+		String marker = RESET_INFO_KEY + "=";
+		int start = line.indexOf(marker);
+		if(start<0) return;
+		start += marker.length();
+		int end = start;
+		while(end<line.length() && line.charAt(end)!='|' && line.charAt(end)!='#') end++;
+		String[] values = line.substring(start, end).trim().split(",");
+		if(values.length<4) {
+			logger.warn("could not parse ResetInfo from " + aMicroController.getName() + ": " + line);
+			return;
+		}
+		String microControllerName = aMicroController.getName();
+		try {
+			String resetReason = values[0].trim();
+			long bootCount = Long.parseLong(values[1].trim());
+			long previousUptimeSeconds = Long.parseLong(values[2].trim());
+			long uptimeSeconds = Long.parseLong(values[3].trim());
+
+			Calendar cal = Calendar.getInstance();
+			Calendar resetCal = Calendar.getInstance();
+			resetCal.add(Calendar.SECOND, (int) -uptimeSeconds);
+			String lastResetTimestamp = hypothalamus.simpleFormatter.format(resetCal.getTime());
+
+			Long lastUptimeSeconds;
+			synchronized(lastUptimeSecondsByMicroController) {
+				lastUptimeSeconds = lastUptimeSecondsByMicroController.put(microControllerName, uptimeSeconds);
+			}
+			if(lastUptimeSeconds!=null && uptimeSeconds<lastUptimeSeconds) {
+				//
+				// The firmware only knows its previous uptime when RTC memory survived
+				// the reset (not after POWERON/EN resets); fall back to the last uptime
+				// we saw, which is at most one Async Cycle short of the real value.
+				//
+				long uptimeBeforeReset = previousUptimeSeconds>=0 ? previousUptimeSeconds : lastUptimeSeconds;
+				logger.warn("Microcontroller " + microControllerName + " reset, reason=" + resetReason + " bootCount=" + bootCount + " uptimeBeforeReset=" + uptimeBeforeReset + "s, reset at about " + lastResetTimestamp);
+				Vector<JSONObject> extraDeneWords = new Vector<JSONObject>();
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_MILLISECONDS, "" + cal.getTime().getTime(), null, "long", true));
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_TIMESTAMP, hypothalamus.simpleFormatter.format(cal.getTime()), null, "String", true));
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Microcontroller", microControllerName, null, "String", true));
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Reset Reason", resetReason, null, "String", true));
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Reset Timestamp", lastResetTimestamp, null, "String", true));
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Uptime Before Reset Seconds", "" + uptimeBeforeReset, null, "long", true));
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Boot Count", "" + bootCount, null, "long", true));
+				hypothalamus.aDenomeManager.addPurposePathologyDene(TeleonomeConstants.PATHOLOGY_MICROCONTROLLER_RESET,
+						TeleonomeConstants.PATHOLOGY_MICROCONTROLLER_RESET,
+						TeleonomeConstants.PATHOLOGY_LOCATION_MICROCONTROLLER, extraDeneWords);
+			}
+
+			JSONObject resetInfoDene = new JSONObject();
+			resetInfoDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, microControllerName);
+			JSONArray resetInfoDeneWords = new JSONArray();
+			resetInfoDene.put("DeneWords", resetInfoDeneWords);
+			resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Reset Reason", resetReason, null, TeleonomeConstants.DATATYPE_STRING, true));
+			resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Last Reset Timestamp", lastResetTimestamp, null, TeleonomeConstants.DATATYPE_STRING, true));
+			resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Boot Count", "" + bootCount, null, TeleonomeConstants.DATATYPE_LONG, true));
+			resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Previous Uptime Seconds", "" + previousUptimeSeconds, null, TeleonomeConstants.DATATYPE_LONG, true));
+			resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Uptime Seconds", "" + uptimeSeconds, null, TeleonomeConstants.DATATYPE_LONG, true));
+
+			JSONObject resetInfoChain = new JSONObject();
+			resetInfoChain.put(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE, RESET_INFO_DENECHAIN_NAME);
+			JSONArray resetInfoDenes = new JSONArray();
+			resetInfoChain.put("Denes", resetInfoDenes);
+			synchronized(resetInfoDeneByMicroController) {
+				resetInfoDeneByMicroController.put(microControllerName, resetInfoDene);
+				for(JSONObject dene : resetInfoDeneByMicroController.values()) {
+					resetInfoDenes.put(dene);
+				}
+			}
+			hypothalamus.aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_PURPOSE, RESET_INFO_DENECHAIN_NAME);
+			hypothalamus.aDenomeManager.injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_PURPOSE, resetInfoChain);
+		} catch (NumberFormatException nfe) {
+			logger.warn("could not parse ResetInfo from " + microControllerName + ": " + line + " " + Utils.getStringException(nfe));
+		} catch (JSONException je) {
+			logger.warn("could not record ResetInfo for " + microControllerName + ": " + Utils.getStringException(je));
 		}
 	}
 
