@@ -16,9 +16,13 @@ import com.teleonome.framework.denome.DenomeUtils;
 //
 // VitalSignsDeserializer#serialHex#version#firmwareBuild#resetCount#lastResetReason#lastResetTime
 //   #wakeCount#earlyWakeCount#commaWakeCount#awakeSecondsTotal#sleptSecondsTotal#lastWakeCause
-//   #lastWakeDriftSec#lastAwakeMs#wakeVoltage_mV#minVoltageSinceReport_mV#txDurationMs
+//   #lastWakeDriftSec#lastAwake#wakeVoltage_mV#minVoltageSinceReport_mV#txDurationMs
 //   #txBatteryPre_mA#txBatteryPeak_mA#txBatteryPost_mA#txPanel_mA#txV50i_mV#txMinVoltage_mV
-//   #loraTxFailCount#seq#i2cDeviceMask#rssi#snr#receivedEpoch            (30 tokens)
+//   #loraTxFailCount#seq#i2cDeviceMask#rssi#snr#receivedAgeSeconds      (30 tokens)
+//   receivedAgeSeconds = how long ago Annabelle received it; the received time is computed here
+//   from this machine's clock because Annabelle's RTC is unreliable local wall time. Firmware from
+//   before 2026-10-05 sent an absolute (and wrong) epoch in this slot - anything above
+//   LEGACY_EPOCH_THRESHOLD is treated that way.
 //
 // Unlike the other deserializers this doesn't return a whole telepathon DeneChain - it returns a
 // single "Vital Signs" Dene, which AnnabelleReader places into the device's existing chain
@@ -26,6 +30,7 @@ import com.teleonome.framework.denome.DenomeUtils;
 //
 public class VitalSignsDeserializer extends AnnabelleDeserializer {
 	public static final int TOKEN_COUNT = 30;
+	private static final long LEGACY_EPOCH_THRESHOLD = 1000000000L;
 	Logger logger;
 
 	private String serialNumber = "";
@@ -102,7 +107,9 @@ public class VitalSignsDeserializer extends AnnabelleDeserializer {
 			long sleptSecondsTotal = Long.parseLong(tokens[11].trim());
 			int lastWakeCause = Integer.parseInt(tokens[12].trim());
 			int lastWakeDriftSec = Integer.parseInt(tokens[13].trim());
-			int lastAwakeMs = Integer.parseInt(tokens[14].trim());
+			// lastAwake: version 1 sent milliseconds (capped at 65.5 s), version 2+ sends seconds.
+			int lastAwakeRaw = Integer.parseInt(tokens[14].trim());
+			double lastAwakeSeconds = version >= 2 ? lastAwakeRaw : lastAwakeRaw / 1000.0;
 			int wakeVoltageMv = Integer.parseInt(tokens[15].trim());
 			int minVoltageMv = Integer.parseInt(tokens[16].trim());
 			int txDurationMs = Integer.parseInt(tokens[17].trim());
@@ -117,7 +124,8 @@ public class VitalSignsDeserializer extends AnnabelleDeserializer {
 			int i2cDeviceMask = Integer.parseInt(tokens[26].trim());
 			double rssi = Double.parseDouble(tokens[27].trim());
 			double snr = Double.parseDouble(tokens[28].trim());
-			long receivedEpoch = Long.parseLong(tokens[29].trim());
+			long receivedToken = Long.parseLong(tokens[29].trim());
+			long receivedEpoch = receivedToken > LEGACY_EPOCH_THRESHOLD ? receivedToken : System.currentTimeMillis() / 1000 - receivedToken;
 
 			if (serialNumber.isEmpty()) {
 				logger.warn("VitalSignsDeserializer: empty serial number, rejecting: " + line);
@@ -148,7 +156,7 @@ public class VitalSignsDeserializer extends AnnabelleDeserializer {
 			}
 			w.put(DenomeUtils.buildDeneWordJSONObject("Last Wake Cause", wakeCauseName(lastWakeCause), null, TeleonomeConstants.DATATYPE_STRING, true));
 			w.put(DenomeUtils.buildDeneWordJSONObject("Last Wake Drift", "" + lastWakeDriftSec, "s", TeleonomeConstants.DATATYPE_INTEGER, true));
-			w.put(DenomeUtils.buildDeneWordJSONObject("Last Awake Duration", "" + lastAwakeMs, "ms", TeleonomeConstants.DATATYPE_INTEGER, true));
+			w.put(DenomeUtils.buildDeneWordJSONObject("Last Awake Duration", "" + lastAwakeSeconds, "s", TeleonomeConstants.DATATYPE_DOUBLE, true));
 			// power (0 mV = not measured -> left out)
 			if (wakeVoltageMv > 0) w.put(DenomeUtils.buildDeneWordJSONObject("Wake Voltage", "" + (wakeVoltageMv / 1000.0), "V", TeleonomeConstants.DATATYPE_DOUBLE, true));
 			if (minVoltageMv > 0) w.put(DenomeUtils.buildDeneWordJSONObject("Min Voltage Since Report", "" + (minVoltageMv / 1000.0), "V", TeleonomeConstants.DATATYPE_DOUBLE, true));
