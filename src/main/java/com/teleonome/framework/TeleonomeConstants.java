@@ -1048,6 +1048,11 @@ public class TeleonomeConstants {
 	public static final String PATHOLOGY_ANALYTICON_SOURCES_LATE = "Analyticon Sources Late";
 	public static final String PATHOLOGY_MICROCONTROLLER_COMMUNICATION_FAILED = "Microcontroller Communication Failed";
 	public static final String PATHOLOGY_MICROCONTROLLER_RESET = "Microcontroller Reset";
+	public static final String PATHOLOGY_TELEPATHON_RESET = "Telepathon Reset";
+	public static final String PATHOLOGY_LOCATION_TELEPATHON = "Telepathon";
+	// Reset / vital-signs diagnostics, added 2026-10-05 - mirrored in teleonomewebapp's TeleonomeConstants.js
+	public static final String DENECHAIN_MICROCONTROLLER_RESET_INFO = "Microcontroller Reset Info";
+	public static final String TELEPATHON_DENE_VITAL_SIGNS = "Vital Signs";
 	
 	
 	public static final String PATHOLOGY_DATA_STALE="Data Stale";

@@ -6,6 +6,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import org.apache.log4j.Logger;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Vector;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -199,6 +204,10 @@ public class AnnabelleReader extends BufferedReader{
 							deserializer="LangleyDataDeserializer";
 							processString=true;
 							appendString=false;
+						}else if(tokens.length>=VitalSignsDeserializer.TOKEN_COUNT && deserializer.contains("VitalSignsDeserializer")) {
+							deserializer="VitalSignsDeserializer";
+							processString=true;
+							appendString=false;
 						}
 					}
 					
@@ -211,7 +220,12 @@ public class AnnabelleReader extends BufferedReader{
 								annabellDeserializer.setMnemosyneManager(aDenomeManager.getMnemosyneManager());
 								String teleonomeName = aDenomeManager.getDenomeName();
 
-								if(annabellDeserializer instanceof CommaRecordDeserializer) {
+								if(annabellDeserializer instanceof VitalSignsDeserializer) {
+									JSONObject vitalSignsDene = annabellDeserializer.deserialise(teleonomeName, line);
+									if(vitalSignsDene != null) {
+										applyVitalSigns((VitalSignsDeserializer)annabellDeserializer, vitalSignsDene);
+									}
+								} else if(annabellDeserializer instanceof CommaRecordDeserializer) {
 									JSONObject commaData = annabellDeserializer.deserialise(teleonomeName, line);
 									long sourceoriginaltime = annabellDeserializer.getSourceoriginaltime();
 									if(commaData != null && commaData.has("devicename") && commaData.has("serialnumber")) {
@@ -260,6 +274,12 @@ public class AnnabelleReader extends BufferedReader{
 											}
 										}
 										if (accept) {
+											//
+											// A data record replaces the device's whole chain - keep the "Vital Signs"
+											// Dene (updated separately, see applyVitalSigns) so it isn't wiped every
+											// pulse, and so the stored history row carries it too.
+											//
+											carryOverVitalSigns(telepathonName, telepathon);
 											//
 											// Idempotency guard, added 2026-08-04 (see conversation).
 											// storeTelepathon() below is already safe to call twice for
@@ -367,4 +387,132 @@ public class AnnabelleReader extends BufferedReader{
 
 		return cleaned;
 	}
+	
+	//
+	// Vital signs (added 2026-10-05) - see VitalSignsDeserializer. The record is placed as the
+	// "Vital Signs" Dene of the device's existing telepathon chain (resolved by serial number).
+	// Its history is stored through the next data record's chain (carryOverVitalSigns), so no
+	// vital-signs-only rows ever become a device's "latest reading".
+	//
+	private void applyVitalSigns(VitalSignsDeserializer vitalSignsDeserializer, JSONObject vitalSignsDene) {
+		String serialNumber = vitalSignsDeserializer.getSerialNumber();
+		String telepathonName = aDenomeManager.getKnownNameForSerial(serialNumber);
+		if (telepathonName == null || telepathonName.isEmpty()) {
+			logger.warn("Vital signs for unknown serial number '" + serialNumber + "' dropped - vital signs never create telepathons");
+			return;
+		}
+		try {
+			JSONObject liveChain = aDenomeManager.getTelepathonDeneChain(telepathonName);
+			if (liveChain == null) {
+				logger.debug("Vital signs for '" + telepathonName + "' dropped - no live telepathon chain yet");
+				return;
+			}
+			JSONObject chain = new JSONObject(liveChain.toString());
+			JSONArray denes = chain.getJSONArray("Denes");
+			JSONObject previous = null;
+			int previousIndex = -1;
+			for (int i = 0; i < denes.length(); i++) {
+				if (TeleonomeConstants.TELEPATHON_DENE_VITAL_SIGNS.equals(denes.getJSONObject(i).optString(TeleonomeConstants.DENE_NAME_ATTRIBUTE))) {
+					previous = denes.getJSONObject(i);
+					previousIndex = i;
+					break;
+				}
+			}
+
+			//
+			// Delivery rate from sequence gaps, within one reset (the device restarts seq at a reset).
+			// The same seq again is Annabelle relaying the same record twice - counts unchanged.
+			//
+			long resetCount = vitalSignsDeserializer.getResetCount();
+			long seq = vitalSignsDeserializer.getSeq();
+			long received = 1, missed = 0;
+			long previousResetCount = previous == null ? -1 : deneWordLong(previous, "Reset Count", -1);
+			if (previous != null && previousResetCount == resetCount) {
+				long previousSeq = deneWordLong(previous, "Sequence", -1);
+				long previousReceived = deneWordLong(previous, "Records Received", 0);
+				long previousMissed = deneWordLong(previous, "Records Missed", 0);
+				if (seq == previousSeq) {
+					received = previousReceived;
+					missed = previousMissed;
+				} else {
+					received = previousReceived + 1;
+					missed = previousMissed + Math.max(0, seq - previousSeq - 1);
+				}
+			}
+			JSONArray words = vitalSignsDene.getJSONArray("DeneWords");
+			words.put(com.teleonome.framework.denome.DenomeUtils.buildDeneWordJSONObject("Records Received", "" + received, null, TeleonomeConstants.DATATYPE_LONG, true));
+			words.put(com.teleonome.framework.denome.DenomeUtils.buildDeneWordJSONObject("Records Missed", "" + missed, null, TeleonomeConstants.DATATYPE_LONG, true));
+			double deliveryPercent = Math.round(1000.0 * received / (received + missed)) / 10.0;
+			words.put(com.teleonome.framework.denome.DenomeUtils.buildDeneWordJSONObject("Delivery Percent", "" + deliveryPercent, "%", TeleonomeConstants.DATATYPE_DOUBLE, true));
+
+			//
+			// A higher reset count than last time = the device reset in between. Not raised the first
+			// time a device's vital signs are seen (nothing to compare with).
+			//
+			if (previousResetCount >= 0 && resetCount > previousResetCount) {
+				String resetTimestamp = new SimpleDateFormat("dd/MM/yy HH:mm").format(new Date(vitalSignsDeserializer.getLastResetTime() * 1000L));
+				logger.warn("Telepathon " + telepathonName + " reset, reason=" + vitalSignsDeserializer.getLastResetReasonName() + " at " + resetTimestamp + " (reset count " + previousResetCount + " -> " + resetCount + ")");
+				long nowMillis = System.currentTimeMillis();
+				Vector<JSONObject> extraDeneWords = new Vector<JSONObject>();
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_MILLISECONDS, "" + nowMillis, null, "long", true));
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_TIMESTAMP, new SimpleDateFormat("dd/MM/yy HH:mm").format(new Date(nowMillis)), null, "String", true));
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Telepathon", telepathonName, null, "String", true));
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Reset Reason", vitalSignsDeserializer.getLastResetReasonName(), null, "String", true));
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Reset Timestamp", resetTimestamp, null, "String", true));
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Reset Count", "" + resetCount, null, "long", true));
+				aDenomeManager.addPurposePathologyDene(TeleonomeConstants.PATHOLOGY_TELEPATHON_RESET,
+						TeleonomeConstants.PATHOLOGY_TELEPATHON_RESET,
+						TeleonomeConstants.PATHOLOGY_LOCATION_TELEPATHON, extraDeneWords);
+			}
+
+			if (previousIndex >= 0) {
+				denes.put(previousIndex, vitalSignsDene);
+			} else {
+				denes.put(vitalSignsDene);
+			}
+			aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+			aDenomeManager.injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS, chain);
+			hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS, chain.toString());
+		} catch (JSONException e) {
+			logger.warn("could not apply vital signs for " + telepathonName + ": " + Utils.getStringException(e));
+		}
 	}
+
+	// Copies the live chain's "Vital Signs" Dene into a freshly deserialized data chain.
+	private void carryOverVitalSigns(String telepathonName, JSONObject telepathon) {
+		try {
+			JSONObject liveChain = aDenomeManager.getTelepathonDeneChain(telepathonName);
+			if (liveChain == null || !liveChain.has("Denes") || !telepathon.has("Denes")) return;
+			JSONArray newDenes = telepathon.getJSONArray("Denes");
+			for (int i = 0; i < newDenes.length(); i++) {
+				if (TeleonomeConstants.TELEPATHON_DENE_VITAL_SIGNS.equals(newDenes.getJSONObject(i).optString(TeleonomeConstants.DENE_NAME_ATTRIBUTE))) return;
+			}
+			JSONArray liveDenes = liveChain.getJSONArray("Denes");
+			for (int i = 0; i < liveDenes.length(); i++) {
+				JSONObject dene = liveDenes.getJSONObject(i);
+				if (TeleonomeConstants.TELEPATHON_DENE_VITAL_SIGNS.equals(dene.optString(TeleonomeConstants.DENE_NAME_ATTRIBUTE))) {
+					newDenes.put(new JSONObject(dene.toString()));
+					return;
+				}
+			}
+		} catch (JSONException e) {
+			logger.warn("could not carry over vital signs for " + telepathonName + ": " + Utils.getStringException(e));
+		}
+	}
+
+	private static long deneWordLong(JSONObject dene, String deneWordName, long defaultValue) {
+		JSONArray words = dene.optJSONArray("DeneWords");
+		if (words == null) return defaultValue;
+		for (int i = 0; i < words.length(); i++) {
+			JSONObject word = words.optJSONObject(i);
+			if (word != null && deneWordName.equals(word.optString("Name"))) {
+				try {
+					return Long.parseLong(word.get("Value").toString().trim());
+				} catch (NumberFormatException | JSONException e) {
+					return defaultValue;
+				}
+			}
+		}
+		return defaultValue;
+	}
+}

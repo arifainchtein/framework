@@ -5899,6 +5899,31 @@ public class DenomeManager {
 		return -1;
 	}
 
+	//
+	// The live Telepathons DeneChain for a device, or null if it isn't in the denome. Added
+	// 2026-10-05 for vital signs, which update one Dene ("Vital Signs") of an existing telepathon
+	// chain instead of replacing the whole chain like a data record does. Returns the live object -
+	// callers that change it should copy it and go through removeDeneChain/injectDeneChainIntoNucleus.
+	//
+	public JSONObject getTelepathonDeneChain(String telepathonName) throws JSONException{
+		if(currentlyCreatingPulseJSONObject==null) return null;
+		JSONObject denomeArray = currentlyCreatingPulseJSONObject.getJSONObject("Denome");
+		JSONArray nucleiArray = denomeArray.getJSONArray("Nuclei");
+		for(int i=0;i<nucleiArray.length();i++){
+			JSONObject aNucleusJSONObject = nucleiArray.getJSONObject(i);
+			if(aNucleusJSONObject.getString("Name").equals(TeleonomeConstants.NUCLEI_TELEPATHONS)){
+				JSONArray deneChains = aNucleusJSONObject.getJSONArray("DeneChains");
+				for(int j=0;j<deneChains.length();j++) {
+					JSONObject deneChain = deneChains.getJSONObject(j);
+					if(deneChain.get(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE).equals(telepathonName)) {
+						return deneChain;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	public void injectDeneChainIntoNucleus( String nucleusName, JSONObject deneChain) throws JSONException{
 		if(currentlyCreatingPulseJSONObject==null) {
 			logger.info("injecting denechain, currentlyCreatingPulseJSONObject is nuill");

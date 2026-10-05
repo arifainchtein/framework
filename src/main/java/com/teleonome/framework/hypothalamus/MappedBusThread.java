@@ -61,7 +61,7 @@ class MappedBusThread extends Thread{
 	// an uptime lower than the last one seen means the board reset in between.
 	//
 	static final String RESET_INFO_KEY = "ResetInfo";
-	static final String RESET_INFO_DENECHAIN_NAME = "Microcontroller Reset Info";
+	static final String RESET_INFO_DENECHAIN_NAME = TeleonomeConstants.DENECHAIN_MICROCONTROLLER_RESET_INFO;
 	private static final Map<String, Long> lastUptimeSecondsByMicroController = new HashMap<String, Long>();
 	private static final Map<String, JSONObject> resetInfoDeneByMicroController = new HashMap<String, JSONObject>();
 	public MappedBusThread(Hypothalamus h){
@@ -2009,7 +2009,8 @@ class MappedBusThread extends Thread{
 
 	//
 	// Parses an optional "ResetInfo=<reason>,<bootCount>,<prevUptimeSeconds>,<uptimeSeconds>"
-	// segment out of a serial board's AsyncData response (optional -- boards whose
+	// segment (optionally followed by ",<freeHeap>,<minFreeHeap>,<maxAllocHeap>,<prevMinFreeHeap>")
+	// out of a serial board's AsyncData response (optional -- boards whose
 	// firmware doesn't send it are simply ignored). Keeps one Dene
 	// per microcontroller in the Purpose "Microcontroller Reset Info" DeneChain,
 	// and adds a "Microcontroller Reset" pathology when the uptime went backwards
@@ -2035,6 +2036,15 @@ class MappedBusThread extends Thread{
 			long bootCount = Long.parseLong(values[1].trim());
 			long previousUptimeSeconds = Long.parseLong(values[2].trim());
 			long uptimeSeconds = Long.parseLong(values[3].trim());
+			//
+			// Optional heap fields (bytes), appended 2026-10-05: free, lowest-since-boot,
+			// largest allocatable block, and the lowest reached before the last reset
+			// (-1 unknown). Older firmware sends only the first four values.
+			//
+			long freeHeap = values.length>4 ? Long.parseLong(values[4].trim()) : -1;
+			long minFreeHeap = values.length>5 ? Long.parseLong(values[5].trim()) : -1;
+			long maxAllocHeap = values.length>6 ? Long.parseLong(values[6].trim()) : -1;
+			long previousMinFreeHeap = values.length>7 ? Long.parseLong(values[7].trim()) : -1;
 
 			Calendar cal = Calendar.getInstance();
 			Calendar resetCal = Calendar.getInstance();
@@ -2061,6 +2071,7 @@ class MappedBusThread extends Thread{
 				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Reset Timestamp", lastResetTimestamp, null, "String", true));
 				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Uptime Before Reset Seconds", "" + uptimeBeforeReset, null, "long", true));
 				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Boot Count", "" + bootCount, null, "long", true));
+				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Min Free Heap Before Reset", "" + previousMinFreeHeap, null, "long", true));
 				hypothalamus.aDenomeManager.addPurposePathologyDene(TeleonomeConstants.PATHOLOGY_MICROCONTROLLER_RESET,
 						TeleonomeConstants.PATHOLOGY_MICROCONTROLLER_RESET,
 						TeleonomeConstants.PATHOLOGY_LOCATION_MICROCONTROLLER, extraDeneWords);
@@ -2075,6 +2086,12 @@ class MappedBusThread extends Thread{
 			resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Boot Count", "" + bootCount, null, TeleonomeConstants.DATATYPE_LONG, true));
 			resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Previous Uptime Seconds", "" + previousUptimeSeconds, null, TeleonomeConstants.DATATYPE_LONG, true));
 			resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Uptime Seconds", "" + uptimeSeconds, null, TeleonomeConstants.DATATYPE_LONG, true));
+			if(freeHeap>=0) {
+				resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Free Heap", "" + freeHeap, "bytes", TeleonomeConstants.DATATYPE_LONG, true));
+				resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Min Free Heap", "" + minFreeHeap, "bytes", TeleonomeConstants.DATATYPE_LONG, true));
+				resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Max Alloc Heap", "" + maxAllocHeap, "bytes", TeleonomeConstants.DATATYPE_LONG, true));
+				resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Previous Min Free Heap", "" + previousMinFreeHeap, "bytes", TeleonomeConstants.DATATYPE_LONG, true));
+			}
 
 			JSONObject resetInfoChain = new JSONObject();
 			resetInfoChain.put(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE, RESET_INFO_DENECHAIN_NAME);
