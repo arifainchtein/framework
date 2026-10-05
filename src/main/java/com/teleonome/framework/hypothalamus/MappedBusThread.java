@@ -61,6 +61,9 @@ class MappedBusThread extends Thread{
 	// an uptime lower than the last one seen means the board reset in between.
 	//
 	static final String RESET_INFO_KEY = "ResetInfo";
+	// Optional "|Crash=<date>;<panic reason>;<task>;<pc>;<backtrace>;<elf sha prefix>" segment after
+	// ResetInfo: the board's last panic, read from its core dump at boot (Annabelle.ino recordCoreDump).
+	static final String CRASH_KEY = "Crash";
 	static final String RESET_INFO_DENECHAIN_NAME = TeleonomeConstants.DENECHAIN_MICROCONTROLLER_RESET_INFO;
 	private static final Map<String, Long> lastUptimeSecondsByMicroController = new HashMap<String, Long>();
 	private static final Map<String, JSONObject> resetInfoDeneByMicroController = new HashMap<String, JSONObject>();
@@ -1084,7 +1087,7 @@ class MappedBusThread extends Thread{
 												int eq = segment.indexOf('=');
 												if(eq<0) continue;
 												String typeName = segment.substring(0, eq);
-												if(typeName.equals(RESET_INFO_KEY)) continue;  // handled by recordMicrocontrollerResetInfo()
+												if(typeName.equals(RESET_INFO_KEY) || typeName.equals(CRASH_KEY)) continue;  // handled by recordMicrocontrollerResetInfo()
 												try {
 													int downloadedCount = Integer.parseInt(segment.substring(eq+1).trim());
 													if(downloadedCount>0) {
@@ -2045,6 +2048,15 @@ class MappedBusThread extends Thread{
 			long minFreeHeap = values.length>5 ? Long.parseLong(values[5].trim()) : -1;
 			long maxAllocHeap = values.length>6 ? Long.parseLong(values[6].trim()) : -1;
 			long previousMinFreeHeap = values.length>7 ? Long.parseLong(values[7].trim()) : -1;
+			String lastCrash = null;
+			String crashMarker = "|" + CRASH_KEY + "=";
+			int crashStart = line.indexOf(crashMarker);
+			if(crashStart>=0) {
+				crashStart += crashMarker.length();
+				int crashEnd = line.indexOf('|', crashStart);
+				lastCrash = (crashEnd<0 ? line.substring(crashStart) : line.substring(crashStart, crashEnd)).trim();
+				if(lastCrash.isEmpty()) lastCrash = null;
+			}
 
 			Calendar cal = Calendar.getInstance();
 			Calendar resetCal = Calendar.getInstance();
@@ -2072,6 +2084,7 @@ class MappedBusThread extends Thread{
 				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Uptime Before Reset Seconds", "" + uptimeBeforeReset, null, "long", true));
 				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Boot Count", "" + bootCount, null, "long", true));
 				extraDeneWords.addElement(Utils.createDeneWordJSONObject("Min Free Heap Before Reset", "" + previousMinFreeHeap, null, "long", true));
+				if(lastCrash!=null) extraDeneWords.addElement(Utils.createDeneWordJSONObject("Last Crash", lastCrash, null, "String", true));
 				hypothalamus.aDenomeManager.addPurposePathologyDene(TeleonomeConstants.PATHOLOGY_MICROCONTROLLER_RESET,
 						TeleonomeConstants.PATHOLOGY_MICROCONTROLLER_RESET,
 						TeleonomeConstants.PATHOLOGY_LOCATION_MICROCONTROLLER, extraDeneWords);
@@ -2091,6 +2104,9 @@ class MappedBusThread extends Thread{
 				resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Min Free Heap", "" + minFreeHeap, "bytes", TeleonomeConstants.DATATYPE_LONG, true));
 				resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Max Alloc Heap", "" + maxAllocHeap, "bytes", TeleonomeConstants.DATATYPE_LONG, true));
 				resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Previous Min Free Heap", "" + previousMinFreeHeap, "bytes", TeleonomeConstants.DATATYPE_LONG, true));
+			}
+			if(lastCrash!=null) {
+				resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Last Crash", lastCrash, null, TeleonomeConstants.DATATYPE_STRING, true));
 			}
 
 			JSONObject resetInfoChain = new JSONObject();
