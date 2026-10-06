@@ -2048,6 +2048,24 @@ class MappedBusThread extends Thread{
 			long minFreeHeap = values.length>5 ? Long.parseLong(values[5].trim()) : -1;
 			long maxAllocHeap = values.length>6 ? Long.parseLong(values[6].trim()) : -1;
 			long previousMinFreeHeap = values.length>7 ? Long.parseLong(values[7].trim()) : -1;
+			//
+			// Optional microcontroller clock, appended 2026-10-06: its RTC local time as
+			// yyyyMMddHHmmss. Compared with this computer's clock so a wrong microcontroller
+			// clock (e.g. not switched to daylight saving time) shows up as an offset.
+			//
+			String microcontrollerTime = null;
+			Long clockOffsetSeconds = null;
+			if(values.length>8) {
+				try {
+					java.text.SimpleDateFormat rtcFormat = new java.text.SimpleDateFormat("yyyyMMddHHmmss");
+					rtcFormat.setLenient(false);
+					java.util.Date rtcDate = rtcFormat.parse(values[8].trim());
+					microcontrollerTime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(rtcDate);
+					clockOffsetSeconds = Math.round((rtcDate.getTime() - System.currentTimeMillis()) / 1000.0);
+				} catch(java.text.ParseException e) {
+					logger.warn("could not parse microcontroller time '" + values[8] + "' from " + aMicroController.getName());
+				}
+			}
 			String lastCrash = null;
 			String crashMarker = "|" + CRASH_KEY + "=";
 			int crashStart = line.indexOf(crashMarker);
@@ -2107,6 +2125,10 @@ class MappedBusThread extends Thread{
 			}
 			if(lastCrash!=null) {
 				resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Last Crash", lastCrash, null, TeleonomeConstants.DATATYPE_STRING, true));
+			}
+			if(microcontrollerTime!=null) {
+				resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Microcontroller Time", microcontrollerTime, null, TeleonomeConstants.DATATYPE_STRING, true));
+				resetInfoDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Clock Offset Seconds", "" + clockOffsetSeconds, "s", TeleonomeConstants.DATATYPE_LONG, true));
 			}
 
 			JSONObject resetInfoChain = new JSONObject();
