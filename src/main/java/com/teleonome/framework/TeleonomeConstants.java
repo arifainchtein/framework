@@ -1053,6 +1053,7 @@ public class TeleonomeConstants {
 	// Reset / vital-signs diagnostics, added 2026-10-05 - mirrored in teleonomewebapp's TeleonomeConstants.js
 	public static final String DENECHAIN_MICROCONTROLLER_RESET_INFO = "Microcontroller Reset Info";
 	public static final String TELEPATHON_DENE_VITAL_SIGNS = "Vital Signs";
+	public static final String TELEPATHON_DENE_DEVICE_IDENTITY = "Device Identity";
 	
 	
 	public static final String PATHOLOGY_DATA_STALE="Data Stale";

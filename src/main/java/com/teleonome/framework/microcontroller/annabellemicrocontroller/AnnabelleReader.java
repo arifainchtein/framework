@@ -208,6 +208,11 @@ public class AnnabelleReader extends BufferedReader{
 							deserializer="VitalSignsDeserializer";
 							processString=true;
 							appendString=false;
+						}else if(deserializer.contains("DeviceIdentityDeserializer")) {
+							// token count checked by the deserializer itself (split keeps empty strings there)
+							deserializer="DeviceIdentityDeserializer";
+							processString=true;
+							appendString=false;
 						}
 					}
 					
@@ -224,6 +229,11 @@ public class AnnabelleReader extends BufferedReader{
 									JSONObject vitalSignsDene = annabellDeserializer.deserialise(teleonomeName, line);
 									if(vitalSignsDene != null) {
 										applyVitalSigns((VitalSignsDeserializer)annabellDeserializer, vitalSignsDene);
+									}
+								} else if(annabellDeserializer instanceof DeviceIdentityDeserializer) {
+									JSONObject deviceIdentityDene = annabellDeserializer.deserialise(teleonomeName, line);
+									if(deviceIdentityDene != null) {
+										applyDeviceIdentity((DeviceIdentityDeserializer)annabellDeserializer, deviceIdentityDene);
 									}
 								} else if(annabellDeserializer instanceof CommaRecordDeserializer) {
 									JSONObject commaData = annabellDeserializer.deserialise(teleonomeName, line);
@@ -280,6 +290,7 @@ public class AnnabelleReader extends BufferedReader{
 											// pulse, and so the stored history row carries it too.
 											//
 											carryOverVitalSigns(telepathonName, telepathon);
+											carryOverDene(telepathonName, telepathon, TeleonomeConstants.TELEPATHON_DENE_DEVICE_IDENTITY);
 											//
 											// Idempotency guard, added 2026-08-04 (see conversation).
 											// storeTelepathon() below is already safe to call twice for
@@ -478,25 +489,71 @@ public class AnnabelleReader extends BufferedReader{
 		}
 	}
 
+	//
+	// Device identity (added 2026-10-07) - see DeviceIdentityDeserializer. Placed as the "Device
+	// Identity" Dene of the device's existing telepathon chain, like the vital signs, and carried
+	// over into each data record's chain (carryOverDene) so it survives every pulse.
+	//
+	private void applyDeviceIdentity(DeviceIdentityDeserializer deviceIdentityDeserializer, JSONObject deviceIdentityDene) {
+		String serialNumber = deviceIdentityDeserializer.getSerialNumber();
+		String telepathonName = aDenomeManager.getKnownNameForSerial(serialNumber);
+		if (telepathonName == null || telepathonName.isEmpty()) {
+			logger.warn("Device identity for unknown serial number '" + serialNumber + "' dropped - device identity never creates telepathons");
+			return;
+		}
+		try {
+			JSONObject liveChain = aDenomeManager.getTelepathonDeneChain(telepathonName);
+			if (liveChain == null) {
+				logger.debug("Device identity for '" + telepathonName + "' dropped - no live telepathon chain yet");
+				return;
+			}
+			JSONObject chain = new JSONObject(liveChain.toString());
+			JSONArray denes = chain.getJSONArray("Denes");
+			int previousIndex = -1;
+			for (int i = 0; i < denes.length(); i++) {
+				if (TeleonomeConstants.TELEPATHON_DENE_DEVICE_IDENTITY.equals(denes.getJSONObject(i).optString(TeleonomeConstants.DENE_NAME_ATTRIBUTE))) {
+					previousIndex = i;
+					break;
+				}
+			}
+			if (previousIndex >= 0) {
+				denes.put(previousIndex, deviceIdentityDene);
+			} else {
+				denes.put(deviceIdentityDene);
+			}
+			aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+			aDenomeManager.injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS, chain);
+			hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS, chain.toString());
+		} catch (JSONException e) {
+			logger.warn("could not apply device identity for " + telepathonName + ": " + Utils.getStringException(e));
+		}
+	}
+
 	// Copies the live chain's "Vital Signs" Dene into a freshly deserialized data chain.
 	private void carryOverVitalSigns(String telepathonName, JSONObject telepathon) {
+		carryOverDene(telepathonName, telepathon, TeleonomeConstants.TELEPATHON_DENE_VITAL_SIGNS);
+	}
+
+	// Copies the live chain's Dene called deneName into a freshly deserialized data chain, unless
+	// the new chain already has one.
+	private void carryOverDene(String telepathonName, JSONObject telepathon, String deneName) {
 		try {
 			JSONObject liveChain = aDenomeManager.getTelepathonDeneChain(telepathonName);
 			if (liveChain == null || !liveChain.has("Denes") || !telepathon.has("Denes")) return;
 			JSONArray newDenes = telepathon.getJSONArray("Denes");
 			for (int i = 0; i < newDenes.length(); i++) {
-				if (TeleonomeConstants.TELEPATHON_DENE_VITAL_SIGNS.equals(newDenes.getJSONObject(i).optString(TeleonomeConstants.DENE_NAME_ATTRIBUTE))) return;
+				if (deneName.equals(newDenes.getJSONObject(i).optString(TeleonomeConstants.DENE_NAME_ATTRIBUTE))) return;
 			}
 			JSONArray liveDenes = liveChain.getJSONArray("Denes");
 			for (int i = 0; i < liveDenes.length(); i++) {
 				JSONObject dene = liveDenes.getJSONObject(i);
-				if (TeleonomeConstants.TELEPATHON_DENE_VITAL_SIGNS.equals(dene.optString(TeleonomeConstants.DENE_NAME_ATTRIBUTE))) {
+				if (deneName.equals(dene.optString(TeleonomeConstants.DENE_NAME_ATTRIBUTE))) {
 					newDenes.put(new JSONObject(dene.toString()));
 					return;
 				}
 			}
 		} catch (JSONException e) {
-			logger.warn("could not carry over vital signs for " + telepathonName + ": " + Utils.getStringException(e));
+			logger.warn("could not carry over " + deneName + " for " + telepathonName + ": " + Utils.getStringException(e));
 		}
 	}
 
