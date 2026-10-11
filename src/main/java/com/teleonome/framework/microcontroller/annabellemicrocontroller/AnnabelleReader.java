@@ -208,6 +208,10 @@ public class AnnabelleReader extends BufferedReader{
 							deserializer="VitalSignsDeserializer";
 							processString=true;
 							appendString=false;
+						}else if(tokens.length>=PowerProfileDeserializer.TOKEN_COUNT && deserializer.contains("PowerProfileDeserializer")) {
+							deserializer="PowerProfileDeserializer";
+							processString=true;
+							appendString=false;
 						}else if(deserializer.contains("DeviceIdentityDeserializer")) {
 							// token count checked by the deserializer itself (split keeps empty strings there)
 							deserializer="DeviceIdentityDeserializer";
@@ -229,6 +233,11 @@ public class AnnabelleReader extends BufferedReader{
 									JSONObject vitalSignsDene = annabellDeserializer.deserialise(teleonomeName, line);
 									if(vitalSignsDene != null) {
 										applyVitalSigns((VitalSignsDeserializer)annabellDeserializer, vitalSignsDene);
+									}
+								} else if(annabellDeserializer instanceof PowerProfileDeserializer) {
+									JSONObject powerProfileDene = annabellDeserializer.deserialise(teleonomeName, line);
+									if(powerProfileDene != null) {
+										applySerialDene(((PowerProfileDeserializer)annabellDeserializer).getSerialNumber(), powerProfileDene, TeleonomeConstants.TELEPATHON_DENE_POWER_PROFILE);
 									}
 								} else if(annabellDeserializer instanceof DeviceIdentityDeserializer) {
 									JSONObject deviceIdentityDene = annabellDeserializer.deserialise(teleonomeName, line);
@@ -291,6 +300,7 @@ public class AnnabelleReader extends BufferedReader{
 											//
 											carryOverVitalSigns(telepathonName, telepathon);
 											carryOverDene(telepathonName, telepathon, TeleonomeConstants.TELEPATHON_DENE_DEVICE_IDENTITY);
+											carryOverDene(telepathonName, telepathon, TeleonomeConstants.TELEPATHON_DENE_POWER_PROFILE);
 											//
 											// Idempotency guard, added 2026-08-04 (see conversation).
 											// storeTelepathon() below is already safe to call twice for
@@ -526,6 +536,45 @@ public class AnnabelleReader extends BufferedReader{
 			hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS, chain.toString());
 		} catch (JSONException e) {
 			logger.warn("could not apply device identity for " + telepathonName + ": " + Utils.getStringException(e));
+		}
+	}
+
+	//
+	// Generic form of applyDeviceIdentity for serial-keyed device Denes (Power Profile, added
+	// 2026-10-12): replaces or adds the Dene called deneName in the device's live telepathon chain.
+	// Never creates a telepathon - the device's data pulses do that.
+	//
+	private void applySerialDene(String serialNumber, JSONObject newDene, String deneName) {
+		String telepathonName = aDenomeManager.getKnownNameForSerial(serialNumber);
+		if (telepathonName == null || telepathonName.isEmpty()) {
+			logger.warn(deneName + " for unknown serial number '" + serialNumber + "' dropped - it never creates telepathons");
+			return;
+		}
+		try {
+			JSONObject liveChain = aDenomeManager.getTelepathonDeneChain(telepathonName);
+			if (liveChain == null) {
+				logger.debug(deneName + " for '" + telepathonName + "' dropped - no live telepathon chain yet");
+				return;
+			}
+			JSONObject chain = new JSONObject(liveChain.toString());
+			JSONArray denes = chain.getJSONArray("Denes");
+			int previousIndex = -1;
+			for (int i = 0; i < denes.length(); i++) {
+				if (deneName.equals(denes.getJSONObject(i).optString(TeleonomeConstants.DENE_NAME_ATTRIBUTE))) {
+					previousIndex = i;
+					break;
+				}
+			}
+			if (previousIndex >= 0) {
+				denes.put(previousIndex, newDene);
+			} else {
+				denes.put(newDene);
+			}
+			aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_TELEPATHONS, telepathonName);
+			aDenomeManager.injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_TELEPATHONS, chain);
+			hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS, chain.toString());
+		} catch (JSONException e) {
+			logger.warn("could not apply " + deneName + " for " + telepathonName + ": " + Utils.getStringException(e));
 		}
 	}
 

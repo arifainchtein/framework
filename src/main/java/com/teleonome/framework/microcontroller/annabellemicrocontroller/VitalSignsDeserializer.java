@@ -30,6 +30,10 @@ import com.teleonome.framework.denome.DenomeUtils;
 //
 public class VitalSignsDeserializer extends AnnabelleDeserializer {
 	public static final int TOKEN_COUNT = 30;
+	// Version 3 (2026-10-12) appends the battery ledger: chargeIn_cmAh, dischargeOut_cmAh,
+	// panelIn_dmWh, ledgerMeasuredSec, ledgerMaxGapMs, batteryTemp_dC (INT16_MIN = no reading).
+	public static final int TOKEN_COUNT_V3 = 36;
+	private static final int BATTERY_TEMP_NONE = -32768;
 	private static final long LEGACY_EPOCH_THRESHOLD = 1000000000L;
 	Logger logger;
 
@@ -182,6 +186,30 @@ public class VitalSignsDeserializer extends AnnabelleDeserializer {
 			w.put(DenomeUtils.buildDeneWordJSONObject("Firmware Build", "" + firmwareBuild, null, TeleonomeConstants.DATATYPE_LONG, true));
 			w.put(DenomeUtils.buildDeneWordJSONObject("Vital Signs Version", "" + version, null, TeleonomeConstants.DATATYPE_INTEGER, true));
 			w.put(DenomeUtils.buildDeneWordJSONObject("Vital Signs Received Time", "" + receivedEpoch, null, TeleonomeConstants.DATATYPE_LONG, true));
+			// Battery ledger (record version 3, tokens 30-35, appended after receivedAgeSeconds).
+			// Running totals since the last real reset, integrated on the device while awake - the
+			// Cerebellum turns differences between records into SOC with the device's Power Profile.
+			// Version 2 records (relayed by a v3 Annabelle) carry zeros here, so they're left out.
+			if (version >= 3 && tokens.length >= TOKEN_COUNT_V3) {
+				long chargeInCmAh = Long.parseLong(tokens[30].trim());
+				long dischargeOutCmAh = Long.parseLong(tokens[31].trim());
+				long panelInDmWh = Long.parseLong(tokens[32].trim());
+				long ledgerMeasuredSec = Long.parseLong(tokens[33].trim());
+				int ledgerMaxGapMs = Integer.parseInt(tokens[34].trim());
+				int batteryTempDc = Integer.parseInt(tokens[35].trim());
+				w.put(DenomeUtils.buildDeneWordJSONObject("Charge In Total", "" + (chargeInCmAh / 100.0), "mAh", TeleonomeConstants.DATATYPE_DOUBLE, true));
+				w.put(DenomeUtils.buildDeneWordJSONObject("Discharge Out Total", "" + (dischargeOutCmAh / 100.0), "mAh", TeleonomeConstants.DATATYPE_DOUBLE, true));
+				w.put(DenomeUtils.buildDeneWordJSONObject("Panel Energy Total", "" + (panelInDmWh / 10.0), "mWh", TeleonomeConstants.DATATYPE_DOUBLE, true));
+				w.put(DenomeUtils.buildDeneWordJSONObject("Ledger Measured Seconds", "" + ledgerMeasuredSec, "s", TeleonomeConstants.DATATYPE_LONG, true));
+				w.put(DenomeUtils.buildDeneWordJSONObject("Ledger Max Gap", "" + ledgerMaxGapMs, "ms", TeleonomeConstants.DATATYPE_INTEGER, true));
+				if (awakeSecondsTotal > 0) {
+					double coverage = Math.min(100.0, Math.round(1000.0 * ledgerMeasuredSec / awakeSecondsTotal) / 10.0);
+					w.put(DenomeUtils.buildDeneWordJSONObject("Ledger Coverage", "" + coverage, "%", TeleonomeConstants.DATATYPE_DOUBLE, true));
+				}
+				if (batteryTempDc != BATTERY_TEMP_NONE) {
+					w.put(DenomeUtils.buildDeneWordJSONObject("Battery Temperature", "" + (batteryTempDc / 10.0), "C", TeleonomeConstants.DATATYPE_DOUBLE, true));
+				}
+			}
 			return dene;
 		} catch (NumberFormatException | JSONException e) {
 			logger.warn("VitalSignsDeserializer: could not parse '" + line + "': " + e.getMessage());

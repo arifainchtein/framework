@@ -1054,6 +1054,7 @@ public class TeleonomeConstants {
 	public static final String DENECHAIN_MICROCONTROLLER_RESET_INFO = "Microcontroller Reset Info";
 	public static final String TELEPATHON_DENE_VITAL_SIGNS = "Vital Signs";
 	public static final String TELEPATHON_DENE_DEVICE_IDENTITY = "Device Identity";
+	public static final String TELEPATHON_DENE_POWER_PROFILE = "Power Profile";
 	
 	
 	public static final String PATHOLOGY_DATA_STALE="Data Stale";
