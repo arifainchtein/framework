@@ -19,6 +19,8 @@ import com.teleonome.framework.denome.DenomeUtils;
 //   #lastWakeDriftSec#lastAwake#wakeVoltage_mV#minVoltageSinceReport_mV#txDurationMs
 //   #txBatteryPre_mA#txBatteryPeak_mA#txBatteryPost_mA#txPanel_mA#txV50i_mV#txMinVoltage_mV
 //   #loraTxFailCount#seq#i2cDeviceMask#rssi#snr#receivedAgeSeconds      (30 tokens)
+//   then v3 #chargeIn_cmAh#dischargeOut_cmAh#panelIn_dmWh#ledgerMeasuredSec#ledgerMaxGapMs
+//   #batteryTemp_dC (36) and v4 #wifiOnSec#wifiOut_cmAh (38)
 //   receivedAgeSeconds = how long ago Annabelle received it; the received time is computed here
 //   from this machine's clock because Annabelle's RTC is unreliable local wall time. Firmware from
 //   before 2026-10-05 sent an absolute (and wrong) epoch in this slot - anything above
@@ -33,6 +35,9 @@ public class VitalSignsDeserializer extends AnnabelleDeserializer {
 	// Version 3 (2026-10-12) appends the battery ledger: chargeIn_cmAh, dischargeOut_cmAh,
 	// panelIn_dmWh, ledgerMeasuredSec, ledgerMaxGapMs, batteryTemp_dC (INT16_MIN = no reading).
 	public static final int TOKEN_COUNT_V3 = 36;
+	// Version 4 (2026-10-14) appends the WiFi totals: wifiOnSec, wifiOut_cmAh (battery charge out
+	// while the device's WiFi was on, from the same core-0 ledger).
+	public static final int TOKEN_COUNT_V4 = 38;
 	private static final int BATTERY_TEMP_NONE = -32768;
 	private static final long LEGACY_EPOCH_THRESHOLD = 1000000000L;
 	Logger logger;
@@ -208,6 +213,18 @@ public class VitalSignsDeserializer extends AnnabelleDeserializer {
 				}
 				if (batteryTempDc != BATTERY_TEMP_NONE) {
 					w.put(DenomeUtils.buildDeneWordJSONObject("Battery Temperature", "" + (batteryTempDc / 10.0), "C", TeleonomeConstants.DATATYPE_DOUBLE, true));
+				}
+			}
+			// WiFi totals (record version 4, tokens 36-37). Running totals since the last real reset;
+			// the average is the battery draw while WiFi was on (WiFi plus everything else running then).
+			if (version >= 4 && tokens.length >= TOKEN_COUNT_V4) {
+				long wifiOnSec = Long.parseLong(tokens[36].trim());
+				long wifiOutCmAh = Long.parseLong(tokens[37].trim());
+				w.put(DenomeUtils.buildDeneWordJSONObject("WiFi On Seconds", "" + wifiOnSec, "s", TeleonomeConstants.DATATYPE_LONG, true));
+				w.put(DenomeUtils.buildDeneWordJSONObject("WiFi Charge Out", "" + (wifiOutCmAh / 100.0), "mAh", TeleonomeConstants.DATATYPE_DOUBLE, true));
+				if (wifiOnSec > 0) {
+					double avgMa = Math.round(10.0 * (wifiOutCmAh / 100.0) / (wifiOnSec / 3600.0)) / 10.0;
+					w.put(DenomeUtils.buildDeneWordJSONObject("WiFi Average Current", "" + avgMa, "mA", TeleonomeConstants.DATATYPE_DOUBLE, true));
 				}
 			}
 			return dene;
