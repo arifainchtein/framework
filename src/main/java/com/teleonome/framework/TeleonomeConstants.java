@@ -1044,6 +1044,8 @@ public class TeleonomeConstants {
 	public static final String PATHOLOGY_AVAILABLE_MEMORY_BELOW_THRESHOLD = "Available Memory Below Threshold";
 	public static final String PATHOLOGY_DISK_SPACE_BELOW_THRESHOLD = "Disk Space Below Threshold";
 	public static final String PATHOLOGY_POWER_UNDERVOLTAGE = "Power Undervoltage";
+	// SFTPPublisherWriter (2026-10-17): written once per outage - see SFTPPublisherWriter.reportFaultOnce()
+	public static final String PATHOLOGY_SFTP_PUBLISH_FAILED = "SFTP Publish Failed";
 	public static final String PATHOLOGY_PULSE_DURATION_ABOVE_THRESHOLD = "Pulse Generation Above Threshold";
 	public static final String PATHOLOGY_ANALYTICON_SOURCES_LATE = "Analyticon Sources Late";
 	public static final String PATHOLOGY_MICROCONTROLLER_COMMUNICATION_FAILED = "Microcontroller Communication Failed";

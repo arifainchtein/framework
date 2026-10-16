@@ -9,10 +9,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Category;
@@ -72,6 +79,32 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 	Session session=null;
 	String teleonomeName="";
 
+	//
+	// Failure handling (2026-10-17). A dead link (the house router failed overnight 16-17 Oct) used
+	// to hang this writer inside the pulse: session.connect() had a timeout but nothing after it did,
+	// so sftp.connect()/put()/disconnect() blocked forever, no pulse was produced, Medula killed and
+	// restarted the Hypothalamus every 10 minutes, and each new process hung on the next publish. No
+	// data was stored from 00:35 to 06:45. Now:
+	//   - every socket read times out (SOCKET_TIMEOUT_MS) and SSH keepalives detect a dead peer;
+	//   - the whole publish runs on its own thread with a hard deadline (PUBLISH_DEADLINE_MS) - on
+	//     timeout the session is disconnected (which unblocks the thread) and the pulse carries on;
+	//   - a failed upload counts as a failed publish (it used to be logged and ignored);
+	//   - the reply is "Failure-...", never "Fault#...": MappedBusThread turns every "Fault" reply
+	//     into a microcontroller fault pathology, which would add one per pulse during an outage;
+	//   - one "SFTP Publish Failed" pathology per outage, see reportFaultOnce().
+	//
+	private static final int SOCKET_TIMEOUT_MS = 30000;
+	private static final int CONNECT_TIMEOUT_MS = 30000;
+	private static final int CHANNEL_CONNECT_TIMEOUT_MS = 20000;
+	private static final int SERVER_ALIVE_INTERVAL_MS = 15000;
+	private static final int SERVER_ALIVE_COUNT_MAX = 2;
+	private static final long PUBLISH_DEADLINE_MS = 180000;
+	// Exists while an SFTP outage has already been reported - survives Hypothalamus restarts, so a
+	// restart loop during one outage still produces a single pathology. Deleted after a full upload.
+	private static final String FAULT_MARKER_FILE_NAME = "SFTPPublishFault.info";
+	private volatile String failureReason=null;  // why the current publish failed, set by the worker thread
+	private Thread publishThread=null;      // the last publish, in case it never returned
+
 
 	public SFTPPublisherWriter(Writer out, JSONArray a, DenomeManager d) {
 		super(out);
@@ -116,24 +149,15 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 		// so to make it standards all microcontrollers do this
 
 		if(command.equals("Publish Via SFTP")) {
-			boolean createdTunnel = createTunnel();
-			logger.debug("create tunnel returned" + createdTunnel);
-
-			if(createdTunnel) {
-				//
-				// session.disconnect() used to run only after publishToSFTP()
-				// returned normally, so any exception it threw (e.g. a null
-				// dereference on an unset "Upload Image" pointer) skipped
-				// disconnect entirely and left a live SSH session -- and its
-				// threads/crypto buffers -- orphaned for the rest of the
-				// process's life. finally guarantees it always runs.
-				//
-				try {
-					boolean publishToSFTP = publishToSFTP();
-					if(publishToSFTP)publishingResults="Ok-publishing SFTP";
-				} finally {
-					session.disconnect();
-				}
+			boolean published = publishWithDeadline();
+			if(published) {
+				publishingResults="Ok-publishing SFTP";
+				clearFaultMarker();
+			}else {
+				// "Failure", not "Fault" - see the failure handling note above
+				publishingResults="Failure-SFTP Publish#" + failureReason;
+				logger.warn("SFTP publish failed: " + failureReason);
+				reportFaultOnce(failureReason);
 			}
 		}else if(command.startsWith("Download Via SFTP")){
 			String[] tokens = command.split("#");
@@ -159,6 +183,110 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 
 
 
+
+	//
+	// Runs one complete publish (tunnel + uploads) on its own thread and waits at most
+	// PUBLISH_DEADLINE_MS. Returns true only if every upload worked; otherwise failureReason says why.
+	//
+	private boolean publishWithDeadline() {
+		failureReason=null;
+		if(publishThread!=null && publishThread.isAlive()) {
+			// the previous publish never returned even after its session was disconnected - don't
+			// stack another one behind it
+			failureReason="previous publish still stuck";
+			disconnectQuietly();
+			return false;
+		}
+		FutureTask<Boolean> task = new FutureTask<Boolean>(new Callable<Boolean>() {
+			public Boolean call() {
+				boolean createdTunnel = createTunnel();
+				logger.debug("create tunnel returned" + createdTunnel);
+				if(!createdTunnel) {
+					if(failureReason==null) failureReason=publishingResults;
+					return false;
+				}
+				//
+				// session.disconnect() used to run only after publishToSFTP()
+				// returned normally, so any exception it threw (e.g. a null
+				// dereference on an unset "Upload Image" pointer) skipped
+				// disconnect entirely and left a live SSH session -- and its
+				// threads/crypto buffers -- orphaned for the rest of the
+				// process's life. finally guarantees it always runs.
+				//
+				try {
+					return publishToSFTP();
+				} finally {
+					disconnectQuietly();
+				}
+			}
+		});
+		publishThread = new Thread(task, "SFTPPublish");
+		publishThread.setDaemon(true);
+		publishThread.start();
+		try {
+			boolean ok = task.get(PUBLISH_DEADLINE_MS, TimeUnit.MILLISECONDS);
+			if(!ok && failureReason==null) failureReason = (publishingResults==null || publishingResults.isEmpty()) ? "publish incomplete" : publishingResults;
+			return ok;
+		} catch (TimeoutException e) {
+			failureReason="no result after " + (PUBLISH_DEADLINE_MS/1000) + " s";
+			disconnectQuietly();   // closes the socket, so the stuck thread gets an exception and ends
+			task.cancel(true);
+			return false;
+		} catch (ExecutionException e) {
+			failureReason="exception: " + e.getCause();
+			logger.warn(Utils.getStringException(e));
+			disconnectQuietly();
+			return false;
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			failureReason="interrupted";
+			disconnectQuietly();
+			return false;
+		}
+	}
+
+	private void disconnectQuietly() {
+		try {
+			if(session!=null) session.disconnect();
+		} catch (Exception e) {
+			logger.debug("disconnect: " + e.getMessage());
+		}
+	}
+
+	//
+	// One "SFTP Publish Failed" pathology per outage, as the denome would otherwise collect one per
+	// pulse (and a large denome is what kills the Hypothalamus). The first failure writes the
+	// pathology and the marker file; failures while the marker exists only log. A complete upload
+	// deletes the marker (clearFaultMarker), so the next failure is a new fault with its own pathology.
+	//
+	private void reportFaultOnce(String reason) {
+		File marker = new File(Utils.getLocalDirectory() + FAULT_MARKER_FILE_NAME);
+		if(marker.isFile()) {
+			logger.info("SFTP publish still failing - pathology already recorded for this outage");
+			return;
+		}
+		try {
+			long now = System.currentTimeMillis();
+			String timestamp = new SimpleDateFormat("dd/MM/yy HH:mm").format(new Date(now));
+			Vector<JSONObject> extraDeneWords = new Vector<JSONObject>();
+			extraDeneWords.addElement(Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_MILLISECONDS, "" + now, null, "long", true));
+			extraDeneWords.addElement(Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_EVENT_TIMESTAMP, timestamp, null, "String", true));
+			extraDeneWords.addElement(Utils.createDeneWordJSONObject(TeleonomeConstants.PATHOLOGY_DETAILS_LABEL, "" + reason, null, "String", true));
+			extraDeneWords.addElement(Utils.createDeneWordJSONObject("SFTP Server", host, null, "String", true));
+			aDenomeManager.addPurposePathologyDene(TeleonomeConstants.PATHOLOGY_SFTP_PUBLISH_FAILED, TeleonomeConstants.PATHOLOGY_SFTP_PUBLISH_FAILED,
+					TeleonomeConstants.PATHOLOGY_LOCATION_NETWORK, extraDeneWords);
+			// marker only after the pathology is in, so a failed attempt is retried next pulse
+			FileUtils.writeStringToFile(marker, timestamp + " " + reason);
+			logger.warn("SFTP publish failed - pathology recorded: " + reason);
+		} catch (Exception e) {
+			logger.warn("could not record the SFTP pathology: " + Utils.getStringException(e));
+		}
+	}
+
+	private void clearFaultMarker() {
+		File marker = new File(Utils.getLocalDirectory() + FAULT_MARKER_FILE_NAME);
+		if(marker.isFile() && marker.delete()) logger.info("SFTP publish working again - fault marker cleared");
+	}
 
 	private boolean createTunnel() {
 
@@ -218,7 +346,10 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 		config.put("StrictHostKeyChecking", "no");
 		session.setConfig(config);
 		try {
-			session.connect(60000);
+			session.setTimeout(SOCKET_TIMEOUT_MS);                 // every socket read, not just the connect
+			session.setServerAliveInterval(SERVER_ALIVE_INTERVAL_MS); // detect a dead peer mid-transfer
+			session.setServerAliveCountMax(SERVER_ALIVE_COUNT_MAX);
+			session.connect(CONNECT_TIMEOUT_MS);
 		} catch (JSchException e) {
 			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
@@ -241,7 +372,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			if(!remoteDirectoryConfirmed) {
 				channel = session.openChannel("sftp");
 				ChannelSftp sftp = (ChannelSftp) channel;
-				sftp.connect();
+				sftp.connect(CHANNEL_CONNECT_TIMEOUT_MS);
 				String currentRemoteDir = sftp.pwd();
 				logger.debug("creating teleonome directory currentRemoteDir" + currentRemoteDir);
 
@@ -300,7 +431,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 		ChannelSftp sftp = (ChannelSftp) channel;
 
 		try {
-			sftp.connect();
+			sftp.connect(CHANNEL_CONNECT_TIMEOUT_MS);
 		} catch (JSchException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -357,7 +488,11 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		uploadFile( destinationDir, sourceFilename,   "start");
+		if(!uploadFile( destinationDir, sourceFilename,   "start")) {
+			// the link is down - don't try the rest of the uploads
+			return false;
+		}
+		boolean allUploaded=true;
 		//
 		// since there is a strong chance that the pulse will be published
 		// we need to check if there are any any denes of Dene Type DENE_TYPE_DENOMIC_OPERATION
@@ -443,7 +578,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 					destinationDir="/home/pi/Teleonome/" + teleonomeName;
 
 					if(new File(sourceFilename).isFile()) {
-						uploadFile( destinationDir, sourceFilename,   value);
+						if(!uploadFile( destinationDir, sourceFilename,   value)) allUploaded=false;
 					}else {
 						logger.debug("Did not upload " + sourceFilename + " because it could not be found");
 					}
@@ -473,7 +608,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 
 							Utils.zipFile(sourceFile, compressedFile);
 							logger.debug("calling uploadfile the zip file, compressedFileName=" + compressedFileName);
-							uploadFile( destinationDir, compressedFileName,   "Teleonome.zip");
+							if(!uploadFile( destinationDir, compressedFileName,   "Teleonome.zip")) allUploaded=false;
 
 							sourceFile.delete();
 							compressedFile.delete();
@@ -505,9 +640,9 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		uploadFile( destinationDir, sourceFilename,   "complete");
+		if(!uploadFile( destinationDir, sourceFilename,   "complete")) allUploaded=false;
 
-		return true;
+		return allUploaded;
 	}
 
 	
@@ -520,7 +655,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			Channel channel = session.openChannel("sftp");
 			ChannelSftp sftp = (ChannelSftp) channel;
 
-			sftp.connect();
+			sftp.connect(CHANNEL_CONNECT_TIMEOUT_MS);
 
 			//send the contents of the source file
 			fis = new FileInputStream(sourceFilename);
@@ -538,6 +673,7 @@ public class SFTPPublisherWriter extends BufferedWriter implements SftpProgressM
 			return true;
 		} catch (Exception e) {
 			logger.warn(Utils.getStringException(e));
+			if(failureReason==null) failureReason="upload of " + destFilename + " failed: " + e.getMessage();
 			try {
 				if (fis != null) {
 					fis.close();
