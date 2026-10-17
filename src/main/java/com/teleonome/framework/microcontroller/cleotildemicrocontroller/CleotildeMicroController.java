@@ -4,9 +4,10 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -27,6 +28,7 @@ import com.teleonome.framework.denome.DenomeUtils;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
+import com.teleonome.framework.microcontroller.TtySerialPort;
 import com.teleonome.framework.mnemosyne.MnemosyneManager;
 import com.teleonome.framework.utils.Utils;
 
@@ -58,12 +60,43 @@ import com.teleonome.framework.utils.Utils;
  *   Router Address (192.168.1.1), Router User (cleotilde),
  *   Router Password File (/home/pi/Teleonome/CleotildeRouter.secret),
  *   Board Serial Port (/dev/ttyUSB0), Serial Data Rate (115200), Ping Target (1.1.1.1),
- *   Speed Test Interval Hours (6)
+ *   Speed Test Interval Hours (6), Latency Warning Ms (1000; LED 1 yellow above it - this link
+ *   normally runs at 600-1000 ms, so the web app rule uses the same limit)
+ *
+ * ---------------------------------------------------------------------------------------------
+ * SERIAL LINK TO THE BOARD: NO jSerialComm (changed 2026-10-18)
+ * ---------------------------------------------------------------------------------------------
+ * The board (ESP32 Wally 17 + Paula shield, CP2104 USB bridge) is reached through TtySerialPort,
+ * which opens the tty as a plain file (stty for the line settings, FileInputStream /
+ * FileOutputStream for the data). It replaced jSerialComm and the old CleotildeBoard class.
+ *
+ * Why: jSerialComm's native library leaks memory outside the Java heap while a port is held open.
+ * On 2026-10-17/18 Cleotilde's Hypothalamus (-Xmx100m, heap never above ~30 MB) grew from 75 MB
+ * to 586 MB resident within about 45 minutes, the kernel OOM-killer started killing processes
+ * (Hypothalamus, Tomcat, speedtest, Medula) and the Pi 3B (923 MB RAM, 100 MB swap) froze until it
+ * was power-cycled - twice. Native Memory Tracking showed the JVM's own memory flat, so the growth
+ * was in a native library, and jSerialComm (libjSerialComm.so) is the only non-JDK one loaded.
+ * It is the same leak investigated on Ra and Sento since July 2026: every Hypothalamus holding a
+ * jSerialComm port open grows (Ra is OOM-killed about every 3.5 h, ChinampaMonitor grows ~6 MB/h);
+ * upgrading to the latest jSerialComm (2.11.4) did not stop it, and opening/closing the port
+ * per pulse was rejected because toggling DTR/RTS can reset the ESP32 (they drive EN/IO0 on Wally).
+ * With TtySerialPort the process loads no native serial code at all, so there is nothing to leak.
+ * Watch "Memory Usage Last 6 Hours" (Home and Diagnostics pages): the Hypothalamus line should
+ * now stay flat instead of climbing. If it does, AnnabelleController (same ESP32 board family)
+ * gets the same change.
+ *
+ * Shape (the same as AnnabelleController): the controller owns the port; CleotildeReader and
+ * CleotildeWriter wrap its input and output streams. boardCommand() does one request/answer
+ * exchange through them, closes the port if it fails and reopens it on the next command, so an
+ * unplugged and replugged board comes back on its own. Prefer the stable Board Serial Port name
+ * /dev/serial/by-id/usb-Silicon_Labs_CP2104_... once the router's console is also on USB.
  */
 public class CleotildeMicroController extends MicroController {
 
 	public static final String NETWORK_SENSOR_FILE = "NetworkSensor.json";
 	private static final String DEFAULT_NETWORK_SENSOR = "-1#-1#[]#{}#0#0#0#";
+	private static final long BOARD_READ_TIMEOUT_MILLIS = 200;    // one read() on the tty
+	private static final long BOARD_ANSWER_TIMEOUT_MILLIS = 2000; // one command's answer
 
 	Logger logger;
 	private String routerAddress = "192.168.1.1";
@@ -73,9 +106,10 @@ public class CleotildeMicroController extends MicroController {
 	private int serialDataRate = 115200;
 	private String pingTarget = "1.1.1.1";
 	private int speedTestIntervalHours = 6;
+	private int latencyWarningMs = 1000;
 
 	private OpenWrtUbusClient ubus;
-	private CleotildeBoard board;
+	private TtySerialPort serialPort;
 	private MnemosyneManager aMnemosyneManager;
 	private CleotildeReader reader;
 	private CleotildeWriter writer;
@@ -109,6 +143,7 @@ public class CleotildeMicroController extends MicroController {
 					case "Serial Data Rate": serialDataRate = Integer.parseInt(value.toString()); break;
 					case "Ping Target": pingTarget = value.toString(); break;
 					case "Speed Test Interval Hours": speedTestIntervalHours = Integer.parseInt(value.toString()); break;
+					case "Latency Warning Ms": latencyWarningMs = Integer.parseInt(value.toString()); break;
 					default: break;
 				}
 			} catch (JSONException | NumberFormatException e) {
@@ -122,17 +157,22 @@ public class CleotildeMicroController extends MicroController {
 			logger.warn("Could not read router password from " + routerPasswordFile + ", router readings will fail");
 		}
 		ubus = new OpenWrtUbusClient(routerAddress, routerUser, password);
-		board = new CleotildeBoard(boardSerialPort, serialDataRate);
-		board.open();  // not fatal: the board is optional, reopened on demand
-		reader = new CleotildeReader(new StringReader(""), this);
-		writer = new CleotildeWriter(new StringWriter(), reader, this);
+		serialPort = new TtySerialPort(boardSerialPort, serialDataRate, BOARD_READ_TIMEOUT_MILLIS);
+		// not fatal: the board is optional, and boardCommand() reopens the port when it's back
+		if (!serialPort.openPort()) logger.warn("Could not open Cleotilde board on " + boardSerialPort);
+		createReaderWriter();
 		logger.info("Cleotilde initialised, router=" + routerAddress + " board=" + boardSerialPort);
+	}
+
+	/** Reader and writer over the board's serial streams, the same shape as AnnabelleController. */
+	private void createReaderWriter() {
+		reader = new CleotildeReader(new BufferedReader(new InputStreamReader(serialPort.getInputStream(), StandardCharsets.UTF_8)), this);
+		writer = new CleotildeWriter(new OutputStreamWriter(serialPort.getOutputStream(), StandardCharsets.UTF_8), reader, this);
 	}
 
 	@Override
 	public BufferedWriter getWriter() throws IOException {
-		reader = new CleotildeReader(new StringReader(""), this);
-		writer = new CleotildeWriter(new StringWriter(), reader, this);
+		createReaderWriter();
 		return writer;
 	}
 
@@ -143,7 +183,45 @@ public class CleotildeMicroController extends MicroController {
 
 	@Override
 	public void reconnect() throws IOException {
-		board.open();
+		if (!serialPort.openPort()) throw new IOException("Could not open Cleotilde board on " + boardSerialPort);
+		createReaderWriter();
+	}
+
+	/**
+	 * One request/answer exchange with the board: drop stale output, send the command, wait for
+	 * the line starting with expectedPrefix (null = "Ok-"/"Failure-"). Null if the board didn't
+	 * answer. If the port has gone (USB unplugged, ESP32 replaced) it is closed here and reopened
+	 * on the next command, so a replugged board comes back without restarting the Hypothalamus.
+	 */
+	synchronized String boardCommand(String command, String expectedPrefix, long timeoutMillis) {
+		if (!serialPort.isOpen()) {
+			if (!serialPort.openPort()) return null;
+			createReaderWriter();
+		}
+		try {
+			reader.dropStaleInput();
+			writer.sendToBoard(command);
+			String answer = reader.readBoardAnswer(expectedPrefix, timeoutMillis);
+			if (answer == null) logger.warn("No answer from Cleotilde board to " + command);
+			return answer;
+		} catch (IOException e) {
+			logger.warn("Cleotilde board port failed, will reopen: " + e.getMessage());
+			serialPort.closePort();
+			return null;
+		}
+	}
+
+	/** OLED page 1-6: a title and up to 6 lines of about 21 characters. */
+	private void oledPage(int page, String title, String... lines) {
+		StringBuilder c = new StringBuilder("Oled#").append(page).append('#').append(oledText(title));
+		for (String l : lines) c.append('#').append(oledText(l));
+		boardCommand(c.toString(), null, BOARD_ANSWER_TIMEOUT_MILLIS);
+	}
+
+	private static String oledText(String s) {
+		if (s == null) return "";
+		String t = s.replace('#', ' ').replace('\n', ' ');
+		return t.length() > 21 ? t.substring(0, 21) : t;
 	}
 
 	// ------------------------------------------------------------------ sensor line
@@ -154,7 +232,8 @@ public class CleotildeMicroController extends MicroController {
 
 		Map<String, Object> r = readRouter(now);
 		double[] ping = pingInternet();  // up(1/0), latency ms, loss %
-		String[] b = board.getSensorData();
+		String boardLine = boardCommand("GetSensorData", "Cleotilde#", BOARD_ANSWER_TIMEOUT_MILLIS);
+		String[] b = boardLine == null ? null : boardLine.split("#", -1);
 
 		StringBuilder line = new StringBuilder(networkSensor);
 		line.append('#').append(ping[0] > 0)
@@ -304,7 +383,7 @@ public class CleotildeMicroController extends MicroController {
 	 */
 	void updateFace(String networkSensor, Map<String, Object> r, double[] ping) {
 		boolean routerReachable = !"none".equals(r.get("reachableVia"));
-		String internet = ping[0] == 0 ? "R" : (ping[1] >= 100 || ping[2] > 0 ? "Y" : "G");
+		String internet = ping[0] == 0 ? "R" : (ping[1] >= latencyWarningMs || ping[2] > 0 ? "Y" : "G");
 
 		String router;
 		if (!routerReachable) router = "r";
@@ -318,21 +397,21 @@ public class CleotildeMicroController extends MicroController {
 		int unknownDevices = parseIntOr(ns[1], -1);
 		String devices = unknownDevices < 0 ? "O" : unknownDevices > 0 ? "Y" : "G";
 
-		board.setLeds(internet, router, wifi, devices, "G");
+		boardCommand("SetLeds#" + internet + "#" + router + "#" + wifi + "#" + devices + "#G", null, BOARD_ANSWER_TIMEOUT_MILLIS);
 
 		long up = (Long) r.get("routerUptime");
-		board.oledPage(1, "Internet",
+		oledPage(1, "Internet",
 				ping[0] > 0 ? "UP " + Math.round(ping[1]) + " ms, loss " + Math.round(ping[2]) + "%" : "DOWN",
 				"WAN " + r.get("wanIp"),
 				"Down " + twoDecimals.format((Double) r.get("wanDownMbps")) + " Mbit/s",
 				"Up   " + twoDecimals.format((Double) r.get("wanUpMbps")) + " Mbit/s",
 				"Speed " + twoDecimals.format(lastDownloadSpeed) + "/" + twoDecimals.format(lastUploadSpeed));
-		board.oledPage(2, "Router",
+		oledPage(2, "Router",
 				routerReachable ? "Up " + (up / 86400) + "d " + ((up / 3600) % 24) + "h " + ((up / 60) % 60) + "m" : "UNREACHABLE",
 				"CPU " + twoDecimals.format((Double) r.get("cpuTemp")) + " C",
 				"Load " + twoDecimals.format((Double) r.get("load")),
 				"Memory free " + r.get("memFreePercent") + "%");
-		board.oledPage(3, "Devices",
+		oledPage(3, "Devices",
 				"Total   " + (ns[0].equals("-1") ? "?" : ns[0]),
 				"Unknown " + (unknownDevices < 0 ? "?" : String.valueOf(unknownDevices)),
 				"WiFi 2.4 " + r.get("clients24") + "  5G " + r.get("clients5"));
@@ -529,7 +608,7 @@ public class CleotildeMicroController extends MicroController {
 	String powerCycle(String target) {
 		int channel = "modem".equalsIgnoreCase(target) ? 1 : "router".equalsIgnoreCase(target) ? 2 : 0;
 		if (channel == 0) return "Failure-Unknown power target " + target;
-		String answer = board.command("Relay#" + channel + "#CYCLE#10");
+		String answer = boardCommand("Relay#" + channel + "#CYCLE#10", null, BOARD_ANSWER_TIMEOUT_MILLIS);
 		logger.info("PowerCycle " + target + " -> " + answer);
 		return answer == null ? "Failure-No answer from board" : answer;
 	}
