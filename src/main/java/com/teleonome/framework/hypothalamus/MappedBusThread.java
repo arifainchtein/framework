@@ -928,6 +928,7 @@ class MappedBusThread extends Thread{
 				long asyncRequestDelayMillis=0;
 				Set<String> asyncSingleDone = new HashSet<>();
 				while(keepRunning) {
+					boolean polledAny = false;
 					for(Enumeration en=hypothalamus.microControllerPointerMicroControllerIndex.keys();en.hasMoreElements();){
 						microControllerPointer = (String)en.nextElement();
 						aMicroController = (MicroController)hypothalamus.microControllerPointerMicroControllerIndex.get(microControllerPointer);
@@ -938,6 +939,7 @@ class MappedBusThread extends Thread{
 						}
 						if(!aMicroController.isEnableAsyncUpdate()) continue;
 						if(!aMicroController.isAsyncContinuous() && asyncSingleDone.contains(microControllerPointer)) continue;
+						polledAny = true;
 
 						String inputLine = "";
 						keepGoing=true;
@@ -1252,6 +1254,21 @@ class MappedBusThread extends Thread{
 							} catch (InterruptedException e) {
 								logger.warn(Utils.getStringException(e));
 							}
+						}
+					}
+					//
+					// Nothing to poll (no microcontroller has async enabled, or every single-mode one
+					// is already done): without this the loop spins at full CPU, logging every pass,
+					// until the pulse sets keepRunning=false. Seen on Cleotilde 2026-10-18, whose
+					// microcontrollers are all non-async: ~50 s of one core pinned every pulse and
+					// all nine AsyncCycle log files rewritten within a second.
+					//
+					if(!polledAny) {
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+							break stop;
 						}
 					}
 				}
