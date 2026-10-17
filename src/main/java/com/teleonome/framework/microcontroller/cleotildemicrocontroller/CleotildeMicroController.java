@@ -46,6 +46,7 @@ import com.teleonome.framework.utils.Utils;
  *   20 Router CPU Temperature 21 Wifi Clients 2.4 GHz  22 Wifi Clients 5 GHz
  *   23 Router Reachable Via (ethernet / none)
  *   24 Board Reachable        25 Board Input Voltage   26 Board Input Current mA   27 Board Temperature
+ *   28 Cleotilde Status       one-line summary for the web app banner (Well Single Value panel)
  *
  * Every GetSensorData also refreshes the board's LEDs and OLED pages from the same readings.
  *
@@ -174,10 +175,33 @@ public class CleotildeMicroController extends MicroController {
 			.append('#').append(b != null)
 			.append('#').append(b != null && b.length > 3 ? b[3] : "0")
 			.append('#').append(b != null && b.length > 4 ? b[4] : "0")
-			.append('#').append(b != null && b.length > 6 ? b[6] : "0");
+			.append('#').append(b != null && b.length > 6 ? b[6] : "0")
+			.append('#').append(statusSummary(networkSensor, r, ping));
 
 		updateFace(networkSensor, r, ping);
 		return line.toString();
+	}
+
+	/** "Internet UP 14 ms · Router up 2d 3h, 55 C · Wi-Fi 12+2 · 31 devices, 9 unknown" */
+	private String statusSummary(String networkSensor, Map<String, Object> r, double[] ping) {
+		StringBuilder s = new StringBuilder();
+		if (ping[0] > 0) {
+			s.append("Internet UP ").append(Math.round(ping[1])).append(" ms");
+			if (ping[2] > 0) s.append(", ").append(Math.round(ping[2])).append("% loss");
+		} else {
+			s.append("Internet DOWN");
+		}
+		if ("none".equals(r.get("reachableVia"))) {
+			s.append(" \u00B7 Router UNREACHABLE");
+		} else {
+			long up = (Long) r.get("routerUptime");
+			s.append(" \u00B7 Router up ").append(up / 86400).append("d ").append((up / 3600) % 24).append("h, ")
+				.append(Math.round((Double) r.get("cpuTemp"))).append(" C");
+			s.append(" \u00B7 Wi-Fi ").append(r.get("clients24")).append('+').append(r.get("clients5"));
+		}
+		String[] ns = networkSensor.split("#", -1);
+		if (!ns[0].equals("-1")) s.append(" \u00B7 ").append(ns[0]).append(" devices, ").append(ns[1]).append(" unknown");
+		return s.toString();  // never contains '#', the token separator
 	}
 
 	private String readNetworkSensorFile(long now) {

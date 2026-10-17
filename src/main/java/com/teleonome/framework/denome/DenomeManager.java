@@ -6213,7 +6213,7 @@ public class DenomeManager {
 												}else if(valueType.equals(TeleonomeConstants.DATATYPE_LONG)) {
 													long v = 0;
 													try {
-														Long.parseLong(inputLine);
+														v = Long.parseLong(inputLine.trim());
 														logger.debug("storing into value long=" + v);
 
 													}catch(java.lang.NumberFormatException e) {
