@@ -137,6 +137,15 @@ public class MnemosyneManager {
 	public JSONArray getLastNetworkSensorDeviceActivity( ) {
 		return aDBManager.getLastNetworkSensorDeviceActivity( );
 	}
+	public JSONObject getNetworkDeviceSightings(long sinceMillis) {
+		return aDBManager.getNetworkDeviceSightings(sinceMillis);
+	}
+	public boolean forgetNetworkDevice(String deviceName, String macAddress) {
+		return aDBManager.forgetNetworkDevice(deviceName, macAddress);
+	}
+	public boolean isDeviceInWhiteList(String deviceName, String macAddress) {
+		return aDBManager.isDeviceInWhiteList(deviceName, macAddress);
+	}
 	public void storeNetworkStatus(JSONArray deviceList, JSONObject devicesChanges, long sampleTimeMillis, String sampleTimeString) {
 		//
 		// stre data into the networkdeviceactivity

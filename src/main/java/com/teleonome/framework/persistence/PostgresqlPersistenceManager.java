@@ -2051,6 +2051,76 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}
 
+	//
+	// Device history for Cleotilde's device cards (added 2026-10-18): every scan is already kept in
+	// the daily networkdeviceactivity_* tables, so first/last seen come from there, and "Forget"
+	// deletes a gone device's rows so it leaves the "Not seen" list.
+	//
+	/**
+	 * Every MAC seen present since sinceMillis, as mac (lower case) -> {"First Seen", "Last Seen"
+	 * (millis), "Device Name", "IP Address" (as last seen)}.
+	 */
+	public JSONObject getNetworkDeviceSightings(long sinceMillis) {
+		JSONObject toReturn = new JSONObject();
+		ArrayList<String> tables = getAllManagedTablesForAPeriod(TeleonomeConstants.NETWORK_DEVICE_ACTIVITY_TABLE, sinceMillis, System.currentTimeMillis());
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		try {
+			connection = connectionPool.getConnection();
+			statement = connection.createStatement();
+			for (String table : tables) {
+				// table names come from information_schema, not from devices
+				String sql = "select lower(deviceMacAddress), min(scanTimeMillis), max(scanTimeMillis),"
+						+ " (array_agg(deviceName order by scanTimeMillis desc))[1],"
+						+ " (array_agg(deviceIpAddress order by scanTimeMillis desc))[1]"
+						+ " from " + table + " where isPresent and deviceMacAddress<>'' group by 1";
+				rs = statement.executeQuery(sql);
+				while (rs.next()) {
+					String mac = rs.getString(1);
+					long first = rs.getLong(2), last = rs.getLong(3);
+					JSONObject s = toReturn.optJSONObject(mac);
+					if (s == null) {
+						s = new JSONObject().put("First Seen", first).put("Last Seen", 0L);
+						toReturn.put(mac, s);
+					}
+					if (first < s.getLong("First Seen")) s.put("First Seen", first);
+					if (last > s.getLong("Last Seen")) {
+						s.put("Last Seen", last);
+						s.put(TeleonomeConstants.DEVICE_NAME, rs.getString(4));
+						s.put(TeleonomeConstants.IP_ADDRESS, rs.getString(5));
+					}
+				}
+				rs.close();
+				rs = null;
+			}
+		} catch (SQLException e) {
+			logger.warn(Utils.getStringException(e));
+		} finally {
+			try {
+				if (rs != null) rs.close();
+				if (statement != null) statement.close();
+				if (connection != null) connectionPool.closeConnection(connection);
+			} catch (SQLException e) {
+				logger.debug(Utils.getStringException(e));
+			}
+		}
+		return toReturn;
+	}
+
+	/**
+	 * Deletes the device's rows from every networkdeviceactivity_* table: by MAC, plus the
+	 * "missing" rows, which are saved by name only.
+	 */
+	public boolean forgetNetworkDevice(String deviceName, String macAddress) {
+		boolean toReturn = true;
+		for (String table : getAllTableNamesForManagedTable(TeleonomeConstants.NETWORK_DEVICE_ACTIVITY_TABLE)) {
+			String sql = "delete from " + table + " where (?<>'' and lower(deviceMacAddress)=lower(?)) or (deviceMacAddress='' and deviceName=?)";
+			toReturn &= executeWhiteListUpdate(sql, macAddress, macAddress, deviceName);
+		}
+		return toReturn;
+	}
+
 	public boolean storeNetworkDeviceActivity(long scanTimeMillis, String scanTimeString,String  deviceName ,String deviceIpAddress, String deviceMacAddress,boolean whiteListStatus,boolean isPresent,boolean isMissing,boolean isNew) { 
 		String sql="";
 		Connection connection=null;

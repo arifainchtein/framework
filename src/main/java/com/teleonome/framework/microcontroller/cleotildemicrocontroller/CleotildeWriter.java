@@ -34,6 +34,8 @@ public class CleotildeWriter extends BufferedWriter {
 			controller.addDeviceToWhiteList(tokens[1], tokens[2]);
 		} else if (command.startsWith("RemoveDeviceFromWhiteList")) {
 			controller.removeDeviceFromWhiteList(tokens[1], tokens.length > 2 ? tokens[2] : "");
+		} else if (command.startsWith("ForgetDevice")) {
+			controller.forgetDevice(tokens[1], tokens.length > 2 ? tokens[2] : "");
 		} else if (command.startsWith("AddAllDevicesToWhiteList")) {
 			controller.addAllDevicesToWhiteList();
 		} else if (command.startsWith("PowerCycle")) {

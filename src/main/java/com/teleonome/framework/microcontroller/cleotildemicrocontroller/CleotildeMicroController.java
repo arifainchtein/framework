@@ -61,7 +61,10 @@ import com.teleonome.framework.utils.Utils;
  *   Router Password File (/home/pi/Teleonome/CleotildeRouter.secret),
  *   Board Serial Port (/dev/ttyUSB0), Serial Data Rate (115200), Ping Target (1.1.1.1),
  *   Speed Test Interval Hours (6), Latency Warning Ms (1000; LED 1 yellow above it - this link
- *   normally runs at 600-1000 ms, so the web app rule uses the same limit)
+ *   normally runs at 600-1000 ms, so the web app rule uses the same limit),
+ *   Device History Days (30; how far back the "Not seen" device cards go),
+ *   Sweep Networks (192.168.1.0/24; space separated, empty turns the sweep off),
+ *   Sweep Interface (eth0)
  *
  * ---------------------------------------------------------------------------------------------
  * SERIAL LINK TO THE BOARD: NO jSerialComm (changed 2026-10-18)
@@ -99,6 +102,10 @@ public class CleotildeMicroController extends MicroController {
 	public static final String VENDOR = "Vendor";
 	public static final String CONNECTION = "Connection";
 	public static final String PRIVATE_MAC = "Private MAC";
+	public static final String FIRST_SEEN = "First Seen";
+	public static final String LAST_SEEN = "Last Seen";
+	/** Connection of a device only the Pi's sweep found: the router has no trace of it. */
+	public static final String SWEEP_ONLY = "sweep only";
 	private static final String OUI_FILE = "/usr/share/arp-scan/ieee-oui.txt";
 	private static final long BOARD_READ_TIMEOUT_MILLIS = 200;    // one read() on the tty
 	private static final long BOARD_ANSWER_TIMEOUT_MILLIS = 2000; // one command's answer
@@ -112,6 +119,9 @@ public class CleotildeMicroController extends MicroController {
 	private String pingTarget = "1.1.1.1";
 	private int speedTestIntervalHours = 6;
 	private int latencyWarningMs = 1000;
+	private int deviceHistoryDays = 30;
+	private String sweepNetworks = "192.168.1.0/24";
+	private String sweepInterface = "eth0";
 
 	private OpenWrtUbusClient ubus;
 	private TtySerialPort serialPort;
@@ -149,6 +159,9 @@ public class CleotildeMicroController extends MicroController {
 					case "Ping Target": pingTarget = value.toString(); break;
 					case "Speed Test Interval Hours": speedTestIntervalHours = Integer.parseInt(value.toString()); break;
 					case "Latency Warning Ms": latencyWarningMs = Integer.parseInt(value.toString()); break;
+					case "Device History Days": deviceHistoryDays = Integer.parseInt(value.toString()); break;
+					case "Sweep Networks": sweepNetworks = value.toString(); break;
+					case "Sweep Interface": sweepInterface = value.toString(); break;
 					default: break;
 				}
 			} catch (JSONException | NumberFormatException e) {
@@ -361,7 +374,9 @@ public class CleotildeMicroController extends MicroController {
 	private double[] pingInternet() {
 		double[] result = { 0, 0, 100 };
 		try {
-			ArrayList lines = Utils.executeCommand("ping -c 3 -W 2 " + pingTarget);
+			// 10 pings 0.2 s apart (about 2 s; intervals under 1 s need root, which the Hypothalamus
+			// is). It was 3 until 2026-10-18: one lost ping read as 33% and tripped the 20% alarm.
+			ArrayList lines = Utils.executeCommand("ping -c 10 -i 0.2 -W 2 " + pingTarget);
 			for (Object o : lines) {
 				String l = o.toString();
 				if (l.contains("packet loss")) {
@@ -463,7 +478,7 @@ public class CleotildeMicroController extends MicroController {
 
 			String sampleTimeString = new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(new Timestamp(now));
 			aMnemosyneManager.storeNetworkStatus(deviceList, changes, now, sampleTimeString);
-			JSONArray lastActivity = aMnemosyneManager.getLastNetworkSensorDeviceActivity();
+			JSONArray lastActivity = addHistory(aMnemosyneManager.getLastNetworkSensorDeviceActivity(), now);
 			addDeviceDetails(lastActivity, deviceList);
 			// Counted here from the present devices only: Mnemosyne's counts include the devices
 			// reported missing in this sample, which kept LED 4 yellow for devices long gone.
@@ -527,6 +542,13 @@ public class CleotildeMicroController extends MicroController {
 			ips.putIfAbsent(mac, f[0]);
 			present.putIfAbsent(mac, "wired");
 		}
+		for (Map.Entry<String, String> e : sweep().entrySet()) {
+			String mac = e.getKey();
+			if (present.containsKey(mac)) continue;
+			ips.put(mac, e.getValue());  // a fixed IP; a lease the router remembers may be stale
+			if (e.getValue().equals(routerAddress)) names.putIfAbsent(mac, "OpenWrt router");
+			present.put(mac, SWEEP_ONLY);
+		}
 
 		JSONArray list = new JSONArray();
 		for (Map.Entry<String, String> e : present.entrySet()) {
@@ -539,6 +561,37 @@ public class CleotildeMicroController extends MicroController {
 			list.put(d);
 		}
 		return list;
+	}
+
+	/**
+	 * Active ARP sweep from the Pi (added 2026-10-18), mac -> ip. The router only knows devices
+	 * whose traffic goes through it; a device with a fixed IP that only talks to others on the
+	 * switch or behind another access point (the shed link radios .251/.254, KitchenPanel) never
+	 * shows up there. The Pi is on the same switch, and devices answer ARP even when they ignore
+	 * ping, so this finds them. A /24 takes about 2 s. The Hypothalamus runs as root, which
+	 * arp-scan needs.
+	 * The router still sees devices the sweep misses (Wi-Fi in power save, the Pi itself), so the
+	 * sweep only adds to the router's list.
+	 */
+	private Map<String, String> sweep() {
+		Map<String, String> found = new HashMap<>();
+		// both go into a shell command, so only network/interface characters
+		String networks = sweepNetworks.replace(",", " ").trim();
+		if (networks.isEmpty()) return found;
+		if (!networks.matches("[0-9./ ]+") || !sweepInterface.matches("[A-Za-z0-9._-]+")) {
+			logger.warn("bad Sweep Networks / Sweep Interface, not sweeping: " + sweepNetworks + " " + sweepInterface);
+			return found;
+		}
+		try {
+			ArrayList lines = Utils.executeCommand("/usr/sbin/arp-scan -I " + sweepInterface + " -q -x -r 2 " + networks);
+			for (Object line : lines) {
+				String[] f = line.toString().trim().split("\\s+");
+				if (f.length >= 2 && f[1].matches("[0-9a-fA-F:]{17}")) found.putIfAbsent(f[1].toLowerCase(), f[0]);
+			}
+		} catch (IOException | InterruptedException e) {
+			logger.warn("sweep failed: " + e.getMessage());
+		}
+		return found;
 	}
 
 	/**
@@ -556,6 +609,44 @@ public class CleotildeMicroController extends MicroController {
 	 * Private MAC: the locally administered bit is set, as phones and laptops do when they
 	 * randomise their Wi-Fi MAC, so the vendor can't be known.
 	 */
+	/**
+	 * Adds First Seen / Last Seen (millis) to the present devices and replaces the absent ones with
+	 * every device seen in the last Device History Days that isn't here now (added 2026-10-18).
+	 * The last scan alone only reports a device as missing once, so it vanished from the cards
+	 * about 3 minutes after leaving; the history lets the cards say when it was last here, and
+	 * Forget (forgetDevice) deletes that history.
+	 */
+	private JSONArray addHistory(JSONArray lastActivity, long now) {
+		JSONObject sightings = aMnemosyneManager.getNetworkDeviceSightings(now - deviceHistoryDays * 86_400_000L);
+		JSONArray toReturn = new JSONArray();
+		java.util.Set<String> presentMacs = new java.util.HashSet<>();
+		for (int i = 0; i < lastActivity.length(); i++) {
+			JSONObject d = lastActivity.getJSONObject(i);
+			if (!d.optBoolean(TeleonomeConstants.IS_DEVICE_PRESENT)) continue;
+			String mac = d.optString(TeleonomeConstants.MAC_ADDRESS).toLowerCase();
+			presentMacs.add(mac);
+			JSONObject s = sightings.optJSONObject(mac);
+			if (s != null) d.put(FIRST_SEEN, s.getLong(FIRST_SEEN)).put(LAST_SEEN, s.getLong(LAST_SEEN));
+			toReturn.put(d);
+		}
+		for (String mac : sightings.keySet()) {
+			if (presentMacs.contains(mac)) continue;
+			JSONObject s = sightings.getJSONObject(mac);
+			String name = s.optString(TeleonomeConstants.DEVICE_NAME, mac);
+			JSONObject d = new JSONObject();
+			d.put(TeleonomeConstants.DEVICE_NAME, name);
+			d.put(TeleonomeConstants.MAC_ADDRESS, mac);
+			d.put(TeleonomeConstants.IP_ADDRESS, s.optString(TeleonomeConstants.IP_ADDRESS, ""));
+			d.put(TeleonomeConstants.WHITE_LIST_STATUS, aMnemosyneManager.isDeviceInWhiteList(name, mac));
+			d.put(TeleonomeConstants.IS_DEVICE_PRESENT, false);
+			d.put(TeleonomeConstants.IS_DEVICE_MISSING, true);
+			d.put(TeleonomeConstants.IS_DEVICE_NEW, false);
+			d.put(FIRST_SEEN, s.getLong(FIRST_SEEN)).put(LAST_SEEN, s.getLong(LAST_SEEN));
+			toReturn.put(d);
+		}
+		return toReturn;
+	}
+
 	private void addDeviceDetails(JSONArray devices, JSONArray presentNow) {
 		Map<String, String> connections = new HashMap<>();
 		for (int i = 0; i < presentNow.length(); i++) {
@@ -653,6 +744,35 @@ public class CleotildeMicroController extends MicroController {
 	void removeDeviceFromWhiteList(String deviceName, String mac) {
 		logger.debug("RemoveDeviceFromWhiteList " + deviceName + " " + mac + " " + aMnemosyneManager.removeDeviceFromWhiteList(deviceName, mac));
 		updateWhiteListStatusInFile(deviceName, false);
+	}
+
+	/**
+	 * Forget, for devices in "Not seen" only (the web app shows it there): deletes the device's
+	 * history so it leaves the list. Its whitelist entry is kept, so it is still known if it comes
+	 * back. A device that is here now would just be seen again at the next scan, so it is refused.
+	 */
+	void forgetDevice(String deviceName, String mac) {
+		try {
+			File file = new File(NETWORK_SENSOR_FILE);
+			String[] t = FileUtils.readFileToString(file, Charset.defaultCharset()).split("#", -1);
+			if (t.length != 9) return;
+			JSONArray devices = new JSONArray(t[2]), kept = new JSONArray();
+			for (int i = 0; i < devices.length(); i++) {
+				JSONObject d = devices.getJSONObject(i);
+				boolean same = mac.isEmpty() ? deviceName.equals(d.optString(TeleonomeConstants.DEVICE_NAME))
+						: mac.equalsIgnoreCase(d.optString(TeleonomeConstants.MAC_ADDRESS));
+				if (same && d.optBoolean(TeleonomeConstants.IS_DEVICE_PRESENT)) {
+					logger.info("ForgetDevice refused, " + deviceName + " " + mac + " is present");
+					return;
+				}
+				if (!same) kept.put(d);
+			}
+			logger.debug("ForgetDevice " + deviceName + " " + mac + " " + aMnemosyneManager.forgetNetworkDevice(deviceName, mac));
+			t[2] = kept.toString();
+			FileUtils.writeStringToFile(file, String.join("#", t), Charset.defaultCharset(), false);
+		} catch (IOException | JSONException e) {
+			logger.warn(Utils.getStringException(e));
+		}
 	}
 
 	void addAllDevicesToWhiteList() {
