@@ -1971,106 +1971,82 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 		return toReturn;
 	}
 
+	//
+	// Whitelist (NetworkInspector / Cleotilde). Changed 2026-10-18:
+	// - prepared statements: device names come from DHCP hostnames, which a device chooses
+	//   itself, so a name with a quote broke (or could inject into) the old concatenated SQL
+	// - a device also matches by MAC address, so it stays known when its name changes (the
+	//   OpenWrt router names devices differently from arp-scan, e.g. "Annabelle.lan")
+	//
 	public boolean removeDeviceFromWhiteList(String deviceName) {
-		String sql="";
-		Connection connection=null;
-		Statement statement = null;
-		boolean toReturn=false;
-		ResultSet rs=null;
-		try {
-
-			connection = connectionPool.getConnection();
-			statement = connection.createStatement();
-			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
-
-			sql = "delete from NetworkDeviceWhiteList where deviceName ='"+ deviceName+"'";
-			logger.debug("delete  NetworkDeviceWhiteList, sql " + sql);
-			int result = statement.executeUpdate(sql);
-			toReturn=true;
-		} catch (SQLException e) {
-			//System.out.println("bad sql:" + sql);
-			logger.warn(Utils.getStringException(e));
-		}finally{
-			try {
-				if(rs!=null)rs.close();
-				if(statement!=null)statement.close();
-				if(connection!=null)connectionPool.closeConnection(connection);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-		}
-		return toReturn;
+		return removeDeviceFromWhiteList(deviceName, "");
 	}
 
-
+	/** Removes the device's rows by name and, if macAddress is not empty, by MAC too. */
+	public boolean removeDeviceFromWhiteList(String deviceName, String macAddress) {
+		String sql = "delete from NetworkDeviceWhiteList where deviceName=? or (?<>'' and lower(deviceMacAddress)=lower(?))";
+		return executeWhiteListUpdate(sql, deviceName, macAddress == null ? "" : macAddress, macAddress == null ? "" : macAddress);
+	}
 
 	public boolean addDeviceToWhiteList(String deviceName, String macAddress) {
-		String sql="";
-		Connection connection=null;
-		Statement statement = null;
-		boolean toReturn=false;
-		ResultSet rs=null;
+		String sql = "insert into NetworkDeviceWhiteList (deviceName , deviceMacAddress) values(?,?)";
+		return executeWhiteListUpdate(sql, deviceName, macAddress);
+	}
+
+	public boolean isDeviceInWhiteList(String deviceName) {
+		return isDeviceInWhiteList(deviceName, "");
+	}
+
+	/** True if the device is whitelisted by name or, if macAddress is not empty, by MAC. */
+	public boolean isDeviceInWhiteList(String deviceName, String macAddress) {
+		String mac = macAddress == null ? "" : macAddress;
+		String sql = "select count(*) from NetworkDeviceWhiteList where deviceName=? or (?<>'' and lower(deviceMacAddress)=lower(?))";
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet rs = null;
+		boolean toReturn = false;
 		try {
-
 			connection = connectionPool.getConnection();
-			statement = connection.createStatement();
-			String createdOn = getPostgresDateString(new Timestamp(System.currentTimeMillis()));
-
-			sql = "insert into NetworkDeviceWhiteList (deviceName , deviceMacAddress) values('"+ deviceName+"','"+macAddress +"')";
-			logger.debug("insert  NetworkDeviceWhiteList, sql " + sql);
-			int result = statement.executeUpdate(sql);
-			toReturn=true;
+			statement = connection.prepareStatement(sql);
+			statement.setString(1, deviceName);
+			statement.setString(2, mac);
+			statement.setString(3, mac);
+			rs = statement.executeQuery();
+			if (rs.next()) toReturn = rs.getInt(1) > 0;
 		} catch (SQLException e) {
-			//System.out.println("bad sql:" + sql);
 			logger.warn(Utils.getStringException(e));
-		}finally{
+		} finally {
 			try {
-				if(rs!=null)rs.close();
-				if(statement!=null)statement.close();
-				if(connection!=null)connectionPool.closeConnection(connection);
+				if (rs != null) rs.close();
+				if (statement != null) statement.close();
+				if (connection != null) connectionPool.closeConnection(connection);
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.debug(Utils.getStringException(e));
 			}
-
 		}
 		return toReturn;
 	}
-	public boolean isDeviceInWhiteList(String deviceName) {
 
+	private boolean executeWhiteListUpdate(String sql, String... parameters) {
 		Connection connection = null;
-		Statement statement = null;
-		String sql = "select count(deviceMacAddress) from NetworkDeviceWhiteList where deviceName='"+deviceName +"'";
-		ResultSet rs = null;
-		int count=0;
-		boolean toReturn=false;
-
+		PreparedStatement statement = null;
+		boolean toReturn = false;
 		try {
 			connection = connectionPool.getConnection();
-			statement = connection.createStatement();
-			rs = statement.executeQuery(sql);
-
-			while(rs.next()){
-				count = rs.getInt(1);
-			}
-			statement.close();
-			connectionPool.closeConnection(connection);
-			if(count>0)toReturn= true;
+			statement = connection.prepareStatement(sql);
+			for (int i = 0; i < parameters.length; i++) statement.setString(i + 1, parameters[i]);
+			logger.debug("NetworkDeviceWhiteList " + sql + " " + java.util.Arrays.toString(parameters));
+			statement.executeUpdate();
+			toReturn = true;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			logger.warn(Utils.getStringException(e));
-		}finally{
+		} finally {
 			try {
-				if(rs!=null)rs.close();
-				if(statement!=null)statement.close();
-				if(connection!=null)connectionPool.closeConnection(connection);
+				if (statement != null) statement.close();
+				if (connection != null) connectionPool.closeConnection(connection);
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				logger.debug(Utils.getStringException(e));
 			}
-
 		}
 		return toReturn;
 	}

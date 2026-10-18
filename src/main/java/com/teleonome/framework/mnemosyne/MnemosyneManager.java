@@ -117,6 +117,11 @@ public class MnemosyneManager {
 		// TODO Auto-generated method stub
 		return aDBManager.removeDeviceFromWhiteList(deviceName);
 	}
+
+	/** Removes by name and by MAC, so a device whitelisted under an older name is removed too. */
+	public boolean removeDeviceFromWhiteList(String deviceName, String deviceMacAddress) {
+		return aDBManager.removeDeviceFromWhiteList(deviceName, deviceMacAddress);
+	}
 	
 	public boolean addDeviceToWhiteList(String deviceName, String deviceMacAddress) {
 		// TODO Auto-generated method stub
@@ -144,7 +149,8 @@ public class MnemosyneManager {
 		for(int i=0;i<deviceList.length();i++){
 			deviceInfo = deviceList.getJSONObject(i);
 			deviceName = deviceInfo.getString(TeleonomeConstants.DEVICE_NAME);
-			whiteListStatus=aDBManager.isDeviceInWhiteList(deviceName);
+			// by name or MAC (2026-10-18), so a device stays known when its name changes
+			whiteListStatus=aDBManager.isDeviceInWhiteList(deviceName, deviceInfo.optString(TeleonomeConstants.MAC_ADDRESS, ""));
 			isPresent=true;
 			isMissing=false;
 			isNew=false;

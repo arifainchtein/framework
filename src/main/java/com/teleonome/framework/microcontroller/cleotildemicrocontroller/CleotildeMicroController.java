@@ -95,6 +95,11 @@ public class CleotildeMicroController extends MicroController {
 
 	public static final String NETWORK_SENSOR_FILE = "NetworkSensor.json";
 	private static final String DEFAULT_NETWORK_SENSOR = "-1#-1#[]#{}#0#0#0#";
+	// extra fields on each DeviceList entry for the web app's device page
+	public static final String VENDOR = "Vendor";
+	public static final String CONNECTION = "Connection";
+	public static final String PRIVATE_MAC = "Private MAC";
+	private static final String OUI_FILE = "/usr/share/arp-scan/ieee-oui.txt";
 	private static final long BOARD_READ_TIMEOUT_MILLIS = 200;    // one read() on the tty
 	private static final long BOARD_ANSWER_TIMEOUT_MILLIS = 2000; // one command's answer
 
@@ -459,8 +464,16 @@ public class CleotildeMicroController extends MicroController {
 			String sampleTimeString = new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(new Timestamp(now));
 			aMnemosyneManager.storeNetworkStatus(deviceList, changes, now, sampleTimeString);
 			JSONArray lastActivity = aMnemosyneManager.getLastNetworkSensorDeviceActivity();
-			int numberOfDevices = aMnemosyneManager.geNumberOfDevicesInLastSample();
-			int numberUnknown = aMnemosyneManager.geNumberUnknowDevicesInLastSample();
+			addDeviceDetails(lastActivity, deviceList);
+			// Counted here from the present devices only: Mnemosyne's counts include the devices
+			// reported missing in this sample, which kept LED 4 yellow for devices long gone.
+			int numberOfDevices = 0, numberUnknown = 0;
+			for (int i = 0; i < lastActivity.length(); i++) {
+				JSONObject d = lastActivity.getJSONObject(i);
+				if (!d.optBoolean(TeleonomeConstants.IS_DEVICE_PRESENT)) continue;
+				numberOfDevices++;
+				if (!d.optBoolean(TeleonomeConstants.WHITE_LIST_STATUS)) numberUnknown++;
+			}
 			String data = numberOfDevices + "#" + numberUnknown + "#" + lastActivity + "#" + changes
 					+ "#" + twoDecimals.format(lastDownloadSpeed) + "#" + twoDecimals.format(lastUploadSpeed)
 					+ "#" + twoDecimals.format(lastSpeedTestPing) + "#" + now + "#" + sampleTimeString;
@@ -521,17 +534,93 @@ public class CleotildeMicroController extends MicroController {
 			JSONObject d = new JSONObject();
 			d.put(TeleonomeConstants.MAC_ADDRESS, mac);
 			d.put(TeleonomeConstants.IP_ADDRESS, ips.getOrDefault(mac, ""));
-			d.put(TeleonomeConstants.DEVICE_NAME, names.getOrDefault(mac, mac));  // the whitelist is keyed by name
-			d.put("Connection", e.getValue());
+			d.put(TeleonomeConstants.DEVICE_NAME, deviceName(names.getOrDefault(mac, mac)));
+			d.put(CONNECTION, e.getValue());
 			list.put(d);
 		}
 		return list;
 	}
 
+	/**
+	 * The router's host hints end in its local domain ("Annabelle.lan"); arp-scan, and so the
+	 * existing whitelist entries, used the bare name.
+	 */
+	private static String deviceName(String routerName) {
+		return routerName.endsWith(".lan") ? routerName.substring(0, routerName.length() - 4) : routerName;
+	}
+
+	/**
+	 * Adds Vendor, Connection and Private MAC to each device of the list Mnemosyne returns (which
+	 * only has name, IP, MAC and the status flags), for the web app's device page: most devices
+	 * without a DHCP name can be recognised by vendor ("Apple", "Espressif", "Raspberry Pi").
+	 * Private MAC: the locally administered bit is set, as phones and laptops do when they
+	 * randomise their Wi-Fi MAC, so the vendor can't be known.
+	 */
+	private void addDeviceDetails(JSONArray devices, JSONArray presentNow) {
+		Map<String, String> connections = new HashMap<>();
+		for (int i = 0; i < presentNow.length(); i++) {
+			JSONObject d = presentNow.getJSONObject(i);
+			connections.put(d.optString(TeleonomeConstants.MAC_ADDRESS), d.optString(CONNECTION));
+		}
+		java.util.Set<String> prefixes = new java.util.HashSet<>();
+		for (int i = 0; i < devices.length(); i++) {
+			String p = ouiPrefix(devices.getJSONObject(i).optString(TeleonomeConstants.MAC_ADDRESS));
+			if (p != null) prefixes.add(p);
+		}
+		Map<String, String> vendors = lookUpVendors(prefixes);
+		for (int i = 0; i < devices.length(); i++) {
+			JSONObject d = devices.getJSONObject(i);
+			String mac = d.optString(TeleonomeConstants.MAC_ADDRESS).toLowerCase();
+			boolean privateMac = isPrivateMac(mac);
+			String prefix = ouiPrefix(mac);
+			d.put(VENDOR, privateMac ? "Private MAC" : prefix == null ? "" : vendors.getOrDefault(prefix, ""));
+			d.put(CONNECTION, connections.getOrDefault(mac, ""));
+			d.put(PRIVATE_MAC, privateMac);
+		}
+	}
+
+	/** "28:37:37:3f:a3:35" -> "283737", or null if it isn't a MAC address. */
+	private static String ouiPrefix(String mac) {
+		String hex = mac == null ? "" : mac.replace(":", "").replace("-", "").toUpperCase();
+		return hex.matches("[0-9A-F]{12}") ? hex.substring(0, 6) : null;
+	}
+
+	private static boolean isPrivateMac(String mac) {
+		String p = ouiPrefix(mac);
+		return p != null && (Integer.parseInt(p.substring(1, 2), 16) & 0x2) != 0;
+	}
+
+	/**
+	 * Reads the IEEE vendor file once per analysis for just the prefixes needed, instead of keeping
+	 * ~30,000 vendors in the Hypothalamus heap. arp-scan's file: "XXXXXX<TAB>Vendor".
+	 */
+	private Map<String, String> lookUpVendors(java.util.Set<String> prefixes) {
+		Map<String, String> found = new HashMap<>();
+		File f = new File(OUI_FILE);
+		if (prefixes.isEmpty() || !f.isFile()) return found;
+		try (java.io.BufferedReader r = new java.io.BufferedReader(new java.io.FileReader(f))) {
+			String line;
+			while ((line = r.readLine()) != null && found.size() < prefixes.size()) {
+				int tab = line.indexOf('\t');
+				if (tab != 6) continue;
+				String p = line.substring(0, 6).toUpperCase();
+				if (prefixes.contains(p)) found.put(p, line.substring(tab + 1).trim());
+			}
+		} catch (IOException e) {
+			logger.warn("Could not read " + OUI_FILE + ": " + e.getMessage());
+		}
+		return found;
+	}
+
 	private JSONObject diff(JSONArray previous, JSONArray current) {
 		JSONArray missing = new JSONArray(), added = new JSONArray();
 		java.util.Set<String> before = new java.util.HashSet<>(), now = new java.util.HashSet<>();
-		for (int i = 0; i < previous.length(); i++) before.add(previous.getJSONObject(i).optString(TeleonomeConstants.DEVICE_NAME));
+		// Only devices that were present last time: one that was already missing was reported
+		// then, so it isn't reported again and drops off the list instead of staying forever.
+		for (int i = 0; i < previous.length(); i++) {
+			JSONObject p = previous.getJSONObject(i);
+			if (p.optBoolean(TeleonomeConstants.IS_DEVICE_PRESENT, true)) before.add(p.optString(TeleonomeConstants.DEVICE_NAME));
+		}
 		for (int i = 0; i < current.length(); i++) now.add(current.getJSONObject(i).optString(TeleonomeConstants.DEVICE_NAME));
 		for (String n : before) if (!now.contains(n)) missing.put(n);
 		for (String n : now) if (!before.contains(n)) added.put(n);
@@ -560,8 +649,9 @@ public class CleotildeMicroController extends MicroController {
 		updateWhiteListStatusInFile(deviceName, true);
 	}
 
-	void removeDeviceFromWhiteList(String deviceName) {
-		logger.debug("RemoveDeviceFromWhiteList " + deviceName + " " + aMnemosyneManager.removeDeviceFromWhiteList(deviceName));
+	/** mac may be empty (older web app); when given, rows saved under an older name go too. */
+	void removeDeviceFromWhiteList(String deviceName, String mac) {
+		logger.debug("RemoveDeviceFromWhiteList " + deviceName + " " + mac + " " + aMnemosyneManager.removeDeviceFromWhiteList(deviceName, mac));
 		updateWhiteListStatusInFile(deviceName, false);
 	}
 
