@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -27,9 +28,10 @@ import com.teleonome.framework.denome.DenomeManager;
 import com.teleonome.framework.denome.DenomeUtils;
 import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.hypothalamus.Hypothalamus;
-import com.teleonome.framework.microcontroller.MicroController;
+import com.teleonome.framework.microcontroller.MotherMicroController;
 import com.teleonome.framework.microcontroller.TtySerialPort;
 import com.teleonome.framework.mnemosyne.MnemosyneManager;
+import com.teleonome.framework.security.totp.TOTP;
 import com.teleonome.framework.utils.Utils;
 
 // com.teleonome.framework.microcontroller.cleotildemicrocontroller.CleotildeMicroController
@@ -93,8 +95,18 @@ import com.teleonome.framework.utils.Utils;
  * exchange through them, closes the port if it fails and reopens it on the next command, so an
  * unplugged and replugged board comes back on its own. Prefer the stable Board Serial Port name
  * /dev/serial/by-id/usb-Silicon_Labs_CP2104_... once the router's console is also on USB.
+ *
+ * ---------------------------------------------------------------------------------------------
+ * MOTHER (added 2026-10-19)
+ * ---------------------------------------------------------------------------------------------
+ * Set "Mother Microcontroller" = true on this component (and false on Simple Micro Controller) and
+ * the TOTP codes come from the board: GetCommandCode / VerifyUserCode#code, firmware Cleotilde-0.4+,
+ * secret set on the board with SetSecret (the same base32 secret as the SecretKey file, so the phone
+ * app's codes keep working). SimpleMicroController.verifyUserCommandCode() accepts every code; the
+ * board checks it: the current 30 s step, or one of the last 3 minutes once each (doorbell rings
+ * arrive 1-2 min late), and locks for an hour after 5 wrong codes. No board answer = invalid code.
  */
-public class CleotildeMicroController extends MicroController {
+public class CleotildeMicroController extends MotherMicroController {
 
 	public static final String NETWORK_SENSOR_FILE = "NetworkSensor.json";
 	private static final String DEFAULT_NETWORK_SENSOR = "-1#-1#[]#{}#0#0#0#";
@@ -109,6 +121,7 @@ public class CleotildeMicroController extends MicroController {
 	private static final String OUI_FILE = "/usr/share/arp-scan/ieee-oui.txt";
 	private static final long BOARD_READ_TIMEOUT_MILLIS = 200;    // one read() on the tty
 	private static final long BOARD_ANSWER_TIMEOUT_MILLIS = 2000; // one command's answer
+	private static final int MOTHER_TRIES = 3;
 
 	Logger logger;
 	private String routerAddress = "192.168.1.1";
@@ -807,6 +820,55 @@ public class CleotildeMicroController extends MicroController {
 		} catch (IOException | JSONException e) {
 			logger.warn(Utils.getStringException(e));
 		}
+	}
+
+	// ------------------------------------------------------------------ mother (TOTP on the board)
+
+	@Override
+	public String getCommandCode() throws IOException {
+		for (int i = 0; i < MOTHER_TRIES; i++) {
+			// the answer is the bare code, so accept any line and check it is 6 digits
+			String answer = boardCommand("GetCommandCode", "", BOARD_ANSWER_TIMEOUT_MILLIS);
+			if (answer != null && answer.matches("\\d{6}")) return answer;
+			logger.warn("GetCommandCode: bad answer from board: " + answer);
+		}
+		return "";
+	}
+
+	@Override
+	public boolean verifyUserCommandCode(String userCode) throws IOException {
+		if (userCode == null || !userCode.trim().matches("\\d{6}")) return false;
+		for (int i = 0; i < MOTHER_TRIES; i++) {
+			// a resend after a lost answer is safe: the board answers valid again for 15 s
+			String answer = boardCommand("VerifyUserCode#" + userCode.trim(), null, BOARD_ANSWER_TIMEOUT_MILLIS);
+			if (TeleonomeConstants.COMMAND_REQUEST_VALID_CODE.equals(answer)) return true;
+			if (TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE.equals(answer)) return false;
+			logger.warn("VerifyUserCode: bad answer from board: " + answer);
+		}
+		return false;
+	}
+
+	/** Same as SimpleMicroController: the DigitalGeppetto secret stays in its file on the Pi. */
+	@Override
+	public String getDigitalGeppettoCommandCode() throws IOException {
+		String unEncodedKey = FileUtils.readFileToString(new File("DigitalGeppettoSecretKey"), "UTF-8").trim();
+		try {
+			return new TOTP().generateCurrentNumberFromUnencodedString(unEncodedKey);
+		} catch (GeneralSecurityException e) {
+			logger.warn(Utils.getStringException(e));
+			return "";
+		}
+	}
+
+	/** The board has no power control over the Pi, so there is nothing to tell it (as SimpleMicroController). */
+	@Override
+	public boolean rebootingHypothalamus() throws IOException {
+		return true;
+	}
+
+	@Override
+	public boolean shuttingDownHypothalamus() throws IOException {
+		return true;
 	}
 
 	// ------------------------------------------------------------------ power control (inactive)
