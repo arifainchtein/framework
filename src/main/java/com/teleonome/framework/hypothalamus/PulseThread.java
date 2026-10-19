@@ -1339,6 +1339,13 @@ public class PulseThread extends Thread{
 				// is an unread pipe) and the pulse timestamp freezes until an external
 				// watchdog restarts the whole process.
 				logger.error("Uncaught exception in pulse cycle, continuing to next pulse: " + Utils.getStringException(t));
+				// wait before the next attempt: a failure that repeats every cycle (on Zhinu
+				// 2026-10-19, an empty denome) otherwise spins the CPU and floods the log
+				try {
+					Thread.sleep(30000);
+				} catch (InterruptedException ie) {
+					logger.warn(Utils.getStringException(ie));
+				}
 			}
 		}while(true);
 	}

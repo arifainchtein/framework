@@ -303,8 +303,10 @@ public class DenomeManager {
 		// now write the denome
 		//
 		try {
-			File primaryDenome = new File("/home/pi/Teleonome/Teleonome.denome");
-		    File previousPulse = new File("/home/pi/Teleonome/Teleonome.previous_pulse");
+			// the working directory, not /home/pi/Teleonome: Zhinu's hypothalamus runs in
+			// /home/pi/zhinuhypothalamus (on the home Pis both are the same directory)
+			File primaryDenome = new File(Utils.getLocalDirectory() + "Teleonome.denome");
+		    File previousPulse = new File(Utils.getLocalDirectory() + "Teleonome.previous_pulse");
 		    File webServerFile = new File(Utils.getLocalDirectory() + "tomcat/webapps/ROOT/Teleonome.denome");
 		    
 //		    if(currentlyCreatingPulseJSONObject==null) {
