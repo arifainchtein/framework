@@ -66,7 +66,16 @@ import com.teleonome.framework.utils.Utils;
  *   normally runs at 600-1000 ms, so the web app rule uses the same limit),
  *   Device History Days (30; how far back the "Not seen" device cards go),
  *   Sweep Networks (192.168.1.0/24; space separated, empty turns the sweep off),
- *   Sweep Interface (eth0)
+ *   Sweep Interface (eth0),
+ *   Mailbox Host (104.154.239.253, chilhuacle/Zhinu), Mailbox User (pi), Mailbox Key File (/home/pi/.ssh/dg),
+ *   Mailbox Directory (Teleonome/Mailbox/), Mailbox Poll Seconds (10; 0 turns the doorbell off)
+ *
+ * ---------------------------------------------------------------------------------------------
+ * DOORBELL (added 2026-10-20)
+ * ---------------------------------------------------------------------------------------------
+ * DoorbellPoller reads Cleotilde's outbox on Zhinu every 10 s by SFTP, asks the board about each
+ * ring's code and writes the answers back for Zhinu's Mailbox page (design 07, section 3). A valid
+ * ring is only shown on OLED page 4 for now; opening the Network Services comes with the Network Rules.
  *
  * ---------------------------------------------------------------------------------------------
  * SERIAL LINK TO THE BOARD: NO jSerialComm (changed 2026-10-18)
@@ -135,6 +144,15 @@ public class CleotildeMicroController extends MotherMicroController {
 	private int deviceHistoryDays = 30;
 	private String sweepNetworks = "192.168.1.0/24";
 	private String sweepInterface = "eth0";
+	private String mailboxHost = "104.154.239.253";
+	private String mailboxUser = "pi";
+	private String mailboxKeyFile = "/home/pi/.ssh/dg";
+	private String mailboxDirectory = "Teleonome/Mailbox/";
+	private int mailboxPollSeconds = 10;
+	private DoorbellPoller doorbellPoller;
+	// the board's doorbell lock, from GetSensorData fields 18-19 (firmware 0.4+), -1 = not known yet
+	private volatile int codeFailuresLastHour = -1;
+	private volatile boolean codeLockedOut = false;
 
 	private OpenWrtUbusClient ubus;
 	private TtySerialPort serialPort;
@@ -175,6 +193,11 @@ public class CleotildeMicroController extends MotherMicroController {
 					case "Device History Days": deviceHistoryDays = Integer.parseInt(value.toString()); break;
 					case "Sweep Networks": sweepNetworks = value.toString(); break;
 					case "Sweep Interface": sweepInterface = value.toString(); break;
+					case "Mailbox Host": mailboxHost = value.toString(); break;
+					case "Mailbox User": mailboxUser = value.toString(); break;
+					case "Mailbox Key File": mailboxKeyFile = value.toString(); break;
+					case "Mailbox Directory": mailboxDirectory = value.toString(); break;
+					case "Mailbox Poll Seconds": mailboxPollSeconds = Integer.parseInt(value.toString()); break;
 					default: break;
 				}
 			} catch (JSONException | NumberFormatException e) {
@@ -192,6 +215,10 @@ public class CleotildeMicroController extends MotherMicroController {
 		// not fatal: the board is optional, and boardCommand() reopens the port when it's back
 		if (!serialPort.openPort()) logger.warn("Could not open Cleotilde board on " + boardSerialPort);
 		createReaderWriter();
+		if (mailboxPollSeconds > 0 && doorbellPoller == null) {
+			doorbellPoller = new DoorbellPoller(this, mailboxHost, mailboxUser, mailboxKeyFile, mailboxDirectory, "Cleotilde", mailboxPollSeconds);
+			doorbellPoller.start();
+		}
 		logger.info("Cleotilde initialised, router=" + routerAddress + " board=" + boardSerialPort);
 	}
 
@@ -265,6 +292,10 @@ public class CleotildeMicroController extends MotherMicroController {
 		double[] ping = pingInternet();  // up(1/0), latency ms, loss %
 		String boardLine = boardCommand("GetSensorData", "Cleotilde#", BOARD_ANSWER_TIMEOUT_MILLIS);
 		String[] b = boardLine == null ? null : boardLine.split("#", -1);
+		if (b != null && b.length > 19) {
+			codeFailuresLastHour = parseIntOr(b[18], -1);
+			codeLockedOut = "1".equals(b[19].trim());
+		}
 
 		StringBuilder line = new StringBuilder(networkSensor);
 		line.append('#').append(ping[0] > 0)
@@ -837,6 +868,14 @@ public class CleotildeMicroController extends MotherMicroController {
 
 	@Override
 	public boolean verifyUserCommandCode(String userCode) throws IOException {
+		return Boolean.TRUE.equals(askBoardToVerify(userCode));
+	}
+
+	/**
+	 * True / false as the board answered, null if it gave no answer: the framework treats that as
+	 * invalid, the doorbell poller asks again rather than calling a good code wrong.
+	 */
+	Boolean askBoardToVerify(String userCode) {
 		if (userCode == null || !userCode.trim().matches("\\d{6}")) return false;
 		for (int i = 0; i < MOTHER_TRIES; i++) {
 			// a resend after a lost answer is safe: the board answers valid again for 15 s
@@ -845,7 +884,42 @@ public class CleotildeMicroController extends MotherMicroController {
 			if (TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE.equals(answer)) return false;
 			logger.warn("VerifyUserCode: bad answer from board: " + answer);
 		}
-		return false;
+		return null;
+	}
+
+	int getCodeFailuresLastHour() {
+		return codeFailuresLastHour;
+	}
+
+	boolean isCodeLockedOut() {
+		return codeLockedOut;
+	}
+
+	/**
+	 * Release of the doorbell lock (5 wrong codes = every code refused for an hour), asked for with the
+	 * Release button on Cleotilde's page, which only the home network reaches; no code is needed, as
+	 * the board would refuse any while locked. Firmware 8 forgets the wrong codes (ResetCodeLockout);
+	 * older firmware keeps them only in RAM, so a Reboot clears them too.
+	 */
+	String releaseCodeLock() {
+		String answer = boardCommand("ResetCodeLockout", null, BOARD_ANSWER_TIMEOUT_MILLIS);
+		if (answer != null && answer.startsWith("Failure-Unknown command")) {
+			answer = boardCommand("Reboot", null, BOARD_ANSWER_TIMEOUT_MILLIS);
+		}
+		logger.info("Doorbell lock release -> " + answer);
+		if (answer != null && answer.startsWith("Ok-")) {
+			codeFailuresLastHour = 0;
+			codeLockedOut = false;
+		}
+		return answer == null ? "Failure-No answer from board" : answer;
+	}
+
+	/** OLED page 4 shows the last ring. TODO: a valid ring sets Requested Open on its Network Rules. */
+	void doorbellAnswered(JSONObject ring) {
+		String when = new SimpleDateFormat("dd/MM HH:mm:ss").format(new Timestamp(ring.optLong("Received")));
+		JSONArray services = ring.optJSONArray("Services");
+		String what = services == null || services.length() == 0 ? "code test" : services.join(",").replace("\"", "");
+		oledPage(4, "Doorbell", when, "Code " + ring.optString("Result"), what, ring.optInt("Minutes") / 60.0 + " h");
 	}
 
 	/** Same as SimpleMicroController: the DigitalGeppetto secret stays in its file on the Pi. */

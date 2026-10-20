@@ -1732,7 +1732,7 @@ public class DenomeManager {
 												// now get the value from 
 												logger.debug("line 1267 dataIsStale=" + dataIsStale + " externalSourceOfData=" + externalSourceOfData);
 
-												Object externalData =  lastPulseExternalTeleonomeJSONObject.get(externalSourceOfData);
+												Object externalData =  lastPulseExternalTeleonomeJSONObject.opt(externalSourceOfData); // opt: a value the other teleonome no longer has (e.g. Ra System Data:Maximum Memory) is skipped, not fatal for the rest
 												logger.debug("line 1270 externalData=" + externalData);
 
 												if(externalData!=null)jsonObjectDeneWord.put("Value", externalData);	

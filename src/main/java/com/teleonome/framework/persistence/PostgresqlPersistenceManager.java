@@ -3667,6 +3667,8 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 
 	public JSONArray getTeleonomeNamesInOrganism() {
 		ArrayList allTables = this.getAllTableNamesForManagedTable(TeleonomeConstants.ORGANISMPULSE_TABLE);
+		// no organismpulse tables yet (Zhinu has none): no names
+		if(allTables.isEmpty()) return new JSONArray();
 		String tableName = (String) allTables.get(allTables.size()-1);
 		String command = "select distinct(teleonomeName) from " + tableName;
 		logger.debug("getTeleonomeNamesInOrganism, sql=" + command);
