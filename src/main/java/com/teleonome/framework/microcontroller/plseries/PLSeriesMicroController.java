@@ -23,6 +23,7 @@ import com.teleonome.framework.exception.MicrocontrollerCommunicationException;
 import com.teleonome.framework.exception.SerialPortCommunicationException;
 import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.microcontroller.MicroController;
+import com.teleonome.framework.microcontroller.raesp32microcontroller.RaEsp32MicroController;
 import com.teleonome.framework.microcontroller.PlainReader;
 import com.teleonome.framework.utils.Utils;
 import com.fazecast.jSerialComm.*;
@@ -34,7 +35,8 @@ public class PLSeriesMicroController extends MicroController {
 			String  dataString="dataString";
 			PLSeriesReader aPLSeriesReader = null;//
 			Logger logger;
-			private static final String PORT_NAMES[] = {  "/dev/ttyUSB0","ttyUSB0"};
+			// any ttyUSB, not just ttyUSB0: with Ra's ESP32 display also on USB the PL2303 can come up as ttyUSB1
+			private static final String PORT_NAMES[] = {  "/dev/ttyUSB","ttyUSB"};
 			SerialPort serialPort;
 			
 			private static final int TIME_OUT = 20000;
@@ -89,6 +91,10 @@ public class PLSeriesMicroController extends MicroController {
 					
 					for (SerialPort port : allPorts) {
 						logger.debug("looking for ports, currPortId=" + port.getSystemPortName());
+						if (RaEsp32MicroController.isRaEsp32Port(port)) {
+							logger.debug("skipping " + port.getSystemPortName() + ", it is the RaEsp32 display");
+							continue;
+						}
 			
 						for (String portName : PORT_NAMES) {
 							if (port.getSystemPortName().equals(portName) || port.getSystemPortName().startsWith(portName)) {
