@@ -17,8 +17,8 @@ import com.teleonome.framework.microcontroller.MicroController;
 /**
  * Sends the readings an Annabelle relays to devices.digitalstables.com (devicesheart, MQTT), set up in
  * the Denome like the SFTP Publisher Controller. Config DeneWords: Upload To DigitalStables,
- * DigitalStables Server, DigitalStables Login, DigitalStables Password File, Annabelle Serial (her
- * ESP32's efuse MAC, sent as relay.annabelleSerial so devicesheart records the path "via <serial>").
+ * DigitalStables Server, DigitalStables Settings File (the file the factory writes at Send To DS with the
+ * login, Annabelle's serial number and the password; the same path on every Pi).
  */
 public class DigitalStablesPublisherMicroController extends MicroController {
 

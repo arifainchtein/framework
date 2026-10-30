@@ -1,6 +1,7 @@
 package com.teleonome.framework.microcontroller.digitalstablespublisher;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,8 +33,12 @@ import com.teleonome.framework.utils.Utils;
  *
  * The MQTT connection lives in this object and stays open between pulses (the Hypothalamus closes the
  * writer after every command, so close() keeps it). Acks arrive on devices/<login>/ack at any time and
- * mark their row acked; a row not acked is sent again at a later pulse. The password is read from the
- * file named in the Denome, never from the Denome itself (it travels in pulses), and never logged.
+ * mark their row acked; a row not acked is sent again at a later pulse.
+ *
+ * The login, Annabelle's serial number and the password are in the settings file named in the Denome
+ * (DigitalStables Settings File), written by the factory at Send To DS (set-devicesheart-settings), so the
+ * Denome is the same for every Annabelle and the password never travels in pulses. It is never logged.
+ * When the factory writes the file again, the next pulse reconnects with what is in it.
  */
 public class DigitalStablesPublisherWriter extends BufferedWriter {
 
@@ -50,10 +55,11 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 	private final DenomeManager aDenomeManager;
 	private boolean uploadEnabled = false;
 	private String server = "";
+	private String settingsFile = "";
+	// from the settings file, read at every connect
 	private String login = "";
-	private String passwordFile = "";
-	// Annabelle's own serial (her ESP32's efuse MAC); she does not report it, so it is set in the Denome
-	private String annabelleSerial = "";
+	private String annabelleSerialNumber = "";
+	private long settingsFileModified = 0;
 	private MqttClient client = null;
 	private volatile String publishingResults = "";
 	private long lastPrune = 0;
@@ -71,18 +77,14 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 					uploadEnabled = Boolean.parseBoolean(value.toString().trim());
 				} else if (deneName.equals("DigitalStables Server")) {
 					server = value.toString().trim();
-				} else if (deneName.equals("DigitalStables Login")) {
-					login = value.toString().trim();
-				} else if (deneName.equals("DigitalStables Password File")) {
-					passwordFile = value.toString().trim();
-				} else if (deneName.equals("Annabelle Serial")) {
-					annabelleSerial = value.toString().trim().toLowerCase();
+				} else if (deneName.equals("DigitalStables Settings File")) {
+					settingsFile = value.toString().trim();
 				}
 			} catch (JSONException e) {
 				logger.warn(Utils.getStringException(e));
 			}
 		}
-		logger.warn("DigitalStables publisher: upload=" + uploadEnabled + " server=" + server + " login=" + login + " annabelleSerial=" + annabelleSerial);
+		logger.warn("DigitalStables publisher: upload=" + uploadEnabled + " server=" + server + " settingsFile=" + settingsFile);
 	}
 
 	public String getPublishingResults() {
@@ -103,6 +105,8 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 		long deadline = System.currentTimeMillis() + PUBLISH_DEADLINE_MS;
 		int sent = 0;
 		try {
+			// the factory wrote new settings (Send To DS again): reconnect with them
+			if (client != null && new File(settingsFile).lastModified() != settingsFileModified) disconnectQuietly();
 			ensureConnected();
 			List<DevicesOutbox.Row> rows = DevicesOutbox.due(ROWS_PER_PULSE);
 			String topic = "devices/" + login + "/reading";
@@ -112,7 +116,7 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 				JSONObject relay = new JSONObject();
 				relay.put("outboxId", row.id);
 				relay.put("teleonome", aDenomeManager.getDenomeName());
-				if (!annabelleSerial.isEmpty()) relay.put("annabelleSerial", annabelleSerial);
+				relay.put("annabelleSerial", annabelleSerialNumber);
 				relay.put("receivedAt", row.createdMillis);
 				message.put("relay", relay);
 				MqttMessage mqttMessage = new MqttMessage(message.toString().getBytes(StandardCharsets.UTF_8));
@@ -137,8 +141,9 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 		if (client != null && client.isConnected()) return;
 		disconnectQuietly();
 		MqttConnectOptions options = new MqttConnectOptions();
+		char[] password = readSettings();
 		options.setUserName(login);
-		options.setPassword(readPassword());
+		options.setPassword(password);
 		options.setCleanSession(true);
 		options.setConnectionTimeout(CONNECT_TIMEOUT_SECONDS);
 		options.setKeepAliveInterval(KEEP_ALIVE_SECONDS);
@@ -148,7 +153,7 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 		client.setTimeToWait(SEND_TIMEOUT_MS);
 		client.connect(options);
 		client.subscribe("devices/" + login + "/ack", 1, (topic, message) -> onAck(new String(message.getPayload(), StandardCharsets.UTF_8)));
-		logger.warn("DigitalStables: connected to " + server + " as " + login);
+		logger.warn("DigitalStables: connected to " + server + " as " + login + " for Annabelle " + annabelleSerialNumber);
 	}
 
 	// {"outboxId", "serialnumber", "secondsTime", "outcome"}; every outcome that comes back is final
@@ -166,15 +171,25 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 		}
 	}
 
-	// The file AddLogin wrote on the devices machine: devicesheart.password=<password>
-	private char[] readPassword() throws IOException {
+	// The file the factory writes at Send To DS: devicesheart.login, annabelle.serialnumber, devicesheart.password.
+	// Sets login and annabelleSerialNumber, returns the password.
+	private char[] readSettings() throws IOException {
+		if (settingsFile.isEmpty()) throw new IOException("no DigitalStables Settings File in the Denome");
+		long modified = new File(settingsFile).lastModified();
 		Properties properties = new Properties();
-		try (InputStream in = new FileInputStream(passwordFile)) {
+		try (InputStream in = new FileInputStream(settingsFile)) {
 			properties.load(in);
 		}
-		String password = properties.getProperty("devicesheart.password");
-		if (password == null || password.trim().isEmpty()) throw new IOException("no devicesheart.password in " + passwordFile);
-		return password.trim().toCharArray();
+		String fileLogin = properties.getProperty("devicesheart.login", "").trim();
+		String serialNumber = properties.getProperty("annabelle.serialnumber", "").trim().toLowerCase();
+		String password = properties.getProperty("devicesheart.password", "").trim();
+		if (fileLogin.isEmpty()) throw new IOException("no devicesheart.login in " + settingsFile);
+		if (serialNumber.isEmpty()) throw new IOException("no annabelle.serialnumber in " + settingsFile);
+		if (password.isEmpty()) throw new IOException("no devicesheart.password in " + settingsFile);
+		login = fileLogin;
+		annabelleSerialNumber = serialNumber;
+		settingsFileModified = modified;
+		return password.toCharArray();
 	}
 
 	private void pruneNowAndThen() {
