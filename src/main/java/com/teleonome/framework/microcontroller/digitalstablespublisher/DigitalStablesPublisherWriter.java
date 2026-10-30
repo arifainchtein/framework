@@ -52,6 +52,8 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 	private String server = "";
 	private String login = "";
 	private String passwordFile = "";
+	// Annabelle's own serial (her ESP32's efuse MAC); she does not report it, so it is set in the Denome
+	private String annabelleSerial = "";
 	private MqttClient client = null;
 	private volatile String publishingResults = "";
 	private long lastPrune = 0;
@@ -73,12 +75,14 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 					login = value.toString().trim();
 				} else if (deneName.equals("DigitalStables Password File")) {
 					passwordFile = value.toString().trim();
+				} else if (deneName.equals("Annabelle Serial")) {
+					annabelleSerial = value.toString().trim().toLowerCase();
 				}
 			} catch (JSONException e) {
 				logger.warn(Utils.getStringException(e));
 			}
 		}
-		logger.warn("DigitalStables publisher: upload=" + uploadEnabled + " server=" + server + " login=" + login);
+		logger.warn("DigitalStables publisher: upload=" + uploadEnabled + " server=" + server + " login=" + login + " annabelleSerial=" + annabelleSerial);
 	}
 
 	public String getPublishingResults() {
@@ -108,6 +112,7 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 				JSONObject relay = new JSONObject();
 				relay.put("outboxId", row.id);
 				relay.put("teleonome", aDenomeManager.getDenomeName());
+				if (!annabelleSerial.isEmpty()) relay.put("annabelleSerial", annabelleSerial);
 				relay.put("receivedAt", row.createdMillis);
 				message.put("relay", relay);
 				MqttMessage mqttMessage = new MqttMessage(message.toString().getBytes(StandardCharsets.UTF_8));
