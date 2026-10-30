@@ -334,6 +334,10 @@ public class AnnabelleReader extends BufferedReader{
 											} catch (PersistenceException e) {
 												logger.warn(Utils.getStringException(e));
 											}
+											// 2026-10-30: queued for devices.digitalstables.com when the Denome has
+											// "Upload To DigitalStables" = true; once per (serial, secondsTime), so a
+											// repeater or overflow-resend copy is not queued twice. Never throws.
+											com.teleonome.framework.microcontroller.digitalstablespublisher.DevicesOutbox.addReading(aDenomeManager, telepathon, sourceoriginaltime);
 											hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_TELEPATHON_STATUS, telepathon.toString());
 										}
 									}else {
