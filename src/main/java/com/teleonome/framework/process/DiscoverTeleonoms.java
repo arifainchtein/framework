@@ -65,7 +65,10 @@ public class DiscoverTeleonoms extends Thread {
 				InetAddress ipToBindToZeroMQ = NetworkUtilities.getExoZeroNetworkAddress();
 				InetAddress addr = InetAddress.getLocalHost();
 
-				String hostname = InetAddress.getByName(ipToBindToZeroMQ.getHostName()).toString();
+				// A host name of its own for this short-lived browsing instance (2026-10-31, Continuity
+				// bug #24): InetAddress.toString() gave "Tlaloc.lan/192.168.1.194", announced as
+				// "Tlaloc-lan/192-168-1-194.local", and the bare host name would clash with avahi's "Tlaloc.local".
+				String hostname = ipToBindToZeroMQ.getHostName().split("\\.")[0] + "-discovery";
 				logger.debug("ipToBindToZeroMQ=" + ipToBindToZeroMQ + " hostname=" + hostname + " addr=" + addr);
 
 
