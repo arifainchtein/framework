@@ -102,7 +102,9 @@ public class DevicesOutbox {
 	/**
 	 * The reading as devicesheart stores it: serialnumber and secondsTime at the top (they identify the
 	 * reading on every path, §5.4), the device's name and type, every DeneWord value grouped by dene,
-	 * and the raw line Annabelle sent.
+	 * the raw line Annabelle sent, and (2026-10-31, design doc §18) the complete telepathon, so that
+	 * devices.digitalstables.com draws the device from its own database exactly as the Teleonome does
+	 * (the shared deviceviews library needs the denes with their units and every attribute).
 	 */
 	static JSONObject toReading(JSONObject telepathon, String serialnumber, long secondsTime) {
 		JSONObject reading = new JSONObject();
@@ -131,6 +133,7 @@ public class DevicesOutbox {
 		}
 		reading.put("values", values);
 		reading.put("raw", telepathon.optString("Raw Data", ""));
+		reading.put("telepathon", new JSONObject(telepathon.toString()));
 		return reading;
 	}
 
