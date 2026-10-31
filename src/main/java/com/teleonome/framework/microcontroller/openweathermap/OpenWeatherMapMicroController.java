@@ -81,20 +81,25 @@ public class OpenWeatherMapMicroController  extends MicroController{
 				dene = configParams.getJSONObject(i);
 				deneName = dene.getString(TeleonomeConstants.DENEWORD_NAME_ATTRIBUTE);
 				//System.out.println("denemanem="+ deneName);
+				//
+				// Number, not (double): org.json 20260814 (framework f3015ce) returns decimals such as
+				// -33.86 as BigDecimal, and the (double) cast threw ClassCastException here, killing
+				// the Hypothalamus constructor on Tlaloc (2026-10-31).
+				//
 				if(deneName.equals("Latitude")) {
-					latitude = (double) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Latitude", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
+					latitude = ((Number) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Latitude", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).doubleValue();
 				}else if(deneName.equals("Longitude")) {
-					longitud = (double) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Longitude", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
+					longitud = ((Number) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Longitude", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).doubleValue();
 				}else if(deneName.equals("Units")) {
 					units = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Units", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
 				}else if(deneName.equals("OpenWeatherAPIKey")) {
 					appid = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "OpenWeatherAPIKey", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
 				}else if(deneName.equals("Connect Timeout Milliseconds")) {
-					connectTimeoutMilliseconds = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Connect Timeout Milliseconds", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
+					connectTimeoutMilliseconds = ((Number) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Connect Timeout Milliseconds", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).intValue();					
 				}else if(deneName.equals("Read Timeout Milliseconds")) {
-					readTimeoutMilliseconds = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Read Timeout Milliseconds", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
+					readTimeoutMilliseconds = ((Number) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Read Timeout Milliseconds", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).intValue();					
 				}else if(deneName.equals("Daily Count")) {
-					dailyCount = (int) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Daily Count", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
+					dailyCount = ((Number) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Daily Count", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE)).intValue();					
 				}else if(deneName.equals("Latitude")) {
 					String timeZoneIdPointer = (String) DenomeUtils.getDeneWordAttributeByDeneWordNameFromDene(dene, "Timezone", TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE);					
 					try {
