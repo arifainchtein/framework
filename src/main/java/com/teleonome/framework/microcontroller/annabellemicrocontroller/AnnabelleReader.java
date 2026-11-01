@@ -212,6 +212,11 @@ public class AnnabelleReader extends BufferedReader{
 							deserializer="PowerProfileDeserializer";
 							processString=true;
 							appendString=false;
+						}else if(tokens.length>=AnnabelleStatusDeserializer.TOKEN_COUNT && deserializer.contains("AnnabelleStatusDeserializer")) {
+							// Annabelle's own status (2026-11-01, firmware 10): becomes the telepathon "Annabelle"
+							deserializer="AnnabelleStatusDeserializer";
+							processString=true;
+							appendString=false;
 						}else if(deserializer.contains("DeviceIdentityDeserializer")) {
 							// token count checked by the deserializer itself (split keeps empty strings there)
 							deserializer="DeviceIdentityDeserializer";
