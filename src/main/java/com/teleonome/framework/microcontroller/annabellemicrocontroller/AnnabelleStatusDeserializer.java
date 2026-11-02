@@ -18,8 +18,10 @@ import com.teleonome.framework.utils.Utils;
  *   AnnabelleStatusDeserializer#1#name#serialnumber#epoch#uptimeSec#firmwareVersion#
  *   weatherEpoch#weatherDownload#weatherLora#weatherRetries#weatherTrigger#weatherPending#
  *   rxPackets#noPacket#rxDropped#txCount#deafPct#wifiReconnects#wifiDownSecMax#
- *   resetReason#lowMemRestarts#heapFree8#heapMin8#heapBlock#loopMsMax#allocFailCount
+ *   resetReason#lowMemRestarts#heapFree8#heapMin8#heapBlock#loopMsMax#allocFailCount[#latitude#longitude]
  *
+ * latitude#longitude (2026-11-02, firmware 11, still format 1): her position (Settings > GPS, or the built-in one),
+ * so devices.digitalstables.com can put her on the map. Firmware 10 sends 27 tokens and gets no position.
  * weatherEpoch 0: no forecast sent since the reset. weatherDownload: 1 ok, 2 failed, 3 no internet.
  * weatherLora: 0 sent, -1 nothing to send, 1 LoRa init failed, 2 CAD timeout, 3 channel busy, 4 TX failed,
  * 5 channel busy after the retries.
@@ -29,6 +31,8 @@ public class AnnabelleStatusDeserializer extends AnnabelleDeserializer {
 	public static final String DEVICE_TYPE = "Annabelle";
 	/** Tokens in format 1, the leading "AnnabelleStatusDeserializer" included. */
 	public static final int TOKEN_COUNT = 27;
+	/** With latitude and longitude at the end (firmware 11). */
+	public static final int TOKEN_COUNT_WITH_POSITION = 29;
 
 	private final Logger logger = Logger.getLogger(getClass());
 
@@ -76,6 +80,15 @@ public class AnnabelleStatusDeserializer extends AnnabelleDeserializer {
 		configuration.put(word("Device Type Id", DEVICE_TYPE, null, TeleonomeConstants.DATATYPE_STRING));
 		configuration.put(word("Serial Number", serialNumber, null, TeleonomeConstants.DATATYPE_STRING));
 		configuration.put(word("Firmware Version", tokens[6], null, TeleonomeConstants.DATATYPE_INTEGER));
+		// her position, named as Langley's ("Latitude" / "Longitude" in Configuration): the map on
+		// devices.digitalstables.com and the "No GPS" badge in deviceviews look for these two
+		if (tokens.length >= TOKEN_COUNT_WITH_POSITION) {
+			double latitude = toDouble(tokens[27]), longitude = toDouble(tokens[28]);
+			if (!(latitude == 0 && longitude == 0) && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180) {
+				configuration.put(word("Latitude", "" + latitude, null, TeleonomeConstants.DATATYPE_DOUBLE));
+				configuration.put(word("Longitude", "" + longitude, null, TeleonomeConstants.DATATYPE_DOUBLE));
+			}
+		}
 
 		dene(denes, TeleonomeConstants.TELEPATHON_DENE_SENSORS);
 
