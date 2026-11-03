@@ -51,6 +51,11 @@ import com.teleonome.framework.utils.Utils;
  *   23 Router Reachable Via (ethernet / none)
  *   24 Board Reachable        25 Board Input Voltage   26 Board Input Current mA   27 Board Temperature
  *   28 Cleotilde Status       one-line summary for the web app banner (Well Single Value panel)
+ *   Traffic watch (TrafficWatcher, added 2026-11-04; design 05 section 7c), all "today" from midnight:
+ *   29 Watchlist Connections Today   30 Watchlist MB Today    31 Night Upload MB (this or last night)
+ *   32 Top Night Uploader (name + MB) 33 Suspicious Events Today 34 Last Suspicious Event (HH:mm + detail)
+ *   35 Countries Today (JSON, MB per country, top 15)        36 Device Traffic Today (JSON, top 20 devices)
+ *   37 Upload MB Today (all devices)  38 Download MB Today
  *
  * Every GetSensorData also refreshes the board's LEDs and OLED pages from the same readings.
  *
@@ -68,7 +73,23 @@ import com.teleonome.framework.utils.Utils;
  *   Sweep Networks (192.168.1.0/24; space separated, empty turns the sweep off),
  *   Sweep Interface (eth0),
  *   Mailbox Host (104.154.239.253, chilhuacle/Zhinu), Mailbox User (pi), Mailbox Key File (/home/pi/.ssh/dg),
- *   Mailbox Directory (Teleonome/Mailbox/), Mailbox Poll Seconds (10; 0 turns the doorbell off)
+ *   Mailbox Directory (Teleonome/Mailbox/), Mailbox Poll Seconds (10; 0 turns the doorbell off),
+ *   Traffic Poll Seconds (30; 0 turns the traffic watch off), Traffic Flush Minutes (5),
+ *   Traffic LAN Prefix (192.168.1.), Traffic Watchlist (CN RU KP IR), Traffic Odd Ports (23 2323 445 ...),
+ *   Traffic Night Hours (0-5), Traffic Night Upload MB (20), Traffic Baseline Factor (10),
+ *   Traffic Baseline Minimum MB (50), Traffic Learning Days (7), Traffic Alert Unknown Devices (true),
+ *   Traffic Flow Days (60), Traffic DNS Days (30),
+ *   DigitalStables Reading Minutes (5; 0 = never), DigitalStables Settings File (/home/pi/Teleonome/devicesheart.properties)
+ *
+ * ---------------------------------------------------------------------------------------------
+ * DEVICES.DIGITALSTABLES.COM (added 2026-11-04)
+ * ---------------------------------------------------------------------------------------------
+ * Every DigitalStables Reading Minutes, one reading of Cleotilde itself goes into the DevicesOutbox, which
+ * the DigitalStables Publisher sends to devicesheart as chilhuacle-cleotilde (the login and the product's
+ * serial number come from the settings file the factory writes at Send To DS; nothing when it is missing or
+ * the Denome's Upload To DigitalStables is false). The reading has internet, WAN, router, Wi-Fi, device
+ * counts, the board and the traffic summary. Never the device list, destinations, domains or DNS: that is the
+ * household's browsing and stays on Cleotilde's own page.
  *
  * ---------------------------------------------------------------------------------------------
  * DOORBELL (added 2026-10-20)
@@ -125,6 +146,15 @@ public class CleotildeMicroController extends MotherMicroController {
 	public static final String PRIVATE_MAC = "Private MAC";
 	public static final String FIRST_SEEN = "First Seen";
 	public static final String LAST_SEEN = "Last Seen";
+	/** The name the router (or the sweep) gives a device that has a nickname. */
+	public static final String ORIGINAL_NAME = "Original Name";
+	/**
+	 * Nicknames from the Rename button on the device cards (added 2026-11-04): {"mac": "nickname"}, in the
+	 * working directory. Kept on the Pi, not on the router, so the router's cleotilde account stays read-only,
+	 * and not in the denome, which is public.
+	 */
+	public static final String NICKNAMES_FILE = "DeviceNicknames.json";
+	private static final int NICKNAME_MAX_LENGTH = 40;
 	/** Connection of a device only the Pi's sweep found: the router has no trace of it. */
 	public static final String SWEEP_ONLY = "sweep only";
 	private static final String OUI_FILE = "/usr/share/arp-scan/ieee-oui.txt";
@@ -150,6 +180,13 @@ public class CleotildeMicroController extends MotherMicroController {
 	private String mailboxDirectory = "Teleonome/Mailbox/";
 	private int mailboxPollSeconds = 10;
 	private DoorbellPoller doorbellPoller;
+	private TrafficWatcher trafficWatcher;
+	private final Map<String, String> trafficSettings = new HashMap<>();
+	/** LED 4 blinks red this long after a new Suspicious Event. */
+	private static final long TRAFFIC_EVENT_BLINK_MILLIS = 3_600_000L;
+	private int digitalStablesReadingMinutes = 5;
+	private String digitalStablesSettingsFile = "/home/pi/Teleonome/devicesheart.properties";
+	private long lastDigitalStablesReadingMillis = 0;
 	// the board's doorbell lock, from GetSensorData fields 18-19 (firmware 0.4+), -1 = not known yet
 	private volatile int codeFailuresLastHour = -1;
 	private volatile boolean codeLockedOut = false;
@@ -198,7 +235,11 @@ public class CleotildeMicroController extends MotherMicroController {
 					case "Mailbox Key File": mailboxKeyFile = value.toString(); break;
 					case "Mailbox Directory": mailboxDirectory = value.toString(); break;
 					case "Mailbox Poll Seconds": mailboxPollSeconds = Integer.parseInt(value.toString()); break;
-					default: break;
+					case "DigitalStables Reading Minutes": digitalStablesReadingMinutes = Integer.parseInt(value.toString()); break;
+					case "DigitalStables Settings File": digitalStablesSettingsFile = value.toString(); break;
+					default:
+						if (name.startsWith("Traffic ")) trafficSettings.put(name, value.toString());
+						break;
 				}
 			} catch (JSONException | NumberFormatException e) {
 				logger.warn(Utils.getStringException(e));
@@ -219,7 +260,57 @@ public class CleotildeMicroController extends MotherMicroController {
 			doorbellPoller = new DoorbellPoller(this, mailboxHost, mailboxUser, mailboxKeyFile, mailboxDirectory, "Cleotilde", mailboxPollSeconds);
 			doorbellPoller.start();
 		}
+		startTrafficWatch();
 		logger.info("Cleotilde initialised, router=" + routerAddress + " board=" + boardSerialPort);
+	}
+
+	/** The traffic watch (TrafficWatcher), with the Traffic ... config parameters. */
+	private void startTrafficWatch() {
+		if (trafficWatcher != null) return;
+		int pollSeconds = parseIntOr(trafficSettings.getOrDefault("Traffic Poll Seconds", "30"), 30);
+		if (pollSeconds <= 0) {
+			logger.info("Traffic watch off (Traffic Poll Seconds = 0)");
+			return;
+		}
+		TrafficWatcher w = new TrafficWatcher(ubus, new TrafficStore(com.teleonome.framework.persistence.PostgresqlPersistenceManager.instance()));
+		w.pollMillis = pollSeconds * 1000L;
+		for (Map.Entry<String, String> e : trafficSettings.entrySet()) {
+			String v = e.getValue().trim();
+			try {
+				switch (e.getKey()) {
+					case "Traffic Flush Minutes": w.flushMillis = Math.max(1, Integer.parseInt(v)) * 60_000L; break;
+					case "Traffic LAN Prefix": w.lanPrefix = v; break;
+					case "Traffic Watchlist": w.watchlist = new java.util.HashSet<>(java.util.Arrays.asList(v.toUpperCase().split("[ ,]+"))); break;
+					case "Traffic Odd Ports":
+						java.util.Set<Integer> ports = new java.util.HashSet<>();
+						for (String p : v.split("[ ,]+")) if (!p.isEmpty()) ports.add(Integer.parseInt(p));
+						w.oddPorts = ports;
+						break;
+					case "Traffic Night Hours":
+						String[] h = v.split("-");
+						w.nightStartHour = Integer.parseInt(h[0].trim());
+						w.nightEndHour = Integer.parseInt(h[1].trim());
+						break;
+					case "Traffic Night Upload MB": w.nightUploadMB = Double.parseDouble(v); break;
+					case "Traffic Baseline Factor": w.baselineFactor = Double.parseDouble(v); break;
+					case "Traffic Baseline Minimum MB": w.baselineMinimumMB = Double.parseDouble(v); break;
+					case "Traffic Learning Days": w.learningDays = Integer.parseInt(v); break;
+					case "Traffic Alert Unknown Devices": w.alertUnknownDevices = Boolean.parseBoolean(v); break;
+					case "Traffic Flow Days": w.flowDays = Integer.parseInt(v); break;
+					case "Traffic DNS Days": w.dnsDays = Integer.parseInt(v); break;
+					default: break;
+				}
+			} catch (RuntimeException ex) {
+				logger.warn("Bad config parameter " + e.getKey() + " = " + v + ", using the default");
+			}
+		}
+		trafficWatcher = w;
+		w.start();
+	}
+
+	/** Tokens 29-38; zeros until the watch runs (and when it is off), so the positions never move. */
+	private String trafficTokens() {
+		return trafficWatcher == null ? "0#0.00#0.00##0##{}#[]#0.00#0.00" : trafficWatcher.sensorTokens();
 	}
 
 	/** Reader and writer over the board's serial streams, the same shape as AnnabelleController. */
@@ -317,10 +408,116 @@ public class CleotildeMicroController extends MotherMicroController {
 			.append('#').append(b != null && b.length > 3 ? b[3] : "0")
 			.append('#').append(b != null && b.length > 4 ? b[4] : "0")
 			.append('#').append(b != null && b.length > 6 ? b[6] : "0")
-			.append('#').append(statusSummary(networkSensor, r, ping));
+			.append('#').append(statusSummary(networkSensor, r, ping))
+			.append('#').append(trafficTokens());
 
 		updateFace(networkSensor, r, ping);
+		queueDigitalStablesReading(now, networkSensor, r, ping, b);
 		return line.toString();
+	}
+
+	// ------------------------------------------------------------------ devices.digitalstables.com
+
+	/** The product's serial number from the factory's settings file, "" when there is none yet. */
+	private String productSerialNumber() {
+		java.util.Properties p = new java.util.Properties();
+		try (java.io.FileInputStream in = new java.io.FileInputStream(digitalStablesSettingsFile)) {
+			p.load(in);
+		} catch (IOException e) {
+			return "";
+		}
+		String serial = p.getProperty("annabelle.serialnumber", "").trim().toLowerCase();
+		return serial.matches("[0-9a-f]{12}") ? serial : "";
+	}
+
+	private static JSONObject telepathonWord(String name, Object value, String valueType, String units) {
+		JSONObject w = new JSONObject().put("Name", name).put("Value", value).put("Value Type", valueType).put("Required", true);
+		if (units != null) w.put("Units", units);
+		return w;
+	}
+
+	/**
+	 * One reading of Cleotilde for the DevicesOutbox, shaped like a relayed telepathon (Configuration +
+	 * Purpose denes), so devices.digitalstables.com draws it like any other device. Never throws.
+	 */
+	void queueDigitalStablesReading(long now, String networkSensor, Map<String, Object> r, double[] ping, String[] b) {
+		if (digitalStablesReadingMinutes <= 0 || now - lastDigitalStablesReadingMillis < digitalStablesReadingMinutes * 60_000L) return;
+		try {
+			JSONObject telepathon = buildDigitalStablesTelepathon(now, networkSensor, r, ping, b);
+			if (telepathon == null) return;
+			lastDigitalStablesReadingMillis = now;
+			com.teleonome.framework.microcontroller.digitalstablespublisher.DevicesOutbox.addReading(aDenomeManager, telepathon, now / 1000);
+		} catch (RuntimeException e) {
+			logger.warn("Could not queue Cleotilde's reading for DigitalStables: " + e.getMessage());
+		}
+	}
+
+	/** null when the factory hasn't given this Pi its settings (no serial number yet). */
+	JSONObject buildDigitalStablesTelepathon(long now, String networkSensor, Map<String, Object> r, double[] ping, String[] b) {
+		String serial = productSerialNumber();
+		if (serial.isEmpty()) return null;
+		long secondsTime = now / 1000;
+		String[] ns = networkSensor.split("#", -1);
+		String[] t = trafficTokens().split("#", -1);  // 29-38, see the class comment
+		JSONArray config = new JSONArray()
+				.put(telepathonWord("Device Type Id", "Cleotilde", "String", null))
+				.put(telepathonWord("Serial Number", serial, "String", null))
+				.put(telepathonWord("Firmware Version", b != null && b.length > 16 ? b[16].trim() : "", "String", null));
+		JSONArray purpose = new JSONArray()
+				.put(telepathonWord("Seconds Time", secondsTime, "long", null))
+				.put(telepathonWord("Internet Up", ping[0] > 0, "boolean", null))
+				.put(telepathonWord("Internet Latency", Math.round(ping[1]), "long", "ms"))
+				.put(telepathonWord("Internet Packet Loss", ping[2], "double", "%"))
+				.put(telepathonWord("WAN Up", r.get("wanUp"), "boolean", null))
+				.put(telepathonWord("WAN Uptime", r.get("wanUptime"), "long", "s"))
+				.put(telepathonWord("Router Reachable", !"none".equals(r.get("reachableVia")), "boolean", null))
+				.put(telepathonWord("Router Uptime", r.get("routerUptime"), "long", "s"))
+				.put(telepathonWord("Router Load", Math.round((Double) r.get("load") * 100) / 100.0, "double", null))
+				.put(telepathonWord("Router Memory Free", r.get("memFreePercent"), "int", "%"))
+				.put(telepathonWord("Router Temperature", Math.round((Double) r.get("cpuTemp") * 10) / 10.0, "double", "C"))
+				.put(telepathonWord("WiFi Clients", (Integer) r.get("clients24") + (Integer) r.get("clients5"), "int", null))
+				.put(telepathonWord("Devices", parseIntOr(ns[0], -1), "int", null))
+				.put(telepathonWord("Unknown Devices", parseIntOr(ns[1], -1), "int", null))
+				.put(telepathonWord("Board Reachable", b != null, "boolean", null))
+				.put(telepathonWord("Board Voltage", b != null && b.length > 3 ? parseDoubleOr(b[3], 0) : 0.0, "double", "V"))
+				.put(telepathonWord("Board Current", b != null && b.length > 4 ? parseDoubleOr(b[4], 0) : 0.0, "double", "mA"))
+				.put(telepathonWord("Board Temperature", b != null && b.length > 6 ? parseDoubleOr(b[6], 0) : 0.0, "double", "C"));
+		if (trafficWatcher != null && t.length >= 10) {
+			JSONObject last = trafficWatcher.getLastEvent();
+			String lastEvent = last == null ? "" : new SimpleDateFormat("HH:mm").format(new Timestamp(last.optLong("Time")))
+					+ " " + last.optString("Rule") + ": " + last.optString("Device")
+					+ (last.optString("Country").isEmpty() ? "" : " (" + last.optString("Country") + ")");
+			StringBuilder countries = new StringBuilder();
+			try {
+				JSONObject cs = new JSONObject(t[6]);
+				cs.keySet().stream().sorted((x, y) -> Double.compare(cs.getDouble(y), cs.getDouble(x))).limit(6)
+						.forEach(k -> countries.append(countries.length() == 0 ? "" : ", ").append(k).append(' ').append(cs.get(k)));
+			} catch (JSONException e) {
+				// leave it empty
+			}
+			purpose.put(telepathonWord("Suspicious Events Today", parseIntOr(t[4], 0), "int", null))
+					.put(telepathonWord("Last Suspicious Event", lastEvent, "String", null))
+					.put(telepathonWord("Upload Today", parseDoubleOr(t[8], 0), "double", "MB"))
+					.put(telepathonWord("Download Today", parseDoubleOr(t[9], 0), "double", "MB"))
+					.put(telepathonWord("Watchlist Connections Today", parseIntOr(t[0], 0), "int", null))
+					.put(telepathonWord("Watchlist Traffic Today", parseDoubleOr(t[1], 0), "double", "MB"))
+					.put(telepathonWord("Night Upload", parseDoubleOr(t[2], 0), "double", "MB"))
+					.put(telepathonWord("Top Countries Today", countries.toString(), "String", "MB"))
+					.put(telepathonWord("Traffic Watch Running", trafficWatcher.isRouterHelperOk(), "boolean", null));
+		}
+		return new JSONObject().put("Name", "Cleotilde").put("Short Name", "Cleotilde").put("Serial Number", serial)
+				.put("Seconds Time", secondsTime).put("Raw Data", "")  // never the sensor line: it has the device list
+				.put("Denes", new JSONArray()
+						.put(new JSONObject().put("Name", "Configuration").put("DeneWords", config))
+						.put(new JSONObject().put("Name", "Purpose").put("DeneWords", purpose)));
+	}
+
+	private static double parseDoubleOr(String s, double fallback) {
+		try {
+			return Double.parseDouble(s.trim());
+		} catch (NumberFormatException | NullPointerException e) {
+			return fallback;
+		}
 	}
 
 	/** "Internet UP 14 ms · Router up 2d 3h, 55 C · Wi-Fi 12+2 · 31 devices, 9 unknown" */
@@ -460,6 +657,11 @@ public class CleotildeMicroController extends MotherMicroController {
 		String[] ns = networkSensor.split("#", -1);
 		int unknownDevices = parseIntOr(ns[1], -1);
 		String devices = unknownDevices < 0 ? "O" : unknownDevices > 0 ? "Y" : "G";
+		// traffic watch: blinking red for an hour after a new Suspicious Event, then at least yellow until midnight
+		int trafficEvents = trafficWatcher == null ? 0 : trafficWatcher.getEventsToday();
+		JSONObject lastTrafficEvent = trafficWatcher == null ? null : trafficWatcher.getLastEvent();
+		if (lastTrafficEvent != null && System.currentTimeMillis() - lastTrafficEvent.optLong("Time") < TRAFFIC_EVENT_BLINK_MILLIS) devices = "r";
+		else if (trafficEvents > 0 && !"O".equals(devices)) devices = "Y";
 
 		boardCommand("SetLeds#" + internet + "#" + router + "#" + wifi + "#" + devices + "#G", null, BOARD_ANSWER_TIMEOUT_MILLIS);
 
@@ -479,6 +681,18 @@ public class CleotildeMicroController extends MotherMicroController {
 				"Total   " + (ns[0].equals("-1") ? "?" : ns[0]),
 				"Unknown " + (unknownDevices < 0 ? "?" : String.valueOf(unknownDevices)),
 				"WiFi 2.4 " + r.get("clients24") + "  5G " + r.get("clients5"));
+		if (trafficWatcher != null) {
+			Object[] t = trafficWatcher.todayTotals();
+			String last = lastTrafficEvent == null ? "none" : new SimpleDateFormat("HH:mm").format(new Timestamp(lastTrafficEvent.optLong("Time")))
+					+ " " + lastTrafficEvent.optString("Rule");
+			String lastWho = lastTrafficEvent == null ? "" : lastTrafficEvent.optString("Device");
+			oledPage(5, "Security",
+					trafficWatcher.isRouterHelperOk() ? "Events today " + trafficEvents : "Traffic: no router",
+					"Last " + last,
+					lastWho,
+					"Up " + TrafficWatcher.mb((Long) t[0]) + " Dn " + TrafficWatcher.mb((Long) t[1]) + " MB",
+					"Top " + t[2]);
+		}
 	}
 
 	private static int parseIntOr(String s, int fallback) {
@@ -594,13 +808,17 @@ public class CleotildeMicroController extends MotherMicroController {
 			present.put(mac, SWEEP_ONLY);
 		}
 
+		JSONObject nicknames = readNicknames();
 		JSONArray list = new JSONArray();
 		for (Map.Entry<String, String> e : present.entrySet()) {
 			String mac = e.getKey();
 			JSONObject d = new JSONObject();
 			d.put(TeleonomeConstants.MAC_ADDRESS, mac);
 			d.put(TeleonomeConstants.IP_ADDRESS, ips.getOrDefault(mac, ""));
-			d.put(TeleonomeConstants.DEVICE_NAME, deviceName(names.getOrDefault(mac, mac)));
+			String name = deviceName(names.getOrDefault(mac, mac));
+			String nickname = nicknames.optString(mac, "");
+			d.put(TeleonomeConstants.DEVICE_NAME, nickname.isEmpty() ? name : nickname);
+			if (!nickname.isEmpty()) d.put(ORIGINAL_NAME, name);
 			d.put(CONNECTION, e.getValue());
 			list.put(d);
 		}
@@ -663,6 +881,7 @@ public class CleotildeMicroController extends MotherMicroController {
 	private JSONArray addHistory(JSONArray lastActivity, long now) {
 		JSONObject sightings = aMnemosyneManager.getNetworkDeviceSightings(now - deviceHistoryDays * 86_400_000L);
 		JSONArray toReturn = new JSONArray();
+		JSONObject nicknames = readNicknames();
 		java.util.Set<String> presentMacs = new java.util.HashSet<>();
 		for (int i = 0; i < lastActivity.length(); i++) {
 			JSONObject d = lastActivity.getJSONObject(i);
@@ -677,7 +896,12 @@ public class CleotildeMicroController extends MotherMicroController {
 			if (presentMacs.contains(mac)) continue;
 			JSONObject s = sightings.getJSONObject(mac);
 			String name = s.optString(TeleonomeConstants.DEVICE_NAME, mac);
+			String nickname = nicknames.optString(mac, "");
 			JSONObject d = new JSONObject();
+			if (!nickname.isEmpty() && !nickname.equals(name)) {
+				d.put(ORIGINAL_NAME, name);
+				name = nickname;
+			}
 			d.put(TeleonomeConstants.DEVICE_NAME, name);
 			d.put(TeleonomeConstants.MAC_ADDRESS, mac);
 			d.put(TeleonomeConstants.IP_ADDRESS, s.optString(TeleonomeConstants.IP_ADDRESS, ""));
@@ -692,10 +916,11 @@ public class CleotildeMicroController extends MotherMicroController {
 	}
 
 	private void addDeviceDetails(JSONArray devices, JSONArray presentNow) {
-		Map<String, String> connections = new HashMap<>();
+		Map<String, String> connections = new HashMap<>(), originalNames = new HashMap<>();
 		for (int i = 0; i < presentNow.length(); i++) {
 			JSONObject d = presentNow.getJSONObject(i);
 			connections.put(d.optString(TeleonomeConstants.MAC_ADDRESS), d.optString(CONNECTION));
+			if (d.has(ORIGINAL_NAME)) originalNames.put(d.optString(TeleonomeConstants.MAC_ADDRESS), d.getString(ORIGINAL_NAME));
 		}
 		java.util.Set<String> prefixes = new java.util.HashSet<>();
 		for (int i = 0; i < devices.length(); i++) {
@@ -711,6 +936,7 @@ public class CleotildeMicroController extends MotherMicroController {
 			d.put(VENDOR, privateMac ? "Private MAC" : prefix == null ? "" : vendors.getOrDefault(prefix, ""));
 			d.put(CONNECTION, connections.getOrDefault(mac, ""));
 			d.put(PRIVATE_MAC, privateMac);
+			if (originalNames.containsKey(mac)) d.put(ORIGINAL_NAME, originalNames.get(mac));
 		}
 	}
 
@@ -747,19 +973,93 @@ public class CleotildeMicroController extends MotherMicroController {
 		return found;
 	}
 
+	/**
+	 * Names that left / arrived since the last scan. Matched by MAC (since 2026-11-04, when nicknames came:
+	 * by name, a renamed device was reported as one leaving and another arriving); a device without a MAC
+	 * is matched by name.
+	 */
 	private JSONObject diff(JSONArray previous, JSONArray current) {
 		JSONArray missing = new JSONArray(), added = new JSONArray();
-		java.util.Set<String> before = new java.util.HashSet<>(), now = new java.util.HashSet<>();
+		Map<String, String> before = new HashMap<>(), now = new HashMap<>();  // mac (or name) -> name
 		// Only devices that were present last time: one that was already missing was reported
 		// then, so it isn't reported again and drops off the list instead of staying forever.
 		for (int i = 0; i < previous.length(); i++) {
 			JSONObject p = previous.getJSONObject(i);
-			if (p.optBoolean(TeleonomeConstants.IS_DEVICE_PRESENT, true)) before.add(p.optString(TeleonomeConstants.DEVICE_NAME));
+			if (p.optBoolean(TeleonomeConstants.IS_DEVICE_PRESENT, true)) before.put(diffKey(p), p.optString(TeleonomeConstants.DEVICE_NAME));
 		}
-		for (int i = 0; i < current.length(); i++) now.add(current.getJSONObject(i).optString(TeleonomeConstants.DEVICE_NAME));
-		for (String n : before) if (!now.contains(n)) missing.put(n);
-		for (String n : now) if (!before.contains(n)) added.put(n);
+		for (int i = 0; i < current.length(); i++) {
+			JSONObject c = current.getJSONObject(i);
+			now.put(diffKey(c), c.optString(TeleonomeConstants.DEVICE_NAME));
+		}
+		for (Map.Entry<String, String> e : before.entrySet()) if (!now.containsKey(e.getKey())) missing.put(e.getValue());
+		for (Map.Entry<String, String> e : now.entrySet()) if (!before.containsKey(e.getKey())) added.put(e.getValue());
 		return new JSONObject().put("Missing", missing).put("New", added);
+	}
+
+	private static String diffKey(JSONObject d) {
+		String mac = d.optString(TeleonomeConstants.MAC_ADDRESS, "").toLowerCase();
+		return mac.isEmpty() ? "name:" + d.optString(TeleonomeConstants.DEVICE_NAME) : mac;
+	}
+
+	// ------------------------------------------------------------------ nicknames (Rename button)
+
+	JSONObject readNicknames() {
+		File f = new File(NICKNAMES_FILE);
+		if (!f.isFile()) return new JSONObject();
+		try {
+			return new JSONObject(FileUtils.readFileToString(f, StandardCharsets.UTF_8));
+		} catch (IOException | JSONException e) {
+			logger.warn("Could not read " + NICKNAMES_FILE + ", no nicknames: " + e.getMessage());
+			return new JSONObject();
+		}
+	}
+
+	/**
+	 * RenameDevice#mac#nickname from the Rename button (code-protected like the whitelist commands); an
+	 * empty nickname goes back to the router's name. The card changes at once (NetworkSensor.json is updated
+	 * here); the whitelist and the history match by MAC, so a known device stays known.
+	 */
+	synchronized void renameDevice(String mac, String nickname) {
+		String m = mac == null ? "" : mac.trim().toLowerCase();
+		if (!m.matches("[0-9a-f]{2}(:[0-9a-f]{2}){5}")) {
+			logger.info("RenameDevice refused, bad MAC " + mac);
+			return;
+		}
+		String n = nickname == null ? "" : nickname.replaceAll("[\\p{Cntrl}#]", "").trim();
+		if (n.length() > NICKNAME_MAX_LENGTH) n = n.substring(0, NICKNAME_MAX_LENGTH).trim();
+		JSONObject nicknames = readNicknames();
+		if (n.isEmpty()) nicknames.remove(m);
+		else nicknames.put(m, n);
+		try {
+			FileUtils.writeStringToFile(new File(NICKNAMES_FILE), nicknames.toString(2), StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			logger.warn("Could not write " + NICKNAMES_FILE + ": " + e.getMessage());
+			return;
+		}
+		logger.info("RenameDevice " + m + " -> " + (n.isEmpty() ? "(router name)" : n));
+		try {
+			File file = new File(NETWORK_SENSOR_FILE);
+			if (!file.isFile()) return;
+			String[] t = FileUtils.readFileToString(file, Charset.defaultCharset()).split("#", -1);
+			if (t.length != 9) return;
+			JSONArray devices = new JSONArray(t[2]);
+			for (int i = 0; i < devices.length(); i++) {
+				JSONObject d = devices.getJSONObject(i);
+				if (!m.equalsIgnoreCase(d.optString(TeleonomeConstants.MAC_ADDRESS))) continue;
+				String original = d.has(ORIGINAL_NAME) ? d.getString(ORIGINAL_NAME) : d.optString(TeleonomeConstants.DEVICE_NAME);
+				if (n.isEmpty()) {
+					d.put(TeleonomeConstants.DEVICE_NAME, original);
+					d.remove(ORIGINAL_NAME);
+				} else {
+					d.put(TeleonomeConstants.DEVICE_NAME, n);
+					d.put(ORIGINAL_NAME, original);
+				}
+			}
+			t[2] = devices.toString();
+			FileUtils.writeStringToFile(file, String.join("#", t), Charset.defaultCharset(), false);
+		} catch (IOException | JSONException e) {
+			logger.warn(Utils.getStringException(e));
+		}
 	}
 
 	private void runSpeedTest(long now) {
