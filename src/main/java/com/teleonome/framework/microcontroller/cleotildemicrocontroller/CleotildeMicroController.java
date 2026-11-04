@@ -149,6 +149,16 @@ public class CleotildeMicroController extends MotherMicroController {
 	/** The name the router (or the sweep) gives a device that has a nickname. */
 	public static final String ORIGINAL_NAME = "Original Name";
 	/**
+	 * Identification for the device cards (2026-11-04, DeviceIdentifier): the name the device announces on the
+	 * network (mDNS), the best guess of what it is and why, and the domains it looked up most in the last 7 days.
+	 */
+	public static final String NETWORK_NAME = "Network Name";
+	public static final String GUESS = "Guess";
+	public static final String GUESS_BECAUSE = "Guess Because";
+	public static final String LOOKS_UP = "Looks Up";
+	private static final int NETWORK_NAME_TIMEOUT_SECONDS = 12;
+	private static final int LOOKS_UP_DOMAINS = 5;
+	/**
 	 * Nicknames from the Rename button on the device cards (added 2026-11-04): {"mac": "nickname"}, in the
 	 * working directory. Kept on the Pi, not on the router, so the router's cleotilde account stays read-only,
 	 * and not in the denome, which is public.
@@ -181,6 +191,8 @@ public class CleotildeMicroController extends MotherMicroController {
 	private int mailboxPollSeconds = 10;
 	private DoorbellPoller doorbellPoller;
 	private TrafficWatcher trafficWatcher;
+	/** The traffic tables, also read by the scan for each device's DNS lookups (null when the watch is off). */
+	private TrafficStore trafficStore;
 	private final Map<String, String> trafficSettings = new HashMap<>();
 	/** LED 4 blinks red this long after a new Suspicious Event. */
 	private static final long TRAFFIC_EVENT_BLINK_MILLIS = 3_600_000L;
@@ -272,7 +284,8 @@ public class CleotildeMicroController extends MotherMicroController {
 			logger.info("Traffic watch off (Traffic Poll Seconds = 0)");
 			return;
 		}
-		TrafficWatcher w = new TrafficWatcher(ubus, new TrafficStore(com.teleonome.framework.persistence.PostgresqlPersistenceManager.instance()));
+		trafficStore = new TrafficStore(com.teleonome.framework.persistence.PostgresqlPersistenceManager.instance());
+		TrafficWatcher w = new TrafficWatcher(ubus, trafficStore);
 		w.pollMillis = pollSeconds * 1000L;
 		for (Map.Entry<String, String> e : trafficSettings.entrySet()) {
 			String v = e.getValue().trim();
@@ -809,13 +822,20 @@ public class CleotildeMicroController extends MotherMicroController {
 		}
 
 		JSONObject nicknames = readNicknames();
+		// the names devices announce themselves (mDNS): used when the router has none, and shown on the card
+		java.util.List<String> presentIps = new java.util.ArrayList<>();
+		for (String mac : present.keySet()) if (!ips.getOrDefault(mac, "").isEmpty()) presentIps.add(ips.get(mac));
+		Map<String, String> networkNames = DeviceIdentifier.networkNames(presentIps, NETWORK_NAME_TIMEOUT_SECONDS);
 		JSONArray list = new JSONArray();
 		for (Map.Entry<String, String> e : present.entrySet()) {
 			String mac = e.getKey();
 			JSONObject d = new JSONObject();
 			d.put(TeleonomeConstants.MAC_ADDRESS, mac);
 			d.put(TeleonomeConstants.IP_ADDRESS, ips.getOrDefault(mac, ""));
-			String name = deviceName(names.getOrDefault(mac, mac));
+			String networkName = networkNames.getOrDefault(ips.getOrDefault(mac, ""), "");
+			if (!networkName.isEmpty()) d.put(NETWORK_NAME, networkName);
+			// nickname, else the router's name, else the name it announces, else its MAC
+			String name = deviceName(names.containsKey(mac) ? names.get(mac) : networkName.isEmpty() ? mac : networkName);
 			String nickname = nicknames.optString(mac, "");
 			d.put(TeleonomeConstants.DEVICE_NAME, nickname.isEmpty() ? name : nickname);
 			if (!nickname.isEmpty()) d.put(ORIGINAL_NAME, name);
@@ -916,12 +936,14 @@ public class CleotildeMicroController extends MotherMicroController {
 	}
 
 	private void addDeviceDetails(JSONArray devices, JSONArray presentNow) {
-		Map<String, String> connections = new HashMap<>(), originalNames = new HashMap<>();
+		Map<String, String> connections = new HashMap<>(), originalNames = new HashMap<>(), networkNames = new HashMap<>();
 		for (int i = 0; i < presentNow.length(); i++) {
 			JSONObject d = presentNow.getJSONObject(i);
 			connections.put(d.optString(TeleonomeConstants.MAC_ADDRESS), d.optString(CONNECTION));
 			if (d.has(ORIGINAL_NAME)) originalNames.put(d.optString(TeleonomeConstants.MAC_ADDRESS), d.getString(ORIGINAL_NAME));
+			if (d.has(NETWORK_NAME)) networkNames.put(d.optString(TeleonomeConstants.MAC_ADDRESS), d.getString(NETWORK_NAME));
 		}
+		long weekAgo = System.currentTimeMillis() - 7 * 86_400_000L;
 		java.util.Set<String> prefixes = new java.util.HashSet<>();
 		for (int i = 0; i < devices.length(); i++) {
 			String p = ouiPrefix(devices.getJSONObject(i).optString(TeleonomeConstants.MAC_ADDRESS));
@@ -937,6 +959,19 @@ public class CleotildeMicroController extends MotherMicroController {
 			d.put(CONNECTION, connections.getOrDefault(mac, ""));
 			d.put(PRIVATE_MAC, privateMac);
 			if (originalNames.containsKey(mac)) d.put(ORIGINAL_NAME, originalNames.get(mac));
+			if (networkNames.containsKey(mac)) d.put(NETWORK_NAME, networkNames.get(mac));
+			// what it looks up, and the best guess of what it is (present devices; the traffic watch has the DNS)
+			JSONArray looksUp = new JSONArray();
+			if (trafficStore != null && d.optBoolean(TeleonomeConstants.IS_DEVICE_PRESENT, true) && !mac.isEmpty()) {
+				for (String domain : DeviceIdentifier.domainNames(trafficStore.domains(mac, weekAgo, LOOKS_UP_DOMAINS))) looksUp.put(domain);
+			}
+			if (looksUp.length() > 0) d.put(LOOKS_UP, looksUp);
+			java.util.List<String> domains = new java.util.ArrayList<>();
+			for (int k = 0; k < looksUp.length(); k++) domains.add(looksUp.getString(k));
+			// the names it goes by (announced, and the router's or the old one behind a nickname) are clues too
+			String names = d.optString(NETWORK_NAME) + " " + d.optString(ORIGINAL_NAME, d.optString(TeleonomeConstants.DEVICE_NAME));
+			JSONObject guess = DeviceIdentifier.guess(d.optString(VENDOR), names, d.optString(CONNECTION), domains);
+			if (!guess.getString("Guess").isEmpty()) d.put(GUESS, guess.getString("Guess")).put(GUESS_BECAUSE, guess.getString("Because"));
 		}
 	}
 
