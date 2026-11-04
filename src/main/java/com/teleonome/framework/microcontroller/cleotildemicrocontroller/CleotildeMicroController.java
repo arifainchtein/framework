@@ -1166,23 +1166,33 @@ public class CleotildeMicroController extends MotherMicroController {
 		return "";
 	}
 
+	/** Commands from Cleotilde's page: firmware 14+ accepts the same code for 15 minutes (the page remembers it). */
 	@Override
 	public boolean verifyUserCommandCode(String userCode) throws IOException {
-		return Boolean.TRUE.equals(askBoardToVerify(userCode));
+		return Boolean.TRUE.equals(askBoardToVerify(userCode, false));
 	}
 
 	/**
 	 * True / false as the board answered, null if it gave no answer: the framework treats that as
 	 * invalid, the doorbell poller asks again rather than calling a good code wrong.
+	 * ring: the doorbell's once-only check (VerifyRingCode, firmware 14+; Zhinu is untrusted, so no replays);
+	 * otherwise VerifyUserCode, which firmware 14+ lets the page reuse within the window. Firmware before 14
+	 * doesn't know VerifyRingCode, so a ring falls back to VerifyUserCode, which was once-only there.
 	 */
-	Boolean askBoardToVerify(String userCode) {
+	Boolean askBoardToVerify(String userCode, boolean ring) {
 		if (userCode == null || !userCode.trim().matches("\\d{6}")) return false;
+		String verb = ring ? "VerifyRingCode#" : "VerifyUserCode#";
 		for (int i = 0; i < MOTHER_TRIES; i++) {
 			// a resend after a lost answer is safe: the board answers valid again for 15 s
-			String answer = boardCommand("VerifyUserCode#" + userCode.trim(), null, BOARD_ANSWER_TIMEOUT_MILLIS);
+			String answer = boardCommand(verb + userCode.trim(), null, BOARD_ANSWER_TIMEOUT_MILLIS);
 			if (TeleonomeConstants.COMMAND_REQUEST_VALID_CODE.equals(answer)) return true;
 			if (TeleonomeConstants.COMMAND_REQUEST_INVALID_CODE.equals(answer)) return false;
-			logger.warn("VerifyUserCode: bad answer from board: " + answer);
+			if (answer != null && answer.startsWith("Failure-Unknown command") && verb.startsWith("VerifyRingCode")) {
+				verb = "VerifyUserCode#";  // firmware before 14
+				i--;
+				continue;
+			}
+			logger.warn(verb + ": bad answer from board: " + answer);
 		}
 		return null;
 	}

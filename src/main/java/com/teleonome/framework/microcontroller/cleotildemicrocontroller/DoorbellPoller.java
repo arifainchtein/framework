@@ -195,7 +195,7 @@ public class DoorbellPoller extends Thread {
 		if (age > RING_MAX_AGE_MILLIS || age < -RING_MAX_FUTURE_MILLIS) {
 			result = RESULT_EXPIRED;
 		} else {
-			Boolean valid = controller.askBoardToVerify(ring.optString("Code"));
+			Boolean valid = controller.askBoardToVerify(ring.optString("Code"), true);
 			if (valid == null) {
 				logger.warn("Doorbell ring " + r.getString("Id") + ": no answer from the board, will ask again");
 				return null;
