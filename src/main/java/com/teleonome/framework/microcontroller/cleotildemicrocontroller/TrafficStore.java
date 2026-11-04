@@ -366,6 +366,27 @@ public class TrafficStore {
 		return out;
 	}
 
+	/**
+	 * One country since 'since' (the Traffic panel's map, 2026-11-04): {"Devices": [{Mac, Device, Up, Down,
+	 * Connections}], "Destinations": [{IP, Port, Proto, Domain, Up, Down, Connections, Last, Devices}]}.
+	 */
+	public JSONObject countryDetail(String country, long since, int limit) {
+		JSONArray devices = new JSONArray(), destinations = new JSONArray();
+		query("select mac, max(device), sum(up_bytes), sum(down_bytes), sum(connections) from traffic_flows"
+				+ " where hour_millis >= ? and country = ? group by mac order by sum(up_bytes) + sum(down_bytes) desc",
+				rs -> devices.put(new JSONObject().put("Mac", rs.getString(1)).put("Device", rs.getString(2))
+						.put("Up", rs.getLong(3)).put("Down", rs.getLong(4)).put("Connections", rs.getLong(5))),
+				since, country);
+		query("select host(remote_ip), remote_port, proto, max(domain), sum(up_bytes), sum(down_bytes), sum(connections),"
+				+ " max(hour_millis), string_agg(distinct device, ', ') from traffic_flows where hour_millis >= ? and country = ?"
+				+ " group by remote_ip, remote_port, proto order by sum(up_bytes) + sum(down_bytes) desc limit ?",
+				rs -> destinations.put(new JSONObject().put("IP", rs.getString(1)).put("Port", rs.getInt(2)).put("Proto", rs.getString(3))
+						.put("Domain", rs.getString(4)).put("Up", rs.getLong(5)).put("Down", rs.getLong(6))
+						.put("Connections", rs.getLong(7)).put("Last", rs.getLong(8)).put("Devices", rs.getString(9))),
+				since, country, limit);
+		return new JSONObject().put("Devices", devices).put("Destinations", destinations);
+	}
+
 	/** Bytes per country since 'since', all devices. */
 	public JSONObject countries(long since) {
 		JSONObject out = new JSONObject();

@@ -133,7 +133,7 @@ import com.teleonome.framework.utils.Utils;
  * the TOTP codes come from the board: GetCommandCode / VerifyUserCode#code, firmware Cleotilde-0.4+,
  * secret set on the board with SetSecret (the same base32 secret as the SecretKey file, so the phone
  * app's codes keep working). SimpleMicroController.verifyUserCommandCode() accepts every code; the
- * board checks it: the current 30 s step, or one of the last 3 minutes once each (doorbell rings
+ * board checks it: the current 30 s step, or one of the last 15 minutes once each (3 until 2026-11-04; doorbell rings
  * arrive 1-2 min late), and locks for an hour after 5 wrong codes. No board answer = invalid code.
  */
 public class CleotildeMicroController extends MotherMicroController {

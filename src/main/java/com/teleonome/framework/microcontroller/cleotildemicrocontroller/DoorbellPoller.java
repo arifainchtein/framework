@@ -51,8 +51,8 @@ public class DoorbellPoller extends Thread {
 	/** Written by the Cleotilde web app's ReleaseDoorbellLock form, in the same working directory. */
 	public static final String RELEASE_FLAG_FILE = "DoorbellReleaseLock";
 	static final String RESULT_VALID = "valid", RESULT_INVALID = "invalid", RESULT_EXPIRED = "expired";
-	/** The board accepts a code from the last 3 minutes, counted when Cleotilde receives it. */
-	private static final long RING_MAX_AGE_MILLIS = 3 * 60_000L;
+	/** The board accepts a code from the last 15 minutes (3 until 2026-11-04), counted when Cleotilde receives it. */
+	private static final long RING_MAX_AGE_MILLIS = 15 * 60_000L;
 	/** A ring dated this far in the future means one of the clocks is wrong. */
 	private static final long RING_MAX_FUTURE_MILLIS = 60_000L;
 	private static final int MAX_RINGS_PER_POLL = 3;
