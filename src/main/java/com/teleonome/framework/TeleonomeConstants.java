@@ -913,6 +913,8 @@ public class TeleonomeConstants {
 	public static final String IS_DEVICE_NEW="Is New";
 	public static final String NETWORK_DEVICE_ACTIVITY_TABLE="networkdeviceactivity";
 	public static final String NETWORK_DEVICE_WHITELIST_TABLE="networkdevicewhitelist";
+	// Cleotilde's critical devices (2026-11-05): must always be online, absence is an alarm
+	public static final String NETWORK_DEVICE_CRITICAL_LIST_TABLE="networkdevicecriticallist";
 	public static final String NETWORK_SCAN_MILLIS="Scan Millis";
 	public static final String NETWORK_SCAN_TIME_STRING="Scan Time String";
 	public static final String DEVICE_LIST="DeviceList";

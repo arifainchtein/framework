@@ -806,15 +806,23 @@ public class CleotildeMicroController extends MotherMicroController {
 			}
 		}
 		// /proc/net/arp: IP, HW type, Flags, HW address, Mask, Device. Flags 0x2 = complete.
+		// "Complete" includes STALE entries, which Linux never drops on a small network (only above
+		// gc_thresh1, 128 entries), so a device switched off stayed "wired, present" for ever (paula3,
+		// 2026-11-05). So an entry counts only if the router confirmed it lately (neighbour state
+		// REACHABLE / DELAY / PROBE / PERMANENT) or it answers Cleotilde's sweep. A Wi-Fi client is
+		// counted by the association list above, whatever its ARP state.
+		Map<String, String> swept = sweep();
+		Map<String, String> states = neighbourStates();
 		String arp = ubus.call("file", "read", new JSONObject().put("path", "/proc/net/arp")).getString("data");
 		for (String row : arp.split("\n")) {
 			String[] f = row.trim().split("\\s+");
 			if (f.length < 6 || !f[2].equals("0x2") || !f[5].startsWith("br-lan")) continue;
 			String mac = f[3].toLowerCase();
+			if (states != null && !LIVE_NEIGHBOUR_STATES.contains(states.getOrDefault(mac, "")) && !swept.containsKey(mac)) continue;
 			ips.putIfAbsent(mac, f[0]);
 			present.putIfAbsent(mac, "wired");
 		}
-		for (Map.Entry<String, String> e : sweep().entrySet()) {
+		for (Map.Entry<String, String> e : swept.entrySet()) {
 			String mac = e.getKey();
 			if (present.containsKey(mac)) continue;
 			ips.put(mac, e.getValue());  // a fixed IP; a lease the router remembers may be stale
@@ -844,6 +852,34 @@ public class CleotildeMicroController extends MotherMicroController {
 			list.put(d);
 		}
 		return list;
+	}
+
+	private static final java.util.Set<String> LIVE_NEIGHBOUR_STATES = new java.util.HashSet<>(java.util.Arrays.asList("REACHABLE", "DELAY", "PROBE", "PERMANENT"));
+	private boolean neighbourWarningLogged = false;
+
+	/**
+	 * The router's LAN neighbour table, mac -> state (added 2026-11-05), from "cleotilde-traffic neigh"
+	 * (OpenWrtOne/code/traffic, installed by install_router_traffic.sh). Null when the router's helper is
+	 * older than that: then every complete ARP entry counts, as before.
+	 */
+	private Map<String, String> neighbourStates() {
+		try {
+			JSONObject r = ubus.call("file", "exec", new JSONObject().put("command", TrafficWatcher.HELPER).put("params", new JSONArray().put("neigh")));
+			if (r.optInt("code", 0) != 0) throw new IOException("exited " + r.optInt("code") + ": " + r.optString("stderr"));
+			Map<String, String> states = new HashMap<>();
+			for (String row : r.optString("stdout", "").split("\n")) {
+				String[] f = row.trim().split("\\s+");
+				if (f.length < 3 || !f[1].matches("[0-9a-fA-F:]{17}")) continue;
+				// one MAC can have several entries (Cleotilde has a STALE 169.254 one next to its live one): a live one wins
+				String mac = f[1].toLowerCase(), state = f[2].toUpperCase();
+				if (!LIVE_NEIGHBOUR_STATES.contains(states.getOrDefault(mac, ""))) states.put(mac, state);
+			}
+			return states;
+		} catch (IOException | JSONException e) {
+			if (!neighbourWarningLogged) logger.warn("no neighbour states from the router (update " + TrafficWatcher.HELPER + " with install_router_traffic.sh), counting every ARP entry: " + e.getMessage());
+			neighbourWarningLogged = true;
+			return null;
+		}
 	}
 
 	/**
@@ -1124,6 +1160,15 @@ public class CleotildeMicroController extends MotherMicroController {
 	void removeDeviceFromWhiteList(String deviceName, String mac) {
 		logger.debug("RemoveDeviceFromWhiteList " + deviceName + " " + mac + " " + aMnemosyneManager.removeDeviceFromWhiteList(deviceName, mac));
 		updateWhiteListStatusInFile(deviceName, false);
+	}
+
+	// critical devices (2026-11-05): read by the web app's GetPresence form, the alarm comes later
+	void addDeviceToCriticalList(String deviceName, String mac, int offlineMinutes) {
+		logger.debug("AddDeviceToCriticalList " + deviceName + " " + mac + " " + offlineMinutes + " " + aMnemosyneManager.addDeviceToCriticalList(deviceName, mac, offlineMinutes));
+	}
+
+	void removeDeviceFromCriticalList(String mac) {
+		logger.debug("RemoveDeviceFromCriticalList " + mac + " " + aMnemosyneManager.removeDeviceFromCriticalList(mac));
 	}
 
 	/**

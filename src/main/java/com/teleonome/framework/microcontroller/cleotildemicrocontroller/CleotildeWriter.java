@@ -38,6 +38,17 @@ public class CleotildeWriter extends BufferedWriter {
 			controller.forgetDevice(tokens[1], tokens.length > 2 ? tokens[2] : "");
 		} else if (command.startsWith("RenameDevice")) {
 			controller.renameDevice(tokens.length > 1 ? tokens[1] : "", tokens.length > 2 ? tokens[2] : "");
+		} else if (command.startsWith("AddDeviceToCriticalList")) {
+			// AddDeviceToCriticalList#name#mac#offlineMinutes (2026-11-05, the Devices page's star)
+			int minutes = 10;
+			try {
+				if (tokens.length > 3) minutes = Integer.parseInt(tokens[3].trim());
+			} catch (NumberFormatException e) {
+				// default
+			}
+			controller.addDeviceToCriticalList(tokens.length > 1 ? tokens[1] : "", tokens.length > 2 ? tokens[2] : "", minutes);
+		} else if (command.startsWith("RemoveDeviceFromCriticalList")) {
+			controller.removeDeviceFromCriticalList(tokens.length > 1 ? tokens[1] : "");
 		} else if (command.startsWith("AddAllDevicesToWhiteList")) {
 			controller.addAllDevicesToWhiteList();
 		} else if (command.startsWith("PowerCycle")) {

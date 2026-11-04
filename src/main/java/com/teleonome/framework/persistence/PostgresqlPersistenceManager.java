@@ -2052,6 +2052,36 @@ public class PostgresqlPersistenceManager implements PersistenceInterface{
 	}
 
 	//
+	// Critical devices (Cleotilde, added 2026-11-05; design: OpenWrtOne 05-teleonome-design.md section 8):
+	// devices that must always be online (Teleonomes, FACTORY2, the NAS, access points), so their absence is
+	// an alarm, not someone leaving. Stored like the whitelist, one row per MAC; offlineMinutes is how long
+	// it may be unseen before it counts as down (longer for an ESP32 that sleeps).
+	//
+	private boolean criticalListTableChecked = false;
+
+	private void ensureCriticalListTable() {
+		if (criticalListTableChecked) return;
+		criticalListTableChecked = executeWhiteListUpdate("create table if not exists " + TeleonomeConstants.NETWORK_DEVICE_CRITICAL_LIST_TABLE
+				+ " (deviceName varchar(100), deviceMacAddress varchar(100), offlineMinutes int default 10)");
+	}
+
+	/** Adds the device, or updates its name and threshold if its MAC is already on the list. */
+	public boolean addDeviceToCriticalList(String deviceName, String macAddress, int offlineMinutes) {
+		if (macAddress == null || macAddress.isEmpty()) return false;
+		ensureCriticalListTable();
+		executeWhiteListUpdate("delete from " + TeleonomeConstants.NETWORK_DEVICE_CRITICAL_LIST_TABLE + " where lower(deviceMacAddress)=lower(?)", macAddress);
+		String sql = "insert into " + TeleonomeConstants.NETWORK_DEVICE_CRITICAL_LIST_TABLE + " (deviceName, deviceMacAddress, offlineMinutes) values(?,lower(?),"
+				+ Math.max(1, offlineMinutes) + ")";
+		return executeWhiteListUpdate(sql, deviceName, macAddress);
+	}
+
+	public boolean removeDeviceFromCriticalList(String macAddress) {
+		if (macAddress == null || macAddress.isEmpty()) return false;
+		ensureCriticalListTable();
+		return executeWhiteListUpdate("delete from " + TeleonomeConstants.NETWORK_DEVICE_CRITICAL_LIST_TABLE + " where lower(deviceMacAddress)=lower(?)", macAddress);
+	}
+
+	//
 	// Device history for Cleotilde's device cards (added 2026-10-18): every scan is already kept in
 	// the daily networkdeviceactivity_* tables, so first/last seen come from there, and "Forget"
 	// deletes a gone device's rows so it leaves the "Not seen" list.

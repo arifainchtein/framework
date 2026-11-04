@@ -127,6 +127,12 @@ public class MnemosyneManager {
 		// TODO Auto-generated method stub
 		return aDBManager.addDeviceToWhiteList(deviceName,  deviceMacAddress);
 	}
+	public boolean addDeviceToCriticalList(String deviceName, String deviceMacAddress, int offlineMinutes) {
+		return aDBManager.addDeviceToCriticalList(deviceName, deviceMacAddress, offlineMinutes);
+	}
+	public boolean removeDeviceFromCriticalList(String deviceMacAddress) {
+		return aDBManager.removeDeviceFromCriticalList(deviceMacAddress);
+	}
 	public int geNumberUnknowDevicesInLastSample() {
 		return aDBManager.geNumberUnknowDevicesInLastSample();
 	}
