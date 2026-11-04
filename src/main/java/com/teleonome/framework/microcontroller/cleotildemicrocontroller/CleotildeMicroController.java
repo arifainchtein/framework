@@ -1162,6 +1162,29 @@ public class CleotildeMicroController extends MotherMicroController {
 		updateWhiteListStatusInFile(deviceName, false);
 	}
 
+	/**
+	 * Doors (2026-11-05; design OpenWrtOne 07, sections 4-5): runs the router's /usr/libexec/cleotilde-doors with these
+	 * arguments (open NAME DEST PORTS MINUTES SRC LABEL | close NAME | remove NAME). The web app checked the code and, to
+	 * open, that the request came from the home network; the router script checks every argument again and only
+	 * touches firewall sections named cleotilde_*. Returns its answer, for the command's result.
+	 */
+	String door(String[] args) {
+		if (args.length < 2 || !args[0].matches("open|close|remove")) return "bad door command";
+		JSONArray params = new JSONArray();
+		for (String a : args) params.put(a);
+		try {
+			JSONObject r = ubus.call("file", "exec", new JSONObject().put("command", DOORS_HELPER).put("params", params));
+			String answer = (r.optString("stdout", "") + r.optString("stderr", "")).trim();
+			logger.info("Door " + String.join(" ", args) + " -> " + r.optInt("code", 0) + " " + answer);
+			return answer;
+		} catch (IOException | JSONException e) {
+			logger.warn("Door " + String.join(" ", args) + " failed: " + e.getMessage());
+			return "failed: " + e.getMessage();
+		}
+	}
+
+	static final String DOORS_HELPER = "/usr/libexec/cleotilde-doors";
+
 	// critical devices (2026-11-05): read by the web app's GetPresence form, the alarm comes later
 	void addDeviceToCriticalList(String deviceName, String mac, int offlineMinutes) {
 		logger.debug("AddDeviceToCriticalList " + deviceName + " " + mac + " " + offlineMinutes + " " + aMnemosyneManager.addDeviceToCriticalList(deviceName, mac, offlineMinutes));

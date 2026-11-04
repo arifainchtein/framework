@@ -49,6 +49,10 @@ public class CleotildeWriter extends BufferedWriter {
 			controller.addDeviceToCriticalList(tokens.length > 1 ? tokens[1] : "", tokens.length > 2 ? tokens[2] : "", minutes);
 		} else if (command.startsWith("RemoveDeviceFromCriticalList")) {
 			controller.removeDeviceFromCriticalList(tokens.length > 1 ? tokens[1] : "");
+		} else if (command.startsWith("Door#")) {
+			// Door#open#name#dest#ports#minutes#src#label | Door#close#name | Door#remove#name (2026-11-05: the
+			// Devices page's "Reach from outside" and the Network Rules switches); the router's cleotilde-doors checks it all
+			reader.setActionResult(controller.door(java.util.Arrays.copyOfRange(tokens, 1, tokens.length)));
 		} else if (command.startsWith("AddAllDevicesToWhiteList")) {
 			controller.addAllDevicesToWhiteList();
 		} else if (command.startsWith("PowerCycle")) {
