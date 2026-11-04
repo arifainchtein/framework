@@ -213,6 +213,17 @@ public class TrafficStore {
 				ev.optString("Country"), ev.optString("Remote IP"), ev.optString("Domain"));
 	}
 
+	/**
+	 * A device's current name on all its rows (2026-11-04): rows keep the name the device had when they were written,
+	 * so a device named later (Rename, the router, mDNS) still showed as its MAC on the map and in the tables.
+	 * Only rows with a different name are touched. The events' Detail text keeps the name it was raised with.
+	 */
+	public void renameDevice(String mac, String name) {
+		update("update traffic_flows set device = ? where mac = ? and device is distinct from ?", name, mac, name);
+		update("update traffic_dns set device = ? where mac = ? and device is distinct from ?", name, mac, name);
+		update("update traffic_events set device = ? where mac = ? and device is distinct from ?", name, mac, name);
+	}
+
 	/** Deletes flows older than flowDays and DNS rows older than dnsDays (events are kept a year). */
 	public void deleteOld(int flowDays, int dnsDays) {
 		long now = System.currentTimeMillis();

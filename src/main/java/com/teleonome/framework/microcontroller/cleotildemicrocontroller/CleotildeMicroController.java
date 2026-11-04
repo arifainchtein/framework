@@ -157,7 +157,8 @@ public class CleotildeMicroController extends MotherMicroController {
 	public static final String GUESS_BECAUSE = "Guess Because";
 	public static final String LOOKS_UP = "Looks Up";
 	private static final int NETWORK_NAME_TIMEOUT_SECONDS = 12;
-	private static final int LOOKS_UP_DOMAINS = 5;
+	private static final int LOOKS_UP_DOMAINS = 5;    // shown on the card
+	private static final int GUESS_DOMAINS = 25;      // read by the guess: the telling ones (iphone-ld, time-ios) are rarely the top 5
 	/**
 	 * Nicknames from the Rename button on the device cards (added 2026-11-04): {"mac": "nickname"}, in the
 	 * working directory. Kept on the Pi, not on the router, so the router's cleotilde account stays read-only,
@@ -961,13 +962,13 @@ public class CleotildeMicroController extends MotherMicroController {
 			if (originalNames.containsKey(mac)) d.put(ORIGINAL_NAME, originalNames.get(mac));
 			if (networkNames.containsKey(mac)) d.put(NETWORK_NAME, networkNames.get(mac));
 			// what it looks up, and the best guess of what it is (present devices; the traffic watch has the DNS)
-			JSONArray looksUp = new JSONArray();
-			if (trafficStore != null && d.optBoolean(TeleonomeConstants.IS_DEVICE_PRESENT, true) && !mac.isEmpty()) {
-				for (String domain : DeviceIdentifier.domainNames(trafficStore.domains(mac, weekAgo, LOOKS_UP_DOMAINS))) looksUp.put(domain);
-			}
-			if (looksUp.length() > 0) d.put(LOOKS_UP, looksUp);
 			java.util.List<String> domains = new java.util.ArrayList<>();
-			for (int k = 0; k < looksUp.length(); k++) domains.add(looksUp.getString(k));
+			if (trafficStore != null && d.optBoolean(TeleonomeConstants.IS_DEVICE_PRESENT, true) && !mac.isEmpty()) {
+				domains = DeviceIdentifier.domainNames(trafficStore.domains(mac, weekAgo, GUESS_DOMAINS));
+			}
+			JSONArray looksUp = new JSONArray();
+			for (int k = 0; k < domains.size() && k < LOOKS_UP_DOMAINS; k++) looksUp.put(domains.get(k));
+			if (looksUp.length() > 0) d.put(LOOKS_UP, looksUp);
 			// the names it goes by (announced, and the router's or the old one behind a nickname) are clues too
 			String names = d.optString(NETWORK_NAME) + " " + d.optString(ORIGINAL_NAME, d.optString(TeleonomeConstants.DEVICE_NAME));
 			JSONObject guess = DeviceIdentifier.guess(d.optString(VENDOR), names, d.optString(CONNECTION), domains);

@@ -96,6 +96,8 @@ public class TrafficWatcher extends Thread {
 
 	// devices from NetworkSensor.json: ip -> {mac, name, whitelisted}
 	private Map<String, String[]> devicesByIp = new HashMap<>();
+	/** mac -> the name last written onto its stored rows (TrafficStore.renameDevice); empty at start = sync all once */
+	private final Map<String, String> namesOnRows = new HashMap<>();
 	private long devicesFileModified = -1;
 
 	// today (reset at midnight; reloaded from Postgres at start)
@@ -458,6 +460,13 @@ public class TrafficWatcher extends Thread {
 			Map<String, String[]> byIp = new HashMap<>();
 			for (int i = 0; i < list.length(); i++) {
 				JSONObject d = list.getJSONObject(i);
+				// every device in the list, present or not: its rows carry its current name (map, tables, Identify)
+				String m = d.optString(TeleonomeConstants.MAC_ADDRESS).toLowerCase(), n = d.optString(TeleonomeConstants.DEVICE_NAME, m);
+				if (!m.isEmpty() && !n.isEmpty() && !n.equals(namesOnRows.get(m))) {
+					store.renameDevice(m, n);
+					namesOnRows.put(m, n);
+					if (deviceNames.containsKey(m)) deviceNames.put(m, n);
+				}
 				if (!d.optBoolean(TeleonomeConstants.IS_DEVICE_PRESENT, true)) continue;
 				String ip = d.optString(TeleonomeConstants.IP_ADDRESS), mac = d.optString(TeleonomeConstants.MAC_ADDRESS).toLowerCase();
 				if (ip.isEmpty() || mac.isEmpty()) continue;
