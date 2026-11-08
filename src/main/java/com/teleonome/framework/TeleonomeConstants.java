@@ -306,6 +306,13 @@ public class TeleonomeConstants {
 	public static final String HEART_TOPIC_CEREBELLUM_REQUEST="Cerebellum_Request";
 	public static final String HEART_TOPIC_CEREBELLUM_RESPONSE="Cerebellum_Response";
 	public static final String HEART_TOPIC_CEREBELLUM_STATUS="Cerebellum_Status";
+	// On-demand telepathon diagnosis (2026-11-09): the webapp's Hippocampus Telepathons tab
+	// publishes {"RequestId","Telepathon"} to DIAGNOSE when a card's "seconds since last heard"
+	// is red; the Cerebellum's TelepathonDiagnosisService runs its diagnostic tests (first:
+	// Current Leak) and publishes progress and then the report to DIAGNOSE_REPORT, every
+	// message carrying the same RequestId.
+	public static final String HEART_TOPIC_CEREBELLUM_TELEPATHON_DIAGNOSE="Cerebellum_Telepathon_Diagnose";
+	public static final String HEART_TOPIC_CEREBELLUM_TELEPATHON_DIAGNOSE_REPORT="Cerebellum_Telepathon_Diagnose_Report";
 	
 	
 	public static final String DENECHAIN_COMPONENTS = "Components";
