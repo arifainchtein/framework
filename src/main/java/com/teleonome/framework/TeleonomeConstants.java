@@ -433,7 +433,29 @@ public class TeleonomeConstants {
 	public static final String DENECHAIN_DENEWORD_INJECTION ="DeneWord Injections";
 	public static final String DENECHAIN_DENE_DELETION ="Dene Deletion";
 	public static final String DENECHAIN_DENEWORD_DELETION ="DeneWord Deletion";
-	
+	//
+	// Structural payloads (2026-11-08, Human Interface pages made from the web page): a State Mutation's
+	// payload may carry whole Denes and DeneChains to inject, and pointers to delete, next to "Updates":
+	//   "Payload": {"Updates": [],
+	//               "DeneChain Deletions": ["@T:Human Interface:Greenhouse Page", ...],
+	//               "Dene Deletions":      ["@T:Human Interface:Human Interface Control Parameters:Greenhouse", ...],
+	//               "Dene Injections":     [{"Injection Target": "@T:Human Interface:Human Interface Control Parameters", "Dene": {...}}],
+	//               "DeneChain Injections":[{"Injection Target": "@T:Human Interface", "DeneChain": {...}}]}
+	// Only a mutation whose "Mutation Configuration" chain has a DeneWord "Allowed Payload Nucleus" accepts them,
+	// and only inside that nucleus. Everything injected this way is marked "Injected By Payload": true, and a
+	// payload may delete only elements so marked, so it can never remove what the Denome was born with.
+	public static final String DENECHAIN_DENECHAIN_INJECTION ="DeneChain Injections";
+	public static final String DENECHAIN_DENECHAIN_DELETION ="DeneChain Deletion";
+	public static final String MUTATION_PAYLOAD_DENE_INJECTIONS ="Dene Injections";
+	public static final String MUTATION_PAYLOAD_DENECHAIN_INJECTIONS ="DeneChain Injections";
+	public static final String MUTATION_PAYLOAD_DENE_DELETIONS ="Dene Deletions";
+	public static final String MUTATION_PAYLOAD_DENECHAIN_DELETIONS ="DeneChain Deletions";
+	public static final String MUTATION_PAYLOAD_DENE ="Dene";
+	public static final String MUTATION_PAYLOAD_DENECHAIN ="DeneChain";
+	public static final String DENECHAIN_MUTATION_CONFIGURATION ="Mutation Configuration";
+	public static final String DENEWORD_ALLOWED_PAYLOAD_NUCLEUS ="Allowed Payload Nucleus";
+	public static final String INJECTED_BY_PAYLOAD_ATTRIBUTE ="Injected By Payload";
+
 	public static final String DENECHAIN_ACTIONS_TO_EXECUTE="Actions To Execute";
 	public static final String DENECHAIN_MNEMOSYCONS_TO_EXECUTE="Mnemosycons To Execute";
 	public static final String DENECHAIN_MNEMOSYNE_OPERATIONS="Mnemosyne Operations";

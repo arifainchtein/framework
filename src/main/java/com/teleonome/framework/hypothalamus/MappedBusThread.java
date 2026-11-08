@@ -1383,6 +1383,17 @@ class MappedBusThread extends Thread{
 					} catch (InvalidMutation e) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e));
+						//
+						// a structural payload that breaks a rule (2026-11-08, see StructuralPayload): nothing was
+						// changed; say why on the command, like a wrong code, so the web page can tell the person
+						String message = e.getMessage();
+						if(message!=null && message.startsWith("Structural payload refused")) {
+							String reason = "Refused: " + message.substring("Structural payload refused: ".length() < message.length() ? "Structural payload refused: ".length() : 0);
+							if(reason.length()>480) reason = reason.substring(0, 480);
+							JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId(), reason);
+							hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
+							return;
+						}
 					}catch (IOException e) {
 						// TODO Auto-generated catch block
 						logger.warn(Utils.getStringException(e));

@@ -3401,6 +3401,13 @@ public class DenomeManager {
 
 		//	logger.debug("Finished injecting payload, exiting for now");
 		//	System.exit(0);
+		//
+		// Denes and DeneChains carried by the payload (2026-11-08, Human Interface pages made from the web
+		// page): checked here, done by loadImmediateMutation; see StructuralPayload. A copy of the mutation
+		// carries them, so the mutation in the Denome is not changed.
+		if(selectedMutationJSONObject!=null && payload.optJSONObject("Payload")!=null) {
+			selectedMutationJSONObject = StructuralPayload.apply(this, selectedMutationJSONObject, payload.getJSONObject("Payload"));
+		}
 		return selectedMutationJSONObject;
 
 	}
@@ -3869,7 +3876,10 @@ public class DenomeManager {
 				}
 			}
 
-
+			//
+			// then the DeneChain Deletion chain (2026-11-08, structural payloads, see StructuralPayload)
+			//
+			StructuralPayload.deleteDeneChains(this, nameMutationDeneChainIndex);
 
 			//
 			// then do the DeneWord Injection chain, injecting the denewords
@@ -3934,6 +3944,11 @@ public class DenomeManager {
 					denesInjection.put(clonedDene);
 				}
 			}
+
+			//
+			// then the DeneChain Injections chain (2026-11-08, structural payloads, see StructuralPayload)
+			//
+			StructuralPayload.injectDeneChains(this, nameMutationDeneChainIndex);
 
 			//
 			// then do the Dene Actions Executions
