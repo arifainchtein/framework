@@ -26,6 +26,17 @@ public abstract class AnnabelleDeserializer {
 
 		// Returns false if the name contains non-printable or non-ASCII characters
 		// (e.g. Unicode replacement chars or null bytes from a corrupted serial frame).
+		// The relay that resent this packet (2026-11-11): Annabelle ends a data line with
+		// "sentby:<name>" ("Paula", "Lan1", "Chinamp"), or "sentby:" when the device sent it itself.
+		// Keyed, so it is found whatever the line's length; "" when the line has none (older Annabelle).
+		protected static String sentByFrom(String[] tokens) {
+			for (int i = tokens.length - 1; i >= 0 && i >= tokens.length - 3; i--) {
+				String t = tokens[i].replaceAll("\u0000", "").trim();
+				if (t.startsWith("sentby:")) return t.substring("sentby:".length()).trim();
+			}
+			return "";
+		}
+
 		protected static boolean isValidName(String name) {
 			if (name == null || name.isEmpty()) return false;
 			for (int i = 0; i < name.length(); i++) {

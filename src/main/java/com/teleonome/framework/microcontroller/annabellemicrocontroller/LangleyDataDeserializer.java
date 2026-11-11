@@ -179,6 +179,9 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		// Top-level, not just a Configuration DeneWord, since DenomeManager.isKnownTelepathonDevice()
 		// reads "Serial Number" directly off the DeneChain - see conversation 2026-07-20.
 		toReturn.put("Serial Number", serialNumber);
+		// who resent it - "" = the device itself (2026-11-11, see AnnabelleDeserializer.sentByFrom)
+		String sentBy = sentByFrom(tokens);
+		toReturn.put("Sent By", sentBy);
 		toReturn.put("Raw Data", line);
 		toReturn.put("Seconds Time", secondsTime);
 
@@ -217,6 +220,7 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		purposeDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, TeleonomeConstants.TELEPATHON_DENE_PURPOSE);
 		JSONArray purposeDeneWords = new JSONArray();
 		purposeDene.put("DeneWords", purposeDeneWords);
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Sent By", sentBy, null, TeleonomeConstants.DATATYPE_STRING, true));
 
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Time", "" + secondsTime, null, TeleonomeConstants.DATATYPE_LONG, true));
 		if (timeCorrected) {

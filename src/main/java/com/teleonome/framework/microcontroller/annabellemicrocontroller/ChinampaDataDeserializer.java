@@ -342,6 +342,9 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		toReturn.put("Name", deviceName);
 		toReturn.put("Short Name", deviceshortname);
 		toReturn.put("Serial Number", serialnumber);
+		// who resent it - "" = the device itself (2026-11-11, see AnnabelleDeserializer.sentByFrom)
+		String sentBy = sentByFrom(tokens);
+		toReturn.put("Sent By", sentBy);
 		toReturn.put("Raw Data", line);
 		toReturn.put("Seconds Time", secondsTime);
 		
@@ -393,6 +396,7 @@ public class ChinampaDataDeserializer extends AnnabelleDeserializer {
 		purposeDene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE,  TeleonomeConstants.TELEPATHON_DENE_PURPOSE);
 		JSONArray purposeDeneWords = new JSONArray();
 		purposeDene.put("DeneWords", purposeDeneWords);
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Sent By", sentBy, null, TeleonomeConstants.DATATYPE_STRING, true));
 	
 
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Time", ""+secondsTime, null,TeleonomeConstants.DATATYPE_LONG, true));
