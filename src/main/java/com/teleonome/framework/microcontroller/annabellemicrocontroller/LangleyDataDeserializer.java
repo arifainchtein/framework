@@ -182,6 +182,9 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		// who resent it - "" = the device itself (2026-11-11, see AnnabelleDeserializer.sentByFrom)
 		String sentBy = sentByFrom(tokens);
 		toReturn.put("Sent By", sentBy);
+		// every route that delivered it, e.g. "direct,Lan1" (2026-11-11, AnnabelleDeserializer.routesFrom)
+		String routes = routesFrom(tokens);
+		toReturn.put("Routes", routes);
 		toReturn.put("Raw Data", line);
 		toReturn.put("Seconds Time", secondsTime);
 
@@ -221,6 +224,8 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		JSONArray purposeDeneWords = new JSONArray();
 		purposeDene.put("DeneWords", purposeDeneWords);
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Sent By", sentBy, null, TeleonomeConstants.DATATYPE_STRING, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Routes", routes, null, TeleonomeConstants.DATATYPE_STRING, true));
+		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Route Count", "" + routeCount(routes), null, TeleonomeConstants.DATATYPE_INTEGER, true));
 
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Time", "" + secondsTime, null, TeleonomeConstants.DATATYPE_LONG, true));
 		if (timeCorrected) {

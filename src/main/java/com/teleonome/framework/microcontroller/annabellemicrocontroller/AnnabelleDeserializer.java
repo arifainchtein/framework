@@ -37,6 +37,21 @@ public abstract class AnnabelleDeserializer {
 			return "";
 		}
 
+		// Every route that delivered this reading to Annabelle (2026-11-11): "routes:direct,Lan1,Paula" -
+		// she collects the copies for a few seconds and sends the reading once. "" when the line has
+		// none (older Annabelle) or she no longer remembered it.
+		protected static String routesFrom(String[] tokens) {
+			for (int i = tokens.length - 1; i >= 0 && i >= tokens.length - 3; i--) {
+				String t = tokens[i].replaceAll("\\u0000", "").trim();
+				if (t.startsWith("routes:")) return t.substring("routes:".length()).trim();
+			}
+			return "";
+		}
+
+		protected static int routeCount(String routes) {
+			return routes.isEmpty() ? 0 : routes.split(",").length;
+		}
+
 		protected static boolean isValidName(String name) {
 			if (name == null || name.isEmpty()) return false;
 			for (int i = 0; i < name.length(); i++) {
