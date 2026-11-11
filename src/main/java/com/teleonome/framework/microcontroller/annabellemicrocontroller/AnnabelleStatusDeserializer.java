@@ -22,7 +22,8 @@ import com.teleonome.framework.utils.Utils;
  *
  * latitude#longitude (2026-11-02, firmware 11, still format 1): her position (Settings > GPS, or the built-in one),
  * so devices.digitalstables.com can put her on the map. Firmware 10 sends 27 tokens and gets no position.
- * weatherEpoch 0: no forecast sent since the reset. weatherDownload: 1 ok, 2 failed, 3 no internet.
+ * weatherEpoch 0: no forecast sent since the reset. weatherDownload: 1 ok, 2 failed, 3 no internet, 4 no download
+ * this time, the stored forecast went out (firmware 14: OpenWeather at most once an hour).
  * weatherLora: 0 sent, -1 nothing to send, 1 LoRa init failed, 2 CAD timeout, 3 channel busy, 4 TX failed,
  * 5 channel busy after the retries.
  */

@@ -217,6 +217,11 @@ public class AnnabelleReader extends BufferedReader{
 							deserializer="AnnabelleStatusDeserializer";
 							processString=true;
 							appendString=false;
+						}else if(tokens.length>WeatherForecastDeserializer.HEADER_TOKENS && deserializer.contains("WeatherForecastDeserializer")) {
+							// Annabelle's 5-day forecast (2026-11-12, firmware 14): the "Weather Forecast" Dene of her telepathon
+							deserializer="WeatherForecastDeserializer";
+							processString=true;
+							appendString=false;
 						}else if(deserializer.contains("DeviceIdentityDeserializer")) {
 							// token count checked by the deserializer itself (split keeps empty strings there)
 							deserializer="DeviceIdentityDeserializer";
@@ -243,6 +248,11 @@ public class AnnabelleReader extends BufferedReader{
 									JSONObject powerProfileDene = annabellDeserializer.deserialise(teleonomeName, line);
 									if(powerProfileDene != null) {
 										applySerialDene(((PowerProfileDeserializer)annabellDeserializer).getSerialNumber(), powerProfileDene, TeleonomeConstants.TELEPATHON_DENE_POWER_PROFILE);
+									}
+								} else if(annabellDeserializer instanceof WeatherForecastDeserializer) {
+									JSONObject forecastDene = annabellDeserializer.deserialise(teleonomeName, line);
+									if(forecastDene != null) {
+										applySerialDene(((WeatherForecastDeserializer)annabellDeserializer).getSerialNumber(), forecastDene, WeatherForecastDeserializer.DENE_NAME);
 									}
 								} else if(annabellDeserializer instanceof DeviceIdentityDeserializer) {
 									JSONObject deviceIdentityDene = annabellDeserializer.deserialise(teleonomeName, line);
@@ -306,6 +316,9 @@ public class AnnabelleReader extends BufferedReader{
 											carryOverVitalSigns(telepathonName, telepathon);
 											carryOverDene(telepathonName, telepathon, TeleonomeConstants.TELEPATHON_DENE_DEVICE_IDENTITY);
 											carryOverDene(telepathonName, telepathon, TeleonomeConstants.TELEPATHON_DENE_POWER_PROFILE);
+											// Annabelle's forecast (2026-11-12): every status line carries the latest one, so it is
+											// stored with it and reaches devices.digitalstables.com through the outbox
+											carryOverDene(telepathonName, telepathon, WeatherForecastDeserializer.DENE_NAME);
 											//
 											// Idempotency guard, added 2026-08-04 (see conversation).
 											// storeTelepathon() below is already safe to call twice for
