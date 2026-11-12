@@ -25,10 +25,12 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 	// fenceVoltageMax#fenceVoltageAvg#pulseCount#rssi#snr#operatingStatus#wpsFrequencySeconds#
 	// maxWPSVoltage#minWPSVoltage#secondsSinceLastPulse#solarVoltage#solarCurrentMa#batteryVoltage#
 	// batteryCurrentMa#estimatedRuntime#batteryChemistry#rtcBatVolt#overnightMah#
-	// parentShortname#branchLabel#latitude#longitude#altitude#checksum[#battemp:<C>]#sentby:<name>#routes:<list>
+	// parentShortname#branchLabel#latitude#longitude#altitude#checksum[#battemp:<C>][#relay:<0|1>]#sentby:<name>#routes:<list>
 	//
 	// battemp: (2026-11-12) the Langley's own battery temperature from Valentino's thermistor, keyed so it is found
 	// wherever it is and a line without it (older Langley / Annabelle) still parses; empty = no thermistor.
+	// relay: (2026-11-13) the device's own relay mode (LangleyData.relayStatus) -> Purpose "Relay Status" (the
+	// "Relay" badge in deviceviews); a line without it (older Annabelle) writes no "Relay Status".
 	//
 	// parentShortname/branchLabel/latitude/longitude/altitude added 2026-07-26 for fence
 	// topology mapping - see LangleyData.h. parentShortname/branchLabel can change at runtime
@@ -175,8 +177,10 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		int checksum = 0;
 		try { checksum = Integer.parseInt(tokens[34].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
-		// the battery's own temperature (keyed token, 2026-11-12); null = not sent or no thermistor
+		// keyed tokens after the fixed ones: the battery's own temperature (2026-11-12, null = not sent or no
+		// thermistor) and the device's own relay mode (2026-11-13, null = not sent)
 		Double batteryTemperature = null;
+		Boolean relayStatus = null;
 		for (int i = 35; i < tokens.length; i++) {
 			String t = tokens[i].replaceAll("\u0000", "").trim();
 			if (t.startsWith("battemp:")) {
@@ -184,7 +188,10 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 					double c = Double.parseDouble(t.substring("battemp:".length()).trim());
 					if (c > -100 && c < 150) batteryTemperature = c;
 				} catch (NumberFormatException e) {}
-				break;
+			} else if (t.startsWith("relay:")) {
+				String v = t.substring("relay:".length()).trim();
+				if (v.equals("1")) relayStatus = Boolean.TRUE;
+				else if (v.equals("0")) relayStatus = Boolean.FALSE;
 			}
 		}
 
@@ -276,6 +283,9 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Internal Temperature", "" + temperature, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
 		if (batteryTemperature != null) {
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Battery Temperature", "" + batteryTemperature, "C", TeleonomeConstants.DATATYPE_DOUBLE, true));
+		}
+		if (relayStatus != null) {
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Relay Status", "" + relayStatus, null, TeleonomeConstants.DATATYPE_BOOLEAN, true));
 		}
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", "" + operatingStatus, null, TeleonomeConstants.DATATYPE_INTEGER, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Since Last Pulse", "" + secondsSinceLastPulse, null, TeleonomeConstants.DATATYPE_INTEGER, true));
