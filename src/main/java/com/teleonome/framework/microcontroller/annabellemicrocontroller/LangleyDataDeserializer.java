@@ -25,7 +25,10 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 	// fenceVoltageMax#fenceVoltageAvg#pulseCount#rssi#snr#operatingStatus#wpsFrequencySeconds#
 	// maxWPSVoltage#minWPSVoltage#secondsSinceLastPulse#solarVoltage#solarCurrentMa#batteryVoltage#
 	// batteryCurrentMa#estimatedRuntime#batteryChemistry#rtcBatVolt#overnightMah#
-	// parentShortname#branchLabel#latitude#longitude#altitude#checksum
+	// parentShortname#branchLabel#latitude#longitude#altitude#checksum[#battemp:<C>]#sentby:<name>#routes:<list>
+	//
+	// battemp: (2026-11-12) the Langley's own battery temperature from Valentino's thermistor, keyed so it is found
+	// wherever it is and a line without it (older Langley / Annabelle) still parses; empty = no thermistor.
 	//
 	// parentShortname/branchLabel/latitude/longitude/altitude added 2026-07-26 for fence
 	// topology mapping - see LangleyData.h. parentShortname/branchLabel can change at runtime
@@ -172,6 +175,19 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		int checksum = 0;
 		try { checksum = Integer.parseInt(tokens[34].replaceAll(" ", "")); } catch (NumberFormatException e) {}
 
+		// the battery's own temperature (keyed token, 2026-11-12); null = not sent or no thermistor
+		Double batteryTemperature = null;
+		for (int i = 35; i < tokens.length; i++) {
+			String t = tokens[i].replaceAll("\u0000", "").trim();
+			if (t.startsWith("battemp:")) {
+				try {
+					double c = Double.parseDouble(t.substring("battemp:".length()).trim());
+					if (c > -100 && c < 150) batteryTemperature = c;
+				} catch (NumberFormatException e) {}
+				break;
+			}
+		}
+
 		logger.debug("LangleyDataDeserializer: finished parsing");
 
 		toReturn.put("Name", deviceName);
@@ -258,6 +274,9 @@ public class LangleyDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Overnight Mah", "" + overnightMah, "mAh", TeleonomeConstants.DATATYPE_DOUBLE, true));
 
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Internal Temperature", "" + temperature, null, TeleonomeConstants.DATATYPE_DOUBLE, true));
+		if (batteryTemperature != null) {
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Battery Temperature", "" + batteryTemperature, "C", TeleonomeConstants.DATATYPE_DOUBLE, true));
+		}
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Operating Status", "" + operatingStatus, null, TeleonomeConstants.DATATYPE_INTEGER, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Seconds Since Last Pulse", "" + secondsSinceLastPulse, null, TeleonomeConstants.DATATYPE_INTEGER, true));
 
