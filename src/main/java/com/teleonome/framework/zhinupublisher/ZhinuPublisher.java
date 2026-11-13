@@ -22,7 +22,10 @@ import com.teleonome.framework.utils.Utils;
 public class ZhinuPublisher implements MqttCallbackExtended{
 
 	static final String BROKER_URL = "tcp://chilhuacle.info:1883";
-	static final String clientID = "Ra";
+	// the Teleonome's own name (2026-11-13): it used to be "Ra" for every Heart, so all the Teleonomes that publish
+	// knocked each other off chilhuacle.info (one session per client name), and Zhinu's Heart, which reads the
+	// client name as the sender's Teleonome, thought everything came from Ra
+	final String clientID;
 	static final String userName = "chilhuacle";
 	static final String password = "9cc67c92a1eb1687cb8c5d97b64e1a866c69a21110bc8531ed40f278dc3f3e11";
 	MqttClient myClient;
@@ -58,7 +61,8 @@ public class ZhinuPublisher implements MqttCallbackExtended{
 			},
 			new ThreadPoolExecutor.DiscardOldestPolicy()
 	);
-	public ZhinuPublisher() {
+	public ZhinuPublisher(String teleonomeName) {
+		this.clientID = teleonomeName;
 		logger = Logger.getLogger(getClass());
 		connOpt = new MqttConnectOptions();
 
