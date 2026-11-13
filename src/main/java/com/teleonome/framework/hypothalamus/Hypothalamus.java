@@ -93,7 +93,8 @@ public abstract class Hypothalamus {
 	SimpleDateFormat detailtimeFormatter = new SimpleDateFormat("HH:mm:ss");
 	MotherMicroController motherMicroController=null;
 	String aMotherMicroControllerPointer="";
-	String mqttBrokerAddress = "tcp://localhost:1883";
+	// 1883 unless lib/app.properties says heartPort= (the Factory Teleonome on factory2: 1884)
+	String mqttBrokerAddress = com.teleonome.framework.utils.HeartPorts.localBrokerAddress();
     String mqttClientId = TeleonomeConstants.PROCESS_HYPOTHALAMUS;
     MemoryPersistence persistence = new MemoryPersistence();
     //
