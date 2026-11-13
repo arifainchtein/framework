@@ -27,7 +27,8 @@ import com.teleonome.framework.exception.MissingDenomeException;
  *     factory's Incubator shows the result);
  *   - the Denome and the sperm given are not touched (it works on copies);
  *   - a sperm problem (a homeobox index pointing at nothing, a hox dene without Target) is a failed result,
- *     not an exit.
+ *     not an exit;
+ *   - besides the DeneWord Remover, a "Dene Remover" removes whole denes (every one of that name in the chain).
  *
  * Purpose Type Mutate: the sperm's @Egg: pointers are renamed to the living Denome's name, and only the validation
  * problems the sperm brought refuse it (a living Denome has problems of its own). Purpose Type Create: the Denome
@@ -137,6 +138,14 @@ public class FertilizerEngine {
 						}
 					} else if (deneType.equals(TeleonomeConstants.SPERM_DENE_TYPE_DENEWORD_CARRIER)) {
 						carryDeneWords(pulseJSONObject, homeoboxDene, result);
+					} else if (deneType.equals(TeleonomeConstants.SPERM_DENE_TYPE_DENE_REMOVER)) {
+						JSONArray removerDeneWords = homeoboxDene.getJSONArray("DeneWords");
+						for (int k = 0; k < removerDeneWords.length(); k++) {
+							Identity target = new Identity(removerDeneWords.getJSONObject(k).getString(TeleonomeConstants.DENEWORD_VALUE_ATTRIBUTE));
+							int removed = 0;
+							while (DenomeUtils.removeDeneFromChain(pulseJSONObject, target.getNucleusName(), target.getDenechainName(), target.getDeneName()) > 0) removed++;
+							result.say(removed > 0 ? "Removed " + target + (removed > 1 ? " (" + removed + " denes of that name)" : "") : "Did not find, to remove: " + target);
+						}
 					}
 				}
 			}

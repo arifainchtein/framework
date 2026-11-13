@@ -1168,6 +1168,9 @@ public class TeleonomeConstants {
 	public static final String SPERM_HOMEOBOX_INDEX="Homeobox Index";
 	public static final String SPERM_DENE_TYPE_DENEWORD_CARRIER="DeneWord Carrier";
 	public static final String SPERM_DENE_TYPE_DENEWORD_REMOVER="DeneWord Remover";
+	// a homeobox dene of this type removes whole denes: each DeneWord's Value points at one (@Egg:Nucleus:Chain:Dene),
+	// and every dene of that name in that chain goes, duplicates included (FertilizerEngine, 2026-11-13)
+	public static final String SPERM_DENE_TYPE_DENE_REMOVER="Dene Remover";
 	
 	public static final String SPERM_DENE_TYPE_HOMEOBOX_METADATA="HomeoBox Metadata";
 	public static final String SPERM_DATE_FORMAT="ddMMyyyy_HHmm";
