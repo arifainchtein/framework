@@ -28,6 +28,9 @@ public class TeleonomeConstants {
 	public static final int ANNABELL_DAFFODIL_WATER_TROUGH_TANK1=11;      // tank1 pressure on terminal 18 + trough ultrasonic on 33
 	public static final int ANNABELL_DAFFODIL_2_WATER_TROUGH=12;          // two troughs: measuredHeight + measuredHeight2
 	public static final int ANNABELL_DAFFODIL_WATER_TROUGH_WATER_TEMP=13; // trough ultrasonic + DS18B20 water temp, temp (degrees C) sent in measuredHeight2
+	public static final int ANNABELL_DAFFODIL_VIEWER=14;                  // LoRa data viewer (no sensor-specific fields)
+	public static final int ANNABELL_DAFFODIL_SONAR_TROUGH=15;            // trough via echo/trigger ultrasonic (trigger 32 / echo 33) -> measuredHeight
+	public static final int ANNABELL_DAFFODIL_FLOW_TROUGH=16;             // flow meter 1 on terminal 18 (flowRate/totalMilliLitres) + trough ultrasonic on 33 (measuredHeight)
 	public static final String ADA_INTERNAL_HOST_IPADDRESS="172.16.1.1";
 	
 	//
