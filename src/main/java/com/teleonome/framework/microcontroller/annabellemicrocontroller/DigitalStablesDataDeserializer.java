@@ -443,6 +443,15 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 			}catch(NumberFormatException e) {
 			}
 		}
+		// token[59] = relayStatus (2026-11-17): the device's own LoRa relay is on (LoRaRelay.h) -> Purpose
+		// "Relay Status", which the devices "Relay" badge reads (as LangleyDataDeserializer). Only "0"/"1"
+		// count: an older Annabelle has sentby:/routes: there, and then no "Relay Status" is written.
+		Boolean relayStatus = null;
+		if (tokens.length > 59) {
+			String rv = tokens[59].replaceAll("\u0000", "").trim();
+			if (rv.equals("1")) relayStatus = Boolean.TRUE;
+			else if (rv.equals("0")) relayStatus = Boolean.FALSE;
+		}
 
 		logger.debug("line 324,finished parsing");
 
@@ -622,6 +631,9 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Estimated Runtime", ""+estimatedRuntime, null,TeleonomeConstants.DATATYPE_DOUBLE, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Sleep Time", ""+sleepTime, null,TeleonomeConstants.DATATYPE_INTEGER, true));
 		purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("TOTP",""+ totpcode, null,TeleonomeConstants.DATATYPE_STRING, true));
+		if (relayStatus != null) {
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Relay Status", "" + relayStatus, null, TeleonomeConstants.DATATYPE_BOOLEAN, true));
+		}
 
 		// Firmware reads and transmits these every cycle regardless of currentFunctionValue
 		// (SHT/BH1750/ultrasonic are independent of the configured mode) — emit them
@@ -716,6 +728,28 @@ public class DigitalStablesDataDeserializer extends AnnabelleDeserializer {
 		}else if(currentFunctionValue==TeleonomeConstants.VOLTAGE_MONITOR) {
 			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Remote Voltage", ""+flowRate, "Volts",TeleonomeConstants.DATATYPE_DOUBLE, true));
 
+		}
+		// Ultrasonic trough modes: the water level as stored words, so it gets history charts like the
+		// flow words (2026-11-17). Same maths as the devices card/detail and the device's own page:
+		// depth = Maximum Height (sensor to bottom) - Measured Height (sensor to water), % = depth / Full Depth.
+		// Measured Height <= 0 is a failed ultrasonic read, so nothing is stored for that packet.
+		if ((currentFunctionValue==TeleonomeConstants.ANNABELL_DAFFODIL_WATER_TROUGH
+				|| currentFunctionValue==TeleonomeConstants.ANNABELL_DAFFODIL_WATER_TROUGH_TANK1
+				|| currentFunctionValue==TeleonomeConstants.ANNABELL_DAFFODIL_2_WATER_TROUGH
+				|| currentFunctionValue==TeleonomeConstants.ANNABELL_DAFFODIL_WATER_TROUGH_WATER_TEMP
+				|| currentFunctionValue==TeleonomeConstants.ANNABELL_DAFFODIL_FLOW_TROUGH)
+				&& measuredHeight > 0 && maximumScepticHeight > 0) {
+			double troughDepth = Math.max(0, maximumScepticHeight - measuredHeight);
+			troughDepth = Math.round(troughDepth * 10) / 10.0;
+			purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Trough Depth", ""+troughDepth, "cm",TeleonomeConstants.DATATYPE_DOUBLE, true));
+			includedRememberedIdentity = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_TELEPATHONS,deviceName, "Purpose","Trough Depth");
+			aMnemosyneManager.unwrapDouble( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), TeleonomeConstants.DATATYPE_DOUBLE,troughDepth, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, "cm");
+			if (fullDepth > 0) {
+				double troughLevel = Math.round(troughDepth / fullDepth * 100);
+				purposeDeneWords.put(DenomeUtils.buildDeneWordJSONObject("Trough Level", ""+troughLevel, "%",TeleonomeConstants.DATATYPE_DOUBLE, true));
+				includedRememberedIdentity = new Identity(teleonomeName, TeleonomeConstants.NUCLEI_TELEPATHONS,deviceName, "Purpose","Trough Level");
+				aMnemosyneManager.unwrapDouble( teleonomeName, lastPulseTime, includedRememberedIdentity.toString(), TeleonomeConstants.DATATYPE_DOUBLE,troughLevel, TeleonomeConstants.REMEMBERED_DENEWORD_SOURCE_TELEPATHON, "%");
+			}
 		}
 		
 		return toReturn;
