@@ -5331,6 +5331,29 @@ public class DenomeManager {
 						deneRemoved = DenomeUtils.removeDeneFromChain(currentlyCreatingPulseJSONObject, TeleonomeConstants.NUCLEI_PURPOSE, TeleonomeConstants.DENECHAIN_OPERATIONAL_DATA, TeleonomeConstants.DENE_ETH0);
 						logger.debug("removing the eth0 Info data dene from operational, result:" + deneRemoved);
 
+						//
+						// interfaces that are not wlan0/wlan1/eth0 (e.g. wlo1, enp114s0 on factory2) get a dene named
+						// after the interface, which the removals above never matched, so one more of each was added
+						// every pulse (the Factory Denome grew from 0.2 to 5 MB in four days). Every interface dene
+						// carries an "IP Address" DeneWord, so remove every dene of the chain that has one.
+						int interfaceDenesRemoved=0;
+						JSONObject candidateDene;
+						JSONArray candidateDeneWords;
+						for(int j=operationalDataDenes.length()-1;j>=0;j--) {
+							candidateDene = operationalDataDenes.optJSONObject(j);
+							if(candidateDene==null)continue;
+							candidateDeneWords = candidateDene.optJSONArray("DeneWords");
+							if(candidateDeneWords==null)continue;
+							for(int k=0;k<candidateDeneWords.length();k++) {
+								if(TeleonomeConstants.DENEWORD_IP_ADDRESS.equals(candidateDeneWords.getJSONObject(k).optString("Name"))) {
+									operationalDataDenes.remove(j);
+									interfaceDenesRemoved++;
+									break;
+								}
+							}
+						}
+						logger.debug("removed " + interfaceDenesRemoved + " network interface denes from operational data");
+
 
 					} catch (InvalidDenomeException e) {
 						// TODO Auto-generated catch block
