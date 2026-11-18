@@ -160,7 +160,18 @@ public class AnnabelleReader extends BufferedReader{
 				readLineDeadlineMillis = System.currentTimeMillis() + 10000;
 
 				logger.debug("line 63, received line=" + line);
-				if(line.contains("Ok-") || line.contains("Failure"))
+				if((command.startsWith("GetCommandCode") || command.startsWith("GetDigitalGeppettoCommandCode"))
+						&& line.trim().matches("\\d{6}")) {
+					//
+					// The firmware answers GetCommandCode with the bare 6-digit code and no Ok-
+					// sentinel, so this loop used to swallow it as data and the caller fell back to
+					// 999999 - every internal command was then rejected. Only showed once Annabelle
+					// became the mother microcontroller (2026-11-18); before that the Pi made codes.
+					//
+					line = line.trim();
+					keepGoing=false;
+					appendString=false;
+				}else if(line.contains("Ok-") || line.contains("Failure"))
 				{
 					keepGoing=false;
 					appendString=false;
