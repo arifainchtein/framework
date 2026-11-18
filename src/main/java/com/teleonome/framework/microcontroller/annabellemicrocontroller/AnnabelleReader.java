@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
+import com.teleonome.framework.denome.Identity;
 import com.teleonome.framework.exception.PersistenceException;
 import com.teleonome.framework.exception.ServletProcessingException;
 import com.teleonome.framework.hypothalamus.Hypothalamus;
@@ -40,6 +41,14 @@ public class AnnabelleReader extends BufferedReader{
 	// See conversation 2026-07-16 (ChinampaMonitor Hypothalamus hangs).
 	//
 	private int expectedDataLineCount = -1;
+	//
+	// Rename detection for the serial-number guard in readLine() (2026-11-18): serial number ->
+	// the different name it last reported, and how many records in a row reported it. Static so
+	// the streak survives the reader being recreated when the serial port is reopened.
+	//
+	private static final int RENAME_CONFIRMATIONS = 3;
+	private static final java.util.Map<String, String> RENAME_CANDIDATE_NAME = new java.util.concurrent.ConcurrentHashMap<String, String>();
+	private static final java.util.Map<String, Integer> RENAME_CANDIDATE_COUNT = new java.util.concurrent.ConcurrentHashMap<String, Integer>();
 	public void setExpectedDataLineCount(int n) {
 		expectedDataLineCount = n;
 	}
@@ -300,11 +309,42 @@ public class AnnabelleReader extends BufferedReader{
 											String serialNumber = telepathon.getString("Serial Number");
 											String knownName = aDenomeManager.getKnownNameForSerial(serialNumber);
 											accept = (knownName == null) || knownName.equals(telepathonName);
-											if (!accept) {
-												logger.warn("Telepathon record rejected -- serialnumber='" + serialNumber
-														+ "' is already registered under name='" + knownName
-														+ "' but this record reports name='" + telepathonName
-														+ "' (likely corrupted device-name token): " + line);
+											if (accept) {
+												RENAME_CANDIDATE_NAME.remove(serialNumber);
+												RENAME_CANDIDATE_COUNT.remove(serialNumber);
+											} else {
+												//
+												// A real rename (2026-11-18: HorseTrough reflashed and renamed FlowCross at
+												// the factory) looks exactly like corruption to the check above, and was
+												// rejected forever. Corruption garbles the name differently each time;
+												// a rename repeats the same new name. So accept the new name once it has
+												// arrived RENAME_CONFIRMATIONS times in a row for this serial number, and
+												// rename the existing DeneChain in place (keeps its Vital Signs / Device
+												// Identity / Power Profile Denes, which are carried over below).
+												//
+												int count = telepathonName.equals(RENAME_CANDIDATE_NAME.get(serialNumber))
+														? RENAME_CANDIDATE_COUNT.get(serialNumber) + 1 : 1;
+												RENAME_CANDIDATE_NAME.put(serialNumber, telepathonName);
+												RENAME_CANDIDATE_COUNT.put(serialNumber, count);
+												if (count >= RENAME_CONFIRMATIONS) {
+													JSONObject oldChain = aDenomeManager.getDenomicElementByIdentity(
+															new Identity(aDenomeManager.getDenomeName(), TeleonomeConstants.NUCLEI_TELEPATHONS, knownName));
+													if (oldChain != null) {
+														oldChain.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, telepathonName);
+													}
+													RENAME_CANDIDATE_NAME.remove(serialNumber);
+													RENAME_CANDIDATE_COUNT.remove(serialNumber);
+													accept = true;
+													logger.warn("Telepathon renamed -- serialnumber='" + serialNumber + "' reported name='"
+															+ telepathonName + "' in " + count + " consecutive records, accepting it in place of '"
+															+ knownName + "'" + (oldChain == null ? " (old DeneChain not found)" : ""));
+												} else {
+													logger.warn("Telepathon record rejected -- serialnumber='" + serialNumber
+															+ "' is already registered under name='" + knownName
+															+ "' but this record reports name='" + telepathonName
+															+ "' (corrupted device-name token, or a rename: " + count + "/" + RENAME_CONFIRMATIONS
+															+ " consecutive records needed to accept it): " + line);
+												}
 											}
 										}
 										if (accept) {
