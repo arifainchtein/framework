@@ -1360,6 +1360,27 @@ class MappedBusThread extends Thread{
 			}else if(command.equals(TeleonomeConstants.COMMAND_KILL_PULSE)){
 
 				logger.debug("receive command to kill pulse ");
+				//
+				// stopped for maintenance (2026-11-19): the code was good (we are here), so if the page sent a token, say
+				// so in a file the Medula and the web page read: the Medula then leaves the Hypothalamus stopped
+				if(dataPayloadJSONObject!=null && dataPayloadJSONObject.optString(TeleonomeConstants.MAINTENANCE_TOKEN, "").length()>=16) {
+					try {
+						int minutes = dataPayloadJSONObject.optInt(TeleonomeConstants.MAINTENANCE_MINUTES, TeleonomeConstants.MAINTENANCE_DEFAULT_MINUTES);
+						minutes = Math.max(5, Math.min(TeleonomeConstants.MAINTENANCE_MAX_MINUTES, minutes));
+						long now = System.currentTimeMillis(), until = now + minutes*60000L;
+						JSONObject stop = new JSONObject();
+						stop.put("Token", dataPayloadJSONObject.getString(TeleonomeConstants.MAINTENANCE_TOKEN));
+						stop.put("Stopped At", now);
+						stop.put("Until", until);
+						stop.put("Until Text", new java.util.Date(until).toString());
+						stop.put("Client Ip", aCommandRequest.getClientIp());
+						stop.put("By", "Stop Hypothalamus");
+						org.apache.commons.io.FileUtils.writeStringToFile(new File(Utils.getLocalDirectory() + TeleonomeConstants.HYPOTHALAMUS_STOPPED_FILE), stop.toString(), "UTF-8");
+						logger.warn("stopped for maintenance until " + stop.getString("Until Text"));
+					} catch (IOException | JSONException e) {
+						logger.warn(Utils.getStringException(e));
+					}
+				}
 				hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
 				System.exit(0);
 

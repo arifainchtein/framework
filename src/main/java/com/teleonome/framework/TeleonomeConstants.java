@@ -414,6 +414,14 @@ public class TeleonomeConstants {
 	public static final String COMMAND_REBOOT_ENABLE_HOST="Reboot Enable Host";
 	public static final String COMMAND_REBOOT_ENABLE_NETWORK="Reboot Enable Network";
 	public static final String COMMAND_KILL_PULSE="KillPulse";
+	// Stop Hypothalamus for maintenance (2026-11-19): a KillPulse whose payload carries a token makes the Hypothalamus
+	// write this file before it exits; while it is there (until "Until") the Medula does not restart the Hypothalamus nor
+	// touch Teleonome.denome, and the web page may fertilize the Denome and start the Hypothalamus again with that token
+	public static final String HYPOTHALAMUS_STOPPED_FILE="HypothalamusStopped.info";
+	public static final String MAINTENANCE_TOKEN="Maintenance Token";
+	public static final String MAINTENANCE_MINUTES="Maintenance Minutes";
+	public static final int MAINTENANCE_DEFAULT_MINUTES=120;
+	public static final int MAINTENANCE_MAX_MINUTES=240;
 	public static final String COMMAND_CONFIRM_REBOOT="ConfirmReboot";
 	public static final String COMMAND_CONFIRM_SHUTDOWN="ConfirmShutdown";
 	public static final String COMMAND_START_PULSE="StartPulse";

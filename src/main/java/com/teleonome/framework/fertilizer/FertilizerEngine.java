@@ -299,6 +299,11 @@ public class FertilizerEngine {
 			}
 		} else if (DenomeUtils.containsDenomicElementByIdentity(pulseJSONObject, new Identity(targetPointer + ":" + deneName))) {
 			result.say("Did not add " + targetPointer + ":" + deneName + ": it already exists");
+		} else if (!DenomeUtils.containsDenomicElementByIdentity(pulseJSONObject, target)) {
+			// 2026-11-19: adding into a chain that is not there did nothing and still said "Added" (WaterNetworks without
+			// HumanInterfacePages lost its pill): a sperm that needs another one first now fails
+			throw new JSONException("the dene chain " + targetPointer + " is not in the Denome, so " + deneName
+					+ " cannot go into it (does this sperm need another one fertilized first?)");
 		} else {
 			DenomeUtils.addDeneToDeneChainByIdentity(pulseJSONObject, hoxDene, target);
 			result.say("Added " + targetPointer + ":" + deneName);
