@@ -111,6 +111,7 @@ class MappedBusThread extends Thread{
 		CommandRequest aCommandRequest=null ;
 		JSONObject dataPayloadJSONObject = null;
 		boolean goodCommandCode=false;
+		int lastBadCodeCommandId=-1;
 		String clientIp;
 		//
 		// Before going into the loop, processed this teleonome's remembered words
@@ -887,7 +888,16 @@ class MappedBusThread extends Thread{
 								goodCommandCode=false;
 								commandCode=null;
 								command=null;
-								aCommandRequest=null;
+								// keep aCommandRequest non-null so the do-while goes on to the next queued
+								// command: nulling it here ended the loop after one bad code, the queue then
+								// drained one command per async cycle, codes aged past Annabelle's 15-minute
+								// window and every later command failed too (2026-11-19, KillPulse id 1376).
+								// Guard: if the mark did not stick (DB error) the same row would come back forever.
+								if(aCommandRequest.getId()==lastBadCodeCommandId) {
+									aCommandRequest=null;
+								}else {
+									lastBadCodeCommandId=aCommandRequest.getId();
+								}
 
 							}
 						}
