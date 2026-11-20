@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import com.teleonome.framework.TeleonomeConstants;
 import com.teleonome.framework.denome.DenomeManager;
+import com.teleonome.framework.hypothalamus.Hypothalamus;
 import com.teleonome.framework.utils.Utils;
 
 /**
@@ -53,6 +54,8 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 
 	private final Logger logger = Logger.getLogger(getClass());
 	private final DenomeManager aDenomeManager;
+	// for the water network alerts' Emergency Channel banner on Annabelle's own page (2026-11-20)
+	private final Hypothalamus hypothalamus;
 	private boolean uploadEnabled = false;
 	private String server = "";
 	private String settingsFile = "";
@@ -66,9 +69,10 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 	// a new connection: send the water networks again, whatever was acknowledged before
 	private boolean justConnected = false;
 
-	public DigitalStablesPublisherWriter(Writer out, JSONArray configParams, DenomeManager d) {
+	public DigitalStablesPublisherWriter(Writer out, JSONArray configParams, DenomeManager d, Hypothalamus h) {
 		super(out);
 		aDenomeManager = d;
+		hypothalamus = h;
 		for (int i = 0; i < configParams.length(); i++) {
 			try {
 				JSONObject dene = configParams.getJSONObject(i);
@@ -107,6 +111,20 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 		long deadline = System.currentTimeMillis() + PUBLISH_DEADLINE_MS;
 		int sent = 0;
 		try {
+			// the water network checks (2026-11-20), before connecting, so an alert reaches Annabelle's own page even
+			// with the internet down; what devices has not acknowledged goes to devicesheart below (it sends it on to the
+			// farmer's phones and email)
+			for (WaterNetworkWatch.Alert alert : WaterNetworkWatch.check(aDenomeManager)) {
+				if (hypothalamus != null) {
+					try {
+						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_EMERGENCY_CHANNEL, new JSONObject().put("Sender", "Water network " + alert.network)
+								.put("Message", (alert.state.equals("cleared") ? "" : alert.title + ": ") + alert.message).put("TimestampMillis", System.currentTimeMillis()).toString());
+					} catch (Exception e) {
+						logger.warn("water network alert not shown on Annabelle's page: " + e.getMessage());
+					}
+				}
+				logger.warn("water network " + alert.state + ": " + alert.title);
+			}
 			// the factory wrote new settings (Send To DS again): reconnect with them
 			if (client != null && new File(settingsFile).lastModified() != settingsFileModified) disconnectQuietly();
 			ensureConnected();
@@ -142,6 +160,13 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 				if (!WaterNetworksSync.lastError.isEmpty()) networksSent = "#waterNetworksError=" + WaterNetworksSync.lastError;
 				else justConnected = false;
 			}
+			JSONArray alertsDue = WaterNetworkWatch.outbox();
+			for (int i = 0; i < alertsDue.length() && System.currentTimeMillis() < deadline; i++) {
+				MqttMessage alertMessage = new MqttMessage(alertsDue.getJSONObject(i).toString().getBytes(StandardCharsets.UTF_8));
+				alertMessage.setQos(1);
+				client.publish("devices/" + login + "/alert", alertMessage);
+			}
+			if (alertsDue.length() > 0) networksSent += "#alerts=" + alertsDue.length();
 			pruneNowAndThen();
 			JSONObject status = DevicesOutbox.status();
 			publishingResults = "Ok-Published " + sent + "#pending=" + status.getLong("pending") + "#oldestPendingSeconds=" + status.getLong("oldestPendingSeconds") + networksSent;
@@ -179,6 +204,7 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 		try {
 			JSONObject ack = new JSONObject(payload);
 			if (WaterNetworksSync.onAck(ack)) return;
+			if (WaterNetworkWatch.onAck(ack)) return;
 			if (!ack.has("outboxId")) return;
 			String outcome = ack.optString("outcome", "");
 			DevicesOutbox.markAcked(ack.getLong("outboxId"), outcome);

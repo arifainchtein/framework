@@ -33,7 +33,7 @@ public class DigitalStablesPublisherMicroController extends MicroController {
 
 	@Override
 	public void init(JSONArray configParams) throws MicrocontrollerCommunicationException {
-		writer = new DigitalStablesPublisherWriter(new StringWriter(), configParams, aDenomeManager);
+		writer = new DigitalStablesPublisherWriter(new StringWriter(), configParams, aDenomeManager, hypothalamus);
 		reader = new DigitalStablesPublisherReader(new StringReader(""), writer);
 		logger.info("DigitalStablesPublisherMicroController initialized");
 	}
