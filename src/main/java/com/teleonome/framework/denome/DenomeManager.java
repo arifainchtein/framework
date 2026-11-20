@@ -3153,6 +3153,11 @@ public class DenomeManager {
 		return denomeJSONObject;
 	}
 
+	/** The Purpose nucleus the identity lookups use (2026-11-20, WaterNetworksSync reads its water networks there). */
+	public JSONObject getPurposeNucleus(){
+		return purposeNucleus;
+	}
+
 	public boolean registerTeleonome(String teleonomeName, String status, String operationMode, String identity, String networkName, String teleonomeAddress){
 		return aDBManager.registerTeleonome(  teleonomeName,   status,  operationMode,  identity,  networkName,  teleonomeAddress);
 	}

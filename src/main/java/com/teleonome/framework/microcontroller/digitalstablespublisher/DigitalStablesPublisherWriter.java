@@ -139,7 +139,8 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 				networksSent = "#waterNetworks=" + networks.getJSONArray("networks").length();
 				logger.info("DigitalStables: sent " + networks.getJSONArray("networks").length() + " water networks");
 			} else if (networks == null) {
-				justConnected = false;
+				if (!WaterNetworksSync.lastError.isEmpty()) networksSent = "#waterNetworksError=" + WaterNetworksSync.lastError;
+				else justConnected = false;
 			}
 			pruneNowAndThen();
 			JSONObject status = DevicesOutbox.status();

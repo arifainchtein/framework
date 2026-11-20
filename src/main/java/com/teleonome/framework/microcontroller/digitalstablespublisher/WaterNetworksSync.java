@@ -32,12 +32,15 @@ public class WaterNetworksSync {
 	static final String DEFAULT_PREFIX = "Water Network ";
 	private static final long RESEND_UNACKED_MS = 5 * 60 * 1000L;
 	private static final Logger logger = Logger.getLogger(WaterNetworksSync.class);
+	// why the last due() could not prepare the networks, for the publish result (this class's log may go nowhere)
+	static volatile String lastError = "";
 
 	private WaterNetworksSync() {
 	}
 
 	/** The message to send now, or null when Digital Stables already has these networks. */
 	public static JSONObject due(DenomeManager aDenomeManager, boolean justConnected) {
+		lastError = "";
 		try {
 			JSONArray networks = networks(aDenomeManager);
 			String hash = hash(networks.toString());
@@ -52,6 +55,7 @@ public class WaterNetworksSync {
 			message.put("networks", networks);
 			return message;
 		} catch (Exception e) {
+			lastError = e.getClass().getSimpleName() + ": " + e.getMessage();
 			logger.warn("water networks: could not prepare them for DigitalStables: " + Utils.getStringException(e));
 			return null;
 		}
@@ -89,16 +93,14 @@ public class WaterNetworksSync {
 	// the "Water Network ..." chains of Purpose, as they are in the Denome
 	static JSONArray networks(DenomeManager aDenomeManager) {
 		JSONArray list = new JSONArray();
-		JSONArray nuclei = aDenomeManager.getDenomeJSONObject().getJSONObject("Denome").getJSONArray("Nuclei");
-		for (int i = 0; i < nuclei.length(); i++) {
-			JSONObject nucleus = nuclei.getJSONObject(i);
-			if (!TeleonomeConstants.NUCLEI_PURPOSE.equals(nucleus.optString("Name"))) continue;
-			JSONArray chains = nucleus.optJSONArray("DeneChains");
-			String prefix = prefix(chains);
-			for (int j = 0; chains != null && j < chains.length(); j++) {
-				JSONObject chain = chains.getJSONObject(j);
-				if (chain.optString("Name").startsWith(prefix)) list.put(chain);
-			}
+		// the nucleus the identity lookups use: the live one (getDenomeJSONObject is not kept up to date)
+		JSONObject purpose = aDenomeManager.getPurposeNucleus();
+		if (purpose == null) throw new IllegalStateException("the Denome has no Purpose nucleus loaded");
+		JSONArray chains = purpose.optJSONArray("DeneChains");
+		String prefix = prefix(chains);
+		for (int j = 0; chains != null && j < chains.length(); j++) {
+			JSONObject chain = chains.getJSONObject(j);
+			if (chain.optString("Name").startsWith(prefix)) list.put(chain);
 		}
 		return list;
 	}
