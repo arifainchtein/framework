@@ -63,6 +63,8 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 	private MqttClient client = null;
 	private volatile String publishingResults = "";
 	private long lastPrune = 0;
+	// a new connection: send the water networks again, whatever was acknowledged before
+	private boolean justConnected = false;
 
 	public DigitalStablesPublisherWriter(Writer out, JSONArray configParams, DenomeManager d) {
 		super(out);
@@ -125,9 +127,23 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 				DevicesOutbox.markSent(row.id);
 				sent++;
 			}
+			// the water networks (2026-11-20): when they changed, after a reconnect, or when a person asked
+			String networksSent = "";
+			JSONObject networks = WaterNetworksSync.due(aDenomeManager, justConnected);
+			if (networks != null && System.currentTimeMillis() < deadline) {
+				MqttMessage networksMessage = new MqttMessage(networks.toString().getBytes(StandardCharsets.UTF_8));
+				networksMessage.setQos(1);
+				client.publish("devices/" + login + "/" + WaterNetworksSync.TOPIC_LEAF, networksMessage);
+				WaterNetworksSync.sent(networks);
+				justConnected = false;
+				networksSent = "#waterNetworks=" + networks.getJSONArray("networks").length();
+				logger.info("DigitalStables: sent " + networks.getJSONArray("networks").length() + " water networks");
+			} else if (networks == null) {
+				justConnected = false;
+			}
 			pruneNowAndThen();
 			JSONObject status = DevicesOutbox.status();
-			publishingResults = "Ok-Published " + sent + "#pending=" + status.getLong("pending") + "#oldestPendingSeconds=" + status.getLong("oldestPendingSeconds");
+			publishingResults = "Ok-Published " + sent + "#pending=" + status.getLong("pending") + "#oldestPendingSeconds=" + status.getLong("oldestPendingSeconds") + networksSent;
 			if (sent > 0) logger.info("DigitalStables: " + publishingResults);
 		} catch (Exception e) {
 			// "Failure", like the SFTP publisher; the rows stay and go at a later pulse
@@ -153,6 +169,7 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 		client.setTimeToWait(SEND_TIMEOUT_MS);
 		client.connect(options);
 		client.subscribe("devices/" + login + "/ack", 1, (topic, message) -> onAck(new String(message.getPayload(), StandardCharsets.UTF_8)));
+		justConnected = true;
 		logger.warn("DigitalStables: connected to " + server + " as " + login + " for Annabelle " + annabelleSerialNumber);
 	}
 
@@ -160,6 +177,7 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 	private void onAck(String payload) {
 		try {
 			JSONObject ack = new JSONObject(payload);
+			if (WaterNetworksSync.onAck(ack)) return;
 			if (!ack.has("outboxId")) return;
 			String outcome = ack.optString("outcome", "");
 			DevicesOutbox.markAcked(ack.getLong("outboxId"), outcome);
