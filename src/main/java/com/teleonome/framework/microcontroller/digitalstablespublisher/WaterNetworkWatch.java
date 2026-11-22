@@ -65,6 +65,21 @@ public class WaterNetworkWatch {
 		if (alerted == null) alerted = new JSONObject();
 		Set<String> problemsNow = new HashSet<String>();
 		long now = System.currentTimeMillis();
+		// device emergencies (2026-11-23, DeviceEmergencyCodes): no delay, the device already acted on them; checked on
+		// their own so a water network failure below cannot hold them back (that path returns before saving)
+		try {
+			for (Map.Entry<String, String[]> p : DeviceEmergencyCodes.problems(dm).entrySet()) {
+				String key = p.getKey();
+				problemsNow.add(key);
+				if (!alerted.has(key)) {
+					out.add(new Alert(key, "alert", p.getValue()[0], p.getValue()[1], p.getValue()[2]));
+					alerted.put(key, new JSONObject().put("Title", p.getValue()[0]).put("Network", p.getValue()[2]).put("At", now));
+				}
+			}
+		} catch (Exception e) {
+			logger.warn("device emergency checks failed: " + Utils.getStringException(e));
+			for (String key : alerted.keySet()) if (key.startsWith(DeviceEmergencyCodes.KEY_PREFIX)) problemsNow.add(key);   // nothing cleared on a failed check
+		}
 		try {
 			JSONArray chains = WaterNetworksSync.networks(dm);
 			for (int i = 0; i < chains.length(); i++) {
@@ -81,7 +96,8 @@ public class WaterNetworkWatch {
 			}
 		} catch (Exception e) {
 			logger.warn("water network checks failed: " + Utils.getStringException(e));
-			return out;   // nothing is cleared on a failed check
+			// nothing of the water networks is cleared on a failed check; the device emergencies above still go out
+			for (String key : alerted.keySet()) if (!key.startsWith(DeviceEmergencyCodes.KEY_PREFIX)) problemsNow.add(key);
 		}
 		for (String key : new HashSet<String>(firstSeen.keySet())) if (!problemsNow.contains(key)) firstSeen.remove(key);
 		for (String key : new ArrayList<String>(alerted.keySet())) {

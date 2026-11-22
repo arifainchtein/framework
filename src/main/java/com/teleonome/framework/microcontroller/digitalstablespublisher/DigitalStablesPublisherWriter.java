@@ -117,13 +117,13 @@ public class DigitalStablesPublisherWriter extends BufferedWriter {
 			for (WaterNetworkWatch.Alert alert : WaterNetworkWatch.check(aDenomeManager)) {
 				if (hypothalamus != null) {
 					try {
-						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_EMERGENCY_CHANNEL, new JSONObject().put("Sender", "Water network " + alert.network)
+						hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_EMERGENCY_CHANNEL, new JSONObject().put("Sender", (alert.key.startsWith(DeviceEmergencyCodes.KEY_PREFIX) ? "" : "Water network ") + alert.network)
 								.put("Message", (alert.state.equals("cleared") ? "" : alert.title + ": ") + alert.message).put("TimestampMillis", System.currentTimeMillis()).toString());
 					} catch (Exception e) {
 						logger.warn("water network alert not shown on Annabelle's page: " + e.getMessage());
 					}
 				}
-				logger.warn("water network " + alert.state + ": " + alert.title);
+				logger.warn("emergency channel " + alert.state + ": " + alert.title);
 			}
 			// the factory wrote new settings (Send To DS again): reconnect with them
 			if (client != null && new File(settingsFile).lastModified() != settingsFileModified) disconnectQuietly();
