@@ -422,6 +422,10 @@ public class TeleonomeConstants {
 	public static final String MAINTENANCE_MINUTES="Maintenance Minutes";
 	public static final int MAINTENANCE_DEFAULT_MINUTES=120;
 	public static final int MAINTENANCE_MAX_MINUTES=240;
+	// Stop Heart / Cerebellum / Hippocampus from the Diagnostics page (2026-11-22, see utils.OrganStop): the payload
+	// names the organ; the Hypothalamus checks the code, writes <Organ>Stopped.info and kills it
+	public static final String COMMAND_STOP_ORGAN="StopOrgan";
+	public static final String STOP_ORGAN_NAME="Organ";
 	public static final String COMMAND_CONFIRM_REBOOT="ConfirmReboot";
 	public static final String COMMAND_CONFIRM_SHUTDOWN="ConfirmShutdown";
 	public static final String COMMAND_START_PULSE="StartPulse";

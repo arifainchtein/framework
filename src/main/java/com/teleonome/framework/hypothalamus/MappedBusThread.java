@@ -1394,6 +1394,51 @@ class MappedBusThread extends Thread{
 				hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
 				System.exit(0);
 
+			}else if(command.equals(TeleonomeConstants.COMMAND_STOP_ORGAN)){
+				//
+				// Stop Heart / Cerebellum / Hippocampus (Diagnostics page, 2026-11-22): the code was good (we are here).
+				// Write <Organ>Stopped.info first, so the Medula leaves the organ alone, then kill it: politely, and
+				// after 10 s for good. The kill runs in its own thread so the commands behind this one are not held up.
+				String organ = dataPayloadJSONObject==null ? "" : dataPayloadJSONObject.optString(TeleonomeConstants.STOP_ORGAN_NAME, "");
+				if(!com.teleonome.framework.utils.OrganStop.isOrgan(organ)) {
+					logger.warn("StopOrgan for an unknown organ: " + organ);
+					JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId(), "Unknown organ " + organ);
+					hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
+					return;
+				}
+				try {
+					int minutes = dataPayloadJSONObject.optInt(TeleonomeConstants.MAINTENANCE_MINUTES, TeleonomeConstants.MAINTENANCE_DEFAULT_MINUTES);
+					minutes = Math.max(5, Math.min(TeleonomeConstants.MAINTENANCE_MAX_MINUTES, minutes));
+					JSONObject stop = com.teleonome.framework.utils.OrganStop.writeStop(Utils.getLocalDirectory(), organ, minutes, aCommandRequest.getClientIp());
+					logger.warn(organ + " stopped by a person until " + stop.getString("Until Text"));
+				} catch (IOException | JSONException e) {
+					// without the file the Medula would start it again within minutes: do not kill it
+					logger.warn("could not write the stop file of " + organ + ", not stopping it: " + Utils.getStringException(e));
+					JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandAsBadCommandCode(aCommandRequest.getId(), "Could not write " + com.teleonome.framework.utils.OrganStop.stopFileName(organ));
+					hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
+					return;
+				}
+				JSONObject commandResponseJSONObject = hypothalamus.aDenomeManager.markCommandCompleted(aCommandRequest.getId());
+				// before the kill: once the Heart is gone this cannot be published
+				hypothalamus.publishToHeart(TeleonomeConstants.HEART_TOPIC_UPDATE_FORM_RESPONSE, commandResponseJSONObject.toString());
+				// '[H]eart.jar': the bracket keeps pkill from matching sudo's command line, the quotes keep sh from
+				// globbing it into the jar file of this directory
+				final String pattern = "'[" + organ.charAt(0) + "]" + organ.substring(1) + ".jar'";
+				final String organName = organ;
+				new Thread(() -> {
+					try {
+						Utils.executeCommand("sudo pkill -f " + pattern);
+						for(int i=0;i<10 && com.teleonome.framework.utils.OrganStop.isRunning(organName);i++) Thread.sleep(1000);
+						if(com.teleonome.framework.utils.OrganStop.isRunning(organName)) {
+							logger.warn(organName + " still running 10 s after SIGTERM, killing it");
+							Utils.executeCommand("sudo pkill -9 -f " + pattern);
+						}
+						logger.warn(organName + " stopped, running=" + com.teleonome.framework.utils.OrganStop.isRunning(organName));
+					} catch (Exception e) {
+						logger.warn(Utils.getStringException(e));
+					}
+				}, "StopOrgan-" + organ).start();
+				return;
 			}
 
 			logger.debug("line 712 command=" + command);
