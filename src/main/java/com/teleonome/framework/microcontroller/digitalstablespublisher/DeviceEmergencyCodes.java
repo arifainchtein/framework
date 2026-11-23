@@ -38,6 +38,8 @@ public class DeviceEmergencyCodes {
 				"The solenoid was open longer than the water budget. The solenoid and pump are off until ClearPause. Check both level sensors and the solenoid." });
 		chinampa.put(13, new String[] { "System paused: fish tank not filling",
 				"The fish tank level did not rise with the pump on. The solenoid and pump are off. Check the pump, the sump level and the fish tank sensor; then ClearPause, or it resumes when the reading makes sense again." });
+		chinampa.put(14, new String[] { "Test alert",
+				"A test asked for from Annabelle's page, Paula or Chinampa's serial port. Nothing is wrong: the pump keeps running, and \"OK again\" follows in 5 minutes." });
 		CODES.put("Chinampa", chinampa);
 	}
 
