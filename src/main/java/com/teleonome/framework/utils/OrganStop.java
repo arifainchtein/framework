@@ -83,7 +83,9 @@ public class OrganStop {
 		if (procs == null) return false;
 		for (File p : procs) {
 			try {
-				byte[] cmd = FileUtils.readFileToByteArray(new File(p, "cmdline"));
+				// java.nio, not FileUtils: /proc files report length 0, and commons-io 2.4 (the webapp's) reads
+				// only file.length() bytes, so every cmdline came back empty and every organ "not running" (2026-11-26)
+				byte[] cmd = java.nio.file.Files.readAllBytes(new File(p, "cmdline").toPath());
 				// arguments are separated by NUL: look for the jar as a whole argument or a path ending in it
 				for (String arg : new String(cmd, StandardCharsets.UTF_8).split("\u0000")) {
 					if (arg.equals(jar) || arg.endsWith("/" + jar)) return true;
