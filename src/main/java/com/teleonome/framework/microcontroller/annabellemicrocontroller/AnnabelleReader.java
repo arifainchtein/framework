@@ -220,6 +220,16 @@ public class AnnabelleReader extends BufferedReader{
 							deserializer="CommaRecordDeserializer";
 							processString=true;
 							appendString=false;
+						}else if(tokens.length>=GloriaDataDeserializer.TOKEN_COUNT && deserializer.contains("GloriaDataDeserializer")) {
+							// Gloria solar pump controller (2026-11-26; it came as LangleyDataDeserializer before)
+							deserializer="GloriaDataDeserializer";
+							processString=true;
+							appendString=false;
+						}else if(tokens.length>=SensorSampleDeserializer.TOKEN_COUNT && deserializer.contains("SensorSampleDeserializer")) {
+							// a soil / rain sample from any device (2026-11-26): a "Sensor <model> <address>" Dene
+							deserializer="SensorSampleDeserializer";
+							processString=true;
+							appendString=false;
 						}else if(tokens.length>27 && deserializer.contains("LangleyDataDeserializer")) {
 							deserializer="LangleyDataDeserializer";
 							processString=true;
@@ -273,6 +283,12 @@ public class AnnabelleReader extends BufferedReader{
 									JSONObject forecastDene = annabellDeserializer.deserialise(teleonomeName, line);
 									if(forecastDene != null) {
 										applySerialDene(((WeatherForecastDeserializer)annabellDeserializer).getSerialNumber(), forecastDene, WeatherForecastDeserializer.DENE_NAME);
+									}
+								} else if(annabellDeserializer instanceof SensorSampleDeserializer) {
+									JSONObject sampleDene = annabellDeserializer.deserialise(teleonomeName, line);
+									if(sampleDene != null) {
+										SensorSampleDeserializer ssd = (SensorSampleDeserializer)annabellDeserializer;
+										applySerialDene(ssd.getSerialNumber(), sampleDene, ssd.getDeneName());
 									}
 								} else if(annabellDeserializer instanceof DeviceIdentityDeserializer) {
 									JSONObject deviceIdentityDene = annabellDeserializer.deserialise(teleonomeName, line);
@@ -370,6 +386,8 @@ public class AnnabelleReader extends BufferedReader{
 											// Annabelle's forecast (2026-11-12): every status line carries the latest one, so it is
 											// stored with it and reaches devices.digitalstables.com through the outbox
 											carryOverDene(telepathonName, telepathon, WeatherForecastDeserializer.DENE_NAME);
+											// RS485 sensor samples (SensorSampleDeserializer, 2026-11-26): one "Sensor ..." Dene per sensor
+											carryOverDenesStartingWith(telepathonName, telepathon, "Sensor ");
 											//
 											// Idempotency guard, added 2026-08-04 (see conversation).
 											// storeTelepathon() below is already safe to call twice for
@@ -676,6 +694,21 @@ public class AnnabelleReader extends BufferedReader{
 			}
 		} catch (JSONException e) {
 			logger.warn("could not carry over " + deneName + " for " + telepathonName + ": " + Utils.getStringException(e));
+		}
+	}
+
+	// carryOverDene for every live Dene whose name starts with prefix (the per-sensor "Sensor <model> <address>" Denes)
+	private void carryOverDenesStartingWith(String telepathonName, JSONObject telepathon, String prefix) {
+		try {
+			JSONObject liveChain = aDenomeManager.getTelepathonDeneChain(telepathonName);
+			if (liveChain == null || !liveChain.has("Denes")) return;
+			JSONArray liveDenes = liveChain.getJSONArray("Denes");
+			for (int i = 0; i < liveDenes.length(); i++) {
+				String name = liveDenes.getJSONObject(i).optString(TeleonomeConstants.DENE_NAME_ATTRIBUTE);
+				if (name.startsWith(prefix)) carryOverDene(telepathonName, telepathon, name);
+			}
+		} catch (JSONException e) {
+			logger.warn("could not carry over " + prefix + "* for " + telepathonName + ": " + Utils.getStringException(e));
 		}
 	}
 
