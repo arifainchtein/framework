@@ -176,6 +176,10 @@ public class FieldPacketListener {
 			}
 			String id = "act-" + java.util.UUID.randomUUID();
 			settings.inbox().mkdirs();
+			// a pasted API key goes into its own owner-only file, never into the action (kept, logged) itself
+			String key = action.has("Key") ? action.optString("Key").trim() : "";
+			action.remove("Key");
+			if (!key.isEmpty()) FieldPacketStore.writeSecret(settings, id, key);
 			FieldPacketStore.writeCode(settings, id, code.trim());
 			File tmp = new File(settings.inbox(), id + ".part");
 			Files.write(tmp.toPath(), action.toString().getBytes(StandardCharsets.UTF_8));

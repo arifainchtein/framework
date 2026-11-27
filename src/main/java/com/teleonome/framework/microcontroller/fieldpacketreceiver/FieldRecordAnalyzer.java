@@ -45,7 +45,7 @@ import com.anthropic.models.beta.messages.MessageCreateParams;
  *   provider=claude                       none (default) | claude; a local LLM can be added as another provider
  *   model=claude-opus-5-5
  *   effort=high                           low | medium | high | xhigh | max
- *   apiKeyFile=/home/pi/Teleonome/AnthropicApiKey   a file holding the API key; empty = ANTHROPIC_API_KEY
+ *   apiKeyFile=/home/pi/Teleonome/secrets/anthropic.key   (written by the Analysis page); empty = ANTHROPIC_API_KEY
  *   maxPhotos=6                           photos per visit sent with the request
  *   maxVisitsPerRun=3
  * A visit that fails is retried after RETRY_AFTER_MS; a refusal is recorded as an analysis (no retry).
@@ -53,6 +53,7 @@ import com.anthropic.models.beta.messages.MessageCreateParams;
 public class FieldRecordAnalyzer {
 
 	public static final String PROPERTIES_FILE = "analysis.properties";
+	public static final String STATUS_FILE = "analysis-status.json";  // the last outcome, for the Analysis page
 	private static final long RETRY_AFTER_MS = 30 * 60 * 1000L;
 	private static final Logger logger = Logger.getLogger(FieldRecordAnalyzer.class);
 
@@ -136,13 +137,23 @@ public class FieldRecordAnalyzer {
 					JSONObject analysis = analyze(client, p, record, i, dir);
 					addAnalysis(recordFile, visit.optString("Packet Id"), analysis);
 					failedAt.remove(key);
+					status(settings, true, "Analysed " + record.optString("Plant") + " (" + analysis.optString("Model") + ")");
 					logger.info("Analysed " + key + " (" + analysis.optString("Stop Reason") + ")");
 				} catch (Exception e) {
 					failedAt.put(key, System.currentTimeMillis());
+					status(settings, false, "Could not analyse " + record.optString("Plant") + ": " + e.getMessage() + " - trying again in " + RETRY_AFTER_MS / 60000 + " min");
 					logger.warn("Could not analyse " + key + ", trying again in " + RETRY_AFTER_MS / 60000 + " min: " + e);
 				}
 				done++;
 			}
+		}
+	}
+
+	private static void status(FieldPacketSettings s, boolean ok, String text) {
+		try {
+			FieldPacketStore.writeJson(new File(s.root, STATUS_FILE), new JSONObject().put("Ok", ok).put("Text", text).put("At", FieldSubjects.now()));
+		} catch (Exception e) {
+			// only the page's status line
 		}
 	}
 

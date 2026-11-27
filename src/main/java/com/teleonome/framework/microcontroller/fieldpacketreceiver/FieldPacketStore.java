@@ -68,6 +68,36 @@ public class FieldPacketStore {
 
 	public static void forgetCode(FieldPacketSettings s, String packetId) {
 		new File(s.inbox(), packetId + ".code").delete();
+		new File(s.inbox(), packetId + SECRET_EXTENSION).delete();  // a key that came with an action never outlives it
+	}
+
+	// An API key sent with a setAnalysis action is kept apart from the action, owner-only, until the action is
+	// carried out or refused (forgetCode removes it either way) - never in the action, the logs or the denome.
+	public static final String SECRET_EXTENSION = ".secret";
+
+	public static void writeSecret(FieldPacketSettings s, String id, String secret) throws IOException {
+		writeOwnerOnly(new File(s.inbox(), id + SECRET_EXTENSION), secret);
+	}
+
+	public static String readSecret(FieldPacketSettings s, String id) {
+		try {
+			return new String(Files.readAllBytes(new File(s.inbox(), id + SECRET_EXTENSION).toPath()), StandardCharsets.UTF_8).trim();
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	public static void writeOwnerOnly(File f, String text) throws IOException {
+		f.getParentFile().mkdirs();
+		File tmp = new File(f.getParentFile(), f.getName() + ".tmp");
+		Files.write(tmp.toPath(), new byte[0]);
+		try {
+			Files.setPosixFilePermissions(tmp.toPath(), java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
+		} catch (UnsupportedOperationException e) {
+			// not a POSIX file system
+		}
+		Files.write(tmp.toPath(), text.getBytes(StandardCharsets.UTF_8));
+		Files.move(tmp.toPath(), f.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 	}
 
 	public static void forgetRejected(FieldPacketSettings s, String packetId) {

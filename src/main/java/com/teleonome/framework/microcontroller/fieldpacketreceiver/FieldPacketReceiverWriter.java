@@ -208,7 +208,7 @@ public class FieldPacketReceiverWriter extends BufferedWriter {
 			try {
 				if (zip.getName().endsWith(FieldPacketStore.ACTION_EXTENSION)) {
 					JSONObject action = new JSONObject(new String(Files.readAllBytes(zip.toPath()), java.nio.charset.StandardCharsets.UTF_8));
-					String result = FieldRecordActions.apply(settings, action);
+					String result = FieldRecordActions.apply(settings, action, FieldPacketStore.readSecret(settings, packetId));
 					FieldPacketStore.actionsDone(settings).mkdirs();
 					FieldPacketStore.writeJson(new File(FieldPacketStore.actionsDone(settings), packetId + ".json"),
 							new JSONObject().put("Action", action).put("Result", result).put("Done", FieldSubjects.now()));

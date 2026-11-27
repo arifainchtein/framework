@@ -91,6 +91,10 @@ public class FieldRecordPages {
 			json(ex, subjectsJson());
 			return;
 		}
+		if (path.equals("/analysis")) {
+			html(ex, 200, analysisPage());
+			return;
+		}
 		if (path.equals("/new-area")) {
 			html(ex, 200, page("+ Area", "<h1>New area</h1>" + CODE_BOX + newAreaForm()));
 			return;
@@ -155,6 +159,7 @@ public class FieldRecordPages {
 		StringBuilder none = new StringBuilder();
 		for (JSONObject r : subjects) if (r.optString("Area").isEmpty()) none.append(subjectCard(r));
 		if (none.length() > 0) sb.append("<h2 style=\"margin-top:16px\">Not in an area</h2><div class=\"m\">Open one and use Move to give it an area.</div>").append(none);
+		sb.append("<div class=\"card\"><h2><a href=\"analysis\">Analysis</a></h2><div class=\"m\">Claude's interpretation of each visit: API key, model, on/off.</div></div>");
 		sb.append("<div class=\"card\"><h2>+ Area</h2>").append(CODE_BOX).append(newAreaForm()).append("</div>");
 		return page("Field Records", sb.toString());
 	}
@@ -291,6 +296,46 @@ public class FieldRecordPages {
 				.append("<form onsubmit=\"return frAct({Action:'moveSubject','Record Id':").append(jsString(id)).append(",Area:this.a.value},'frMove')\">")
 				.append(areaSelect("a", area, FieldSubjects.areas(settings))).append("<button>Move</button></form><div id=\"frMove\" class=\"msg\"></div></div>");
 		return page(r.optString("Plant"), sb.toString());
+	}
+
+	// Analysis (2026-11-27): paste the Anthropic API key, pick model and effort, on/off - a setAnalysis action. The
+	// key never comes back to the page: only whether one is saved and its last 4 characters.
+	private String analysisPage() throws IOException {
+		java.util.Properties p = new java.util.Properties();
+		File pf = new File(settings.root, "analysis.properties");
+		if (pf.isFile()) {
+			try (java.io.InputStream in = new java.io.FileInputStream(pf)) {
+				p.load(in);
+			}
+		}
+		boolean on = "claude".equalsIgnoreCase(p.getProperty("provider", "none").trim());
+		String model = p.getProperty("model", FieldRecordActions.MODELS[0]).trim(), effort = p.getProperty("effort", "high").trim();
+		File keyFile = new File(p.getProperty("apiKeyFile", FieldRecordActions.keyFile(settings).getAbsolutePath()).trim());
+		String keyText = "none saved";
+		if (keyFile.isFile()) {
+			String k = new String(Files.readAllBytes(keyFile.toPath()), StandardCharsets.UTF_8).trim();
+			keyText = "saved, ends in &hellip;" + esc(k.length() > 4 ? k.substring(k.length() - 4) : "");
+		}
+		StringBuilder sb = new StringBuilder("<nav><a href=\"/fieldrecords/\">Field Records</a></nav><h1>Analysis</h1>");
+		sb.append("<div class=\"card\"><h2>Now</h2><div>Analysis is <strong>").append(on ? "on" : "off").append("</strong>")
+				.append(on ? " &middot; " + esc(model) + ", effort " + esc(effort) : "").append("</div><div class=\"m\">API key: ").append(keyText).append("</div>");
+		File st = new File(settings.root, "analysis-status.json");
+		if (st.isFile()) {
+			JSONObject j = read(st);
+			sb.append("<div class=\"").append(j.optBoolean("Ok") ? "m" : "msg").append("\">Last: ").append(esc(j.optString("Text"))).append(" (").append(esc(j.optString("At"))).append(")</div>");
+		}
+		sb.append("<div class=\"m\">Each filed visit that has no analysis yet is sent to Claude after an Async Cycle: its photos (up to 6), readings, note and the plant's earlier visits.</div></div>");
+		sb.append("<div class=\"card\"><h2>Change</h2>").append(CODE_BOX)
+				.append("<form onsubmit=\"return frAct({Action:'setAnalysis',Key:this.k.value,Model:this.m.value,Effort:this.e.value,Enabled:this.o.checked},'frAnalysis')\">")
+				.append("<input name=\"k\" type=\"password\" autocomplete=\"off\" placeholder=\"").append(keyFile.isFile() ? "Paste a new key, or leave empty to keep it" : "Paste your Anthropic API key (sk-ant-...)").append("\" style=\"flex:1 1 260px\">")
+				.append("<select name=\"m\">");
+		for (String m : FieldRecordActions.MODELS) sb.append("<option").append(m.equals(model) ? " selected" : "").append(">").append(m).append("</option>");
+		sb.append("</select><select name=\"e\">");
+		for (String e : FieldRecordActions.EFFORTS) sb.append("<option").append(e.equals(effort) ? " selected" : "").append(">").append(e).append("</option>");
+		sb.append("</select><label class=\"m\"><input name=\"o\" type=\"checkbox\"").append(on || !keyFile.isFile() ? " checked" : "").append("> on</label>")
+				.append("<button>Save</button></form><div id=\"frAnalysis\" class=\"msg\"></div>")
+				.append("<div class=\"m\">The key is saved on this Pi in /home/pi/Teleonome/secrets/anthropic.key, readable only by the Teleonome. It is never shown again, logged, or put in the denome.</div></div>");
+		return page("Analysis", sb.toString());
 	}
 
 	private String subjectsJson() throws IOException {
