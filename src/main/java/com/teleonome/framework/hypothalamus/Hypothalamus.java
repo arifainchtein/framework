@@ -548,6 +548,12 @@ public abstract class Hypothalamus {
 		}
 	}
 	
+	// 2026-11-27: the Field Packet Receiver checks its senders' codes through the mother microcontroller
+	// (Annabelle's ESP32 holds the secret - VerifyUserCode), the same way MappedBusThread checks a command's code.
+	public MotherMicroController getMotherMicroController() {
+		return motherMicroController;
+	}
+
 	public DenomeManager getDenomeManager() {
 		return aDenomeManager;
 	}
