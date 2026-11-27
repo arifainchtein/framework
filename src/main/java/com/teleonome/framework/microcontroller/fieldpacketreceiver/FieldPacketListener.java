@@ -31,6 +31,7 @@ import com.sun.net.httpserver.HttpServer;
  *        400 not a valid packet / type not accepted / no code, 413 too big, 503 the inbox is full
  *   GET  /fieldpacket/<packet id>   {"State": "Inbox" | "Ingested" | "Rejected" | "Unknown", "Reason"?} - only the
  *        state, never content, so it needs no code
+ *   GET  /fieldrecords/...          read-only pages of the records (FieldRecordPages)
  *
  * Why the code is not checked here: the secret lives in Annabelle's ESP32 (VerifyUserCode, through the mother
  * microcontroller), and its serial port belongs to the Async Cycle - a second thread talking on it would mix its
@@ -57,6 +58,16 @@ public class FieldPacketListener {
 		settings.plants().mkdirs();
 		server = HttpServer.create(new InetSocketAddress(settings.listenPort), 0);
 		server.createContext("/fieldpacket", this::handlePacket);
+		final FieldRecordPages pages = new FieldRecordPages(settings);
+		server.createContext("/fieldrecords", ex -> {
+			try {
+				pages.handle(ex);
+			} catch (Exception e) {
+				logger.warn("Field record page failed: " + e);
+				ex.sendResponseHeaders(500, -1);
+				ex.close();
+			}
+		});
 		server.setExecutor(Executors.newFixedThreadPool(2, r -> {
 			Thread t = new Thread(r, "FieldPacketListener");
 			t.setDaemon(true);

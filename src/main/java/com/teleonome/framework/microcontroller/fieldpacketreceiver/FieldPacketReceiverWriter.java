@@ -103,6 +103,8 @@ public class FieldPacketReceiverWriter extends BufferedWriter {
 			List<File> verified = checkCodes(refused);
 			String r = verified.isEmpty() ? "Ok-Ingest Field Packets#Ingested=0|Rejected=0" : ingestWithDeadline(verified);
 			ingestionResults = r + (refused[0] > 0 ? "|Code Refused=" + refused[0] : "");
+			// visits not analysed yet (new ones, or earlier failures) - on its own thread, see FieldRecordAnalyzer
+			FieldRecordAnalyzer.startIfIdle(settings);
 		} else {
 			ingestionResults = "Ok";
 		}

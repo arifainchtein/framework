@@ -26,6 +26,12 @@ import org.json.JSONObject;
 public class SoilVisitPacketProcessor extends FieldPacketProcessor {
 
 	public JSONObject process(FieldPacket packet, FieldPacketSettings settings) throws FieldPacketException, IOException {
+		synchronized (FieldPacketStore.RECORD_LOCK) {
+			return processLocked(packet, settings);
+		}
+	}
+
+	private JSONObject processLocked(FieldPacket packet, FieldPacketSettings settings) throws FieldPacketException, IOException {
 		if (packet.getPacketVersion() != 1) throw new FieldPacketException("SoilVisit version " + packet.getPacketVersion() + " is not known (1 is)");
 		JSONObject data = packet.json("data.json");
 		String plant = data.optString("plant", "").trim();

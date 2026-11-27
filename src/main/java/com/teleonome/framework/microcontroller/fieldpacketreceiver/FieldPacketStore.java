@@ -20,6 +20,8 @@ import org.json.JSONObject;
 public class FieldPacketStore {
 
 	public static final String RECORD_FILE = "record.json";
+	// held while a record.json is read and rewritten (ingestion and FieldRecordAnalyzer both write records)
+	public static final Object RECORD_LOCK = new Object();
 	private static final String NAME_PATTERN = "[A-Za-z0-9_.-]+";
 
 	// Waiting or ingested; a rejected packet may be sent again (with a new code), so it does not count.
