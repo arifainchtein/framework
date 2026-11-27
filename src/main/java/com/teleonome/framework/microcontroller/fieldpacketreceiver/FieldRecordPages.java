@@ -325,6 +325,35 @@ public class FieldRecordPages {
 			sb.append("<div class=\"").append(j.optBoolean("Ok") ? "m" : "msg").append("\">Last: ").append(esc(j.optString("Text"))).append(" (").append(esc(j.optString("At"))).append(")</div>");
 		}
 		sb.append("<div class=\"m\">Each filed visit that has no analysis yet is sent to Claude after an Async Cycle: its photos (up to 6), readings, note and the plant's earlier visits.</div></div>");
+		// the estimated balance (AnalysisSpend)
+		JSONObject spend = AnalysisSpend.read(settings);
+		java.math.BigDecimal credits = AnalysisSpend.credits(spend), left = AnalysisSpend.balance(spend);
+		sb.append("<div class=\"card\"><h2>Credits</h2>");
+		if (spend.getJSONArray("Credits").length() == 0) {
+			sb.append("<div class=\"m\">No credits entered yet. Add what you bought in the Console (Settings &rarr; Billing), and the page keeps an estimate of what is left.</div>");
+		} else {
+			sb.append("<div style=\"font-size:28px;font-weight:700\"").append(left.signum() <= 0 ? " class=\"msg\"" : "").append(">about $").append(left.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString()).append(" left</div>")
+					.append("<div class=\"m\">$").append(credits.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString()).append(" in credits &minus; $")
+					.append(new java.math.BigDecimal(spend.optString("Spent", "0")).setScale(2, java.math.RoundingMode.HALF_UP).toPlainString()).append(" spent on ")
+					.append(spend.optInt("Analyses")).append(spend.optInt("Analyses") == 1 ? " analysis" : " analyses")
+					.append(spend.has("Since") ? " since " + esc(spend.optString("Since")) : "").append("</div>");
+			JSONArray recent = spend.getJSONArray("Recent");
+			if (recent.length() > 0) {
+				sb.append("<table><tr><th>Analysis</th><th>Model</th><th>Cost</th></tr>");
+				for (int i = recent.length() - 1; i >= Math.max(0, recent.length() - 10); i--) {
+					JSONObject r = recent.getJSONObject(i);
+					sb.append("<tr><td>").append(esc(r.optString("At"))).append(" &middot; ").append(esc(r.optString("What"))).append("</td><td>").append(esc(r.optString("Model")))
+							.append("</td><td>$").append(esc(r.optString("Cost"))).append("</td></tr>");
+				}
+				sb.append("</table>");
+			}
+		}
+		sb.append(CODE_BOX)
+				.append("<form onsubmit=\"return frAct({Action:'addCredit',Amount:this.a.value,Note:this.n.value},'frCredit')\">$<input name=\"a\" inputmode=\"decimal\" size=\"7\" placeholder=\"10.00\" required>")
+				.append("<input name=\"n\" placeholder=\"note (optional)\" maxlength=\"60\"><button>Add credits</button></form>")
+				.append("<form onsubmit=\"return frAct({Action:'setBalance',Amount:this.a.value},'frCredit')\">$<input name=\"a\" inputmode=\"decimal\" size=\"7\" required>")
+				.append("<button class=\"sec\">Set to the Console's balance</button></form><div id=\"frCredit\" class=\"msg\"></div>")
+				.append("<div class=\"m\">An estimate: what each analysis cost (from the tokens the API reports and the list prices) taken off what you entered. It only knows what Annabelle spends with this key - the Console shows the real balance.</div></div>");
 		sb.append("<div class=\"card\"><h2>Change</h2>").append(CODE_BOX)
 				.append("<form onsubmit=\"return frAct({Action:'setAnalysis',Key:this.k.value,Model:this.m.value,Effort:this.e.value,Enabled:this.o.checked},'frAnalysis')\">")
 				.append("<input name=\"k\" type=\"password\" autocomplete=\"off\" placeholder=\"").append(keyFile.isFile() ? "Paste a new key, or leave empty to keep it" : "Paste your Anthropic API key (sk-ant-...)").append("\" style=\"flex:1 1 260px\">")

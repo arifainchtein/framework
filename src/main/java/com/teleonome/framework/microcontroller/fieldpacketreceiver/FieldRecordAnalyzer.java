@@ -135,9 +135,11 @@ public class FieldRecordAnalyzer {
 				if (client == null) client = client(p);
 				try {
 					JSONObject analysis = analyze(client, p, record, i, dir);
+					// the spend first: the answer was paid for even if writing it fails
+					AnalysisSpend.addSpend(settings, record.optString("Plant"), analysis.optString("Model"), new java.math.BigDecimal(analysis.optString("Cost USD", "0")));
 					addAnalysis(recordFile, visit.optString("Packet Id"), analysis);
 					failedAt.remove(key);
-					status(settings, true, "Analysed " + record.optString("Plant") + " (" + analysis.optString("Model") + ")");
+					status(settings, true, "Analysed " + record.optString("Plant") + " (" + analysis.optString("Model") + ", about $" + analysis.optString("Cost USD") + ")");
 					logger.info("Analysed " + key + " (" + analysis.optString("Stop Reason") + ")");
 				} catch (Exception e) {
 					failedAt.put(key, System.currentTimeMillis());
@@ -233,6 +235,11 @@ public class FieldRecordAnalyzer {
 		a.put("Stop Reason", stop);
 		a.put("Photos Sent", sent);
 		a.put("Text", answer.toString().trim());
+		// what it cost, from the token counts the API returns (AnalysisSpend keeps the estimated credit balance)
+		long in = response.usage().inputTokens(), out = response.usage().outputTokens();
+		long cacheRead = response.usage().cacheReadInputTokens().orElse(0L), cacheWrite = response.usage().cacheCreationInputTokens().orElse(0L);
+		a.put("Usage", new JSONObject().put("Input Tokens", in).put("Output Tokens", out).put("Cache Read Tokens", cacheRead).put("Cache Write Tokens", cacheWrite));
+		a.put("Cost USD", AnalysisSpend.cost(response.model().toString(), model, in, out, cacheRead, cacheWrite).toPlainString());
 		return a;
 	}
 

@@ -20,10 +20,12 @@ import org.json.JSONObject;
  *   {"Action": "setAnalysis",    "Enabled", "Model", "Effort"} + a key, kept apart (FieldPacketStore.writeSecret):
  *                                writes /home/pi/Teleonome/secrets/anthropic.key (owner-only, the folder too) when a key
  *                                came, and analysis.properties
+ *   {"Action": "addCredit",      "Amount", "Note"}             credits bought in the Console (AnalysisSpend)
+ *   {"Action": "setBalance",     "Amount"}                     the balance the Console shows: counting starts again
  */
 public class FieldRecordActions {
 
-	public static final String[] ACTIONS = { "createArea", "renameArea", "deleteArea", "fileArrival", "discardArrival", "moveSubject", "setAnalysis" };
+	public static final String[] ACTIONS = { "createArea", "renameArea", "deleteArea", "fileArrival", "discardArrival", "moveSubject", "setAnalysis", "addCredit", "setBalance" };
 	public static final String KEY_FILE = "anthropic.key";
 
 	// The Teleonome's secrets (2026-11-27): <Teleonome dir>/secrets/, owner-only - /home/pi/Teleonome/secrets/anthropic.key
@@ -76,6 +78,10 @@ public class FieldRecordActions {
 			FieldPacketStore.writeOwnerOnly(new File(s.root, "analysis.properties")  /* FieldRecordAnalyzer.PROPERTIES_FILE; not touched here so the SDK isn't loaded */, props);
 			return "Analysis " + (on ? "on, " + model + ", effort " + effort : "off") + (key != null && !key.isEmpty() ? ", new key saved" : "");
 		}
+		case "addCredit":
+			return AnalysisSpend.addCredit(s, a.optString("Amount"), a.optString("Note", ""));
+		case "setBalance":
+			return AnalysisSpend.setBalance(s, a.optString("Amount"));
 		case "createArea":
 			FieldSubjects.createArea(s, a.optString("Name"));
 			return "Area " + a.optString("Name").trim() + " created";
