@@ -102,9 +102,14 @@ public class FieldPacketReceiverWriter extends BufferedWriter {
 			int[] refused = { 0 };
 			List<File> verified = checkCodes(refused);
 			String r = verified.isEmpty() ? "Ok-Ingest Field Packets#Ingested=0|Rejected=0" : ingestWithDeadline(verified);
+			if (verified.isEmpty()) syncDenome();  // the first cycle after a restart puts the chains in
 			ingestionResults = r + (refused[0] > 0 ? "|Code Refused=" + refused[0] : "");
 			// visits not analysed yet (new ones, or earlier failures) - on its own thread, see FieldRecordAnalyzer
-			FieldRecordAnalyzer.startIfIdle(settings);
+			try {
+				FieldRecordAnalyzer.startIfIdle(settings);
+			} catch (Throwable t) {  // e.g. the Anthropic SDK missing from the jar: ingestion must go on regardless
+				logger.warn("Field record analysis not started: " + t);
+			}
 		} else {
 			ingestionResults = "Ok";
 		}
@@ -123,14 +128,14 @@ public class FieldPacketReceiverWriter extends BufferedWriter {
 	// The waiting packets whose codes passed, oldest first; the others are moved to rejected/ with the reason.
 	private List<File> checkCodes(int[] refused) {
 		List<File> verified = new ArrayList<File>();
-		File[] zips = settings.inbox().listFiles((d, name) -> name.endsWith(".zip"));
+		File[] zips = settings.inbox().listFiles((d, name) -> name.endsWith(".zip") || name.endsWith(FieldPacketStore.ACTION_EXTENSION));
 		if (zips == null) return verified;
 		Arrays.sort(zips, (a, b) -> Long.compare(a.lastModified(), b.lastModified()));
 		Map<String, Boolean> asked = new HashMap<String, Boolean>();
 		long now = System.currentTimeMillis();
 		for (Iterator<Long> it = wrongCodeTimes.iterator(); it.hasNext();) if (now - it.next() > 3600000L) it.remove();
 		for (File zip : zips) {
-			String packetId = zip.getName().substring(0, zip.getName().length() - ".zip".length());
+			String packetId = FieldPacketStore.idOf(zip);
 			String[] code = FieldPacketStore.readCode(settings, packetId);
 			String why = null;
 			if (code == null) {
@@ -197,22 +202,34 @@ public class FieldPacketReceiverWriter extends BufferedWriter {
 	}
 
 	private String ingest(List<File> zips) {
-		int ingested = 0, rejected = 0;
+		int ingested = 0, rejected = 0, actions = 0;
 		for (File zip : zips) {
-			String packetId = zip.getName().substring(0, zip.getName().length() - ".zip".length());
+			String packetId = FieldPacketStore.idOf(zip);
 			try {
+				if (zip.getName().endsWith(FieldPacketStore.ACTION_EXTENSION)) {
+					JSONObject action = new JSONObject(new String(Files.readAllBytes(zip.toPath()), java.nio.charset.StandardCharsets.UTF_8));
+					String result = FieldRecordActions.apply(settings, action);
+					FieldPacketStore.actionsDone(settings).mkdirs();
+					FieldPacketStore.writeJson(new File(FieldPacketStore.actionsDone(settings), packetId + ".json"),
+							new JSONObject().put("Action", action).put("Result", result).put("Done", FieldSubjects.now()));
+					zip.delete();
+					FieldPacketStore.forgetCode(settings, packetId);
+					actions++;
+					logger.info("Field record action " + packetId + ": " + result);
+					continue;
+				}
 				FieldPacket packet = FieldPacket.open(Files.readAllBytes(zip.toPath()));
 				packet.check(settings.acceptedTypes);
 				if (!packet.getPacketId().equals(packetId)) throw new FieldPacketException("the file name does not match the Packet Id");
-				JSONObject pointer = FieldPacketProcessor.forType(packet.getPacketType()).process(packet, settings);
+				JSONObject where = FieldPacketProcessor.forType(packet.getPacketType()).process(packet, settings);
 				File dir = FieldPacketStore.storeDir(settings, packet.getPacketType(), packetId);
 				dir.mkdirs();
 				Files.move(zip.toPath(), new File(dir, "packet.zip").toPath());
 				FieldPacketStore.forgetCode(settings, packetId);
 				FieldPacketStore.writeJson(new File(dir, FieldPacket.MANIFEST), packet.getManifest());
-				markRecord(pointer);
 				ingested++;
-				logger.info("Field packet ingested: " + packet.getPacketType() + " " + packetId + " -> record " + pointer.optString("Record Id"));
+				logger.info("Field packet ingested: " + packet.getPacketType() + " " + packetId + " -> "
+						+ (where.has("Record Id") ? "record " + where.optString("Record Id") : "Arrivals"));
 			} catch (FieldPacketException e) {
 				rejected++;
 				logger.warn("Field packet " + packetId + " rejected: " + e.getMessage());
@@ -227,47 +244,76 @@ public class FieldPacketReceiverWriter extends BufferedWriter {
 				return "Failure-Ingest Field Packets#" + packetId + ": " + e.getMessage();
 			}
 		}
-		return "Ok-Ingest Field Packets#Ingested=" + ingested + "|Rejected=" + rejected;
+		syncDenome();
+		return "Ok-Ingest Field Packets#Ingested=" + ingested + "|Actions=" + actions + "|Rejected=" + rejected;
 	}
 
-	// Adds the record's pointer dene to Purpose:Field Records, once per record. Nothing else of the record goes
-	// into the denome.
-	private void markRecord(JSONObject pointer) {
-		String recordName = pointer.optString("Record Name");
+	// The denome only knows that areas and records exist and where they are (2026-11-27):
+	//   Purpose:Field Records          "Field Records Receiver" (Record Host, Listen Port) + one pointer dene per
+	//                                  plant or bed in no area
+	//   Purpose:Field Records <Area>   "Area" (Area Name, Created) + one pointer dene per plant or bed in it
+	// A pointer dene, named after the subject: Record Type (Plant/Bed), Record Id, Record File, Record Host.
+	// Built from disk (FieldSubjects) and put in only when it changed; chains of areas that no longer exist go.
+	private String lastSynced = null;
+
+	void syncDenome() {
 		try {
-			JSONObject existing = null;
-			try {
-				existing = aDenomeManager.getDeneChainByName(TeleonomeConstants.NUCLEI_PURPOSE, FIELD_RECORDS_CHAIN);
-			} catch (Exception e) {
-				existing = null;
+			java.util.Map<String, JSONArray> chains = new java.util.LinkedHashMap<String, JSONArray>();
+			JSONArray base = new JSONArray();
+			JSONObject receiver = new JSONObject().put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, "Field Records Receiver").put("DeneWords", new JSONArray()
+					.put(DenomeUtils.buildDeneWordJSONObject("Record Host", hostName(), null, TeleonomeConstants.DATATYPE_STRING, true))
+					.put(DenomeUtils.buildDeneWordJSONObject("Listen Port", "" + settings.listenPort, null, TeleonomeConstants.DATATYPE_INTEGER, true)));
+			base.put(receiver);
+			chains.put(FIELD_RECORDS_CHAIN, base);
+			JSONArray areas = FieldSubjects.areas(settings);
+			for (int i = 0; i < areas.length(); i++) {
+				JSONObject area = areas.getJSONObject(i);
+				JSONArray denes = new JSONArray();
+				denes.put(new JSONObject().put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, "Area").put("DeneWords", new JSONArray()
+						.put(DenomeUtils.buildDeneWordJSONObject("Area Name", area.optString("Name"), null, TeleonomeConstants.DATATYPE_STRING, true))
+						.put(DenomeUtils.buildDeneWordJSONObject("Created", area.optString("Created"), null, TeleonomeConstants.DATATYPE_STRING, true))));
+				chains.put(FIELD_RECORDS_CHAIN + " " + area.optString("Name"), denes);
 			}
-			JSONArray denes = new JSONArray();
-			if (existing != null && existing.optJSONArray("Denes") != null) {
-				JSONArray old = existing.getJSONArray("Denes");
-				for (int i = 0; i < old.length(); i++) {
-					JSONObject dene = old.getJSONObject(i);
-					if (recordName.equals(dene.optString(TeleonomeConstants.DENE_NAME_ATTRIBUTE))) return;  // already marked
-					denes.put(dene);
-				}
+			for (JSONObject r : FieldSubjects.subjects(settings)) {
+				String chain = r.optString("Area", "").isEmpty() ? FIELD_RECORDS_CHAIN : FIELD_RECORDS_CHAIN + " " + r.optString("Area");
+				if (!chains.containsKey(chain)) chain = FIELD_RECORDS_CHAIN;  // an area that was removed by hand
+				File f = new File(FieldPacketStore.recordDir(settings, r.optString("Record Id")), FieldPacketStore.RECORD_FILE);
+				chains.get(chain).put(new JSONObject().put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, r.optString("Plant")).put("DeneWords", new JSONArray()
+						.put(DenomeUtils.buildDeneWordJSONObject("Record Type", r.optString("Record Type", FieldSubjects.TYPE_PLANT), null, TeleonomeConstants.DATATYPE_STRING, true))
+						.put(DenomeUtils.buildDeneWordJSONObject("Record Id", r.optString("Record Id"), null, TeleonomeConstants.DATATYPE_STRING, true))
+						.put(DenomeUtils.buildDeneWordJSONObject("Record File", f.getAbsolutePath(), null, TeleonomeConstants.DATATYPE_STRING, true))
+						.put(DenomeUtils.buildDeneWordJSONObject("Record Host", hostName(), null, TeleonomeConstants.DATATYPE_STRING, true))));
 			}
-			JSONObject dene = new JSONObject();
-			dene.put(TeleonomeConstants.DENE_NAME_ATTRIBUTE, recordName);
-			JSONArray words = new JSONArray();
-			dene.put("DeneWords", words);
-			words.put(DenomeUtils.buildDeneWordJSONObject("Record Type", pointer.optString("Record Type"), null, TeleonomeConstants.DATATYPE_STRING, true));
-			words.put(DenomeUtils.buildDeneWordJSONObject("Record Id", pointer.optString("Record Id"), null, TeleonomeConstants.DATATYPE_STRING, true));
-			words.put(DenomeUtils.buildDeneWordJSONObject("Record File", pointer.optString("Record File"), null, TeleonomeConstants.DATATYPE_STRING, true));
-			words.put(DenomeUtils.buildDeneWordJSONObject("Record Host", hostName(), null, TeleonomeConstants.DATATYPE_STRING, true));
-			denes.put(dene);
-			JSONObject chain = new JSONObject();
-			chain.put(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE, FIELD_RECORDS_CHAIN);
-			chain.put("Denes", denes);
-			if (existing != null) aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_PURPOSE, FIELD_RECORDS_CHAIN);
-			aDenomeManager.injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_PURPOSE, chain);
+			String now = new JSONObject(chains).toString();
+			if (now.equals(lastSynced) || aDenomeManager == null) return;
+			for (String name : purposeChainNames()) {
+				if (name.equals(FIELD_RECORDS_CHAIN) || name.startsWith(FIELD_RECORDS_CHAIN + " ")) aDenomeManager.removeDeneChain(TeleonomeConstants.NUCLEI_PURPOSE, name);
+			}
+			for (java.util.Map.Entry<String, JSONArray> e : chains.entrySet()) {
+				JSONObject chain = new JSONObject();
+				chain.put(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE, e.getKey());
+				chain.put("Denes", e.getValue());
+				aDenomeManager.injectDeneChainIntoNucleus(TeleonomeConstants.NUCLEI_PURPOSE, chain);
+			}
+			lastSynced = now;
 		} catch (Exception e) {
-			// the record is on disk either way; the pointer is added when the next visit of this plant comes in
-			logger.warn("could not add " + recordName + " to " + FIELD_RECORDS_CHAIN + ": " + Utils.getStringException(e));
+			// the records are on disk either way; the denome is brought up to date at the next ingest
+			logger.warn("could not bring " + FIELD_RECORDS_CHAIN + " up to date in the denome: " + Utils.getStringException(e));
 		}
+	}
+
+	private List<String> purposeChainNames() {
+		List<String> names = new ArrayList<String>();
+		JSONObject pulse = aDenomeManager.getCurrentlyCreatingPulseJSONObject();
+		if (pulse == null) return names;
+		JSONArray nuclei = pulse.getJSONObject("Denome").getJSONArray("Nuclei");
+		for (int i = 0; i < nuclei.length(); i++) {
+			JSONObject n = nuclei.getJSONObject(i);
+			if (!TeleonomeConstants.NUCLEI_PURPOSE.equals(n.optString("Name"))) continue;
+			JSONArray chains = n.optJSONArray("DeneChains");
+			for (int j = 0; chains != null && j < chains.length(); j++) names.add(chains.getJSONObject(j).optString(TeleonomeConstants.DENE_DENE_NAME_ATTRIBUTE));
+		}
+		return names;
 	}
 
 	private static String hostName() {

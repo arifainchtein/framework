@@ -58,14 +58,18 @@ public class FieldPacketListener {
 		settings.plants().mkdirs();
 		server = HttpServer.create(new InetSocketAddress(settings.listenPort), 0);
 		server.createContext("/fieldpacket", this::handlePacket);
+		server.createContext("/fieldaction", this::handleAction);
 		final FieldRecordPages pages = new FieldRecordPages(settings);
 		server.createContext("/fieldrecords", ex -> {
 			try {
 				pages.handle(ex);
-			} catch (Exception e) {
+			} catch (Throwable e) {  // Errors too (e.g. a class missing from the jar): answer, don't just drop
 				logger.warn("Field record page failed: " + e);
-				ex.sendResponseHeaders(500, -1);
-				ex.close();
+				try {
+					reply(ex, 500, status("Error", null, String.valueOf(e)));
+				} catch (Throwable ignored) {
+					ex.close();
+				}
 			}
 		});
 		server.setExecutor(Executors.newFixedThreadPool(2, r -> {
@@ -129,9 +133,57 @@ public class FieldPacketListener {
 			logger.info("Field packet received: " + packet.getPacketType() + " " + id + " from " + packet.getSender() + ", "
 					+ zip.length / 1024 + " KB");
 			reply(ex, 200, status("Received", id, null).put("Packet Type", packet.getPacketType()));
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			logger.warn("Field packet reception failed: " + e);
 			reply(ex, 500, status("Error", null, String.valueOf(e.getMessage())));
+		}
+	}
+
+	// POST /fieldaction  JSON body {"Action", ...} (FieldRecordActions), header X-Totp-Code -> {"Status":"Received","Action Id"}
+	// GET  /fieldaction/<id> -> {"State": "Inbox" | "Done" | "Rejected" | "Unknown", "Result"?, "Reason"?}
+	// Like a packet, the action waits in the inbox until the Async Cycle has checked its code with the ESP32.
+	private void handleAction(HttpExchange ex) throws IOException {
+		try {
+			String path = ex.getRequestURI().getPath();
+			if ("GET".equals(ex.getRequestMethod()) && path.startsWith("/fieldaction/")) {
+				reply(ex, 200, FieldPacketStore.state(settings, path.substring("/fieldaction/".length())));
+				return;
+			}
+			if (!"POST".equals(ex.getRequestMethod())) {
+				reply(ex, 405, status("Error", null, "POST an action to /fieldaction"));
+				return;
+			}
+			String code = ex.getRequestHeaders().getFirst(TOTP_HEADER);
+			if (code == null || !code.trim().matches("[0-9]{6}")) {
+				reply(ex, 400, status("Error", null, "no 6-digit code in " + TOTP_HEADER));
+				return;
+			}
+			if (FieldPacketStore.waiting(settings) >= MAX_WAITING) {
+				reply(ex, 503, status("Error", null, "the inbox is full - try again after the next Async Cycle"));
+				return;
+			}
+			byte[] body = readBody(ex.getRequestBody(), 16 * 1024);
+			JSONObject action;
+			try {
+				action = new JSONObject(new String(body == null ? new byte[0] : body, StandardCharsets.UTF_8));
+			} catch (Exception e) {
+				reply(ex, 400, status("Error", null, "the action is not JSON"));
+				return;
+			}
+			if (!FieldRecordActions.known(action.optString("Action"))) {
+				reply(ex, 400, status("Error", null, "unknown action " + action.optString("Action")));
+				return;
+			}
+			String id = "act-" + java.util.UUID.randomUUID();
+			settings.inbox().mkdirs();
+			FieldPacketStore.writeCode(settings, id, code.trim());
+			File tmp = new File(settings.inbox(), id + ".part");
+			Files.write(tmp.toPath(), action.toString().getBytes(StandardCharsets.UTF_8));
+			Files.move(tmp.toPath(), new File(settings.inbox(), id + FieldPacketStore.ACTION_EXTENSION).toPath(), StandardCopyOption.ATOMIC_MOVE);
+			logger.info("Field record action received: " + action.optString("Action") + " " + id);
+			reply(ex, 200, new JSONObject().put("Status", "Received").put("Action Id", id));
+		} catch (Throwable e) {
+			reply(ex, 500, status("Error", null, String.valueOf(e)));
 		}
 	}
 

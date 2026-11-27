@@ -3,9 +3,10 @@ package com.teleonome.framework.microcontroller.fieldpacketreceiver;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,12 +14,19 @@ import org.json.JSONObject;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
- * Read-only pages for the field records (2026-11-27), served by FieldPacketListener:
- *   GET /fieldrecords/                 every plant: last visit, last readings, how many visits
- *   GET /fieldrecords/<record id>/     one plant's timeline, newest visit first: readings, note, photos, analyses
- *   GET /fieldrecords/<record id>/<file>   a photo, or record.json
- * Nothing here changes anything. Like the Teleonome's own pages they are open on the local network; there is no
- * code check (codes go through Annabelle's ESP32, which belongs to the Async Cycle).
+ * The field records' pages (2026-11-27), served by FieldPacketListener and shown in the Teleonome's Home page pills:
+ *   GET /fieldrecords/                       areas, Arrivals, plants and beds in no area, "+ Area"
+ *   GET /fieldrecords/area/<area>/           one area: its plants and beds; rename / delete the area
+ *   GET /fieldrecords/arrivals/              visits waiting to be filed, each with a File form
+ *   GET /fieldrecords/arrivals/<id>/<photo>
+ *   GET /fieldrecords/new-area               just the "+ Area" form (the pill of that name)
+ *   GET /fieldrecords/subjects.json          {"Areas": [..], "Subjects": [{"Record Id","Name","Type","Area","Visits","Last Visit"}]}
+ *                                            - Paula's "For" list
+ *   GET /fieldrecords/<record id>/           one plant or bed: readings over time, its visits, photos, analyses; Move
+ *   GET /fieldrecords/<record id>/<file>     a photo, or record.json
+ * Reading is open on the local network, like the Teleonome's pages. Every change is an action (FieldRecordActions)
+ * posted to /fieldaction with the 6-digit code, carried out at the next Async Cycle - the pages show it as waiting,
+ * then reload.
  */
 public class FieldRecordPages {
 
@@ -27,16 +35,40 @@ public class FieldRecordPages {
 		{"n", "N*", "0"}, {"p", "P*", "0"}, {"k", "K*", "0"}, {"salt", "Salt", "0"}};
 
 	private static final String STYLE = "<meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-			+ "<style>:root{--bg:#fff;--fg:#212529;--muted:#6c757d;--line:#dee2e6;--card:#f8f9fa;--link:#2a670e}"
-			+ "@media(prefers-color-scheme:dark){:root{--bg:#1b1d1f;--fg:#e9ecef;--muted:#adb5bd;--line:#3a3f44;--card:#24272a;--link:#8fd16a}}"
+			+ "<style>:root{--bg:#fff;--fg:#212529;--muted:#6c757d;--line:#dee2e6;--card:#f8f9fa;--link:#2a670e;--warn:#b45309}"
+			+ "@media(prefers-color-scheme:dark){:root{--bg:#1b1d1f;--fg:#e9ecef;--muted:#adb5bd;--line:#3a3f44;--card:#24272a;--link:#8fd16a;--warn:#f59f00}}"
 			+ "body{font-family:system-ui,sans-serif;margin:0 auto;max-width:900px;padding:16px;background:var(--bg);color:var(--fg)}"
-			+ "a{color:var(--link)}h1{font-size:22px}h2{font-size:18px;margin:0 0 6px}.m{color:var(--muted);font-size:13px}"
+			+ "a{color:var(--link)}h1{font-size:22px;margin:4px 0 10px}h2{font-size:18px;margin:0 0 6px}.m{color:var(--muted);font-size:13px}"
 			+ ".card{border:1px solid var(--line);border-radius:10px;padding:12px;margin:12px 0;background:var(--card)}"
+			+ ".grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}.grid .card{margin:0}"
 			+ "table{border-collapse:collapse;font-size:14px;margin:6px 0;width:100%;overflow-x:auto;display:block}"
 			+ "td,th{border:1px solid var(--line);padding:4px 6px;text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}"
 			+ ".ph{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.ph img{width:140px;height:140px;object-fit:cover;border-radius:8px}"
 			+ ".note{white-space:pre-wrap}.an{white-space:pre-wrap;border-left:3px solid var(--link);padding:6px 10px;margin:8px 0;background:var(--bg)}"
+			+ "form{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}input,select,button{font:inherit;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}"
+			+ "button{background:var(--link);color:#fff;border:0;cursor:pointer}button.sec{background:transparent;color:var(--fg);border:1px solid var(--line)}"
+			+ ".badge{display:inline-block;min-width:20px;padding:1px 7px;border-radius:10px;background:var(--warn);color:#fff;font-size:13px;text-align:center}"
+			+ ".msg{font-size:13px;color:var(--warn)}.msg:empty{display:none}nav{font-size:14px;margin-bottom:6px}"
 			+ "</style>";
+
+	// Every form here: fields + a code -> POST /fieldaction, then wait for the Async Cycle and reload.
+	private static final String SCRIPT = "<script>"
+			+ "function frCode(){var c=document.getElementById('frCode');var v=c?c.value.trim():'';if(!/^\\d{6}$/.test(v)){alert('Type the 6-digit code first (at the top of the page).');return null;}"
+			+ "try{sessionStorage.setItem('frCode',v)}catch(e){}return v;}"
+			+ "function frAct(action,msgId){var code=frCode();if(!code)return false;var m=document.getElementById(msgId);if(m)m.textContent='Sending...';"
+			+ "fetch('/fieldaction',{method:'POST',headers:{'X-Totp-Code':code,'Content-Type':'application/json'},body:JSON.stringify(action)})"
+			+ ".then(function(r){return r.json()}).then(function(j){if(j.Status!=='Received'){if(m)m.textContent='Not sent: '+(j.Reason||j.Status);return;}"
+			+ "if(m)m.textContent='Waiting for the next Async Cycle (Annabelle checks the code, then does it)...';frWait(j['Action Id'],m,0);})"
+			+ ".catch(function(){if(m)m.textContent='Could not reach the receiver.'});return false;}"
+			+ "function frWait(id,m,n){setTimeout(function(){fetch('/fieldaction/'+id).then(function(r){return r.json()}).then(function(s){"
+			+ "if(s.State==='Done'){if(m)m.textContent=s.Result+' - reloading';setTimeout(function(){location.reload()},800);}"
+			+ "else if(s.State==='Rejected'){if(m)m.textContent='Not done: '+(s.Reason||'refused');}"
+			+ "else if(n<120){frWait(id,m,n+1);}else if(m){m.textContent='Still waiting - is the Hypothalamus running?';}})},5000);}"
+			+ "document.addEventListener('DOMContentLoaded',function(){var c=document.getElementById('frCode');try{var v=sessionStorage.getItem('frCode');if(c&&v)c.value=v}catch(e){}});"
+			+ "</script>";
+
+	private static final String CODE_BOX = "<form onsubmit=\"return false\"><label class=\"m\" for=\"frCode\">6-digit code (for changes)</label>"
+			+ "<input id=\"frCode\" inputmode=\"numeric\" maxlength=\"6\" size=\"7\" autocomplete=\"one-time-code\"></form>";
 
 	private final FieldPacketSettings settings;
 
@@ -52,7 +84,32 @@ public class FieldRecordPages {
 		}
 		String[] parts = path.replaceAll("^/+", "").split("/");
 		if (path.equals("/")) {
-			html(ex, 200, listPage());
+			html(ex, 200, indexPage());
+			return;
+		}
+		if (path.equals("/subjects.json")) {
+			json(ex, subjectsJson());
+			return;
+		}
+		if (path.equals("/new-area")) {
+			html(ex, 200, page("+ Area", "<h1>New area</h1>" + CODE_BOX + newAreaForm()));
+			return;
+		}
+		if (parts[0].equals("area") && parts.length >= 2) {
+			html(ex, 200, areaPage(parts[1]));
+			return;
+		}
+		if (parts[0].equals("arrivals")) {
+			if (parts.length == 1) {
+				html(ex, 200, arrivalsPage());
+				return;
+			}
+			File d = FieldSubjects.arrivalDir(settings, parts[1]);
+			if (parts.length == 3 && d != null && parts[2].matches("[A-Za-z0-9_.-]+\\.jpg") && new File(d, parts[2]).isFile()) {
+				file(ex, new File(d, parts[2]));
+				return;
+			}
+			html(ex, 404, "<p>No such arrival.</p>");
 			return;
 		}
 		if (parts.length == 1 && !path.endsWith("/")) {
@@ -60,9 +117,9 @@ public class FieldRecordPages {
 			return;
 		}
 		if (parts.length == 1) {
-			File f = FieldPacketStore.recordFile(settings, parts[0], FieldPacketStore.RECORD_FILE);
+			File f = FieldSubjects.recordFile(settings, parts[0]);
 			if (f == null) {
-				html(ex, 404, "<p>No such record.</p>");
+				html(ex, 404, "<p>No such plant or bed.</p>");
 				return;
 			}
 			html(ex, 200, recordPage(read(f)));
@@ -73,48 +130,117 @@ public class FieldRecordPages {
 			html(ex, 404, "<p>No such file.</p>");
 			return;
 		}
-		ex.getResponseHeaders().set("Content-Type", f.getName().endsWith(".jpg") ? "image/jpeg" : "application/json; charset=utf-8");
-		ex.sendResponseHeaders(200, f.length());
-		try (OutputStream out = ex.getResponseBody()) {
-			Files.copy(f.toPath(), out);
-		}
+		file(ex, f);
 	}
 
-	private String listPage() throws IOException {
-		StringBuilder sb = new StringBuilder("<!doctype html><html><head>" + STYLE + "<title>Field Records</title></head><body><h1>Field Records</h1>");
-		File[] dirs = settings.plants().listFiles(File::isDirectory);
-		if (dirs == null || dirs.length == 0) sb.append("<p>No records yet. Send a visit from PaulaDeployer's Test Soil Sensor.</p>");
-		else {
-			Arrays.sort(dirs, (a, b) -> Long.compare(new File(b, FieldPacketStore.RECORD_FILE).lastModified(), new File(a, FieldPacketStore.RECORD_FILE).lastModified()));
-			for (File d : dirs) {
-				File f = new File(d, FieldPacketStore.RECORD_FILE);
-				if (!f.isFile()) continue;
-				JSONObject r = read(f);
-				JSONArray visits = r.optJSONArray("Visits");
-				int n = visits == null ? 0 : visits.length();
-				JSONObject last = n > 0 ? visits.getJSONObject(n - 1) : null;
-				sb.append("<div class=\"card\"><h2><a href=\"").append(esc(d.getName())).append("/\">").append(esc(r.optString("Plant"))).append("</a></h2>")
-						.append("<div class=\"m\">").append(n).append(" visit").append(n == 1 ? "" : "s").append(", last ").append(esc(r.optString("Last Updated"))).append("</div>");
-				if (last != null) {
-					JSONObject reading = lastReading(last);
-					if (reading != null) sb.append("<div class=\"m\">").append(summary(reading)).append("</div>");
-					if (!last.optString("Note").isEmpty()) sb.append("<div class=\"note\">").append(esc(last.optString("Note"))).append("</div>");
-					sb.append(thumbs(d.getName(), last, 4));
+	// ---------------------------------------------------------------- pages
+
+	private String indexPage() throws IOException {
+		StringBuilder sb = new StringBuilder("<h1>Field Records</h1>");
+		List<JSONObject> arrivals = FieldSubjects.arrivals(settings);
+		sb.append("<div class=\"card\"><h2><a href=\"arrivals/\">Arrivals</a> ").append(arrivals.isEmpty() ? "" : "<span class=\"badge\">" + arrivals.size() + "</span>")
+				.append("</h2><div class=\"m\">").append(arrivals.isEmpty() ? "Nothing waiting to be filed." : "Visits waiting to be filed into a plant or bed.").append("</div></div>");
+		JSONArray areas = FieldSubjects.areas(settings);
+		List<JSONObject> subjects = FieldSubjects.subjects(settings);
+		sb.append("<h2>Areas</h2><div class=\"grid\">");
+		for (int i = 0; i < areas.length(); i++) {
+			String a = areas.getJSONObject(i).optString("Name");
+			int n = 0;
+			for (JSONObject r : subjects) if (a.equals(r.optString("Area"))) n++;
+			sb.append("<div class=\"card\"><h2><a href=\"area/").append(enc(a)).append("/\">").append(esc(a)).append("</a></h2><div class=\"m\">")
+					.append(n).append(n == 1 ? " plant or bed" : " plants and beds").append("</div></div>");
+		}
+		if (areas.length() == 0) sb.append("<div class=\"m\">No areas yet. Make one below - the Orangerie, the Greenhouse, the Potager...</div>");
+		sb.append("</div>");
+		StringBuilder none = new StringBuilder();
+		for (JSONObject r : subjects) if (r.optString("Area").isEmpty()) none.append(subjectCard(r));
+		if (none.length() > 0) sb.append("<h2 style=\"margin-top:16px\">Not in an area</h2><div class=\"m\">Open one and use Move to give it an area.</div>").append(none);
+		sb.append("<div class=\"card\"><h2>+ Area</h2>").append(CODE_BOX).append(newAreaForm()).append("</div>");
+		return page("Field Records", sb.toString());
+	}
+
+	private String newAreaForm() {
+		return "<form onsubmit=\"return frAct({Action:'createArea',Name:this.n.value},'frNewArea')\"><input name=\"n\" placeholder=\"e.g. Orangerie\" maxlength=\"40\" required>"
+				+ "<button>Create area</button></form><div id=\"frNewArea\" class=\"msg\"></div>";
+	}
+
+	private String areaPage(String area) throws IOException {
+		if (!FieldSubjects.areaExists(settings, area)) return page("No such area", "<nav><a href=\"/fieldrecords/\">Field Records</a></nav><p>There is no area " + esc(area) + ".</p>");
+		StringBuilder sb = new StringBuilder("<nav><a href=\"/fieldrecords/\">Field Records</a></nav><h1>" + esc(area) + "</h1>");
+		int n = 0;
+		for (JSONObject r : FieldSubjects.subjects(settings)) {
+			if (!area.equals(r.optString("Area"))) continue;
+			sb.append(subjectCard(r));
+			n++;
+		}
+		if (n == 0) sb.append("<p class=\"m\">No plants or beds here yet. File one from <a href=\"/fieldrecords/arrivals/\">Arrivals</a>, or Move one here from its page.</p>");
+		String a = jsString(area);
+		sb.append("<div class=\"card\"><h2>Change this area</h2>").append(CODE_BOX)
+				.append("<form onsubmit=\"return frAct({Action:'renameArea',Name:").append(a).append(",'New Name':this.n.value},'frArea')\"><input name=\"n\" value=\"").append(esc(area)).append("\" maxlength=\"40\"><button>Rename</button></form>")
+				.append("<form onsubmit=\"return confirm('Delete the area? Its plants and beds stay, with no area.') && frAct({Action:'deleteArea',Name:").append(a).append("},'frArea')\"><button class=\"sec\">Delete area</button></form>")
+				.append("<div id=\"frArea\" class=\"msg\"></div></div>");
+		return page(area, sb.toString());
+	}
+
+	private String arrivalsPage() throws IOException {
+		StringBuilder sb = new StringBuilder("<nav><a href=\"/fieldrecords/\">Field Records</a></nav><h1>Arrivals</h1>");
+		List<JSONObject> arrivals = FieldSubjects.arrivals(settings);
+		if (arrivals.isEmpty()) return page("Arrivals", sb.append("<p class=\"m\">Nothing waiting. Visits for a plant or bed Annabelle already knows go straight to it.</p>").toString());
+		sb.append("<p class=\"m\">Each visit below is waiting for you to say which plant or bed it is for.</p>").append(CODE_BOX);
+		JSONArray areas = FieldSubjects.areas(settings);
+		List<JSONObject> subjects = FieldSubjects.subjects(settings);
+		for (JSONObject arr : arrivals) {
+			String id = arr.optString("Arrival Id");
+			JSONObject v = arr.optJSONObject("Visit"), sug = arr.optJSONObject("Suggested");
+			if (v == null) continue;
+			if (sug == null) sug = new JSONObject();
+			sb.append("<div class=\"card\"><h2>").append(esc(sug.optString("Name", "(no name)"))).append(" <span class=\"m\">").append(esc(sug.optString("Type"))).append("</span></h2>")
+					.append("<div class=\"m\">").append(esc(shortTime(v.optString("Visit Time")))).append(" from ").append(esc(v.optString("Sender")))
+					.append(sug.optString("Area").isEmpty() ? "" : ", suggested area " + esc(sug.optString("Area"))).append("</div>");
+			if (!v.optString("Note").isEmpty()) sb.append("<p class=\"note\">").append(esc(v.optString("Note"))).append("</p>");
+			JSONObject reading = lastReading(v);
+			if (reading != null) sb.append("<div class=\"m\">").append(summary(reading)).append("</div>");
+			JSONArray photos = v.optJSONArray("Photos");
+			if (photos != null && photos.length() > 0) {
+				sb.append("<div class=\"ph\">");
+				for (int i = 0; i < photos.length(); i++) {
+					String href = "/fieldrecords/arrivals/" + enc(id) + "/" + enc(photos.getJSONObject(i).optString("File"));
+					sb.append("<a href=\"").append(href).append("\"><img loading=\"lazy\" src=\"").append(href).append("\" alt=\"photo\"></a>");
 				}
 				sb.append("</div>");
 			}
+			String msg = "frArr" + Math.abs(id.hashCode()), jid = jsString(id);
+			// into an existing plant or bed
+			sb.append("<form onsubmit=\"return frAct({Action:'fileArrival','Arrival Id':").append(jid).append(",'Record Id':this.r.value},'").append(msg).append("')\">")
+					.append("<select name=\"r\" required><option value=\"\">An existing plant or bed...</option>");
+			for (JSONObject r : subjects) {
+				String rid = r.optString("Record Id");
+				boolean sel = rid.equals(sug.optString("Record Id")) || rid.equals(FieldPacketStore.recordId(sug.optString("Name", "")));
+				sb.append("<option value=\"").append(esc(rid)).append("\"").append(sel ? " selected" : "").append(">").append(esc(r.optString("Plant")))
+						.append(r.optString("Area").isEmpty() ? "" : " (" + esc(r.optString("Area")) + ")").append("</option>");
+			}
+			sb.append("</select><button>File</button></form>");
+			// or a new one
+			sb.append("<form onsubmit=\"return frAct({Action:'fileArrival','Arrival Id':").append(jid).append(",Name:this.n.value,Type:this.t.value,Area:this.a.value},'").append(msg).append("')\">")
+					.append("<input name=\"n\" value=\"").append(esc(sug.optString("Name"))).append("\" placeholder=\"New plant or bed\" required>")
+					.append("<select name=\"t\"><option").append(FieldSubjects.TYPE_BED.equals(sug.optString("Type")) ? "" : " selected").append(">Plant</option><option")
+					.append(FieldSubjects.TYPE_BED.equals(sug.optString("Type")) ? " selected" : "").append(">Bed</option></select>")
+					.append(areaSelect("a", sug.optString("Area"), areas)).append("<button>File as new</button></form>")
+					.append("<form onsubmit=\"return confirm('Discard this visit? It is kept in discarded/, not deleted.') && frAct({Action:'discardArrival','Arrival Id':").append(jid).append("},'").append(msg).append("')\"><button class=\"sec\">Discard</button></form>")
+					.append("<div id=\"").append(msg).append("\" class=\"msg\"></div></div>");
 		}
-		return sb.append("</body></html>").toString();
+		return page("Arrivals", sb.toString());
 	}
 
-	private String recordPage(JSONObject r) {
-		String id = r.optString("Record Id");
-		StringBuilder sb = new StringBuilder("<!doctype html><html><head>" + STYLE + "<title>" + esc(r.optString("Plant")) + "</title></head><body>"
-				+ "<p class=\"m\"><a href=\"../\">All records</a> &middot; <a href=\"record.json\">record.json</a></p>"
-				+ "<h1>" + esc(r.optString("Plant")) + "</h1><p class=\"m\">Record since " + esc(r.optString("Created")) + "</p>");
+	private String recordPage(JSONObject r) throws IOException {
+		String id = r.optString("Record Id"), area = r.optString("Area");
+		StringBuilder sb = new StringBuilder("<nav><a href=\"/fieldrecords/\">Field Records</a>"
+				+ (area.isEmpty() ? "" : " &rsaquo; <a href=\"/fieldrecords/area/" + enc(area) + "/\">" + esc(area) + "</a>")
+				+ " &middot; <a href=\"record.json\">record.json</a></nav>"
+				+ "<h1>" + esc(r.optString("Plant")) + " <span class=\"m\">" + esc(r.optString("Record Type", "Plant")) + "</span></h1>"
+				+ "<p class=\"m\">" + (area.isEmpty() ? "Not in an area" : "In " + esc(area)) + " &middot; record since " + esc(r.optString("Created")) + "</p>");
 		JSONArray visits = r.optJSONArray("Visits");
 		if (visits == null) visits = new JSONArray();
-		// all readings over time, oldest first, so a trend shows at a glance
 		boolean any = false;
 		StringBuilder table = new StringBuilder("<table><tr><th>Visit</th>");
 		for (String[] c : VALUES) table.append("<th>").append(c[1]).append("</th>");
@@ -159,15 +285,68 @@ public class FieldRecordPages {
 							.append("<div class=\"an\">").append(esc(a.optString("Text"))).append("</div>");
 				}
 			}
-			JSONArray follow = v.optJSONArray("Follow Ups");
-			if (follow != null && follow.length() > 0) sb.append("<div class=\"m\">Follow ups: ").append(esc(follow.toString())).append("</div>");
 			sb.append("</div>");
 		}
-		return sb.append("</body></html>").toString();
+		sb.append("<div class=\"card\"><h2>Move</h2>").append(CODE_BOX)
+				.append("<form onsubmit=\"return frAct({Action:'moveSubject','Record Id':").append(jsString(id)).append(",Area:this.a.value},'frMove')\">")
+				.append(areaSelect("a", area, FieldSubjects.areas(settings))).append("<button>Move</button></form><div id=\"frMove\" class=\"msg\"></div></div>");
+		return page(r.optString("Plant"), sb.toString());
 	}
 
+	private String subjectsJson() throws IOException {
+		JSONArray areas = new JSONArray();
+		JSONArray a = FieldSubjects.areas(settings);
+		for (int i = 0; i < a.length(); i++) areas.put(a.getJSONObject(i).optString("Name"));
+		JSONArray subjects = new JSONArray();
+		for (JSONObject r : FieldSubjects.subjects(settings)) {
+			JSONArray visits = r.optJSONArray("Visits");
+			int n = visits == null ? 0 : visits.length();
+			subjects.put(new JSONObject().put("Record Id", r.optString("Record Id")).put("Name", r.optString("Plant"))
+					.put("Type", r.optString("Record Type", FieldSubjects.TYPE_PLANT)).put("Area", r.optString("Area"))
+					.put("Visits", n).put("Last Visit", n > 0 ? visits.getJSONObject(n - 1).optString("Visit Time") : ""));
+		}
+		return new JSONObject().put("Areas", areas).put("Subjects", subjects).toString();
+	}
+
+	// ---------------------------------------------------------------- pieces
+
+	private String subjectCard(JSONObject r) {
+		JSONArray visits = r.optJSONArray("Visits");
+		int n = visits == null ? 0 : visits.length();
+		JSONObject last = n > 0 ? visits.getJSONObject(n - 1) : null;
+		StringBuilder sb = new StringBuilder("<div class=\"card\"><h2><a href=\"/fieldrecords/").append(enc(r.optString("Record Id"))).append("/\">")
+				.append(esc(r.optString("Plant"))).append("</a> <span class=\"m\">").append(esc(r.optString("Record Type", "Plant"))).append("</span></h2>")
+				.append("<div class=\"m\">").append(n).append(n == 1 ? " visit" : " visits").append(", last ").append(esc(last == null ? "-" : shortTime(last.optString("Visit Time")))).append("</div>");
+		if (last != null) {
+			JSONObject reading = lastReading(last);
+			if (reading != null) sb.append("<div class=\"m\">").append(summary(reading)).append("</div>");
+			if (!last.optString("Note").isEmpty()) sb.append("<div class=\"note\">").append(esc(last.optString("Note"))).append("</div>");
+			sb.append(thumbs(r.optString("Record Id"), last, 4));
+		}
+		return sb.append("</div>").toString();
+	}
+
+	private static String areaSelect(String name, String selected, JSONArray areas) {
+		StringBuilder sb = new StringBuilder("<select name=\"").append(name).append("\"><option value=\"\">No area</option>");
+		for (int i = 0; i < areas.length(); i++) {
+			String a = areas.getJSONObject(i).optString("Name");
+			sb.append("<option value=\"").append(esc(a)).append("\"").append(a.equals(selected) ? " selected" : "").append(">").append(esc(a)).append("</option>");
+		}
+		return sb.append("</select>").toString();
+	}
+
+	// Read here, not through FieldRecordAnalyzer: that class needs the Anthropic SDK, and the pages must work without it.
 	private boolean analysisOn() {
-		return "claude".equalsIgnoreCase(FieldRecordAnalyzer.properties(settings).getProperty("provider", "none").trim());
+		java.util.Properties p = new java.util.Properties();
+		File f = new File(settings.root, "analysis.properties");
+		if (f.isFile()) {
+			try (java.io.InputStream in = new java.io.FileInputStream(f)) {
+				p.load(in);
+			} catch (IOException e) {
+				return false;
+			}
+		}
+		return "claude".equalsIgnoreCase(p.getProperty("provider", "none").trim());
 	}
 
 	private static String thumbs(String recordId, JSONObject visit, int max) {
@@ -175,7 +354,7 @@ public class FieldRecordPages {
 		if (photos == null || photos.length() == 0) return "";
 		StringBuilder sb = new StringBuilder("<div class=\"ph\">");
 		for (int i = 0; i < photos.length() && i < max; i++) {
-			String href = "/fieldrecords/" + esc(recordId) + "/" + esc(photos.getJSONObject(i).optString("File"));
+			String href = "/fieldrecords/" + enc(recordId) + "/" + enc(photos.getJSONObject(i).optString("File"));
 			sb.append("<a href=\"").append(href).append("\"><img loading=\"lazy\" src=\"").append(href).append("\" alt=\"photo\"></a>");
 		}
 		return sb.append("</div>").toString();
@@ -198,8 +377,11 @@ public class FieldRecordPages {
 	}
 
 	private static String shortTime(String iso) {
-		// "2026-11-27T04:30:06Z" -> "2026-11-27 04:30 UTC"; anything else as it is
 		return iso.matches("\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d.*Z") ? iso.substring(0, 10) + " " + iso.substring(11, 16) + " UTC" : iso;
+	}
+
+	private static String page(String title, String body) {
+		return "<!doctype html><html><head>" + STYLE + "<title>" + esc(title) + "</title>" + SCRIPT + "</head><body>" + body + "</body></html>";
 	}
 
 	private static JSONObject read(File f) throws IOException {
@@ -208,14 +390,45 @@ public class FieldRecordPages {
 		}
 	}
 
+	private static String enc(String s) {
+		try {
+			return URLEncoder.encode(s, "UTF-8").replace("+", "%20");
+		} catch (Exception e) {
+			return s;
+		}
+	}
+
 	private static String esc(String s) {
-		return s == null ? "" : s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+		return s == null ? "" : s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+	}
+
+	// a JS string literal, safe inside a double-quoted HTML attribute
+	private static String jsString(String s) {
+		return esc(JSONObject.quote(s));
+	}
+
+	private static void file(HttpExchange ex, File f) throws IOException {
+		ex.getResponseHeaders().set("Content-Type", f.getName().endsWith(".jpg") ? "image/jpeg" : "application/json; charset=utf-8");
+		ex.sendResponseHeaders(200, f.length());
+		try (OutputStream out = ex.getResponseBody()) {
+			Files.copy(f.toPath(), out);
+		}
 	}
 
 	private static void redirect(HttpExchange ex, String to) throws IOException {
 		ex.getResponseHeaders().set("Location", to);
 		ex.sendResponseHeaders(302, -1);
 		ex.close();
+	}
+
+	private static void json(HttpExchange ex, String body) throws IOException {
+		byte[] b = body.getBytes(StandardCharsets.UTF_8);
+		ex.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+		ex.getResponseHeaders().set("Access-Control-Allow-Origin", "*");  // PaulaDeployer reads it from its Pi
+		ex.sendResponseHeaders(200, b.length);
+		try (OutputStream out = ex.getResponseBody()) {
+			out.write(b);
+		}
 	}
 
 	private static void html(HttpExchange ex, int code, String body) throws IOException {

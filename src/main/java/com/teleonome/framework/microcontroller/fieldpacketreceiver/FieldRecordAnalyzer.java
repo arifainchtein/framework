@@ -61,8 +61,9 @@ public class FieldRecordAnalyzer {
 
 	private static final String SYSTEM_PROMPT = String.join("\n",
 			"You are a horticulturist helping a farmer in Victoria, Australia (southern hemisphere) look after his plants.",
-			"Each request is one visit to one plant: readings from a 7-in-1 RS485 soil probe pushed into the soil at root depth,",
-			"phone photos of the plant, the farmer's note, and the plant's earlier visits and your earlier analyses.",
+			"Each request is one visit to one plant, or to one raised bed (its soil and whatever grows in it): readings from a",
+			"7-in-1 RS485 soil probe pushed into the soil at root depth, phone photos, the farmer's note, the area it is in,",
+			"and its earlier visits and your earlier analyses.",
 			"",
 			"About the probe: moisture is volumetric %, temperature is soil temperature in C, EC is in uS/cm, pH is soil pH.",
 			"Its N, P and K (mg/kg) are estimated by the probe from EC, not measured, so treat them as a rough guide and never",
@@ -162,7 +163,9 @@ public class FieldRecordAnalyzer {
 		JSONObject visit = visits.getJSONObject(visitIndex);
 
 		StringBuilder text = new StringBuilder();
-		text.append("Plant: ").append(record.optString("Plant")).append("\n\n");
+		text.append(record.optString("Record Type", "Plant")).append(": ").append(record.optString("Plant")).append("\n");
+		if (!record.optString("Area").isEmpty()) text.append("Area: ").append(record.optString("Area")).append("\n");
+		text.append("\n");
 		if (visitIndex > 0) {
 			text.append("Earlier visits, oldest first:\n");
 			for (int i = Math.max(0, visitIndex - 6); i < visitIndex; i++) text.append(describe(visits.getJSONObject(i), true)).append("\n");

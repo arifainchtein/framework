@@ -27,12 +27,27 @@ public class FieldPacketStore {
 	// Waiting or ingested; a rejected packet may be sent again (with a new code), so it does not count.
 	public static boolean known(FieldPacketSettings s, String packetId) {
 		String st = state(s, packetId).optString("State");
-		return "Inbox".equals(st) || "Ingested".equals(st);
+		return "Inbox".equals(st) || "Ingested".equals(st) || "Arrivals".equals(st) || "Done".equals(st);
 	}
 
 	public static int waiting(FieldPacketSettings s) {
-		File[] zips = s.inbox().listFiles((d, name) -> name.endsWith(".zip"));
+		File[] zips = s.inbox().listFiles((d, name) -> name.endsWith(".zip") || name.endsWith(ACTION_EXTENSION));
 		return zips == null ? 0 : zips.length;
+	}
+
+	// Actions (FieldRecordActions) wait in the inbox as <id>.action beside their .code; when carried out, the
+	// result is kept as actions/<id>.json.
+	public static final String ACTION_EXTENSION = ".action";
+
+	public static File actionsDone(FieldPacketSettings s) {
+		return new File(s.root, "actions");
+	}
+
+	// "x.zip" / "x.action" -> "x"
+	public static String idOf(File f) {
+		String n = f.getName();
+		int dot = n.lastIndexOf('.');
+		return dot > 0 ? n.substring(0, dot) : n;
 	}
 
 	// The sender's code, kept beside the zip until the Async Cycle checks it: inbox/<packet id>.code holds
@@ -67,8 +82,22 @@ public class FieldPacketStore {
 			o.put("State", "Unknown");
 			return o;
 		}
-		if (new File(s.inbox(), packetId + ".zip").isFile()) {
+		if (new File(s.inbox(), packetId + ".zip").isFile() || new File(s.inbox(), packetId + ACTION_EXTENSION).isFile()) {
 			o.put("State", "Inbox");
+			return o;
+		}
+		File done = new File(actionsDone(s), packetId + ".json");
+		if (done.isFile()) {
+			o.put("State", "Done");
+			try {
+				o.put("Result", new JSONObject(new String(Files.readAllBytes(done.toPath()), StandardCharsets.UTF_8)).optString("Result"));
+			} catch (Exception e) {
+				// the state is still right
+			}
+			return o;
+		}
+		if (new File(FieldSubjects.arrivalsDir(s), packetId).isDirectory()) {
+			o.put("State", "Arrivals");
 			return o;
 		}
 		File reason = new File(s.rejected(), packetId + ".txt");
@@ -101,7 +130,7 @@ public class FieldPacketStore {
 
 	public static void reject(FieldPacketSettings s, File zip, String packetId, String reason) throws IOException {
 		s.rejected().mkdirs();
-		Files.move(zip.toPath(), new File(s.rejected(), packetId + ".zip").toPath(), StandardCopyOption.REPLACE_EXISTING);
+		Files.move(zip.toPath(), new File(s.rejected(), zip.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
 		Files.write(new File(s.rejected(), packetId + ".txt").toPath(), (reason + "\n").getBytes(StandardCharsets.UTF_8));
 		forgetCode(s, packetId);
 	}
